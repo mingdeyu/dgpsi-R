@@ -1,0 +1,100 @@
+---
+title: "nonGaussian_likelihood"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{nonGaussian_likelihood}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
+## Load the package
+
+```{r}
+library(dgpsi)
+library(MASS)
+init_py()
+```
+
+## Load the Motorcycle Accident data
+
+```{r}
+X <- mcycle$times
+Y <- mcycle$accel
+```
+
+## Scale the training data
+
+```{r}
+X <- as.matrix((X - min(X))/(max(X)-min(X)))
+Y <- as.matrix(scale(Y, center = TRUE, scale = TRUE))
+```
+
+## Plot the scaled training data
+
+```{r}
+plot(X,Y, xlab='Times', cex.axis=1.3, cex.lab=1.3, ylab='Accel',)
+```
+
+## Construct a 2-layered DGP with Heteroskedastic likelihood
+
+```{r}
+layer1 <- c(kernel(length = c(0.5), name = 'sexp'))
+layer2 <- c(kernel(length = c(0.2), name = 'sexp', scale_est = TRUE, connect = c(1)),
+            kernel(length = c(0.2), name = 'sexp', scale_est = TRUE, connect = c(1)))
+layer3 <- c(Hetero())
+all_layer <- combine(layer1, layer2, layer3)
+m <- dgp(X, Y, all_layer)
+```
+
+## Summarize the untrained model
+
+```{r}
+summary(m)
+```
+
+## Train the model
+
+```{r}
+m_trained <- train(m)
+```
+
+## Construct the emulator
+
+```{r}
+trained_struc=estimate(m_trained)
+emu <- emulator(trained_struc)
+```
+
+## Summarize the trained model for emulation
+
+```{r}
+summary(emu)
+```
+
+## Make predictions over [0,1]
+
+```{r}
+test_x <- as.matrix(seq(0, 1, length = 200))
+res <- predict(emu, x = test_x)
+```
+
+## Plot the emulation results
+
+```{r}
+mu <- res$mean
+sd <- sqrt(res$var)
+up <- mu + 2*sd
+lo <- mu - 2*sd
+
+plot(test_x, mu, type='l',col='blue',xlab='Times', cex.axis=1.3,cex.lab=1.3, ylab='Accel',ylim=c(-3.5,3.5))
+polygon(c(test_x,rev(test_x)),c(up,rev(lo)),col='grey80',border=F)
+lines(test_x,mu,type='l',col='blue')
+lines(X,Y,type='p',cex=0.8)
+```

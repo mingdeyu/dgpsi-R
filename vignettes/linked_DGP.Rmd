@@ -1,0 +1,157 @@
+---
+title: "linked_DGP"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{linked_DGP}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
+## Load the package
+
+```{r}
+library(dgpsi)
+init_py()
+```
+
+## Construct two synthetic models and their linked model
+
+```{r}
+#Model 1
+f1 <- function(x) {
+  (sin(7.5*x)+1)/2
+}
+#Model 2
+f2 <- function(x) {
+  2/3*sin(2*(2*x-1))+4/3*exp(-30*(2*(2*x-1))^2)-1/3  
+}
+#Linked model 
+f12 <- function(x) {
+  f2(f1(x))
+}
+```
+
+## Set up training datasets for both models
+
+```{r}
+X1 <- as.matrix(seq(0, 1, length = 9))
+X2 <- as.matrix(seq(0, 1, length = 13))
+Y1 <- as.matrix(sapply(X1, f1))
+Y2 <- as.matrix(sapply(X2, f2))
+```
+
+## Set up testing datasets
+
+```{r}
+test_x1 <- as.matrix(seq(0, 1, length = 300))
+test_x2 <- as.matrix(seq(0, 1, length = 300))
+test_y1 <- as.matrix(sapply(test_x1, f1))
+test_y2 <- as.matrix(sapply(test_x2, f2))
+test_y <- as.matrix(sapply(test_x1, f12))
+```
+
+## Emulation of the first model
+
+### Construct a GP for the first model
+
+```{r}
+m1 <- gp(X1, Y1, kernel(length = c(1.0), name = 'matern2.5', scale_est = TRUE))
+m1_trained <- train(m1)
+```
+
+### Evaluate the GP emulator for model 1 over [0,1]
+
+```{r}
+res1 <- predict(m1_trained, x = test_x1)
+
+mu1 <- res1$mean
+sd1 <- sqrt(res1$var)
+up1 <- mu1 + 2*sd1
+lo1 <- mu1 - 2*sd1
+
+plot(test_x1, mu1, type='l',col='blue',xlab='x1', cex.axis=1.3,cex.lab=1.3, ylab='y1',ylim=c(-0.2,1.2))
+polygon(c(test_x1,rev(test_x1)),c(up1,rev(lo1)),col='grey80',border=F)
+lines(test_x1,mu1,type='l',col='blue')
+lines(test_x1,test_y1,type='l',col='red')
+lines(X1,Y1,type='p',cex=0.8)
+```
+
+### Create a container for the first emulator
+
+```{r}
+c1 <- container(export(m1), c(1))
+```
+
+## Emulation of the second model
+
+### Construct a DGP for the second model
+
+```{r}
+layer1 <- c(kernel(length = c(1.), name = 'matern2.5'))
+layer2 <- c(kernel(length = c(1.), name = 'matern2.5', scale_est = TRUE))
+all_layer <- combine(layer1, layer2)
+m2 <- dgp(X2, Y2, all_layer)
+m2_trained <- train(m2)
+```
+
+### Evaluate the DGP emulator for model 2 over [0,1]
+
+```{r}
+#Construct emulator
+trained_struc <- estimate(m2_trained)
+emu <- emulator(trained_struc)
+```
+
+```{r}
+#Make predictions
+res2 <- predict(emu, x = test_x2)
+
+mu2 <- res2$mean
+sd2 <- sqrt(res2$var)
+up2 <- mu2 + 2*sd2
+lo2 <- mu2 - 2*sd2
+
+plot(test_x2, mu2, type='l',col='blue',xlab='x2', cex.axis=1.3,cex.lab=1.3, ylab='y2',ylim=c(-1.2,1.7))
+polygon(c(test_x2,rev(test_x2)),c(up2,rev(lo2)),col='grey80',border=F)
+lines(test_x2,mu2,type='l',col='blue')
+lines(test_x2,test_y2,type='l',col='red')
+lines(X2,Y2,type='p',cex=0.8)
+```
+
+### Create a container for the second emulator
+
+```{r}
+c2 <- container(trained_struc, c(1))
+```
+
+## Linking two emulators
+
+### Construct linked emulator
+
+```{r}
+struc <- combine(c(c1), c(c2))
+lm <- lgp(struc)
+```
+
+### Make predictions from the linked emulator
+
+```{r}
+res <- predict(lm, x = test_x1)
+
+mu <- res$mean$emulator1
+sd <- sqrt(res$var$emulator1)
+up <- mu + 2*sd
+lo <- mu - 2*sd
+
+plot(test_x1, mu, type='l',col='blue',xlab='x1', cex.axis=1.3,cex.lab=1.3, ylab='y1',ylim=c(-1.2,1.7))
+polygon(c(test_x1,rev(test_x1)),c(up,rev(lo)),col='grey80',border=F)
+lines(test_x1,mu,type='l',col='blue')
+lines(test_x1,test_y,type='l',col='red')
+```

@@ -1,11 +1,27 @@
 Package: dgpsi
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: R Interface to 'dgpsi'
+Version: 2.1.2
+Author: Deyu Ming <deyu.ming.16@ucl.ac.uk>
+Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>
+Description: This is the R wrapper to the Python package 'dgpsi' for deep and linked
+    Gaussian process emulations.
+License: MIT + file LICENSE
+URL: https://github.com/mingdeyu/dgpsi.R
+BugReports: https://github.com/mingdeyu/dgpsi.R/issues
 Encoding: UTF-8
-LazyData: true
+Depends:
+    R (>= 4.0)
+Imports:
+    reticulate (>= 1.25),
+    benchmarkme (>= 1.0.8)
+Suggests:
+    knitr,
+    rmarkdown,
+    MASS,
+    utils,
+    R.utils
+LazyData: false
+VignetteBuilder:
+    knitr
+RoxygenNote: 7.2.1
