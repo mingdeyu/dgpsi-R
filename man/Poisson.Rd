@@ -19,6 +19,9 @@ An object to represent the Poissonlikelihood node.
 \description{
 This function constructs an object for Poisson likelihood.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}
 \note{
 The Poisson likelihood node only needs one feeding GP node.
 }

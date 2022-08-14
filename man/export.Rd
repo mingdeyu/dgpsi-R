@@ -16,3 +16,6 @@ A GP object representing the trained GP.
 This function exports the GP model trained using \code{\link[=train]{train()}} to be used for
 linked Gaussian process constructions.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

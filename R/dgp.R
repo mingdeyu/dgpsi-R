@@ -22,6 +22,7 @@
 #'     `max(100, ceil(sqrt(Data Size)*log(Data Size))))`.
 #'
 #' @return A DGP object to be used by [train()] for DGP training.
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 dgp <- function(X, Y, all_layer = NULL, check_rep = TRUE, rff = FALSE, M = NULL) {

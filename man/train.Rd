@@ -23,6 +23,9 @@ Updated GP or DGP object to be used for GP or DGP predictions.
 \description{
 This function trains a GP or DGP model constructed by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}} function.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}
 \note{
 The function can be re-applied to the returned trained DGP object to continue
 the training of the DGP model with additional number of SEM iterations.

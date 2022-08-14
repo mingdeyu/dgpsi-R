@@ -10,8 +10,11 @@ read(pkl_file)
 \item{pkl_file}{the path to and the name of the \code{.pkl} file where the emulator is stored.}
 }
 \value{
-an emulator object. See \code{\link[=write]{write()}}.
+An emulator object. See \code{\link[=write]{write()}}.
 }
 \description{
 This function loads the \code{.pkl} file that stores the emulator.
+}
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

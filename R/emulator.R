@@ -8,6 +8,7 @@
 #' @param nb_parallel whether to use the multi-threading to accelerate the predictions. Defaults to `FALSE`.
 #'
 #' @return An emulator object to be used by [predict()] or [ppredict()] for DGP predictions.
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 emulator <- function(all_layer, N = 50, nb_parallel = FALSE) {

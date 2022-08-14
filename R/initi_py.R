@@ -3,6 +3,9 @@ pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
 
 #' Initialize the Python environment
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#'
+#' @md
 #' @export
 init_py <- function() {
   py_ver <- '3.9.13'

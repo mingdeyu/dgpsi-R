@@ -10,6 +10,7 @@
 #'
 #' @return An object to represent the Poissonlikelihood node.
 #' @note The Poisson likelihood node only needs one feeding GP node.
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 Poisson <- function(input_dim = NULL) {
@@ -33,6 +34,7 @@ Poisson <- function(input_dim = NULL) {
 #'
 #' @return An object to represent the heteroskedastic Gaussian likelihood node.
 #' @note The heteroskedastic Gaussian likelihood node only needs two feeding GP nodes.
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 Hetero <- function(input_dim = NULL) {
@@ -55,6 +57,7 @@ Hetero <- function(input_dim = NULL) {
 #'
 #' @return An object to represent the negative Binomial likelihood node.
 #' @note The negative Binomial likelihood node only needs two feeding GP nodes.
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 NegBin <- function(input_dim = NULL) {
@@ -78,6 +81,8 @@ NegBin <- function(input_dim = NULL) {
 #' @return A named list with two components. The first one, named `meanNLL`, is a scalar that gives the average negative
 #'     predicted log-likelihood across all testing data points. The second one, named `NLL`, is a vector that gives
 #'     the negative predicted log-likelihood for each testing data point.
+#'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 nllik <- function(obj, x, y) {

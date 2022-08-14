@@ -8,6 +8,7 @@
 #'
 #' @return A list of layers defining the DGP or linked (D)GP structure.
 #'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 combine <- function(...) {
@@ -28,6 +29,7 @@ combine <- function(...) {
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator object `obj` is saved.
 #'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 write <- function(obj, pkl_file) {
@@ -41,8 +43,9 @@ write <- function(obj, pkl_file) {
 #'
 #' @param pkl_file the path to and the name of the `.pkl` file where the emulator is stored.
 #'
-#' @return an emulator object. See [write()].
+#' @return An emulator object. See [write()].
 #'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 read <- function(pkl_file) {
@@ -62,10 +65,37 @@ read <- function(pkl_file) {
 #'     * the object produced by [emulator()].
 #'     * the object produced by [lgp()].
 #'
-#' @return a table summarizing key information contained in `obj`.
+#' @return A table summarizing key information contained in `obj`.
 #'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 summary <- function(obj) {
   pkg.env$dgpsi$summary(obj)
+}
+
+
+#' @title Implement multi-threading in predictions
+#'
+#' @description This function switch on or off Numba's multi-threading implementation for DGP and linked (D)GP predictions.
+#'
+#' @param obj the object produced by [emulator()] or [lgp()]
+#' @param nb_parallel `TRUE` to switch on Numba's multi-threading implementation and `FALSE` to switch off.
+#'
+#' @return An object for DGP or linked (D)GP with Numba's multi-threading implementation switched on or off.
+#'
+#' @note One can switch on or off Numba's multi-threading implementation for prediction while constructing the DGP and linked (D)GP
+#'     objectives through [emulator()] and [lgp()]. This function is useful when one wants to change the implementation for prediction
+#'     after the DGP and linked (D)GP objectives have already been built.
+#'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @md
+#' @export
+set_nb_parallel <- function(obj, nb_parallel) {
+  if (pkg.env$py_buildin$type(obj)$'__name__' == 'emulator' | pkg.env$py_buildin$type(obj)$'__name__' == 'lgp'){
+    obj$set_nb_parallel(nb_parallel)
+    return(obj)
+  } else {
+    stop("Numba's multi-threading implementation only applies to DGP and linked (D)GP emulations.", call. = FALSE)
+    }
 }

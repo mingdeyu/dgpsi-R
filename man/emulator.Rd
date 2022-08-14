@@ -20,3 +20,6 @@ An emulator object to be used by \code{\link[=predict]{predict()}} or \code{\lin
 \description{
 This function constructs an object for deep Gaussian process predictions.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

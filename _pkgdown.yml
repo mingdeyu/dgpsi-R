@@ -1,6 +1,89 @@
-title: dgpsi-R
 url: http://mingdeyu.github.io/dgpsi-R
+
+home:
+  title: R Interface to dgpsi
+  description: This is the R wrapper to the Python package 'dgpsi' for deep and linked Gaussian process emulations.
+
+authors:
+  Deyu Ming
+
 template:
   bootstrap: 5
-  bootswatch: cerulean
+  bslib:
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+articles:
+- title: Step function
+  desc: DGP emulation of a step function.
+  navbar: ~
+  contents:
+  - step_fct
+
+- title: DGP with heteroskedastic likelihood
+  desc: DGP modeling of the motorcycle accident data.
+  navbar: ~
+  contents:
+  - nonGaussian_likelihood
+
+- title: Linked emulation
+  desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
+  navbar: ~
+  contents:
+  - linked_DGP
+
+navbar:
+ components:
+   articles:
+    text: Tutorials
+
+reference:
+- title: "Initalization"
+  desc: >
+    The function to initiate the underlying Python environment.
+  contents:
+  - init_py
+
+- title: "Basic Nodes"
+  desc: >
+    Functions to define nodes in GP and DGP stuctures.
+  contents:
+  - kernel
+  - Hetero
+  - Poisson
+  - NegBin
+
+- title: "GP, DGP, and Linked (D)GP"
+  desc: >
+    Functions to construct GP, DGP, and Linked (D)GP structures.
+  contents:
+  - gp
+  - dgp
+  - container
+  - lgp
+  - export
+
+- title: "Training and Prediction"
+  desc: >
+    Functions to train and make predictions from GP, DGP, and Linked (D)GP.
+  contents:
+  - train
+  - estimte
+  - emulator
+  - predict
+  - ppredict
+
+- title: "Helpers"
+  contents:
+  - combine
+  - summary
+  - write
+  - read
+  - trace_plot
+  - nllik
+  - set_local_input
+  - set_nb_parallel
+
+
 

@@ -15,8 +15,11 @@ summary(obj)
 * the object produced by \code{\link[=lgp]{lgp()}}.}
 }
 \value{
-a table summarizing key information contained in \code{obj}.
+A table summarizing key information contained in \code{obj}.
 }
 \description{
 This function summarizes key information of GP, DGP, and linked (D)GP structures.
+}
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

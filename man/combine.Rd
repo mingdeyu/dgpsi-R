@@ -17,3 +17,6 @@ A list of layers defining the DGP or linked (D)GP structure.
 \description{
 This function combines layers into one list as a DGP or linked (D)GP structure.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

@@ -37,3 +37,6 @@ A DGP object to be used by \code{\link[=train]{train()}} for DGP training.
 \description{
 This function constructs an object for deep Gaussian process training.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

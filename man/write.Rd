@@ -18,3 +18,6 @@ the emulator object \code{obj} is saved.}
 \description{
 This function saves the constructed emulator to a \code{.pkl} file.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

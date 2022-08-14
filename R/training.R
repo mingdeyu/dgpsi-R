@@ -12,6 +12,7 @@
 #' @return Updated GP or DGP object to be used for GP or DGP predictions.
 #' @note The function can be re-applied to the returned trained DGP object to continue
 #'     the training of the DGP model with additional number of SEM iterations.
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 
@@ -38,7 +39,7 @@ train <- function(obj, N = 500, ess_burn = 10, disable = FALSE) {
 #'     are used. Defaults to `NULL`.
 #'
 #' @return a DGP object to be used to construct the emulator by [emulator()] function.
-#'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 
@@ -58,7 +59,7 @@ estimate <- function(obj, burnin = NULL) {
 #' @param obj the GP model produced by [train()] function.
 #'
 #' @return A GP object representing the trained GP.
-#'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 
@@ -81,6 +82,7 @@ export <- function(obj) {
 #' @param labelsize the font size of y labels. Defaults to `8`.
 #' @param hspace the space between sub-plots. Defaults to `0.1`.
 #'
+#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 

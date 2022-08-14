@@ -36,3 +36,6 @@ trace_plot(
 This function plots the traces of model parameters of a particular GP node
 in the trained DGP hierarchy.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

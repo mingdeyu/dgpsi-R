@@ -77,3 +77,6 @@ A kernel object to represent a GP node.
 This function constructs an object to represent properties of a
 Gaussian process node.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}

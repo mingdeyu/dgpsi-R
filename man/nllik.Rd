@@ -22,3 +22,6 @@ the negative predicted log-likelihood for each testing data point.
 This function compute the negative predicted log-likelihood from a
 trained DGP with likelihood layer.
 }
+\details{
+See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+}
