@@ -4,9 +4,6 @@ home:
   title: R Interface to dgpsi
   description: This is the R wrapper to the Python package 'dgpsi' for deep and linked Gaussian process emulations.
 
-authors:
-  Deyu Ming
-
 template:
   bootstrap: 5
   bslib:
