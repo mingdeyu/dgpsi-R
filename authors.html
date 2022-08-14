@@ -24,8 +24,13 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <h6 class="dropdown-header" data-toc-skip>Step function</h6>
     <a class="dropdown-item" href="articles/step_fct.html">step_fct</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>DGP with heteroskedastic likelihood</h6>
     <a class="dropdown-item" href="articles/nonGaussian_likelihood.html">nonGaussian_likelihood</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Linked emulation</h6>
     <a class="dropdown-item" href="articles/linked_DGP.html">linked_DGP</a>
   </div>
 </li>
@@ -62,18 +67,26 @@
 
     <div class="section level2 citation">
       <h2 id="citation">Citation</h2>
-      <p><small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/DESCRIPTION" class="external-link"><code>DESCRIPTION</code></a></small></p>
+      <p><small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/inst/CITATION" class="external-link"><code>inst/CITATION</code></a></small></p>
 
-      <p>Ming D (2022).
-<em>dgpsi: R Interface to 'dgpsi'</em>.
-R package version 2.1.2, <a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">https://github.com/mingdeyu/dgpsi-R</a>. 
-</p>
-      <pre>@Manual{,
-  title = {dgpsi: R Interface to 'dgpsi'},
-  author = {Deyu Ming},
+      <p>Ming, D. and Guillas, S. (2021) Linked Gaussian process emulation for systems of computer models using Matérn kernels and adaptive design, SIAM/ASA Journal on Uncertainty Quantification. 9(4), 1615-1642. URL https://epubs.siam.org/doi/abs/10.1137/20M1323771.</p>
+      <pre>@Article{,
+  title = {Linked Gaussian process emulation for systems of computer models using Matérn kernels and adaptive design},
+  author = {Deyu Ming and Serge Guillas},
+  journal = {SIAM/ASA Journal on Uncertainty Quantification},
+  year = {2021},
+  volume = {9},
+  number = {4},
+  pages = {1615--1642},
+  url = {https://epubs.siam.org/doi/abs/10.1137/20M1323771},
+}</pre>
+      <p>Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation, Technometric (to appear). URL https://arxiv.org/abs/2107.01590.</p>
+      <pre>@Article{,
+  title = {Deep Gaussian process emulation using stochastic imputation},
+  author = {Deyu Ming and Daniel Williamson and Serge Guillas},
+  journal = {Technometric (to appear)},
   year = {2022},
-  note = {R package version 2.1.2},
-  url = {https://github.com/mingdeyu/dgpsi-R},
+  url = {https://arxiv.org/abs/2107.01590},
 }</pre>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
