@@ -27,5 +27,5 @@ This function constructs an object that contains the trained GP or DGP emulator 
 for linked (D)GP emulation.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

@@ -15,7 +15,7 @@
 #'     argument is `NULL`, one needs to set its value by applying [set_local_input()] to the returned container object.
 #'
 #' @return A container object to be used for linked GP emulation.
-#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 container <- function(structure, local_input_idx = NULL) {
@@ -41,7 +41,7 @@ container <- function(structure, local_input_idx = NULL) {
 #'     of their model even without knowing how different models are connected together. When this information is available and
 #'     containers of different emulators are collected, the connections between emulators can then be set by assigning
 #'     values to `local_input_idx` of each container with this function.
-#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 set_local_input <- function(obj, idx) {

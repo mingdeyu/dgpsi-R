@@ -16,5 +16,5 @@ An emulator object. See \code{\link[=write]{write()}}.
 This function loads the \code{.pkl} file that stores the emulator.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

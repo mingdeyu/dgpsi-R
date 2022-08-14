@@ -41,7 +41,7 @@
 #'      computer models.
 #'
 #' @return A kernel object to represent a GP node.
-#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = c(1.6,0.3), nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {

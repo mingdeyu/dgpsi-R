@@ -57,7 +57,7 @@
 #'      the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 #'      samples of size: `N * sample_size`, where `N` is the number of imputations specified in [emulator()].
 #'
-#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 predict <- function(obj, x, method = 'mean_var',full_layer = FALSE, sample_size = 50) {
@@ -162,7 +162,7 @@ predict <- function(obj, x, method = 'mean_var',full_layer = FALSE, sample_size 
 #'
 #' @return Same as that in [predict()].
 #'
-#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 ppredict <- function(obj, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, chunk_num = NULL, core_num = NULL) {

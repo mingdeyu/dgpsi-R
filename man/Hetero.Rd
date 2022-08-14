@@ -20,7 +20,7 @@ An object to represent the heteroskedastic Gaussian likelihood node.
 This function constructs an object for heteroskedastic Gaussian likelihood.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }
 \note{
 The heteroskedastic Gaussian likelihood node only needs two feeding GP nodes.

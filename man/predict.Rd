@@ -78,5 +78,5 @@ samples of size: \code{N * sample_size}, where \code{N} is the number of imputat
 This function implements prediction from GP, DGP, or linked (D)GP emulators.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

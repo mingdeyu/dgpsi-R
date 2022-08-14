@@ -21,5 +21,5 @@ a DGP object to be used to construct the emulator by \code{\link[=emulator]{emul
 This function estimates the final DGP model from the model trained using \code{\link[=train]{train()}} function.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

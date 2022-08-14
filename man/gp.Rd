@@ -20,5 +20,5 @@ A GP object to be used by \code{\link[=train]{train()}} for GP training.
 This function constructs an object for Gaussian process training.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

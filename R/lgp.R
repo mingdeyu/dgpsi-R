@@ -12,7 +12,7 @@
 #' @param nb_parallel whether to use the multi-threading to accelerate the predictions. Defaults to `FALSE`.
 #'
 #' @return A linked (D)GP object to be used by [predict()] or [ppredict()] for linked (D)GP predictions.
-#' @details See examples in tutorials at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
 #' @export
 lgp <- function(all_layer, N = 50, nb_parallel = FALSE) {

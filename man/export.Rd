@@ -17,5 +17,5 @@ This function exports the GP model trained using \code{\link[=train]{train()}} t
 linked Gaussian process constructions.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }

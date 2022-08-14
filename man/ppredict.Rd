@@ -38,5 +38,5 @@ Same as that in \code{\link[=predict]{predict()}}.
 This function implements multi-core prediction from GP, DGP, or linked (D)GP emulators.
 }
 \details{
-See examples in tutorials at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
 }
