@@ -1,99 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/404.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/404.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/LICENSE-text.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/articles/index.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/articles/index.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/articles/linked_DGP.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/articles/linked_DGP.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/articles/nonGaussian_likelihood.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/articles/nonGaussian_likelihood.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/articles/step_fct.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/articles/step_fct.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/authors.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/authors.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/index.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/index.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/news/index.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/news/index.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/Hetero.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/Hetero.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/NegBin.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/NegBin.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/Poisson.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/Poisson.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/combine.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/combine.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/container.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/container.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/dgp.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/dgp.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/emulator.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/emulator.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/estimate.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/estimate.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/export.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/export.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/gp.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/gp.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/index.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/index.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/init_py.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/init_py.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/kernel.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/kernel.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/lgp.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/lgp.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/nllik.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/nllik.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/ppredict.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/ppredict.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/predict.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/predict.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/read.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/read.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/set_local_input.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/set_local_input.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/summary.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/summary.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/trace_plot.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/trace_plot.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/train.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/train.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi.R/reference/write.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi_R/reference/write.html</loc>
   </url>
 </urlset>
