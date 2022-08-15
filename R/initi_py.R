@@ -9,8 +9,8 @@ pkg.env$py_buildin <- NULL
 #' @export
 init_py <- function() {
   py_ver <- '3.9.13'
-  dgpsi_ver <- 'dgpsi==2.1.1'
-  env_name <- 'dgp_si_R_2_1_1'
+  dgpsi_ver <- 'dgpsi==2.1.2'
+  env_name <- 'dgp_si_R_2_1_2'
   #Check if there is any conda binary installed, if not, request to install it.
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
@@ -27,20 +27,38 @@ init_py <- function() {
     conda_path <- reticulate::conda_binary()
     no_dgpsi <- inherits(tryCatch(reticulate::conda_python(envname = env_name, conda = conda_path), error = identity), "error")
     if (no_dgpsi){
-      message("I am unable to find the required Python environment. It may be because it is your first time using the package or your conda binary has changed. I am (re)setting it for you now...")
-      install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+      if (any(grepl('^dgp_si_R', reticulate::conda_list(conda = conda_path)$name))){
+        conda_list <- reticulate::conda_list(conda = conda_path)$name
+        dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
+        ans <- readline(prompt="I found Python environment(s) of old package versions. Do you want me to remove them for you? (Y/N) ")
+        if (ans == 'Y'){
+          message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
+          for (item in dgpsi_list) {
+            reticulate::conda_remove(envname = item, conda = conda_path)
+          }
+          message("Done.")
+        }
+        install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+      } else {
+        ans <- readline(prompt="Is this your first time installing the package? (Y/N) ")
+        if (ans == 'N'){
+              message("I am unable to find the required Python environment. It may be because your conda binary has changed. I am re-setting it for you now...")
+              install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+              } else {
+                install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+              }
+      }
     }
   }
   reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)
-  #py_buildin <<- reticulate::import_builtins()
-  #dgpsi <<- reticulate::import("dgpsi")
+
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
   assign('py_buildin', reticulate::import_builtins(), pkg.env)
-  message("The Python environment is loaded.")
+  message("The Python environment for dgpsi is successfully loaded.")
 }
 
 install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
-  message("Setting up the Python environment...")
+  message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
   reticulate::conda_create(envname = env_name, python_version = py_ver, conda = conda_path)
   message("Installing the required Python packages...")
   if (Sys.info()[["sysname"]] == "Darwin" & Sys.info()[["machine"]] == "arm64"){
