@@ -84,23 +84,26 @@
 
     
     
-<style>
-pre.bluecars {
-    background-color: white;
+<div class="sourceCode" id="cb1"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.badCode</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">background-color</span>: <span class="cn">red</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<style type="text/css">
+.badCode {
+background-color: red;
 }
 </style>
 <p>This vignette shows how to use the package to emulate a step function with a three-layered DGP structure.</p>
 <div class="section level2">
 <h2 id="load-the-package">Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="set-up-the-step-function">Set up the step function<a class="anchor" aria-label="anchor" href="#set-up-the-step-function"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">x</span> <span class="op">&lt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -109,21 +112,21 @@ pre.bluecars {
 <div class="section level2">
 <h2 id="set-up-training-data">Set up training data<a class="anchor" aria-label="anchor" href="#set-up-training-data"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="set-up-testing-data">Set up testing data<a class="anchor" aria-label="anchor" href="#set-up-testing-data"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="set-up-a-three-layered-dgp-structure">Set up a three-layered DGP structure<a class="anchor" aria-label="anchor" href="#set-up-a-three-layered-dgp-structure"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">layer1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span>, nugget <span class="op">=</span> <span class="fl">1e-6</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">layer2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span>, nugget <span class="op">=</span> <span class="fl">1e-6</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">layer3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span>, nugget <span class="op">=</span> <span class="fl">1e-6</span>, scale_est <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
@@ -133,9 +136,10 @@ pre.bluecars {
 <div class="section level2">
 <h2 id="summarize-the-untrained-model">Summarize the untrained model<a class="anchor" aria-label="anchor" href="#summarize-the-untrained-model"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
-<pre class="bluecar"><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
@@ -143,12 +147,12 @@ pre.bluecars {
 <span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [1.000]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
-<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.</span></span></code></pre>
+<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="train-the-model">Train the model<a class="anchor" aria-label="anchor" href="#train-the-model"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_trained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04&lt;00:00, 106.14it/s]</span></span></code></pre></div>
@@ -156,14 +160,14 @@ pre.bluecars {
 <div class="section level2">
 <h2 id="construct-the-emulator">Construct the emulator<a class="anchor" aria-label="anchor" href="#construct-the-emulator"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trained_struc</span><span class="op">=</span><span class="fu"><a href="../reference/estimate.html">estimate</a></span><span class="op">(</span><span class="va">m_trained</span><span class="op">)</span></span>
 <span><span class="va">emu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/emulator.html">emulator</a></span><span class="op">(</span><span class="va">trained_struc</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summarize-the-trained-model-for-emulation">Summarize the trained model for emulation<a class="anchor" aria-label="anchor" href="#summarize-the-trained-model-for-emulation"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">emu</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## ╒═════════════╤════════════╤══════════════════╤═══════════════════╤═══════════════╤═══════════════════╤══════════════╤═════════════════════╕</span></span>
@@ -181,13 +185,13 @@ pre.bluecars {
 <div class="section level2">
 <h2 id="make-predictions">Make predictions<a class="anchor" aria-label="anchor" href="#make-predictions"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">emu</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot-the-emulation-results">Plot the emulation results<a class="anchor" aria-label="anchor" href="#plot-the-emulation-results"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">mean</span></span>
 <span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">var</span><span class="op">)</span></span>
 <span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
