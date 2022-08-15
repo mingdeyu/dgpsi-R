@@ -25,7 +25,7 @@ combine <- function(...) {
 #' @param obj an emulator object. For GP, it is the one produced by [gp()] (either before
 #'     or after applying [train()]). For DGP, it can be the one produced by [dgp()] (either before
 #'     or after applying [train()]), or the one produced by [emulator()]. For linked (D)GP,
-#'     it is the one produced by [lgp()].
+#'     it is the one produced by [container()] or [lgp()].
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator object `obj` is saved.
 #'
@@ -71,7 +71,7 @@ read <- function(pkl_file) {
 #' @md
 #' @export
 summary <- function(obj) {
-  pkg.env$dgpsi$summary(obj)
+  pkg.env$dgpsi$summary(obj, 'pretty')
 }
 
 
