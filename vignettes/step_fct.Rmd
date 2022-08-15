@@ -9,13 +9,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{=html}
-<style>
-pre.bluecars {
-    background-color: white;
+```{css}
+.badCode {
+background-color: red;
 }
-</style>
 ```
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -71,7 +70,7 @@ m <- dgp(X, Y, all_layer)
 summary(m)
 ```
 
-```{bluecar}
+```{r, class.source="badCode"}
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
