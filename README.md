@@ -5,3 +5,5 @@
   <!-- badges: end -->
   
 The R interface to the Python package `dgpsi` ([https://github.com/mingdeyu/DGP](https://github.com/mingdeyu/DGP)) for deep and linked Gaussian process emulations.
+
+The repo is still under development. Please do not install the package yet. Instructions will be posted here soon once the package is ready to be installed. 
