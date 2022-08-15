@@ -84,14 +84,18 @@
 
     
     
+<style>
+pre.bluecars {
+    background-color: white;
+}
+</style>
+<p>This vignette shows how to use the package to emulate a step function with a three-layered DGP structure.</p>
 <div class="section level2">
 <h2 id="load-the-package">Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## The Python environment is loaded.</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="set-up-the-step-function">Set up the step function<a class="anchor" aria-label="anchor" href="#set-up-the-step-function"></a>
@@ -130,24 +134,21 @@
 <h2 id="summarize-the-untrained-model">Summarize the untrained model<a class="anchor" aria-label="anchor" href="#summarize-the-untrained-model"></a>
 </h2>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## ╒═════════════╤════════════╤══════════════════╤═══════════════════╤═══════════════╤═══════════════════╤══════════════╤═════════════════════╕</span></span>
-<span><span class="co">## │ Layer No.   │ Node No.   │ Type             │ Length-scale(s)   │ Variance      │ Nugget            │ Input Dims   │ Global Connection   │</span></span>
-<span><span class="co">## ╞═════════════╪════════════╪══════════════════╪═══════════════════╪═══════════════╪═══════════════════╪══════════════╪═════════════════════╡</span></span>
-<span><span class="co">## │ Layer 1     │ Node 1     │ GP (Squared-Exp) │ [1.000]           │ 1.000 (fixed) │ 1.000e-06 (fixed) │ [1]          │ No                  │</span></span>
-<span><span class="co">## ├─────────────┼────────────┼──────────────────┼───────────────────┼───────────────┼───────────────────┼──────────────┼─────────────────────┤</span></span>
-<span><span class="co">## │ Layer 2     │ Node 1     │ GP (Squared-Exp) │ [1.000]           │ 1.000 (fixed) │ 1.000e-06 (fixed) │ [1]          │ No                  │</span></span>
-<span><span class="co">## ├─────────────┼────────────┼──────────────────┼───────────────────┼───────────────┼───────────────────┼──────────────┼─────────────────────┤</span></span>
-<span><span class="co">## │ Layer 3     │ Node 1     │ GP (Squared-Exp) │ [1.000]           │ 1.000         │ 1.000e-06 (fixed) │ [1]          │ No                  │</span></span>
-<span><span class="co">## ╘═════════════╧════════════╧══════════════════╧═══════════════════╧═══════════════╧═══════════════════╧══════════════╧═════════════════════╛</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
+<pre class="bluecar"><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
+<span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [1.000]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
-<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.</span></span></code></pre></div>
+<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="train-the-model">Train the model<a class="anchor" aria-label="anchor" href="#train-the-model"></a>
 </h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_trained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04&lt;00:00, 106.14it/s]</span></span></code></pre></div>
@@ -155,14 +156,14 @@
 <div class="section level2">
 <h2 id="construct-the-emulator">Construct the emulator<a class="anchor" aria-label="anchor" href="#construct-the-emulator"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trained_struc</span><span class="op">=</span><span class="fu"><a href="../reference/estimate.html">estimate</a></span><span class="op">(</span><span class="va">m_trained</span><span class="op">)</span></span>
 <span><span class="va">emu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/emulator.html">emulator</a></span><span class="op">(</span><span class="va">trained_struc</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summarize-the-trained-model-for-emulation">Summarize the trained model for emulation<a class="anchor" aria-label="anchor" href="#summarize-the-trained-model-for-emulation"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">emu</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## ╒═════════════╤════════════╤══════════════════╤═══════════════════╤═══════════════╤═══════════════════╤══════════════╤═════════════════════╕</span></span>
@@ -180,13 +181,13 @@
 <div class="section level2">
 <h2 id="make-predictions">Make predictions<a class="anchor" aria-label="anchor" href="#make-predictions"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">emu</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot-the-emulation-results">Plot the emulation results<a class="anchor" aria-label="anchor" href="#plot-the-emulation-results"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">mean</span></span>
 <span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">var</span><span class="op">)</span></span>
 <span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
