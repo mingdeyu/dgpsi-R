@@ -11,19 +11,19 @@ template:
 articles:
 - title: Step function
   desc: DGP emulation of a step function.
-  navbar: Step function
+  navbar: ~
   contents:
   - step_fct
 
-- title: DGP with heteroskedastic likelihood
+- title: DGP with the heteroskedastic likelihood
   desc: DGP modeling of the motorcycle accident data.
-  navbar: DGP with heteroskedastic likelihood
+  navbar: ~
   contents:
   - nonGaussian_likelihood
 
 - title: Linked emulation
   desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
-  navbar: Linked emulation
+  navbar: ~
   contents:
   - linked_DGP
 

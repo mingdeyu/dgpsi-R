@@ -1,6 +1,8 @@
 ---
-title: "nonGaussian_likelihood"
+title: "DGP with the heteroskedastic likelihood"
 output: rmarkdown::html_vignette
+description: >
+  DGP modeling of the motorcycle accident data.
 vignette: >
   %\VignetteIndexEntry{nonGaussian_likelihood}
   %\VignetteEngine{knitr::rmarkdown}

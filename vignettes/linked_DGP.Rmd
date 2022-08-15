@@ -1,6 +1,8 @@
 ---
-title: "linked_DGP"
+title: "Linked emulation"
 output: rmarkdown::html_vignette
+description: >
+  Linked (D)GP emulation of a synthetic system of two linked computer models.
 vignette: >
   %\VignetteIndexEntry{linked_DGP}
   %\VignetteEngine{knitr::rmarkdown}

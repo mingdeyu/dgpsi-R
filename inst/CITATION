@@ -23,13 +23,13 @@ citEntry(entry = "Article",
   author       = personList(as.person("Deyu Ming"),
                    as.person("Daniel Williamson"),
                    as.person("Serge Guillas")),
-  journal      = "Technometric (to appear)",
+  journal      = "Technometrics (to appear)",
   year         = "2022",
   url          = "https://arxiv.org/abs/2107.01590",
 
   textVersion  =
   paste("Ming, D., Williamson, D., and Guillas, S. (2022)",
         "Deep Gaussian process emulation using stochastic imputation,",
-        "Technometric (to appear).",
+        "Technometrics (to appear).",
         "URL https://arxiv.org/abs/2107.01590.")
 )

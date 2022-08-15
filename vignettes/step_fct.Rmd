@@ -1,6 +1,8 @@
 ---
-title: "step_fct"
+title: "Step function"
 output: rmarkdown::html_vignette
+description: >
+  DGP emulation of a step function.
 vignette: >
   %\VignetteIndexEntry{step_fct}
   %\VignetteEngine{knitr::rmarkdown}
