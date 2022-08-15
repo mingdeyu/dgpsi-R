@@ -1,6 +1,6 @@
 Package: dgpsi
 Type: Package
-Title: R Interface to 'dgpsi'
+Title: R Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
 Version: 2.1.2
 Author: Deyu Ming <deyu.ming.16@ucl.ac.uk>
 Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>

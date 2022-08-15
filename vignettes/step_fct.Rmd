@@ -9,6 +9,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{=html}
+<style>
+pre.bluecars {
+    background-color: white;
+}
+</style>
+```
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -16,13 +23,13 @@ knitr::opts_chunk$set(
 )
 ```
 
+This vignette shows how to use the package to emulate a step function with a three-layered DGP structure.
+
 ## Load the package
 
 ```{r}
 library(dgpsi)
 init_py()
-
-## The Python environment is loaded.
 ```
 
 ## Set up the step function
@@ -62,18 +69,18 @@ m <- dgp(X, Y, all_layer)
 
 ```{r}
 summary(m)
+```
 
-## ╒═════════════╤════════════╤══════════════════╤═══════════════════╤═══════════════╤═══════════════════╤══════════════╤═════════════════════╕
-## │ Layer No.   │ Node No.   │ Type             │ Length-scale(s)   │ Variance      │ Nugget            │ Input Dims   │ Global Connection   │
-## ╞═════════════╪════════════╪══════════════════╪═══════════════════╪═══════════════╪═══════════════════╪══════════════╪═════════════════════╡
-## │ Layer 1     │ Node 1     │ GP (Squared-Exp) │ [1.000]           │ 1.000 (fixed) │ 1.000e-06 (fixed) │ [1]          │ No                  │
-## ├─────────────┼────────────┼──────────────────┼───────────────────┼───────────────┼───────────────────┼──────────────┼─────────────────────┤
-## │ Layer 2     │ Node 1     │ GP (Squared-Exp) │ [1.000]           │ 1.000 (fixed) │ 1.000e-06 (fixed) │ [1]          │ No                  │
-## ├─────────────┼────────────┼──────────────────┼───────────────────┼───────────────┼───────────────────┼──────────────┼─────────────────────┤
-## │ Layer 3     │ Node 1     │ GP (Squared-Exp) │ [1.000]           │ 1.000         │ 1.000e-06 (fixed) │ [1]          │ No                  │
-## ╘═════════════╧════════════╧══════════════════╧═══════════════════╧═══════════════╧═══════════════════╧══════════════╧═════════════════════╛
+```{bluecar}
+## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
+## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
+## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
+## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [1.000]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        No         |
+## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
-## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
+## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.
 ```
 
 ## Train the model
