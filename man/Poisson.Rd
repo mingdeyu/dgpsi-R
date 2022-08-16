@@ -14,7 +14,7 @@ one needs to ensure there is only one GP node specified in the feeding layer..
 Defaults to \code{NULL}.}
 }
 \value{
-An object to represent the Poissonlikelihood node.
+An object to represent the Poisson likelihood node.
 }
 \description{
 This function constructs an object for Poisson likelihood.

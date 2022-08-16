@@ -10,7 +10,7 @@ write(obj, pkl_file)
 \item{obj}{an emulator object. For GP, it is the one produced by \code{\link[=gp]{gp()}} (either before
 or after applying \code{\link[=train]{train()}}). For DGP, it can be the one produced by \code{\link[=dgp]{dgp()}} (either before
 or after applying \code{\link[=train]{train()}}), or the one produced by \code{\link[=emulator]{emulator()}}. For linked (D)GP,
-it is the one produced by \code{\link[=lgp]{lgp()}}.}
+it is the one produced by \code{\link[=container]{container()}} or \code{\link[=lgp]{lgp()}}.}
 
 \item{pkl_file}{the path to and the name of the \code{.pkl} file to which
 the emulator object \code{obj} is saved.}
