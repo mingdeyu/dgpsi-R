@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this guide we give a quick demonstration of the package on modelling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `articles/`, and a comprehensive Reference of functions available in `reference/`. 
+In this guide we give a quick demonstration of the package on modelling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Article`, and a comprehensive Reference of available functions documented in `Reference`. 
 
 ## Load packages and data
 
@@ -200,4 +200,6 @@ lines(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
 ```
 
 ![](images/motorcycle_plot.png)
+
+## References
 
