@@ -19,7 +19,7 @@ articles:
   desc: DGP modeling of the motorcycle accident data.
   navbar: ~
   contents:
-  - dgpsi.R
+  - dgpsi
 
 - title: Linked Emulation
   desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
