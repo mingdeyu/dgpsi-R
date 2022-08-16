@@ -8,7 +8,7 @@
 #'     one needs to ensure there is only one GP node specified in the feeding layer..
 #'     Defaults to `NULL`.
 #'
-#' @return An object to represent the Poissonlikelihood node.
+#' @return An object to represent the Poisson likelihood node.
 #' @note The Poisson likelihood node only needs one feeding GP node.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
 #' @md
