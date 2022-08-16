@@ -74,10 +74,48 @@
 <div class="page-header"><h1 id="dgpsi-r">dgpsi-R<a class="anchor" aria-label="anchor" href="#dgpsi-r"></a>
 </h1></div>
 <!-- badges: start -->
+<p>The R package <code>dgpsi</code> provides R interface to Python package <a href="https://github.com/mingdeyu/DGP" class="external-link"><code>dgpsi</code></a> for deep and linked Gaussian process emulations. The package currently has following features:</p>
+<ul>
+<li>Deep Gaussian process emulation with flexible architecture construction:<ul>
+<li>multiple layers;</li>
+<li>multiple GP nodes;</li>
+<li>separable or non-separable squared exponential and Matérn2.5 kernels;</li>
+<li>global input connections;</li>
+<li>non-Gaussian likelihoods (Poisson, Negative-Binomial, heteroskedastic Gaussian, and more to come);</li>
+</ul>
+</li>
+<li>Linked emulation of feed-forward systems of computer models:<ul>
+<li>linking GP emulators of deterministic individual computer models;</li>
+<li>linking GP and DGP emulators of deterministic individual computer models;</li>
+</ul>
+</li>
+<li>Multi-core predictions from GP, DGP, and Linked (D)GP emulators.</li>
+</ul>
 <div class="section level2">
-<h2 id="the-r-interface-to-dgpsi-for-deep-and-linked-gaussian-process-emulations">The R interface to <a href="https://github.com/mingdeyu/DGP" class="external-link"><code>dgpsi</code></a> for deep and linked Gaussian process emulations.<a class="anchor" aria-label="anchor" href="#the-r-interface-to-dgpsi-for-deep-and-linked-gaussian-process-emulations"></a>
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
-<p>The repo is still under development. Please do not install the package yet. Instructions will be posted here soon once the package is ready to be installed.</p>
+<p>See <a href="https://mingdeyu.github.io/dgpsi-R" class="external-link">https://mingdeyu.github.io/dgpsi-R</a> to learn more about the package.</p>
+</div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>For now, you can install the package from this GitHub repo (on the way to CRAN):</p>
+<ol style="list-style-type: decimal"><li>In your RStudio Console, type:</li></ol>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'mingdeyu/dgpsi-R'</span><span class="op">)</span></span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Restart your RStudio.</p></li>
+<li><p>Load the package and initialize the required Python environment:</p></li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<blockquote><p><a href="https://arxiv.org/abs/2107.01590" class="external-link">Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i> (to appear).</a></p></blockquote>
+<blockquote><p><a href="https://epubs.siam.org/doi/abs/10.1137/20M1323771" class="external-link">Ming, D. and Guillas, S. (2021) Linked Gaussian process emulation for systems of computer models using Matérn kernels and adaptive design, <i>SIAM/ASA Journal on Uncertainty Quantification</i>. 9(4), 1615-1642.</a></p></blockquote>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -116,6 +154,7 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://epubs.siam.org/doi/abs/10.1137/20M1323771" class="external-link"><img src="https://img.shields.io/badge/DOI-10.1137%2F20M1323771-informational?style=flat-square" alt="DOI"></a></li>
 </ul>
 </div>
 
