@@ -28,6 +28,7 @@ For now, you can install the package from this GitHub repo (on the way to CRAN):
 ```r
 devtools::install_github('mingdeyu/dgpsi-R')
 ```
+The package depends on {reticulate} and {benchmarkme}.
 
 2. Restart your RStudio.
 
