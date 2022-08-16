@@ -97,7 +97,7 @@ m_trained <- train(m)
 ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04<00:00, 109.16it/s]
 ```
 
-The progress bar displayed shows how long it will takes to finish the training. You are able to change some default settings, e.g., for longer training iterations or to switch off the progress bar. Note that if you want to continue the training for further iterations, you can simply do `r m_trained_new <- train(m_trained)` instead of rebuilding the DGP object.
+The progress bar displayed shows how long it will takes to finish the training. You are able to change some default settings, e.g., for longer training iterations or to switch off the progress bar. Note that if you want to continue the training for further iterations, you can simply do `m_trained_new <- train(m_trained)` instead of rebuilding the DGP object.
 
 Once the training is finished, we can construct our emulator for predictions:
 

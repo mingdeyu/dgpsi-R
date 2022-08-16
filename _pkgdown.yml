@@ -15,6 +15,12 @@ articles:
   contents:
   - step_fct
 
+- title: Introduction
+  desc: DGP modeling of the motorcycle accident data.
+  navbar: ~
+  contents:
+  - dgpsi
+
 - title: Linked emulation
   desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
   navbar: ~
