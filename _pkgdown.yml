@@ -15,12 +15,6 @@ articles:
   contents:
   - step_fct
 
-- title: DGP with the heteroskedastic likelihood
-  desc: DGP modeling of the motorcycle accident data.
-  navbar: ~
-  contents:
-  - nonGaussian_likelihood
-
 - title: Linked emulation
   desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
   navbar: ~
