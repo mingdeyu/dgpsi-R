@@ -1,6 +1,6 @@
 ---
 title: >
-  A Quick Guide to `dgpsi`
+  A Quick Guide to dgpsi
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this guide we give a quick demonstration of the package on modelling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Articles`, and a comprehensive Reference of available functions documented in `Reference`. 
+In this guide we give a quick demonstration of the package on modeling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Articles`, and a comprehensive Reference of available functions documented in `Reference`. 
 
 ## Load packages and data
 
@@ -189,18 +189,20 @@ par(cex=0.7, mar = c(5, 5, 0.9, 0.9)+0.2)
 #GP
 par(fig = c(0, 0.5, 0.2, 0.8))
 plot(test_x, mu_gp, type = 'l', lwd = 1.5, col = 'cornflowerblue', main = "GP", xlab = 'Time', ylab = 'Acceleration', ylim = c(-3.2,3.2))
-polygon(c(test_x, rev(test_x)),c(up_gp, rev(lo_gp)), col = 'grey80', border = F)
-lines(X,Y,type='p',pch = 16, cex = 0.8)
+polygon(c(test_x, rev(test_x)), c(up_gp, rev(lo_gp)), col = 'grey80', border = F)
+lines(X, Y, type = 'p',pch = 16, cex = 0.8)
 lines(test_x, mu_gp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
 #DGP
 par(fig = c(0.5, 1, 0.2, 0.8), new = TRUE)
 plot(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue', main = "DGP", xlab = 'Time', ylab = 'Acceleration', ylim = c(-3.2,3.2))
-polygon(c(test_x, rev(test_x)),c(up_dgp, rev(lo_dgp)), col = 'grey80', border = F)
-lines(X,Y,type='p',pch = 16, cex = 0.8)
+polygon(c(test_x, rev(test_x)), c(up_dgp, rev(lo_dgp)), col = 'grey80', border = F)
+lines(X, Y, type = 'p',pch = 16, cex = 0.8)
 lines(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
 ```
 
 ![](images/motorcycle_plot.png)
+
+The visualization shows that the DGP model gives a better performance than the GP model on modeling the heteroskedastic noises embedded in the underlying dataset.
 
 ### References
 

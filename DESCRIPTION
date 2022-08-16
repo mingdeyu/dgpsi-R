@@ -7,7 +7,7 @@ Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>
 Description: This is the R wrapper to the Python package 'dgpsi' for deep and linked
     Gaussian process emulations.
 License: MIT + file LICENSE
-URL: https://github.com/mingdeyu/dgpsi-R
+URL: https://github.com/mingdeyu/dgpsi-R, http://mingdeyu.github.io/dgpsi-R
 BugReports: https://github.com/mingdeyu/dgpsi-R/issues
 Encoding: UTF-8
 Depends:
