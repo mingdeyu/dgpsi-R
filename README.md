@@ -2,7 +2,7 @@
 <!-- badges: start -->
   [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
   ![GitHub](https://img.shields.io/github/license/mingdeyu/DGP)
-  [![DOI](https://img.shields.io/badge/DOI-10.1137%2F20M1323771-informational?style=flat-square)](https://epubs.siam.org/doi/abs/10.1137/20M1323771)
+  [![DOI](https://img.shields.io/badge/DOI-10.1137%2F20M1323771-informational)](https://epubs.siam.org/doi/abs/10.1137/20M1323771)
 <!-- badges: end -->
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations. The package currently has following features:
