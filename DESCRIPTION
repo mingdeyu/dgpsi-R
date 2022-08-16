@@ -1,4 +1,4 @@
-Package: dgpsi-R
+Package: dgpsi
 Type: Package
 Title: R Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
 Version: 2.1.2
