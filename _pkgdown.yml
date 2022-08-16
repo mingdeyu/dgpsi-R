@@ -15,8 +15,8 @@ articles:
   contents:
   - step_fct
 
-- title: Introduction
-  desc: DGP modeling of the motorcycle accident data.
+- title: A Quick Guide to dgpsi
+  desc: A quick guide to dgpsi by modeling the motorcycle data.
   navbar: ~
   contents:
   - dgpsi

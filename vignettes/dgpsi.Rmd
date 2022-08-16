@@ -1,5 +1,6 @@
 ---
-title: "A Quick Guide to dgpsi"
+title: >
+  A Quick Guide to `dgpsi`
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
@@ -17,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this guide we give a quick demonstration of the package on modelling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Article`, and a comprehensive Reference of available functions documented in `Reference`. 
+In this guide we give a quick demonstration of the package on modelling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Articles`, and a comprehensive Reference of available functions documented in `Reference`. 
 
 ## Load packages and data
 
@@ -201,5 +202,5 @@ lines(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
 
 ![](images/motorcycle_plot.png)
 
-## References
+### References
 
