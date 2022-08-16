@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="DGP emulation of a step function.
 ">
-<title>Step function • dgpsi</title>
+<title>Step Function • dgpsi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Step function">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Step Function">
 <meta property="og:description" content="DGP emulation of a step function.
 ">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -46,8 +46,8 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/step_fct.html">Step function</a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked emulation</a>
+    <a class="dropdown-item" href="../articles/step_fct.html">Step Function</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -77,7 +77,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Step function</h1>
+      <img src="" class="logo" alt=""><h1>Step Function</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/vignettes/step_fct.Rmd" class="external-link"><code>vignettes/step_fct.Rmd</code></a></small>
@@ -88,7 +88,7 @@
     
 <p>This vignette shows how to use the package to emulate a step function with a three-layered DGP structure.</p>
 <div class="section level2">
-<h2 id="load-the-package">1. Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
+<h2 id="load-the-package">Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
 </h2>
 <p><code>dgpsi</code> in R provides an initialization function <code><a href="../reference/init_py.html">init_py()</a></code> that helps you to set up and initialize the required Python environment automatically. We just need to run <code><a href="../reference/init_py.html">init_py()</a></code> every time after the package is loaded to initiate the underlying Python environment.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -96,7 +96,7 @@
 <span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="set-up-the-step-function">2. Set up the step function<a class="anchor" aria-label="anchor" href="#set-up-the-step-function"></a>
+<h2 id="set-up-the-step-function">Set up the step function<a class="anchor" aria-label="anchor" href="#set-up-the-step-function"></a>
 </h2>
 <p>We first define the step function:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -114,7 +114,7 @@
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="construct-the-dgp-structure">3. Construct the DGP structure<a class="anchor" aria-label="anchor" href="#construct-the-dgp-structure"></a>
+<h2 id="construct-the-dgp-structure">Construct the DGP structure<a class="anchor" aria-label="anchor" href="#construct-the-dgp-structure"></a>
 </h2>
 <p>We now build a DGP structure with three layers:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -135,7 +135,7 @@
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
 <span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.</span></span></code></pre>
-<p>The summary table summarizes key information about the constructed DGP model. Note that we have fixed nugget terms to <code>1e-6</code> for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior variances (i.e., scales) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer will be estimated (with initial value being 1.0) due to its attachment to the output. For further information about other attributes in the table and how to change the default setting of individual GP nodes, see <code>?kerenl</code>.</p>
+<p>The summary table summarizes key information about the constructed DGP model. Note that we have fixed nugget terms to <code>1e-6</code> for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior variances (i.e., scales) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer will be estimated (with initial value being 1.0) due to its attachment to the output. For further information about other attributes in the table and how to change the default setting of individual GP nodes, see <code><a href="../reference/kernel.html">?kernel</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="training-and-prediction">Training and prediction<a class="anchor" aria-label="anchor" href="#training-and-prediction"></a>
@@ -173,11 +173,11 @@
 <span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span> </span>
 <span><span class="va">lo</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu</span>, type<span class="op">=</span><span class="st">'l'</span>,col<span class="op">=</span><span class="st">'blue'</span>,xlab<span class="op">=</span><span class="st">'x'</span>, cex.axis<span class="op">=</span><span class="fl">1.3</span>,cex.lab<span class="op">=</span><span class="fl">1.3</span>, ylab<span class="op">=</span><span class="st">'y'</span>,ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>,<span class="fl">1.5</span><span class="op">)</span><span class="op">)</span>  <span class="co"># predictive means </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test_x</span>,<span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test_x</span><span class="op">)</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up</span>,<span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span><span class="op">)</span>,col<span class="op">=</span><span class="st">'grey80'</span>,border<span class="op">=</span><span class="cn">F</span><span class="op">)</span> <span class="co"># predictive bounds</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>,<span class="va">mu</span>,type<span class="op">=</span><span class="st">'l'</span>,col<span class="op">=</span><span class="st">'blue'</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>,<span class="va">test_y</span>,type<span class="op">=</span><span class="st">'l'</span>,col<span class="op">=</span><span class="st">'red'</span><span class="op">)</span> <span class="co"># Underlying truth</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">Y</span>,type<span class="op">=</span><span class="st">'p'</span>,cex<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="co"># Training data points</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu</span>, type <span class="op">=</span> <span class="st">'l'</span>,lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col<span class="op">=</span><span class="st">'black'</span>, xlab <span class="op">=</span> <span class="st">'x'</span>, cex.axis <span class="op">=</span> <span class="fl">1.3</span>, cex.lab <span class="op">=</span> <span class="fl">1.3</span>, ylab <span class="op">=</span> <span class="st">'y'</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>,<span class="fl">1.5</span><span class="op">)</span><span class="op">)</span>  <span class="co"># predictive means </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test_x</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up</span>,<span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'grey80'</span>, border <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="co"># predictive bounds</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="co"># Underlying truth</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'black'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, type <span class="op">=</span> <span class="st">'p'</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Training data points</span></span></code></pre></div>
 <p><img src="images/step_fct.png"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
