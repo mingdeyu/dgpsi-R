@@ -20,7 +20,7 @@ An object to represent the negative Binomial likelihood node.
 This function constructs an object for negative Binomial likelihood.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 The negative Binomial likelihood node only needs two feeding GP nodes.

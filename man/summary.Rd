@@ -21,5 +21,5 @@ A table summarizing key information contained in \code{obj}.
 This function summarizes key information of GP, DGP, and linked (D)GP structures.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

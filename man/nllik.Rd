@@ -23,5 +23,5 @@ This function compute the negative predicted log-likelihood from a
 trained DGP with likelihood layer.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

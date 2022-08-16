@@ -8,7 +8,7 @@
 #'
 #' @return A list of layers defining the DGP or linked (D)GP structure.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 combine <- function(...) {
@@ -29,7 +29,7 @@ combine <- function(...) {
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator object `obj` is saved.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 write <- function(obj, pkl_file) {
@@ -45,7 +45,7 @@ write <- function(obj, pkl_file) {
 #'
 #' @return An emulator object. See [write()].
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 read <- function(pkl_file) {
@@ -67,7 +67,7 @@ read <- function(pkl_file) {
 #'
 #' @return A table summarizing key information contained in `obj`.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 summary <- function(obj) {
@@ -88,7 +88,7 @@ summary <- function(obj) {
 #'     objectives through [emulator()] and [lgp()]. This function is useful when one wants to change the implementation for prediction
 #'     after the DGP and linked (D)GP objectives have already been built.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 set_nb_parallel <- function(obj, nb_parallel) {

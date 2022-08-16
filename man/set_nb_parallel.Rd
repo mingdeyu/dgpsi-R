@@ -18,7 +18,7 @@ An object for DGP or linked (D)GP with Numba's multi-threading implementation sw
 This function switch on or off Numba's multi-threading implementation for DGP and linked (D)GP predictions.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 One can switch on or off Numba's multi-threading implementation for prediction while constructing the DGP and linked (D)GP

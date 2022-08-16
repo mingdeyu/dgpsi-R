@@ -18,5 +18,5 @@ A list of layers defining the DGP or linked (D)GP structure.
 This function combines layers into one list as a DGP or linked (D)GP structure.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

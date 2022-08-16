@@ -19,7 +19,7 @@ This function sets the value of \code{local_input_idx} to a container object if 
 when the container object is constructed by \code{\link[=container]{container()}}.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 This function is useful when different models are emulated by different teams. Each team can create the container

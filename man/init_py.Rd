@@ -9,6 +9,6 @@ init_py()
 \description{
 Initialize the Python environment
 }
-\details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+\note{
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

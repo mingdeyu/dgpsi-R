@@ -19,7 +19,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Multi-core predictions from GP, DGP, and Linked (D)GP emulators.
 
 ## Documentation
-See [https://mingdeyu.github.io/dgpsi-R](https://mingdeyu.github.io/dgpsi-R) to learn more about the package.
+See [https://mingdeyu.github.io/dgpsi-R](https://mingdeyu.github.io/dgpsi-R/) to learn more about the package.
 
 ## Installation
 For now, you can install the package from this GitHub repo (on the way to CRAN):

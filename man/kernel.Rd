@@ -78,5 +78,5 @@ This function constructs an object to represent properties of a
 Gaussian process node.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

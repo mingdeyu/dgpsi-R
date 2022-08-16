@@ -3,7 +3,7 @@ pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
 
 #' Initialize the Python environment
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @note See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #'
 #' @md
 #' @export

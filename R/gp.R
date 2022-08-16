@@ -7,7 +7,7 @@
 #' @param kernel a kernel object produced by the [kernel()] function.
 #'
 #' @return A GP object to be used by [train()] for GP training.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R>.
+#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 gp <- function(X, Y, kernel) {

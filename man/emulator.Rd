@@ -21,5 +21,5 @@ An emulator object to be used by \code{\link[=predict]{predict()}} or \code{\lin
 This function constructs an object for deep Gaussian process predictions.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

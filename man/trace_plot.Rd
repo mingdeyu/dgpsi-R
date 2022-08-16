@@ -37,5 +37,5 @@ This function plots the traces of model parameters of a particular GP node
 in the trained DGP hierarchy.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

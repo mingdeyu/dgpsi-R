@@ -25,5 +25,5 @@ A linked (D)GP object to be used by \code{\link[=predict]{predict()}} or \code{\
 This function constructs an object for linked (D)GP predictions.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
