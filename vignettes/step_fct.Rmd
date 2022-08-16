@@ -148,4 +148,4 @@ lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 lines(X, Y, type = 'p', pch = 16, cex = 1) # Training data points
 ```
 
-![](images/step_fct.png)
+![](images/step_fct_plot.png)
