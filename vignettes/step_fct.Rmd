@@ -1,10 +1,10 @@
 ---
-title: "Step function"
+title: "Step Function"
 output: rmarkdown::html_vignette
 description: >
   DGP emulation of a step function.
 vignette: >
-  %\VignetteIndexEntry{Step function}
+  %\VignetteIndexEntry{Step Function}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 This vignette shows how to use the package to emulate a step function with a three-layered DGP structure.
 
-## 1. Load the package
+## Load the package
 
 `dgpsi` in R provides an initialization function `init_py()` that helps you to set up and initialize the required Python environment automatically. We just need to run `init_py()` every time after the package is loaded to initiate the underlying Python environment.
 
@@ -27,7 +27,7 @@ library(dgpsi)
 init_py()
 ```
 
-## 2. Set up the step function
+## Set up the step function
 
 We first define the step function:
 
@@ -52,7 +52,7 @@ test_x <- as.matrix(seq(0, 1, length = 200))
 test_y <- as.matrix(sapply(test_x, f))
 ```
 
-## 3. Construct the DGP structure
+## Construct the DGP structure
 
 We now build a DGP structure with three layers:
 
@@ -82,7 +82,7 @@ summary(m)
 ## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.
 ```
 
-The summary table summarizes key information about the constructed DGP model. Note that we have fixed nugget terms to `1e-6` for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior variances (i.e., scales) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer will be estimated (with initial value being 1.0) due to its attachment to the output. For further information about other attributes in the table and how to change the default setting of individual GP nodes, see `?kerenl`.
+The summary table summarizes key information about the constructed DGP model. Note that we have fixed nugget terms to `1e-6` for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior variances (i.e., scales) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer will be estimated (with initial value being 1.0) due to its attachment to the output. For further information about other attributes in the table and how to change the default setting of individual GP nodes, see `?kernel`.
 
 ## Training and prediction
 
@@ -141,11 +141,11 @@ sd <- sqrt(res$var) # extract the predictive variance and compute the predictive
 up <- mu + 2*sd 
 lo <- mu - 2*sd
 
-plot(test_x, mu, type='l',col='blue',xlab='x', cex.axis=1.3,cex.lab=1.3, ylab='y',ylim=c(-1.5,1.5))  # predictive means 
-polygon(c(test_x,rev(test_x)),c(up,rev(lo)),col='grey80',border=F) # predictive bounds
-lines(test_x,mu,type='l',col='blue')
-lines(test_x,test_y,type='l',col='red') # Underlying truth
-lines(X,Y,type='p',cex=0.8) # Training data points
+plot(test_x, mu, type = 'l',lty = 2, lwd = 1.5, col='black', xlab = 'x', cex.axis = 1.3, cex.lab = 1.3, ylab = 'y', ylim = c(-1.5,1.5))  # predictive means 
+polygon(c(test_x, rev(test_x)), c(up,rev(lo)), col = 'grey80', border = F) # predictive bounds
+lines(test_x, test_y, type = 'l', col = 'cornflowerblue', lwd = 2) # Underlying truth
+lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
+lines(X, Y, type = 'p', pch = 16, cex = 1) # Training data points
 ```
 
 ![](images/step_fct.png)

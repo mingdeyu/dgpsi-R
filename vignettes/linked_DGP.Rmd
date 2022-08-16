@@ -1,10 +1,10 @@
 ---
-title: "Linked emulation"
+title: "Linked Emulation"
 output: rmarkdown::html_vignette
 description: >
   Linked (D)GP emulation of a synthetic system of two linked computer models.
 vignette: >
-  %\VignetteIndexEntry{Linked emulation}
+  %\VignetteIndexEntry{Linked Emulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

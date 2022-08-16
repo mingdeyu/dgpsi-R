@@ -9,7 +9,7 @@ template:
   bootswatch: litera
 
 articles:
-- title: Step function
+- title: Step Function
   desc: DGP emulation of a step function.
   navbar: ~
   contents:
@@ -19,9 +19,9 @@ articles:
   desc: DGP modeling of the motorcycle accident data.
   navbar: ~
   contents:
-  - dgpsi
+  - dgpsi-R
 
-- title: Linked emulation
+- title: Linked Emulation
   desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
   navbar: ~
   contents:
