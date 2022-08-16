@@ -4,7 +4,7 @@ output: rmarkdown::html_vignette
 description: >
   DGP emulation of a step function.
 vignette: >
-  %\VignetteIndexEntry{step_fct}
+  %\VignetteIndexEntry{Step function}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

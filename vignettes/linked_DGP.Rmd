@@ -4,7 +4,7 @@ output: rmarkdown::html_vignette
 description: >
   Linked (D)GP emulation of a synthetic system of two linked computer models.
 vignette: >
-  %\VignetteIndexEntry{linked_DGP}
+  %\VignetteIndexEntry{Linked emulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
