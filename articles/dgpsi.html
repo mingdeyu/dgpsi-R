@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="DGP modeling of the motorcycle accident data.
 ">
-<title>DGP with the heteroskedastic likelihood • dgpsi</title>
+<title>A Quick Guide to dgpsi • dgpsi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DGP with the heteroskedastic likelihood">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="A Quick Guide to dgpsi">
 <meta property="og:description" content="DGP modeling of the motorcycle accident data.
 ">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -77,7 +77,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>DGP with the heteroskedastic likelihood</h1>
+      <img src="" class="logo" alt=""><h1>A Quick Guide to dgpsi</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/vignettes/dgpsi.Rmd" class="external-link"><code>vignettes/dgpsi.Rmd</code></a></small>
@@ -86,37 +86,32 @@
 
     
     
+<p>In this guide we give a quick demonstration of the package on modelling the popular motorcycle dataset <span class="citation">(Silverman 1985)</span>. There are other examples showing the functionality of the package in <code>articles/</code>, and a comprehensive Reference of functions available in <code>reference/</code>.</p>
 <div class="section level2">
-<h2 id="load-the-package">1. Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
+<h2 id="load-packages-and-data">Load packages and data<a class="anchor" aria-label="anchor" href="#load-packages-and-data"></a>
 </h2>
+<p>We start by first loading the package and setting up the required Python environment via <code><a href="../reference/init_py.html">init_py()</a></code></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/" class="external-link">MASS</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="load-the-motorcycle-accident-data">2. Load the Motorcycle Accident data<a class="anchor" aria-label="anchor" href="#load-the-motorcycle-accident-data"></a>
-</h2>
+<p><code><a href="../reference/init_py.html">init_py()</a></code> provides an automatic Python environment setup and initialization routine and must be run every time after the package is loaded. We then load the training data points,</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">mcycle</span><span class="op">$</span><span class="va">times</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">mcycle</span><span class="op">$</span><span class="va">accel</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="scale-the-training-data">2.1 Scale the training data<a class="anchor" aria-label="anchor" href="#scale-the-training-data"></a>
-</h3>
+<p>scale them,</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="op">(</span><span class="va">X</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">Y</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="plot-the-scaled-training-data">2.2 Plot the scaled training data<a class="anchor" aria-label="anchor" href="#plot-the-scaled-training-data"></a>
-</h3>
+<p>and plot them:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">Y</span>, xlab<span class="op">=</span><span class="st">'Times'</span>, cex.axis<span class="op">=</span><span class="fl">1.3</span>, cex.lab<span class="op">=</span><span class="fl">1.3</span>, ylab<span class="op">=</span><span class="st">'Accel'</span>,<span class="op">)</span></span></code></pre></div>
-</div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">1</span>, xlab <span class="op">=</span> <span class="st">'Time'</span>, ylab <span class="op">=</span> <span class="st">'Acceleration'</span>, cex.axis <span class="op">=</span> <span class="fl">1.3</span>, cex.lab <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span></span></code></pre></div>
+<p><img src="images/motorcycle_data.png"></p>
 </div>
 <div class="section level2">
-<h2 id="construct-and-train-a-2-layered-dgp-with-heteroskedastic-likelihood">3. Construct and train a 2-layered DGP with Heteroskedastic likelihood<a class="anchor" aria-label="anchor" href="#construct-and-train-a-2-layered-dgp-with-heteroskedastic-likelihood"></a>
+<h2 id="construct-the-dgp-structure">Construct the DGP structure<a class="anchor" aria-label="anchor" href="#construct-the-dgp-structure"></a>
 </h2>
+<p>We consider a three-layered DGP structure:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">layer1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">layer2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span>, scale_est <span class="op">=</span> <span class="cn">TRUE</span>, connect <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -124,51 +119,105 @@
 <span><span class="va">layer3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/Hetero.html">Hetero</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">all_layer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine.html">combine</a></span><span class="op">(</span><span class="va">layer1</span>, <span class="va">layer2</span>, <span class="va">layer3</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">all_layer</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="summarize-the-untrained-model">3.1 Summarize the untrained model<a class="anchor" aria-label="anchor" href="#summarize-the-untrained-model"></a>
-</h3>
+<p>The first layer of the DGP contains a single GP node produced by <code><a href="../reference/kernel.html">kernel()</a></code> using the squared exponential kernel with the length-scale being 0.5. The second layer contains two GP nodes, both of which have squared exponential kernel with the length-scale being 0.2. We switch on the estimation of prior variances of these two GPs because they model the mean and variance of the heteroskedastic Gaussian likelihood node in the final layer. We choose a heteroskedastic likelihood node since the data above show varying noises.</p>
+<p>The constructed DGP structure is stored in <code>m</code> and we can use <code><a href="../reference/summary.html">summary()</a></code> to view the key information specified for the DGP structure:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="train-the-model">3.2 Train the model<a class="anchor" aria-label="anchor" href="#train-the-model"></a>
-</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_trained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
-</div>
+<pre><code><span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
+<span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.500]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.200]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [0.200]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |</span></span>
+<span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
+<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.</span></span></code></pre>
+<p>For comparison, we also construct a simple GP model (by <code><a href="../reference/gp.html">gp()</a></code>) which incorporates homogeneous noises:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">gp_node</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span>, nugget <span class="op">=</span> <span class="fl">1e-2</span>, nugget_est <span class="op">=</span> <span class="cn">T</span>, scale_est <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">gp_node</span><span class="op">)</span></span></code></pre></div>
+<p>Note that we have nugget estimation switched on to account for the noises. The summary of the constructed GP model is given by</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_gp</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
+<span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
+<span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
+<span><span class="co">## | Squared-Exp |     [0.500]     |  1.000   | 0.010  |    [1]     |</span></span>
+<span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
+<span><span class="co">## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="construct-the-emulator">4. Construct the emulator<a class="anchor" aria-label="anchor" href="#construct-the-emulator"></a>
+<h2 id="training-and-prediction">Training and prediction<a class="anchor" aria-label="anchor" href="#training-and-prediction"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>We now are able to train the constructed DGP and GP models:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m_trained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="co"># training of DGP</span></span>
+<span><span class="va">m_gp_trained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">m_gp</span><span class="op">)</span> <span class="co"># training of GP</span></span></code></pre></div>
+<pre><code><span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:20&lt;00:00, 24.80it/s]</span></span></code></pre>
+<p>For DGP model, we need to construct a separate emulator through <code><a href="../reference/estimate.html">estimate()</a></code> and <code><a href="../reference/emulator.html">emulator()</a></code> for predictions:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trained_struc</span><span class="op">=</span><span class="fu"><a href="../reference/estimate.html">estimate</a></span><span class="op">(</span><span class="va">m_trained</span><span class="op">)</span></span>
 <span><span class="va">emu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/emulator.html">emulator</a></span><span class="op">(</span><span class="va">trained_struc</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="summarize-the-trained-model-for-emulation">4.1 Summarize the trained model for emulation<a class="anchor" aria-label="anchor" href="#summarize-the-trained-model-for-emulation"></a>
-</h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>Before we make predictions, we can summarize the trained GP:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_gp_trained</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
+<span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
+<span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
+<span><span class="co">## | Squared-Exp |     [0.132]     |  0.780   | 0.282  |    [1]     |</span></span>
+<span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
+<span><span class="co">## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.</span></span></code></pre>
+<p>and DGP:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">emu</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="make-predictions-over-01">5. Make predictions over [0,1]<a class="anchor" aria-label="anchor" href="#make-predictions-over-01"></a>
-</h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
+<span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.890]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.530]     |     0.797     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [0.848]     |    26.668     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |</span></span>
+<span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
+<span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
+<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.</span></span></code></pre>
+<p>We are now ready to make predictions from both models via <code><a href="../reference/predict.html">predict()</a></code> at 200 testing positions over <span class="math inline">\([0,1]\)</span>:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">emu</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="plot-the-emulation-results">5.1 Plot the emulation results<a class="anchor" aria-label="anchor" href="#plot-the-emulation-results"></a>
-</h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">mean</span></span>
-<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">var</span><span class="op">)</span></span>
-<span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
-<span><span class="va">lo</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
+<span><span class="va">res_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">emu</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span>
+<span><span class="va">res_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m_gp_trained</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
+<p>Finally, we plot the predictions from both models to check their emulation performance:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># extract predictive means and variances from DGP</span></span>
+<span><span class="va">mu_dgp</span> <span class="op">&lt;-</span> <span class="va">res_dgp</span><span class="op">$</span><span class="va">mean</span> <span class="co"># predictive means</span></span>
+<span><span class="va">sd_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">res_dgp</span><span class="op">$</span><span class="va">var</span><span class="op">)</span> <span class="co"># predictive variances and compute predictive standard deviations</span></span>
+<span><span class="va">up_dgp</span> <span class="op">&lt;-</span> <span class="va">mu_dgp</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd_dgp</span> <span class="co"># predictive upper bound</span></span>
+<span><span class="va">lo_dgp</span> <span class="op">&lt;-</span> <span class="va">mu_dgp</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd_dgp</span> <span class="co"># predictive lower bound</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu</span>, type<span class="op">=</span><span class="st">'l'</span>,col<span class="op">=</span><span class="st">'blue'</span>,xlab<span class="op">=</span><span class="st">'Times'</span>, cex.axis<span class="op">=</span><span class="fl">1.3</span>,cex.lab<span class="op">=</span><span class="fl">1.3</span>, ylab<span class="op">=</span><span class="st">'Accel'</span>,ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3.5</span>,<span class="fl">3.5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test_x</span>,<span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test_x</span><span class="op">)</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up</span>,<span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span><span class="op">)</span>,col<span class="op">=</span><span class="st">'grey80'</span>,border<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>,<span class="va">mu</span>,type<span class="op">=</span><span class="st">'l'</span>,col<span class="op">=</span><span class="st">'blue'</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">Y</span>,type<span class="op">=</span><span class="st">'p'</span>,cex<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># extract predictive means and variances from GP</span></span>
+<span><span class="va">mu_gp</span> <span class="op">&lt;-</span> <span class="va">res_gp</span><span class="op">$</span><span class="va">mean</span></span>
+<span><span class="va">sd_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">res_gp</span><span class="op">$</span><span class="va">var</span><span class="op">)</span></span>
+<span><span class="va">up_gp</span> <span class="op">&lt;-</span> <span class="va">mu_gp</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd_gp</span></span>
+<span><span class="va">lo_gp</span> <span class="op">&lt;-</span> <span class="va">mu_gp</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd_gp</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>cex<span class="op">=</span><span class="fl">0.7</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">0.9</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">+</span><span class="fl">0.2</span><span class="op">)</span></span>
+<span><span class="co">#GP</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>fig <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu_gp</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span>, main <span class="op">=</span> <span class="st">"GP"</span>, xlab <span class="op">=</span> <span class="st">'Time'</span>, ylab <span class="op">=</span> <span class="st">'Acceleration'</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3.2</span>,<span class="fl">3.2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test_x</span><span class="op">)</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up_gp</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">lo_gp</span><span class="op">)</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'grey80'</span>, border <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">Y</span>,type<span class="op">=</span><span class="st">'p'</span>,pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu_gp</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span><span class="op">)</span></span>
+<span><span class="co">#DGP</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>fig <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">0.2</span>, <span class="fl">0.8</span><span class="op">)</span>, new <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu_dgp</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span>, main <span class="op">=</span> <span class="st">"DGP"</span>, xlab <span class="op">=</span> <span class="st">'Time'</span>, ylab <span class="op">=</span> <span class="st">'Acceleration'</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3.2</span>,<span class="fl">3.2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test_x</span><span class="op">)</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up_dgp</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">lo_dgp</span><span class="op">)</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'grey80'</span>, border <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">Y</span>,type<span class="op">=</span><span class="st">'p'</span>,pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu_dgp</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="images/motorcycle_plot.png"></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-silverman1985" class="csl-entry">
+Silverman, Bernhard W. 1985. <span>“Some Aspects of the Spline Smoothing Approach to Non-Parametric Regression Curve Fitting.”</span> <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 47 (1): 1–21.
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
