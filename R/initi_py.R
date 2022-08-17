@@ -50,8 +50,9 @@ init_py <- function() {
       }
     }
   }
+
   Sys.unsetenv("RETICULATE_PYTHON")
-  reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)
+  with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE))
 
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
   assign('py_buildin', reticulate::import_builtins(), pkg.env)
@@ -69,4 +70,14 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
   } else {
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
   }
+}
+
+with_warning_handler <- function(...)
+{
+  withCallingHandlers(..., warning = function(w)
+  { condition <- conditionMessage(w)
+  reg1 <- 'Previous request to `use_python('
+  reg2 <- ', required = TRUE)` will be ignored. It is superseded by request to `use_python('
+  if(grepl(reg1, condition) & grepl(reg2, condition)) invokeRestart("muffleWarning")
+  })
 }
