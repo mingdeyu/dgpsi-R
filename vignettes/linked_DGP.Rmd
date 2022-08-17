@@ -243,3 +243,5 @@ lines(test_x1, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 ```
 
 ![](images/linked_plot.png)
+
+It can be seen from the above plot that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.
