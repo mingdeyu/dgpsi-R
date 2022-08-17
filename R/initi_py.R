@@ -76,8 +76,8 @@ with_warning_handler <- function(...)
 {
   withCallingHandlers(..., warning = function(w)
   { condition <- conditionMessage(w)
-  reg1 <- 'Previous request to `use_python('
-  reg2 <- ', required = TRUE)` will be ignored. It is superseded by request to `use_python('
+  reg1 <- "Previous request to"
+  reg2 <- "will be ignored. It is superseded by request to"
   if(grepl(reg1, condition) & grepl(reg2, condition)) invokeRestart("muffleWarning")
   })
 }
