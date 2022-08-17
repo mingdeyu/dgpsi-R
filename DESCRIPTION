@@ -8,7 +8,10 @@ Authors@R: c(
   )
 Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>
 Description: R wrapper to the Python package 'dgpsi' for Gaussian process, deep Gaussian process, 
-             and linked Gaussian process emulations of computer models and systems.
+             and linked Gaussian process emulations of computer models and systems of computer
+             models. The implementations follow Ming and Guillas (2021) <doi:10.1137/20M1323771> and 
+             Ming et al. (2022) <arXiv:2107.01590>. To get started with the package, 
+             see <https://mingdeyu.github.io/dgpsi-R/>.
 License: MIT + file LICENSE
 URL: https://github.com/mingdeyu/dgpsi-R, https://mingdeyu.github.io/dgpsi-R/
 BugReports: https://github.com/mingdeyu/dgpsi-R/issues

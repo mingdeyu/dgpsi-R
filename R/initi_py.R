@@ -50,6 +50,7 @@ init_py <- function() {
       }
     }
   }
+  Sys.unsetenv("RETICULATE_PYTHON")
   reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)
 
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
