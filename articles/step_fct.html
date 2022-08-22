@@ -90,85 +90,66 @@
 <div class="section level2">
 <h2 id="load-the-package">Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
 </h2>
-<p><code>dgpsi</code> in R provides an initialization function <code><a href="../reference/init_py.html">init_py()</a></code> that helps you to set up and initialize the required Python environment automatically. We just need to run <code><a href="../reference/init_py.html">init_py()</a></code> every time after the package is loaded to initiate the underlying Python environment.</p>
+<p><code>dgpsi</code> in R provides an initialization function <code><a href="../reference/init_py.html">init_py()</a></code> that helps you set up and initialize the required Python environment automatically. We just need to run <code><a href="../reference/init_py.html">init_py()</a></code> every time after the package is loaded to initiate the underlying Python environment.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## The Python environment for dgpsi is successfully loaded.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="set-up-the-step-function">Set up the step function<a class="anchor" aria-label="anchor" href="#set-up-the-step-function"></a>
 </h2>
 <p>We first define the step function:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">x</span> <span class="op">&lt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Then we generate ten training data points:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>and 200 testing data points over <span class="math inline">\([0,1]\)</span>:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="construct-the-dgp-structure">Construct the DGP structure<a class="anchor" aria-label="anchor" href="#construct-the-dgp-structure"></a>
+<h2 id="training">Training<a class="anchor" aria-label="anchor" href="#training"></a>
 </h2>
-<p>We now build a DGP structure with three layers:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">layer1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">layer2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">layer3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/kernel.html">kernel</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">'sexp'</span>, scale_est <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">all_layer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine.html">combine</a></span><span class="op">(</span><span class="va">layer1</span>, <span class="va">layer2</span>, <span class="va">layer3</span><span class="op">)</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">all_layer</span><span class="op">)</span></span></code></pre></div>
-<p>Note that each layer is a list that contains one GP node defined by <code><a href="../reference/kernel.html">kernel()</a></code> function. In this case we use squared exponential kernel for all GP nodes in every layer with the initial length-scale being unit. By default, the scale (i.e., the prior variance) of a GP node is fixed to 1.0 and we switch on the estimation of scale of the GP node in the final layer that attaches to the output data. We use <code><a href="../reference/combine.html">combine()</a></code> function to combine layers into the DGP hierarchy that is then feeds into <code><a href="../reference/dgp.html">dgp()</a></code> to form our DGP object. The key information of constructed DGP structure can be viewed using the <code><a href="../reference/summary.html">summary()</a></code> function:</p>
+<p>We now build and train a DGP model with three layers:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, depth <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
+<span><span class="co">## Initializing the DGP model ... done</span></span>
+<span><span class="co">## Training the DGP model:</span></span>
+<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04&lt;00:00, 122.09it/s]</span></span></code></pre>
+<p>The progress bar displayed shows how long it will takes to finish the training. We are able to change some default settings. E.g., We can set <code>verb = 2</code> so a summary table of the initialized DGP model will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to <code>struc</code> and we want to check it before the training is implemented. Note that if we want to continue the training for further iterations, you can simply do <code>m_new &lt;- continue(m)</code> instead of rebuilding the DGP model.</p>
+<p>The trained DGP emulator can be viewed using the <code><a href="../reference/summary.html">summary()</a></code> function:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [1.000]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
-<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions ## to the current GP.</span></span></code></pre>
-<p>The summary table summarizes key information about the constructed DGP model. Note that we have fixed nugget terms to <code>1e-6</code> for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior variances (i.e., scales) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer will be estimated (with initial value being 1.0) due to its attachment to the output. For further information about other attributes in the table and how to change the default setting of individual GP nodes, see <code><a href="../reference/kernel.html">?kernel</a></code>.</p>
-</div>
-<div class="section level2">
-<h2 id="training-and-prediction">Training and prediction<a class="anchor" aria-label="anchor" href="#training-and-prediction"></a>
-</h2>
-<p>Once the DGP object is constructed, we can train the model using the <code><a href="../reference/train.html">train()</a></code> function:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_trained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04&lt;00:00, 109.16it/s]</span></span></code></pre>
-<p>The progress bar displayed shows how long it will takes to finish the training. You are able to change some default settings, e.g., for longer training iterations or to switch off the progress bar. Note that if you want to continue the training for further iterations, you can simply do <code>m_trained_new &lt;- train(m_trained)</code> instead of rebuilding the DGP object.</p>
-<p>Once the training is finished, we can construct our emulator for predictions:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trained_struc</span><span class="op">=</span><span class="fu"><a href="../reference/estimate.html">estimate</a></span><span class="op">(</span><span class="va">m_trained</span><span class="op">)</span></span>
-<span><span class="va">emu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/emulator.html">emulator</a></span><span class="op">(</span><span class="va">trained_struc</span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/estimate.html">estimate()</a></code> function extracts the trained structure from the trained DGP object and the structure feeds into <code><a href="../reference/emulator.html">emulator()</a></code> to form the emulator object. At this point, you could use <code><a href="../reference/write.html">write()</a></code> to save the emulator <code>emu</code> to a local file and then load it using <code><a href="../reference/read.html">read()</a></code> next time when you simply would like to make predictions from the emulator.</p>
-<p>The following code produces the table that summarizes key information of GP nodes contained in the emulator:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">emu</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
-<span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.544]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [0.890]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [1.413]     |     0.290     | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.288]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.377]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.737]     |     0.465     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
 <span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.</span></span></code></pre>
-<p>Note that the variance (i.e., scale) of the GP node in the final layer and length-scales of all GP nodes have changed due to the training. Once the emulator is ready, it is time to make predictions from it:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">emu</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/predict.html">predict()</a></code> function returns a named list that gives the posterior predictive means and variances at testing positions. We can extract these information and plot the emulation results to check the predictive performance of our constructed DGP emulator:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">mean</span> <span class="co"># extract the predictive means </span></span>
-<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">var</span><span class="op">)</span> <span class="co"># extract the predictive variance and compute the predictive standard deviations</span></span>
+<p>The summary table gives key information about the trained DGP model. Note that in the auto-generated model we have nugget terms fixed to <code>1e-6</code> for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer is estimated due to its attachment to the output. For further information about how to change the default settings to train a DGP emulator, see <code><a href="../reference/dgp.html">?dgp</a></code>.</p>
+<p>At this point, you could use <code><a href="../reference/write.html">write()</a></code> to save the emulator <code>m</code> to a local file and then load it using <code><a href="../reference/read.html">read()</a></code> next time when you simply would like to make predictions from the emulator.</p>
+</div>
+<div class="section level2">
+<h2 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
+</h2>
+<p>Once the emulator is ready, it is time to make predictions from it:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="../reference/predict.html">predict()</a></code> function returns an updated DGP class that contains a slot called <code>results</code> that gives the posterior predictive means and variances at testing positions. We can extract these information and plot the emulation results to check the predictive performance of our constructed DGP emulator:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m_pred</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span> <span class="co"># extract the predictive means </span></span>
+<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m_pred</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">)</span> <span class="co"># extract the predictive variance and compute the predictive standard deviations</span></span>
 <span><span class="co"># compute predictive bounds which are two predictive standard deviations above and below the predictive means</span></span>
 <span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span> </span>
 <span><span class="va">lo</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>

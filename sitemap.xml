@@ -40,19 +40,10 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/combine.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/container.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/continue.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/dgp.html</loc>
-  </url>
-  <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/emulator.html</loc>
-  </url>
-  <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/estimate.html</loc>
-  </url>
-  <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/export.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/gp.html</loc>
@@ -73,28 +64,19 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/nllik.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/ppredict.html</loc>
-  </url>
-  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/predict.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/read.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/set_local_input.html</loc>
-  </url>
-  <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/set_nb_parallel.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/set_linked_idx.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/summary.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/trace_plot.html</loc>
-  </url>
-  <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/reference/train.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/write.html</loc>

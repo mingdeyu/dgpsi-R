@@ -72,7 +72,7 @@
       </dl></div><div class="section level2">
       <h2 id="basic-nodes">Basic Nodes<a class="anchor" aria-label="anchor" href="#basic-nodes"></a></h2>
       
-      <p class="section-desc"></p><p>Functions to define nodes in GP and DGP stuctures.</p>
+      <p class="section-desc"></p><p>Functions to customize GP and DGP stuctures.</p>
 
       
     </div><div id="" class="section level2">
@@ -103,7 +103,7 @@
       </dl></div><div class="section level2">
       <h2 id="gp-dgp-and-linked-d-gp">GP, DGP, and Linked (D)GP<a class="anchor" aria-label="anchor" href="#gp-dgp-and-linked-d-gp"></a></h2>
       
-      <p class="section-desc"></p><p>Functions to construct GP, DGP, and Linked (D)GP structures.</p>
+      <p class="section-desc"></p><p>Functions to train and make predictions from GP, DGP, and Linked (D)GP.</p>
 
       
     </div><div id="" class="section level2">
@@ -115,63 +115,32 @@
           
           <code><a href="gp.html">gp()</a></code> 
         </dt>
-        <dd>Initialize the GP object</dd>
+        <dd>Gaussian process emulator construction</dd>
       </dl><dl><dt>
           
           <code><a href="dgp.html">dgp()</a></code> 
         </dt>
-        <dd>Initialize the DGP object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="container.html">container()</a></code> 
-        </dt>
-        <dd>Initialize the container object</dd>
+        <dd>Deep Gaussian process emulator construction</dd>
       </dl><dl><dt>
           
           <code><a href="lgp.html">lgp()</a></code> 
         </dt>
-        <dd>Initialize the linked (D)GP object</dd>
+        <dd>Linked (D)GP emulator construction</dd>
       </dl><dl><dt>
           
-          <code><a href="export.html">export()</a></code> 
+          <code><a href="continue.html">continue()</a></code> 
         </dt>
-        <dd>Export the trained GP model</dd>
-      </dl></div><div class="section level2">
-      <h2 id="training-and-prediction">Training and Prediction<a class="anchor" aria-label="anchor" href="#training-and-prediction"></a></h2>
-      
-      <p class="section-desc"></p><p>Functions to train and make predictions from GP, DGP, and Linked (D)GP.</p>
-
-      
-    </div><div id="" class="section level2">
-      
-      
-      
-
-      <dl><dt>
-          
-          <code><a href="train.html">train()</a></code> 
-        </dt>
-        <dd>Training of GP and DGP</dd>
+        <dd>Continue the training of a DGP model</dd>
       </dl><dl><dt>
           
-          <code><a href="estimate.html">estimate()</a></code> 
+          <code><a href="combine.html">combine()</a></code> 
         </dt>
-        <dd>Estimating the final DGP model</dd>
+        <dd>Combine layers</dd>
       </dl><dl><dt>
           
-          <code><a href="emulator.html">emulator()</a></code> 
-        </dt>
-        <dd>Initialize the emulator object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="predict.html">predict()</a></code> 
+          <code><a href="predict.html">predict(<i>&lt;dgp_model&gt;</i>)</a></code> <code><a href="predict.html">predict(<i>&lt;lgp_model&gt;</i>)</a></code> <code><a href="predict.html">predict(<i>&lt;gp_model&gt;</i>)</a></code> 
         </dt>
         <dd>Predictions from GP, DGP, or linked (D)GP emulators</dd>
-      </dl><dl><dt>
-          
-          <code><a href="ppredict.html">ppredict()</a></code> 
-        </dt>
-        <dd>Multi-core predictions from GP, DGP, or linked (D)GP emulators</dd>
       </dl></div><div class="section level2">
       <h2 id="helpers">Helpers<a class="anchor" aria-label="anchor" href="#helpers"></a></h2>
       
@@ -185,24 +154,24 @@
 
       <dl><dt>
           
-          <code><a href="combine.html">combine()</a></code> 
+          <code><a href="summary.html">summary(<i>&lt;gp_model&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;dgp_model&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;lgp_model&gt;</i>)</a></code> 
         </dt>
-        <dd>Combine layers</dd>
-      </dl><dl><dt>
-          
-          <code><a href="summary.html">summary()</a></code> 
-        </dt>
-        <dd>Summary of constructed GP, DGP, and linked (D)GP structures</dd>
+        <dd>Summary of a constructed GP, DGP, or linked (D)GP emulator</dd>
       </dl><dl><dt>
           
           <code><a href="write.html">write()</a></code> 
         </dt>
-        <dd>Save the constructed emulator object</dd>
+        <dd>Save the constructed emulator</dd>
       </dl><dl><dt>
           
           <code><a href="read.html">read()</a></code> 
         </dt>
-        <dd>Load the stored emulator object</dd>
+        <dd>Load the stored emulator</dd>
+      </dl><dl><dt>
+          
+          <code><a href="set_linked_idx.html">set_linked_idx()</a></code> 
+        </dt>
+        <dd>Set linked indices</dd>
       </dl><dl><dt>
           
           <code><a href="trace_plot.html">trace_plot()</a></code> 
@@ -213,16 +182,6 @@
           <code><a href="nllik.html">nllik()</a></code> 
         </dt>
         <dd>Calculate negative predicted log-likelihood</dd>
-      </dl><dl><dt>
-          
-          <code><a href="set_local_input.html">set_local_input()</a></code> 
-        </dt>
-        <dd>Set local input indices</dd>
-      </dl><dl><dt>
-          
-          <code><a href="set_nb_parallel.html">set_nb_parallel()</a></code> 
-        </dt>
-        <dd>Implement multi-threading in predictions</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
