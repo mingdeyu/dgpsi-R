@@ -179,7 +179,7 @@ lines(X, Y, type = 'p',pch = 16, cex = 0.8)
 lines(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
 ```
 
-![](images/motorcycle_plot.png)
+![](images/motorcycle_result.png)
 
 The visualization shows that the DGP model gives a better performance than the GP model on modeling the heteroskedastic noises embedded in the underlying dataset.
 
