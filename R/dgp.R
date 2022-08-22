@@ -282,7 +282,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 }
 
 
-#' @title Continue the training of a DGP model
+#' @title Continue the training of a DGP emulator
 #'
 #' @description This function implements additional training iterations for a DGP model with at least two layers.
 #'
