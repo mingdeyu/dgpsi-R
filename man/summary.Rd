@@ -2,23 +2,32 @@
 % Please edit documentation in R/utils.R
 \name{summary}
 \alias{summary}
-\title{Summary of constructed GP, DGP, and linked (D)GP structures}
+\alias{summary.gp_model}
+\alias{summary.dgp_model}
+\alias{summary.lgp_model}
+\title{Summary of a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
-summary(obj)
+\method{summary}{gp_model}(object, ...)
+
+\method{summary}{dgp_model}(object, ...)
+
+\method{summary}{lgp_model}(object, ...)
 }
 \arguments{
-\item{obj}{can be one of the following:
-* the object produced by \code{\link[=kernel]{kernel()}}.
-* the object produced by \code{\link[=gp]{gp()}} (either before or after applying \code{\link[=train]{train()}}).
-* the object produced by \code{\link[=dgp]{dgp()}} before applying \code{\link[=train]{train()}}.
-* the object produced by \code{\link[=emulator]{emulator()}}.
-* the object produced by \code{\link[=lgp]{lgp()}}.}
+\item{object}{can be one of the following:
+\itemize{
+\item the S3 class produced by \code{\link[=gp]{gp()}}.
+\item the S3 class produced by \code{\link[=dgp]{dgp()}}.
+\item the S3 class produced by \code{\link[=lgp]{lgp()}}.
+}}
+
+\item{...}{N/A.}
 }
 \value{
-A table summarizing key information contained in \code{obj}.
+A table summarizing key information contained in \code{object}.
 }
 \description{
-This function summarizes key information of GP, DGP, and linked (D)GP structures.
+This function summarizes key information of a GP, DGP or linked (D)GP emulator.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

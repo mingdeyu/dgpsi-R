@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{read}
 \alias{read}
-\title{Load the stored emulator object}
+\title{Load the stored emulator}
 \usage{
 read(pkl_file)
 }
@@ -10,7 +10,7 @@ read(pkl_file)
 \item{pkl_file}{the path to and the name of the \code{.pkl} file where the emulator is stored.}
 }
 \value{
-An emulator object. See \code{\link[=write]{write()}}.
+A GP, DGP or linked (D)GP emulator S3 class.
 }
 \description{
 This function loads the \code{.pkl} file that stores the emulator.

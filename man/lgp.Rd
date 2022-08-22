@@ -2,27 +2,25 @@
 % Please edit documentation in R/lgp.R
 \name{lgp}
 \alias{lgp}
-\title{Initialize the linked (D)GP object}
+\title{Linked (D)GP emulator construction}
 \usage{
-lgp(all_layer, N = 50, nb_parallel = FALSE)
+lgp(struc, B = 50)
 }
 \arguments{
-\item{all_layer}{a list contains \emph{L} (the number of layers of a systems of computer models) sub-lists,
-each of which represents a layer and contains the GP/DGP emulators of computer models represented by
-containers constructed by \code{\link[=container]{container()}}. The sub-lists are placed in the list in the same order of
-the specified computer model system.}
+\item{struc}{a list contains \emph{L} (the number of layers in a systems of computer models) sub-lists,
+each of which represents a layer and contains (D)GP emulators (represented by
+the output classes produced by \code{\link[=dgp]{dgp()}}) of computer models. The sub-lists are placed in the list
+in the same order of the specified computer model system's hierarchy.}
 
-\item{N}{the number of imputation to produce the predictions. Increase the value to account for more
-imputation uncertainties. If the system consists only GP emulators, \code{N} is set to \code{1} automatically.
-Defaults to \code{50}.}
-
-\item{nb_parallel}{whether to use the multi-threading to accelerate the predictions. Defaults to \code{FALSE}.}
+\item{B}{the number of imputations to produce the predictions. Increase the value to account for more
+imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
+If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{50}.}
 }
 \value{
-A linked (D)GP object to be used by \code{\link[=predict]{predict()}} or \code{\link[=ppredict]{ppredict()}} for linked (D)GP predictions.
+An S3 class to be used by \code{\link[=predict]{predict()}} for linked (D)GP predictions.
 }
 \description{
-This function constructs an object for linked (D)GP predictions.
+This function constructs a linked (D)GP emulator.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

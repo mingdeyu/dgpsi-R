@@ -25,6 +25,10 @@ library(dgpsi)
 init_py()
 ```
 
+```
+## The Python environment for dgpsi is successfully loaded.
+```
+
 ## Construct two synthetic models and their linked model
 
 We first define the functional forms of the two synthetic models and their linked model:
@@ -70,25 +74,25 @@ test_y <- as.matrix(sapply(test_x1, f12))
 
 ## Emulation of Model 1
 
-We construct a simple GP model with Matérn-2.5 kernel with length-scale initialized at 1.0:
+We construct and train a simple GP model with Matérn-2.5 kernel:
 
 ```{r}
-m1 <- gp(X1, Y1, kernel(length = c(1.0), name = 'matern2.5', scale_est = TRUE))
+m1 <- gp(X1, Y1, name = "matern2.5")
 ```
 
-We now train the GP model:
-
-```{r}
-m1_trained <- train(m1)
+```
+## Auto-generating a GP structure: done
+## Initializing the GP model: done
+## Training the GP model: done
 ```
 
-and make predictions from the trained model to evaluate the emulation performance for Model 1 over $[0,1]$:
+We now make predictions from the trained model to evaluate the emulation performance for Model 1 over $[0,1]$:
 
 ```{r}
-res1 <- predict(m1_trained, x = test_x1)
+m1 <- predict(m1, x = test_x1)
 
-mu1 <- res1$mean # predictive mean
-sd1 <- sqrt(res1$var) # predictive standard deviations
+mu1 <- m1$results$mean # predictive mean
+sd1 <- sqrt(m1$results$var) # predictive standard deviations
 up1 <- mu1 + 2*sd1 # predictive upper bound
 lo1 <- mu1 - 2*sd1 # predictive lower bound
 
@@ -101,51 +105,37 @@ lines(X1, Y1, type = 'p', pch = 16, cex = 1) # Training data points
 
 ![](images/model_1.png)
 
-The emulation performance of GP looks good so we now export (by `export()`) the GP node contained in the GP model to a contained (via `container()`) for later use in linked emulator construction:
+Since we will use `m1` later for linked emulation, we must specify how it links to the emulators in the feeding layer through `linked_idx` in [dgp()]. Since `m1` is in the first layer of the system, `linked_idx` refers to the column indices of the global input `X` that will feed intp `m1`, and therefore we should have set `linked_idx = c(1)` in [dgp()] when we first constructed the emulator. Instead of re-training the emulator to provide this information, we can simply use [set_linked_idx()] to add this information to `m1`:
 
 ```{r}
-c1 <- container(export(m1), c(1))
+m1 <- set_linked_idx(m1, c(1))
 ```
-
-Note that we need to explicitly inform `container()` which columns of output matrix (from the feeding layer) that GP emulator of Model 1 will use as its input. Since the input to the GP emulator of Model 1 is the global input and all global input (which is a column vector) feeds into Model 1, the column indices that we provide to `container()` is `1`.
 
 ## Emulation of Model 2
 
 We construct a two-layered DGP model with Matérn-2.5 kernels to emulate the Model 2:
 
 ```{r}
-layer1 <- c(kernel(length = c(1.), name = 'matern2.5'))
-layer2 <- c(kernel(length = c(1.), name = 'matern2.5', scale_est = TRUE))
-all_layer <- combine(layer1, layer2)
-m2 <- dgp(X2, Y2, all_layer)
-```
-
-The training of the DGP model is taken care by `train()`:
-
-```{r}
-m2_trained <- train(m2)
+m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ```
 
 ```
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:03<00:00, 163.72it/s]
+## Auto-generating a 2-layered DGP structure ... done
+## Initializing the DGP model ... done
+## Training the DGP model:
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 232.55it/s]
 ```
 
-We then use `estimate()` and `emulator()` to build the DGP emulator from the trained DGP model `m2_trained`:
-
-```{r}
-# construct emulator
-trained_struc <- estimate(m2_trained)
-emu <- emulator(trained_struc)
-```
+Since all outputs (which is one-dimensional) from the emulators in the first layer (i.e., `m1`) feed into `m2`, we set `linked_idx = c(1)` in [dgp()] above. 
 
 The following plot visualizes the emulation performance of the DGP emulator:
 
 ```{r}
 # make predictions
-res2 <- predict(emu, x = test_x2)
+m2 <- predict(m2, x = test_x2)
 
-mu2 <- res2$mean
-sd2 <- sqrt(res2$var)
+mu2 <- m2$results$mean
+sd2 <- sqrt(m2$results$var)
 up2 <- mu2 + 2*sd2
 lo2 <- mu2 - 2*sd2
 
@@ -158,24 +148,16 @@ lines(X2, Y2, type = 'p', pch = 16, cex = 1) # training data points
 
 ![](images/model_2.png)
 
-The DGP emulation of the Model 2 looks good as well and so we can export it (the objective produced by `estimate()`) to `container()` for later use.
-
-```{r}
-c2 <- container(trained_struc, c(1))
-```
-
-Note that this DGP emulator absorbs all output produced by the feeding layer (which only contains the GP emulator of Model 1). Since the output from the feeding layer (i.e., layer 1) is a column vector, the column indices that we need to inform the container of our DGP emulator is `c(1)`.
-
 ## Emulation of Model 1 + Model 2
 
-With the containers `c1` (for Model 1) and `c2` (for Model 2) at hand, we are now ready to build the linked emulator by first using `combine()` to construct the system hierarchy `struc` and then applying `lgp()` for the linked emulator.  
+With the GP emulator `m1` (for Model 1) and the DGP emulator `m2` (for Model 2) at hand, we are now ready to build the linked emulator by first using `combine()` to construct the system hierarchy `struc` and then applying `lgp()` for the linked emulator.  
 
 ```{r}
-struc <- combine(c(c1), c(c2))
+struc <- combine(list(m1), list(m2))
 lm <- lgp(struc)
 ```
 
-Note that each layer of a computer model system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put there corresponding containers in the list using `c()` or `list()`.
+Note that each layer of a computer model system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulators in the list using `list()`.
 
 We can check the relations between connected emulators by using `summary()` on `lm`:
 
@@ -199,31 +181,36 @@ For comparison, we construct a GP emulator for the whole system by generating 13
 ```{r}
 X_gp <- as.matrix(seq(0, 1, length = 13))
 Y_gp <- as.matrix(sapply(X_gp, f12))
-m_gp <- gp(X_gp, Y_gp, kernel(length = c(1.0), name = 'matern2.5', scale_est = TRUE))
-m_gp_trained <- train(m_gp)
+m_gp <- gp(X_gp, Y_gp, name = 'matern2.5')
+```
+
+```
+## Auto-generating a GP structure: done
+## Initializing the GP model: done
+## Training the GP model: done
 ```
 
 In this final step, we make predictions from both the GP emulator and the linked emulator:
 
 ```{r}
 # linked emulator
-res <- predict(lm, x = test_x1)
+lm <- predict(lm, x = test_x1)
 # GP emulator
-res_gp <- predict(m_gp_trained, x = test_x1)
+m_gp <- predict(m_gp, x = test_x1)
 ```
 
 and plot the predictions to compare their emulation performances:
 
 ```{r}
 # extract predictive means and variances from the linked emulator
-mu <- res$mean$emulator1
-sd <- sqrt(res$var$emulator1)
+mu <- lm$results$mean$emulator1
+sd <- sqrt(lm$results$var$emulator1)
 up <- mu + 2*sd
 lo <- mu - 2*sd
 
 # extract predictive means and variances from the GP emulator
-mu_gp <- res_gp$mean
-sd_gp <- sqrt(res_gp$var)
+mu_gp <- m_gp$results$mean
+sd_gp <- sqrt(m_gp$results$var)
 up_gp <- mu_gp + 2*sd_gp
 lo_gp <- mu_gp - 2*sd_gp
 

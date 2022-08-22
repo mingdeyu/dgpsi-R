@@ -36,7 +36,7 @@ reference:
 
 - title: "Basic Nodes"
   desc: >
-    Functions to define nodes in GP and DGP stuctures.
+    Functions to customize GP and DGP stuctures.
   contents:
   - kernel
   - Hetero
@@ -45,34 +45,23 @@ reference:
 
 - title: "GP, DGP, and Linked (D)GP"
   desc: >
-    Functions to construct GP, DGP, and Linked (D)GP structures.
+    Functions to train and make predictions from GP, DGP, and Linked (D)GP.
   contents:
   - gp
   - dgp
-  - container
   - lgp
-  - export
-
-- title: "Training and Prediction"
-  desc: >
-    Functions to train and make predictions from GP, DGP, and Linked (D)GP.
-  contents:
-  - train
-  - estimate
-  - emulator
+  - continue
+  - combine
   - predict
-  - ppredict
 
 - title: "Helpers"
   contents:
-  - combine
   - summary
   - write
   - read
+  - set_linked_idx
   - trace_plot
   - nllik
-  - set_local_input
-  - set_nb_parallel
 
 
 

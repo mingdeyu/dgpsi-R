@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this guide we give a quick demonstration of the package on modeling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Articles`, and a comprehensive Reference of available functions documented in `Reference`. 
+`dgpsi` provides a flexible toolbox for Gaussian process (GP), deep Gaussian process (DGP) and linked (D)GP emulations. In this guide we give a quick demonstration of the package on modeling the popular motorcycle dataset [@silverman1985]. There are other examples showing the functionality of the package in `Articles`, and how to customize DGP structures. A comprehensive reference of available functions is documented in `Reference`. 
 
 ## Load packages and data
 
@@ -30,7 +30,11 @@ library(MASS)
 init_py()
 ```
 
-`init_py()` provides an automatic Python environment setup and initialization routine and must be run every time after the package is loaded. We then load the training data points,
+```
+## The Python environment for dgpsi is successfully loaded.
+```
+
+`init_py()` provides an automatic Python environment setup and initialization routine and must be run every time after the package is loaded. We now load the training data points,
 
 ```{r}
 X <- mcycle$times
@@ -52,22 +56,56 @@ plot(X, Y, pch = 16, cex = 1, xlab = 'Time', ylab = 'Acceleration', cex.axis = 1
 
 ![](images/motorcycle_data.png)
 
-## Construct the DGP structure 
+## Construct and train a DGP model
 
-We consider a three-layered DGP structure:
+We consider a three-layered DGP model with squared exponential kernels:
 
 ```{r}
-layer1 <- c(kernel(length = c(0.5), name = 'sexp'))
-layer2 <- c(kernel(length = c(0.2), name = 'sexp', scale_est = TRUE, connect = c(1)),
-            kernel(length = c(0.2), name = 'sexp', scale_est = TRUE, connect = c(1)))
-layer3 <- c(Hetero())
-all_layer <- combine(layer1, layer2, layer3)
-m <- dgp(X, Y, all_layer)
+m <- dgp(X, Y, depth = 3, likelihood = "Hetero", verb = 2)
 ```
 
-The first layer of the DGP contains a single GP node produced by `kernel()` using the squared exponential kernel with the length-scale being 0.5. The second layer contains two GP nodes, both of which have squared exponential kernel with the length-scale being 0.2. We switch on the estimation of prior variances of these two GPs because they model the mean and variance of the heteroskedastic Gaussian likelihood node in the final layer. We choose a heteroskedastic likelihood node since the data above show varying noises.
+```
+## Auto-generating a 3-layered DGP structure ... done
+## Initializing the DGP model ... done
+## Summarizing the initialized DGP model ... done
+## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
+## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
+## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
+## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [1.000]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [1.000]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.000]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
+## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
+## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
+## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
+## Enter [Y] to continue or [N] to cancel the training: Y
+## Training the DGP model:
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:19<00:00, 26.00it/s]
+```
 
-The constructed DGP structure is stored in `m` and we can use `summary()` to view the key information specified for the DGP structure:
+We choose a heteroskedastic Gaussian likelihood by setting `likelihood = "Hetero"` since the data drawn in the plot show varying noises. We set `verb = 2` so [dgp()] prints out a table that summarizes the generated DGP structure and we can check if everything is correct before proceeding to training.
+
+For comparison, we also build a GP model (by `gp()`) that incorporates homogeneous noises by setting `nugget_est = T` and the initial nugget value to $0.01$. `verb` is set to `2` so we can check the generated GP structure before proceeding to the training:
+
+```{r}
+m_gp <- gp(X, Y, nugget_est = T, nugget = 1e-2, verb = 2)
+```
+
+```
+## Auto-generating a GP structure: done
+## Initializing the GP model: done
+## Summarizing the initialized GP model: done
+## +-------------+-----------------+----------+--------+------------+
+## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
+## +-------------+-----------------+----------+--------+------------+
+## | Squared-Exp |     [0.200]     |  1.000   | 0.010  |    [1]     |
+## +-------------+-----------------+----------+--------+------------+
+## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.
+## Enter [Y] to continue or [N] to cancel the training: Y
+## Training the GP model: done
+```
+
+Before we make predictions, we can summarize the trained DGP emulator:
 
 ```{r}
 summary(m)
@@ -77,61 +115,19 @@ summary(m)
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.500]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.200]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [0.200]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [1.251]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.434]     |     1.796     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.951]     |    29.327     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
 ## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
 ```
 
-For comparison, we also construct a simple GP model (by `gp()`) which incorporates homogeneous noises:
-
-```{r}
-gp_node <- kernel(length = c(0.5), name = 'sexp', nugget = 1e-2, nugget_est = T, scale_est = T)
-m_gp <- gp(X, Y, gp_node)
-```
-
-Note that we have nugget estimation switched on to account for the noises. The summary of the constructed GP model is given by
+and GP emulator:
 
 ```{r}
 summary(m_gp)
-```
-
-```
-## +-------------+-----------------+----------+--------+------------+
-## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
-## +-------------+-----------------+----------+--------+------------+
-## | Squared-Exp |     [0.500]     |  1.000   | 0.010  |    [1]     |
-## +-------------+-----------------+----------+--------+------------+
-## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.
-```
-
-## Training and prediction
-
-We now are able to train the constructed DGP and GP models: 
-
-```{r}
-m_trained <- train(m) # training of DGP
-m_gp_trained <- train(m_gp) # training of GP
-```
-
-```
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:20<00:00, 24.80it/s]
-```
-
-For DGP model, we need to construct a separate emulator through `estimate()` and `emulator()` for predictions:
-
-```{r}
-trained_struc=estimate(m_trained)
-emu <- emulator(trained_struc)
-```
-
-Before we make predictions, we can summarize the trained GP:
-
-```{r}
-summary(m_gp_trained)
 ```
 
 ```
@@ -143,45 +139,28 @@ summary(m_gp_trained)
 ## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.
 ```
 
-and DGP:
-
-```{r}
-summary(emu)
-```
-
-```
-## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
-## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.890]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.530]     |     0.797     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [0.848]     |    26.668     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
-## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
-## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
-```
+## Prediction
 
 We are now ready to make predictions from both models via `predict()` at 200 testing positions over $[0,1]$:
 
 ```{r}
 test_x <- as.matrix(seq(0, 1, length = 200))
-res_dgp <- predict(emu, x = test_x)
-res_gp <- predict(m_gp_trained, x = test_x)
+m <- predict(m, x = test_x)
+m_gp <- predict(m_gp, x = test_x)
 ```
 
 Finally, we plot the predictions from both models to check their emulation performance:
 
 ```{r}
 # extract predictive means and variances from DGP
-mu_dgp <- res_dgp$mean # predictive means
-sd_dgp <- sqrt(res_dgp$var) # predictive variances and compute predictive standard deviations
+mu_dgp <- m$results$mean # predictive means
+sd_dgp <- sqrt(m$results$var) # predictive variances and compute predictive standard deviations
 up_dgp <- mu_dgp + 2*sd_dgp # predictive upper bound
 lo_dgp <- mu_dgp - 2*sd_dgp # predictive lower bound
 
 # extract predictive means and variances from GP
-mu_gp <- res_gp$mean
-sd_gp <- sqrt(res_gp$var)
+mu_gp <- m_gp$results$mean
+sd_gp <- sqrt(m_gp$results$var)
 up_gp <- mu_gp + 2*sd_gp
 lo_gp <- mu_gp - 2*sd_gp
 

@@ -7,15 +7,20 @@
 combine(...)
 }
 \arguments{
-\item{...}{a sequence of lists, each of which contains the GP nodes (produced by \code{\link[=kernel]{kernel()}}),
-likelihood nodes (e.g., produced by \code{\link[=Poisson]{Poisson()}}), or containers (produced by \code{\link[=container]{container()}})
-in that layer.}
+\item{...}{a sequence of lists:
+\enumerate{
+\item For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by \code{\link[=kernel]{kernel()}}), or
+likelihood nodes (produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, or \code{\link[=NegBin]{NegBin()}}).
+\item For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by \code{\link[=gp]{gp()}} or
+\code{\link[=dgp]{dgp()}}) in that layer.
+}}
 }
 \value{
-A list of layers defining the DGP or linked (D)GP structure.
+A list defining a DGP structure (for \code{struc} of \code{\link[=dgp]{dgp()}}) or a linked (D)GP structure
+(for \code{struc} for \code{\link[=lgp]{lgp()}}).
 }
 \description{
-This function combines layers into one list as a DGP or linked (D)GP structure.
+This function combines customized layers into a DGP or linked (D)GP structure.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

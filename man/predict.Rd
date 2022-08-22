@@ -2,80 +2,126 @@
 % Please edit documentation in R/prediction.R
 \name{predict}
 \alias{predict}
+\alias{predict.dgp_model}
+\alias{predict.lgp_model}
+\alias{predict.gp_model}
 \title{Predictions from GP, DGP, or linked (D)GP emulators}
 \usage{
-predict(obj, x, method = "mean_var", full_layer = FALSE, sample_size = 50)
+\method{predict}{dgp_model}(
+  object,
+  x,
+  method = "mean_var",
+  full_layer = FALSE,
+  sample_size = 50,
+  cores = 1,
+  chunks = NULL,
+  threading = FALSE,
+  ...
+)
+
+\method{predict}{lgp_model}(
+  object,
+  x,
+  method = "mean_var",
+  full_layer = FALSE,
+  sample_size = 50,
+  cores = 1,
+  chunks = NULL,
+  threading = FALSE,
+  ...
+)
+
+\method{predict}{gp_model}(
+  object,
+  x,
+  method = "mean_var",
+  sample_size = 50,
+  cores = 1,
+  chunks = NULL,
+  ...
+)
 }
 \arguments{
-\item{obj}{a GP, DGP, or linked (D)GP object produced by \code{\link[=gp]{gp()}} (after applying \code{\link[=train]{train()}}), \code{\link[=emulator]{emulator()}}, or \code{\link[=lgp]{lgp()}}.}
+\item{object}{a GP, DGP, or linked (D)GP object produced by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}}, or \code{\link[=lgp]{lgp()}}.}
 
 \item{x}{a matrix where each row is an input testing data point and each column is an input dimension.}
 
 \item{method}{the prediction approach: mean-variance (\code{"mean_var"}) or sampling (\code{"sampling"}) approach. Defaults to \code{"mean_var"}.}
 
-\item{full_layer}{whether to output the predictions of all layers. Defaults to \code{FALSE}. Only used when \code{obj} is for DGP and linked (D)GP.}
+\item{full_layer}{a bool indicating whether to output the predictions of all layers. Defaults to \code{FALSE}. Only used when \code{object} is a DGP and linked (D)GP emulator.}
 
 \item{sample_size}{the number of samples to draw for each given imputation if \code{method = "sampling"}. Defaults to \code{50}.}
+
+\item{cores}{the number of cores/workers to be used. If set to \code{NULL},
+the number of cores is set to \verb{(max physical cores available - 1)}. Defaults to \code{1}.}
+
+\item{chunks}{the number of chunks that the testing input matrix \code{x} will be divided into for multi-cores to work on.
+Only used when \code{cores} is not \code{1}. If not specified (i.e., \code{chunks = NULL}), the number of chunks is set to the value of \code{cores}.
+Defaults to \code{NULL}.}
+
+\item{threading}{a bool indicating whether to use the multi-threading to accelerate the predictions of DGP or linked (D)GP emulators. Turn this option on
+when you have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to \code{FALSE}.}
+
+\item{...}{N/A.}
 }
 \value{
 \itemize{
-\item \strong{(GP case)} If \code{obj} is produced by \code{\link[=train]{train()}} on a object built with \code{\link[=gp]{gp()}}:
+\item If \code{object} is produced by \code{\link[=gp]{gp()}}:
 \enumerate{
-\item if \code{method = "mean_var"}: a named list is returned that contains two matrices named \code{mean} for the predictive means
-and \code{var} for the predictive variances. Each matrix has only one column with its rows
-corresponding to testing positions (i.e., row of \code{x}).
-\item if \code{method = "sampling"}: a matrix is returned whose rows corresponding to testing positions and columns corresponding
-to \code{sample_size} number of samples drawn from the predictive distribution of GP.
+\item if \code{method = "mean_var"}: an updated \code{object} is returned with an additional slot called \code{results} that contains two matrices named \code{mean}
+for the predictive means and \code{var} for the predictive variances. Each matrix has only one column with its rows
+corresponding to testing positions (i.e., rows of \code{x}).
+\item if \code{method = "sampling"}: an updated \code{object} is returned with an additional slot called \code{results} that contains a matrix whose rows correspond
+to testing positions and columns correspond to \code{sample_size} number of samples drawn from the predictive distribution of GP.
 }
-\item \strong{(DGP case)} If \code{obj} is produced by \code{\link[=emulator]{emulator()}}:
+\item If \code{object} is produced by \code{\link[=dgp]{dgp()}}:
 \enumerate{
-\item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: a named list is returned. The list contains two matrices named \code{mean}
-for the predictive means and \code{var} for the predictive variances respectively. Each matrix has its rows corresponding to testing
+\item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains two
+matrices named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each matrix has its rows corresponding to testing
 positions and columns corresponding to DGP global output dimensions (i.e., the number of GP/likelihood nodes in the final layer).
-\item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: a named list is returned. The list contains two sub-lists named \code{mean}
-for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L} (i.e., the number of layers)
+\item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains two
+sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L} (i.e., the number of layers)
 matrices named \verb{layer1, layer2,..., layerL}. Each matrix has its rows corresponding to testing positions and columns corresponding to
-output dimensions (i.e., the number of GP nodes from the associated layer and in case of the final layer, it may be the number of the
-likelihood nodes).
-\item if \code{method = "sampling"} and  \code{full_layer = FALSE}: a named list is returned. The list contains \emph{D} (i.e., the number of GP/likelihood
-nodes in the final layer) matrices named \verb{output1, output2,..., outputD}. Each matrix has its rows corresponding to testing positions and
-columns corresponding to samples of size: \code{N * sample_size}, where \code{N} is the number of imputations specified in \code{\link[=emulator]{emulator()}}.
-\item if \code{method = "sampling"} and  \code{full_layer = TRUE}: a named list is returned. The list contains \emph{L} (i.e., the number of layers)
-sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents samples drawn from the GPs/likelihoods in the corresponding layers,
-and contains \emph{D} (i.e., the number of GP nodes in the corresponding layer or likelihood nodes in the final layer)
-matrices named \verb{output1, output2,..., outputD}. Each matrix gives samples of the output from one of \emph{D} GPs/likelihoods at the
-testing positions, and has its rows corresponding to testing positions and columns corresponding to samples
-of size: \code{N * sample_size}, where \code{N} is the number of imputations specified in \code{\link[=emulator]{emulator()}}.
+output dimensions (i.e., the number of GP/likelihood nodes from the associated layer).
+\item if \code{method = "sampling"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains \emph{D} (i.e., the number
+of GP/likelihood nodes in the final layer) matrices named \verb{output1, output2,..., outputD}. Each matrix has its rows corresponding to testing positions and
+columns corresponding to samples of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=dgp]{dgp()}}.
+\item if \code{method = "sampling"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains \emph{L} (i.e., the number
+of layers) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents samples drawn from the GP/likelihood nodes in the corresponding layer,
+and contains \emph{D} (i.e., the number of GP/likelihood nodes in the corresponding layer) matrices named \verb{output1, output2,..., outputD}. Each matrix gives samples
+of the output from one of \emph{D} GP/likelihood nodes, and has its rows corresponding to testing positions and columns corresponding to samples
+of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=dgp]{dgp()}}.
 }
-\item \strong{(Linked (D)GP case)} If \code{obj} is produced by \code{\link[=lgp]{lgp()}}:
+\item If \code{object} is produced by \code{\link[=lgp]{lgp()}}:
 \enumerate{
-\item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: a named list is returned. The list contains two sub-lists named \code{mean}
-for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{M} number (same number
-of computer models in the final layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}. Each matrix has
-its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
+\item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that
+contains two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list
+contains \emph{M} number (same number of emulators in the final layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
+Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.
-\item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: a named list is returned. The list contains two sub-lists named \code{mean}
-for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L} (i.e., the number of layers
-of the emulated system) components named \verb{layer1, layer2,..., layerL}. Each component represents a layer and contains \emph{M} number
-(same number of emulators in the corresponding layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}. Each
-matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
+\item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
+two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L}
+(i.e., the number of layers in the emulated system) components named \verb{layer1, layer2,..., layerL}. Each component represents a layer
+and contains \emph{M} number (same number of emulators in the corresponding layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
+Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 GP/DGP emulator in the corresponding layer.
-\item if \code{method = "sampling"} and  \code{full_layer = FALSE}: a named list is returned. The list contains \emph{M} number (same number of emulators
-in the final layer of the system) of sub-lists named \verb{emulator1, emulator2,..., emulatorM}. Each sub-list corresponds to an emulator
-in the final layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to the output
+\item if \code{method = "sampling"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
+\emph{M} number (same number of emulators in the final layer of the system) of sub-lists named \verb{emulator1, emulator2,..., emulatorM}. Each
+sub-list corresponds to an emulator in the final layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to the output
 dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
-of size: \code{N * sample_size}, where \code{N} is the number of imputations specified in \code{\link[=emulator]{emulator()}}.
-\item if \code{method = "sampling"} and  \code{full_layer = TRUE}: a named list is returned. The list contains \emph{L} (i.e., the number of layers of
-the emulated system) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents a layer and contains \emph{M} number (same
-number of emulators in the corresponding layer of the system) of components named \verb{emulator1, emulator2,..., emulatorM}. Each component
-corresponds to an emulator in the associated layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to
+of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
+\item if \code{method = "sampling"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
+\emph{L} (i.e., the number of layers of the emulated system) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents a layer
+and contains \emph{M} number (same number of emulators in the corresponding layer of the system) of components named \verb{emulator1, emulator2,..., emulatorM}.
+Each component corresponds to an emulator in the associated layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to
 the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
-samples of size: \code{N * sample_size}, where \code{N} is the number of imputations specified in \code{\link[=emulator]{emulator()}}.
+samples of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 }
 }
 }
 \description{
-This function implements prediction from GP, DGP, or linked (D)GP emulators.
+This function implements single-core or multi-core predictions (with or without multi-threading)
+from GP, DGP, or linked (D)GP emulators.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

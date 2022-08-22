@@ -67,26 +67,3 @@ NegBin <- function(input_dim = NULL) {
   res <- pkg.env$dgpsi$NegBin(input_dim)
   return(res)
 }
-
-
-#' @title Calculate negative predicted log-likelihood
-#'
-#' @description This function compute the negative predicted log-likelihood from a
-#'     trained DGP with likelihood layer.
-#'
-#' @param obj a DGP object produced by [emulator()]
-#' @param x a matrix where each row is an input testing data point and each column is an input dimension.
-#' @param y a matrix with only one column where each row is a scalar-valued testing output data point.
-#'
-#' @return A named list with two components. The first one, named `meanNLL`, is a scalar that gives the average negative
-#'     predicted log-likelihood across all testing data points. The second one, named `NLL`, is a vector that gives
-#'     the negative predicted log-likelihood for each testing data point.
-#'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @md
-#' @export
-nllik <- function(obj, x, y) {
-  res <- obj$nllik(x, y)
-  named_res <- list("meanNLL" = res[[1]], "NLL" = res[[2]])
-  return(named_res)
-}

@@ -2,41 +2,145 @@
 % Please edit documentation in R/dgp.R
 \name{dgp}
 \alias{dgp}
-\title{Initialize the DGP object}
+\title{Deep Gaussian process emulator construction}
 \usage{
-dgp(X, Y, all_layer = NULL, check_rep = TRUE, rff = FALSE, M = NULL)
+dgp(
+  X,
+  Y,
+  struc = NULL,
+  depth = 2,
+  name = "sexp",
+  lengthscale = 1,
+  nugget_est = FALSE,
+  nugget = 1e-06,
+  connect = TRUE,
+  likelihood = NULL,
+  verb = 1,
+  check_rep = TRUE,
+  rff = FALSE,
+  M = NULL,
+  N = 500,
+  ess_burn = 10,
+  burnin = NULL,
+  B = 50,
+  internal_input_idx = NULL,
+  linked_idx = NULL
+)
 }
 \arguments{
 \item{X}{a matrix where each row is an input training data point and each column is an input dimension.}
 
-\item{Y}{a matrix containing observed training output data..
-The matrix has it rows being output data points and columns being output dimensions
-(with the number of columns equals to the number of GP nodes in the final layer).}
+\item{Y}{a matrix containing observed training output data. The matrix has it rows being output data points and columns being
+output dimensions. When \code{likelihood} (see below) is not \code{NULL}, \code{Y} must be a matrix with only one column.}
 
-\item{all_layer}{a list contains \emph{L} (the number of layers) sub-lists, each of which contains
-the GPs defined by the \code{\link[=kernel]{kernel()}} function in that layer. The sub-lists are placed in the list
-in the same order of the specified DGP model. The final layer of DGP hierarchy can be set to a likelihood
-layer by putting an object created by a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}) into the final sub-list of \code{all_layer}.
-Defaults to \code{NULL}. If a DGP structure is not provided, an input-connected two-layered DGP structure
-(for deterministic model emulation) with the number of GP nodes in the first layer equal to the dimension
-of \code{X} is automatically constructed.}
+\item{struc}{a list that specifies a user-defined DGP structure. It should contain \emph{L} (the number of DGP layers) sub-lists,
+each of which contains a number of GPs (defined by \code{\link[=kernel]{kernel()}}) in the corresponding layer. The sub-lists are placed in the list
+in the same order of layers in the DGP model. The final layer of the DGP structure (i.e., final sub-list of \code{struc}) can be a likelihood
+layer that contains a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}). When \code{struc = NULL},
+the DGP structure is automatically generated and will be summarized in a table after \code{\link[=dgp]{dgp()}} is executed if \code{verb} (see below) is set to \code{2}.
+If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{name}, \code{lengthscale}, \code{nugget_est}, \code{nugget},
+\code{connect}, and \code{likelihood} will NOT be used. Defaults to \code{NULL}.}
 
-\item{check_rep}{whether to check the repetitions in the dataset, i.e., if one input
+\item{depth}{number of layers (including the likelihood layer) for a DGP structure. \code{depth} must be at least \code{2}.
+Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}
+
+\item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
+\code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}
+
+\item{lengthscale}{initial lengthscales for GP nodes in the DGP model. It can be a single numeric value or a vector:
+\enumerate{
+\item if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP model.
+\item if it is a vector, each element of the vector specifies the initial lengthscales that will be applied to all GP nodes in the corresponding layer.
+The vector should have a length of \code{depth} if \code{likelihood = NULL} or a length of \code{depth - 1} if \code{likelihood} is not \code{NULL}.
+}
+
+Defaults to a numeric value of \code{1.0}. This argument is only used when \code{struc = NULL}.}
+
+\item{nugget_est}{a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
+provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each
+bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
+\itemize{
+\item \code{FALSE}: the nugget of the corresponding GP in the final layer is fixed to the corresponding value defined in \code{nugget} (see below).
+\item \code{TRUE}: the nugget of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in \code{nugget} (see below).
+}
+
+Defaults to \code{FALSE}. This argument is only used when \code{struc = NULL}.}
+
+\item{nugget}{the initial nugget value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
+in the final layer. If it is a vector (which must have a length of \code{ncol(Y)}), each numeric in the vector will be applied to the corresponding GP node
+(if any) in the final layer. Set \code{nugget} to a small value and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the model outputs
+interpolate the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic emulations where
+model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used when \code{struc = NULL}.}
+
+\item{connect}{a bool indicating whether to implement global input connection to the DGP structure. Defaults to \code{TRUE}.
+This argument is only used when \code{struc = NULL}.}
+
+\item{likelihood}{the likelihood type of a DGP model:
+\enumerate{
+\item \code{NULL}: no likelihood layer is included in the model.
+\item \code{"Hetero"}: a heteroskedastic likelihood layer is added for stochastic emulation where the model outputs are assumed to follow a heteroskedastic Gaussian distribution
+(i.e., the model outputs have varying noises).
+\item \code{"Poisson"}: a Poisson likelihood layer is added for stochastic emulation where the model outputs are assumed to a Poisson distribution.
+\item \code{"NegBin"}: a negative Binomial likelihood layer is added for stochastic emulation where model outputs are assumed to follow a negative Binomial distribution.
+}
+
+When \code{likelihood} is not \code{NULL}, the values of \code{nugget_est} and \code{nugget} are overridden by \code{FALSE} and \code{1e-6} respectively. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
+
+\item{verb}{an integer indicating the level of information to be printed during the function execution:
+\itemize{
+\item \code{2}: trace information on DGP initialization and a summary table of the initialized DGP model.
+\item \code{1}: all information as in \code{2} except for the summary table.
+\item \code{0}: no trace information and the summary table.
+}
+
+When \code{verb = 2}, you will have a chance to check the specified DGP model (especially when a customized \code{struc} is provided) and decide if you want to proceed to training. Defaults to \code{1}.}
+
+\item{check_rep}{a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 position has multiple outputs. Defaults to \code{TRUE}.}
 
-\item{rff}{whether to use random Fourier features to approximate the correlation matrices
-during the imputation in training. Defaults to \code{FALSE}.}
+\item{rff}{a bool indicating whether to use random Fourier features to approximate the correlation matrices in training. Turning on this option could help accelerate
+the training when the training data is relatively large but may reduce the quality of the resulting emulator. Defaults to \code{FALSE}.}
 
 \item{M}{the number of features to be used by random Fourier approximation. It is only used
-when \code{rff} is set to \code{TRUE}. Defaults to \code{NULL}. If it is not specified, \code{M} is set to
-\verb{max(100, ceil(sqrt(Data Size)*log(Data Size))))}.}
+when \code{rff} is set to \code{TRUE}. Defaults to \code{NULL}. If it is \code{NULL}, \code{M} is automatically set to
+\verb{max(100, ceiling(sqrt(nrow(X))*log(nrow(X)))))}.}
+
+\item{N}{number of iterations for the training. Defaults to \code{500}.}
+
+\item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
+at each I-step of the training. Defaults to \code{10}.}
+
+\item{burnin}{the number of training iterations to be discarded for
+point estimate calculation. Must be smaller than the SEM iterations
+implemented. If this is not specified, only the last 25\% of iterations
+are used. Defaults to \code{NULL}.}
+
+\item{B}{the number of imputations to produce the later predictions. Increase the value to account for
+more imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
+Defaults to \code{50}.}
+
+\item{internal_input_idx}{column indices of \code{X} that are generated by the linked emulators in the feeding layer.
+Set \code{internal_input_idx = NULL} if the model is not linked to an emulator or all columns in \code{X} are
+generated by the linked emulators in the feeding layer. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
+
+\item{linked_idx}{indices of columns in the pooled output matrix (formed by column-combined outputs of all emulators
+in the feeding layer) that will feed into the DGP emulator. The length of \code{linked_idx} shall equal to the length of
+\code{internal_input_idx} when \code{internal_input_idx} is not \code{NULL}. Set \code{linked_idx = NULL} if the model is not intended
+for linked emulations. If the DGP emulator is in the first layer of a system, \code{linked_idx} gives the column indices of the
+global input (formed by column-combining all input matrices of emulators in the first layer) that the emulator will use.
+Defaults to \code{NULL}.}
 }
 \value{
-A DGP object to be used by \code{\link[=train]{train()}} for DGP training.
+An S3 class that can be used by
+\itemize{
+\item \code{\link[=predict]{predict()}} for DGP predictions.
+\item \code{\link[=continue]{continue()}} to continue the DGP training with additional iterations.
+\item \code{\link[=lgp]{lgp()}} to construct linked (D)GP emulators.
+}
 }
 \description{
-This function constructs an object for deep Gaussian process training.
+This function builds and trains a DGP emulator.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/} and learn how to customize a DGP structure.
 }
