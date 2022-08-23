@@ -3,8 +3,21 @@
 #' @description This function implements single-core or multi-core predictions (with or without multi-threading)
 #'     from GP, DGP, or linked (D)GP emulators.
 #'
-#' @param object a GP, DGP, or linked (D)GP object produced by [gp()], [dgp()], or [lgp()].
-#' @param x a matrix where each row is an input testing data point and each column is an input dimension.
+#' @param object a GP, DGP, or linked (D)GP object produced by [gp()], [dgp()], [continue()], or [lgp()].
+#' @param x the testing input data:
+#' * if `object` is a GP or DGP class, `x` is a matrix where each row is an input testing data point and each column is an input dimension.
+#' * if `object` is a linked (D)GP class, `x` can be a matrix or a list:
+#'    - if `x` is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
+#'      The rows of `x` represent different input data points and the columns represent input dimensions across all emulators in
+#'      the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
+#'      emulators in the first layer and there is no global input to emulators in other layers.
+#'    - if `x` is a list, it should have *L* (the number of layers in an emulator system) elements. The first element
+#'      is a matrix that represents the global testing input data that feed into the emulators in the first layer of the system. The
+#'      remaining *L-1* elements are *L-1* sub-lists, each of which contains a number (the same number of emulators in
+#'      the corresponding layer) of matrices (rows being testing input data points and columns being input dimensions) that represent the
+#'      global testing input data to the emulators in the corresponding layer. The matrices must be placed in the sub-lists based on how
+#'      their corresponding emulators are placed in `struc` argument of [lgp()]. If there is no global input data to a certain emulator,
+#'      set `NULL` in the corresponding sub-list of `x`.
 #' @param method the prediction approach: mean-variance (`"mean_var"`) or sampling (`"sampling"`) approach. Defaults to `"mean_var"`.
 #' @param full_layer a bool indicating whether to output the predictions of all layers. Defaults to `FALSE`. Only used when `object` is a DGP and linked (D)GP emulator.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
@@ -129,7 +142,9 @@ predict.dgp_model <- function(object, x, method = 'mean_var', full_layer = FALSE
 #' @export
 predict.lgp_model <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
   if ( class(object)!='lgp_model' ) stop("'object' must be a linked (D)GP model produced by lgp().", call. = FALSE)
-  if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
+  if ( !is.list(x) ) {
+    if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
+  }
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)

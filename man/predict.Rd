@@ -42,9 +42,26 @@
 )
 }
 \arguments{
-\item{object}{a GP, DGP, or linked (D)GP object produced by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}}, or \code{\link[=lgp]{lgp()}}.}
+\item{object}{a GP, DGP, or linked (D)GP object produced by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}}, \code{\link[=continue]{continue()}}, or \code{\link[=lgp]{lgp()}}.}
 
-\item{x}{a matrix where each row is an input testing data point and each column is an input dimension.}
+\item{x}{the testing input data:
+\itemize{
+\item if \code{object} is a GP or DGP class, \code{x} is a matrix where each row is an input testing data point and each column is an input dimension.
+\item if \code{object} is a linked (D)GP class, \code{x} can be a matrix or a list:
+\itemize{
+\item if \code{x} is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
+The rows of \code{x} represent different input data points and the columns represent input dimensions across all emulators in
+the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
+emulators in the first layer and there is no global input to emulators in other layers.
+\item if \code{x} is a list, it should have \emph{L} (the number of layers in an emulator system) elements. The first element
+is a matrix that represents the global testing input data that feed into the emulators in the first layer of the system. The
+remaining \emph{L-1} elements are \emph{L-1} sub-lists, each of which contains a number (the same number of emulators in
+the corresponding layer) of matrices (rows being testing input data points and columns being input dimensions) that represent the
+global testing input data to the emulators in the corresponding layer. The matrices must be placed in the sub-lists based on how
+their corresponding emulators are placed in \code{struc} argument of \code{\link[=lgp]{lgp()}}. If there is no global input data to a certain emulator,
+set \code{NULL} in the corresponding sub-list of \code{x}.
+}
+}}
 
 \item{method}{the prediction approach: mean-variance (\code{"mean_var"}) or sampling (\code{"sampling"}) approach. Defaults to \code{"mean_var"}.}
 

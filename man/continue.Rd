@@ -2,7 +2,7 @@
 % Please edit documentation in R/dgp.R
 \name{continue}
 \alias{continue}
-\title{Continue the training of a DGP model}
+\title{Continue the training of a DGP emulator}
 \usage{
 continue(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 50)
 }
