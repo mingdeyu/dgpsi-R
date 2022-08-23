@@ -105,11 +105,24 @@ from GP, DGP, or linked (D)GP emulators.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>object</dt>
-<dd><p>a GP, DGP, or linked (D)GP object produced by <code><a href="gp.html">gp()</a></code>, <code><a href="dgp.html">dgp()</a></code>, or <code><a href="lgp.html">lgp()</a></code>.</p></dd>
+<dd><p>a GP, DGP, or linked (D)GP object produced by <code><a href="gp.html">gp()</a></code>, <code><a href="dgp.html">dgp()</a></code>, <code><a href="continue.html">continue()</a></code>, or <code><a href="lgp.html">lgp()</a></code>.</p></dd>
 
 
 <dt>x</dt>
-<dd><p>a matrix where each row is an input testing data point and each column is an input dimension.</p></dd>
+<dd><p>the testing input data:</p><ul><li><p>if <code>object</code> is a GP or DGP class, <code>x</code> is a matrix where each row is an input testing data point and each column is an input dimension.</p></li>
+<li><p>if <code>object</code> is a linked (D)GP class, <code>x</code> can be a matrix or a list:</p><ul><li><p>if <code>x</code> is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
+The rows of <code>x</code> represent different input data points and the columns represent input dimensions across all emulators in
+the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
+emulators in the first layer and there is no global input to emulators in other layers.</p></li>
+<li><p>if <code>x</code> is a list, it should have <em>L</em> (the number of layers in an emulator system) elements. The first element
+is a matrix that represents the global testing input data that feed into the emulators in the first layer of the system. The
+remaining <em>L-1</em> elements are <em>L-1</em> sub-lists, each of which contains a number (the same number of emulators in
+the corresponding layer) of matrices (rows being testing input data points and columns being input dimensions) that represent the
+global testing input data to the emulators in the corresponding layer. The matrices must be placed in the sub-lists based on how
+their corresponding emulators are placed in <code>struc</code> argument of <code><a href="lgp.html">lgp()</a></code>. If there is no global input data to a certain emulator,
+set <code>NULL</code> in the corresponding sub-list of <code>x</code>.</p></li>
+</ul></li>
+</ul></dd>
 
 
 <dt>method</dt>
