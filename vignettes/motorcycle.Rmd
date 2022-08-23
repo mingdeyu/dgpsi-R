@@ -83,7 +83,7 @@ m <- dgp(X, Y, depth = 3, lengthscale = c(0.5, 0.2), likelihood = "Hetero", verb
 ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:19<00:00, 25.00it/s]
 ```
 
-We choose a heteroskedastic Gaussian likelihood by setting `likelihood = "Hetero"` since the data drawn in the plot show varying noises. `lengthscale` is set to `c(0.5, 0.2)` where `0.5` is the initial lengthscale value for kernel functions of all GP nodes in the first layer and `0.2` is the initial lengthscale value for kernel functions of all GP nodes in the second layer. We set `verb = 2` so `[dgp()]` prints out a table that summarizes the generated DGP structure and we can check if everything we specified is correct before proceeding to training.
+We choose a heteroskedastic Gaussian likelihood by setting `likelihood = "Hetero"` since the data drawn in the plot show varying noises. `lengthscale` is set to `c(0.5, 0.2)` where `0.5` is the initial lengthscale value for kernel functions of all GP nodes in the first layer and `0.2` is the initial lengthscale value for kernel functions of all GP nodes in the second layer. We set `verb = 2` so `dgp()` prints out a table that summarizes the generated DGP structure and we can check if everything we specified is correct before proceeding to training.
 
 For comparison, we also build a GP model (by `gp()`) that incorporates homogeneous noises by setting `nugget_est = T` and the initial nugget value to $0.01$. `verb` is set to `2` so we can check the generated GP structure before proceeding to the training:
 
