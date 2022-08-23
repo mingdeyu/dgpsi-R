@@ -39,7 +39,7 @@ in the same order of layers in the DGP model. The final layer of the DGP structu
 layer that contains a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}). When \code{struc = NULL},
 the DGP structure is automatically generated and will be summarized in a table after \code{\link[=dgp]{dgp()}} is executed if \code{verb} (see below) is set to \code{2}.
 If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{name}, \code{lengthscale}, \code{nugget_est}, \code{nugget},
-\code{connect}, and \code{likelihood} will NOT be used. Defaults to \code{NULL}.}
+\code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
 
 \item{depth}{number of layers (including the likelihood layer) for a DGP structure. \code{depth} must be at least \code{2}.
 Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}

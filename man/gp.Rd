@@ -24,7 +24,7 @@ gp(
 
 \item{struc}{an object produced by \code{\link[=kernel]{kernel()}} that gives a user-defined GP specifications. When \code{struc = NULL},
 the GP specifications are automatically generated using information provided in \code{name}, \code{lengthscale},
-\code{nugget_est}, and \code{internal_input_idx}. Defaults to \code{NULL}.}
+\code{nugget_est}, \code{nugget}, and \code{internal_input_idx}. Defaults to \code{NULL}.}
 
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}
