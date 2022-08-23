@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Load the package
 
-`dgpsi` in R provides an initialization function `init_py()` that helps you set up and initialize the required Python environment automatically. We just need to run `init_py()` every time after the package is loaded to initiate the underlying Python environment.
+`dgpsi` in R provides an initialization function `init_py()` that helps us set up and initialize the required Python environment automatically. We just need to run `init_py()` every time after the package is loaded to initiate the underlying Python environment.
 
 ```{r}
 library(dgpsi)
@@ -71,7 +71,7 @@ m <- dgp(X, Y, depth = 3)
 ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 126.27it/s]
 ```
 
-The progress bar displayed shows how long it will takes to finish the training. We are able to change some default settings. E.g., we can set `verb = 2` so a summary table of the initialized DGP emulator will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to `struc` and we want to check it before the training is implemented. Note that if we want to continue the training for further iterations, you can simply do `m_new <- continue(m)` instead of rebuilding the DGP emulator.
+The progress bar displayed shows how long it takes to finish the training. We are able to change some default settings. E.g., we can set `verb = 2` so a summary table of the initialized DGP emulator will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to `struc` and we want to check it before the training is implemented. Note that if we want to train the DGP emulator `m` for additional iterations, we can simply do `m <- continue(m)` instead of rebuilding the DGP emulator.
 
 The trained DGP emulator can be viewed using the `summary()` function:
 
@@ -91,9 +91,9 @@ summary(m)
 ## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
 ```
 
-The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer is estimated due to its attachment to the output. For further information about how to change the default settings to train a DGP emulator, see `?dgp`.
+The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
 
-At this point, you could use `write()` to save the emulator `m` to a local file and then load it using `read()` next time when you simply would like to make predictions from the emulator.
+At this point, you could use `write()` to save the emulator `m` to a local file and then load it using `read()` next time when you would like to make predictions from the emulator.
 
 ## Prediction
 
@@ -103,7 +103,7 @@ Once the emulator is ready, it is time to make predictions from it:
 m <- predict(m, x = test_x)
 ```
 
-The `predict()` function returns an updated DGP emulator `m` that contains a slot called `results` that gives the posterior predictive means and variances at testing positions. We can extract these information and plot the emulation results to check the predictive performance of our constructed DGP emulator:
+The `predict()` function returns an updated DGP emulator `m` that contains a slot named `results` that gives the posterior predictive means and variances at testing positions. We can extract these information and plot the emulation results to check the predictive performance of our constructed DGP emulator:
 
 ```{r}
 mu <- m$results$mean # extract the predictive means 
