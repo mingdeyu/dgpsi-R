@@ -105,7 +105,7 @@ lines(X1, Y1, type = 'p', pch = 16, cex = 1) # Training data points
 
 ![](images/model_1.png)
 
-Since we will use `m1` later for linked emulation, we must specify how it links to the emulators in the feeding layer through `linked_idx` in [dgp()]. Since `m1` is in the first layer of the system, `linked_idx` refers to the column indices of the global input `X` that will feed intp `m1`, and therefore we should have set `linked_idx = c(1)` in [dgp()] when we first constructed the emulator. Instead of re-training the emulator to provide this information, we can simply use [set_linked_idx()] to add this information to `m1`:
+Since we will use `m1` later for linked emulation, we must specify how it links to the emulators in the feeding layer through `linked_idx` in `dgp()`. Since `m1` is in the first layer of the system, `linked_idx` refers to the column indices of the global input `X` that will feed intp `m1`, and therefore we should have set `linked_idx = c(1)` in `dgp()` when we first constructed the emulator. Instead of re-training the emulator to provide this information, we can simply use `set_linked_idx()` to add this information to `m1`:
 
 ```{r}
 m1 <- set_linked_idx(m1, c(1))
@@ -126,7 +126,7 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 232.55it/s]
 ```
 
-Since all outputs (which is one-dimensional) from the emulators in the first layer (i.e., `m1`) feed into `m2`, we set `linked_idx = c(1)` in [dgp()] above. 
+Since all outputs (which is one-dimensional) from the emulators in the first layer (i.e., `m1`) feed into `m2`, we set `linked_idx = c(1)` in `dgp()` above. 
 
 The following plot visualizes the emulation performance of the DGP emulator:
 
