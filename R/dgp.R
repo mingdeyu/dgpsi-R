@@ -11,7 +11,7 @@
 #'     layer that contains a likelihood function (e.g., [Poisson()]). When `struc = NULL`,
 #'     the DGP structure is automatically generated and will be summarized in a table after [dgp()] is executed if `verb` (see below) is set to `2`.
 #'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `name`, `lengthscale`, `nugget_est`, `nugget`,
-#'     `connect`, and `likelihood` will NOT be used. Defaults to `NULL`.
+#'     `connect`, `likelihood`, and `internal_input_idx` will NOT be used. Defaults to `NULL`.
 #' @param depth number of layers (including the likelihood layer) for a DGP structure. `depth` must be at least `2`.
 #'     Defaults to `2`. This argument is only used when `struc = NULL`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or

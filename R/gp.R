@@ -6,7 +6,7 @@
 #' @param Y a matrix with only one column and each row being an input data point.
 #' @param struc an object produced by [kernel()] that gives a user-defined GP specifications. When `struc = NULL`,
 #'     the GP specifications are automatically generated using information provided in `name`, `lengthscale`,
-#'     `nugget_est`, and `internal_input_idx`. Defaults to `NULL`.
+#'     `nugget_est`, `nugget`, and `internal_input_idx`. Defaults to `NULL`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
 #' @param lengthscale initial values of lengthscales in the kernel function. It can be a single numeric value or a vector:
