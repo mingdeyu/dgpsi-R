@@ -139,9 +139,9 @@
 <p>For comparison, we also build a GP model (by <code><a href="../reference/gp.html">gp()</a></code>) that incorporates homogeneous noises by setting <code>nugget_est = T</code> and the initial nugget value to <span class="math inline">\(0.01\)</span>. <code>verb</code> is set to <code>2</code> so we can check the generated GP structure before proceeding to the training:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, nugget_est <span class="op">=</span> <span class="cn">T</span>, nugget <span class="op">=</span> <span class="fl">1e-2</span>, verb <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Auto-generating a GP structure: done</span></span>
-<span><span class="co">## Initializing the GP model: done</span></span>
-<span><span class="co">## Summarizing the initialized GP model: done</span></span>
+<pre><code><span><span class="co">## Auto-generating a GP structure ... done</span></span>
+<span><span class="co">## Initializing the GP model ... done</span></span>
+<span><span class="co">## Summarizing the initialized GP model ... done</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
