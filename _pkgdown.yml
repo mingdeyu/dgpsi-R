@@ -9,14 +9,14 @@ template:
   bootswatch: litera
 
 articles:
-- title: Step Function
-  desc: DGP emulation of a step function.
+- title: DGP Emulation with the Heteroskedastic Gaussian Likelihood
+  desc: DGP modeling of the motorcycle accident data.
   navbar: ~
   contents:
-  - step_fct
+  - motorcycle
 
 - title: A Quick Guide to dgpsi
-  desc: A quick guide to dgpsi by modeling the motorcycle data.
+  desc: A quick guide to dgpsi by emulating a step function.
   navbar: ~
   contents:
   - dgpsi
