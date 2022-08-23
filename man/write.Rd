@@ -7,7 +7,7 @@
 write(object, pkl_file)
 }
 \arguments{
-\item{object}{a GP, DGP, or linked (D)GP emulator produced by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}}, or \code{\link[=lgp]{lgp()}}.}
+\item{object}{an instance of the S3 class \code{gp}, \code{dgp}, or \code{lgp}.}
 
 \item{pkl_file}{the path to and the name of the \code{.pkl} file to which
 the emulator \code{object} is saved.}

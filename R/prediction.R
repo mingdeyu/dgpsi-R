@@ -3,10 +3,10 @@
 #' @description This function implements single-core or multi-core predictions (with or without multi-threading)
 #'     from GP, DGP, or linked (D)GP emulators.
 #'
-#' @param object a GP, DGP, or linked (D)GP object produced by [gp()], [dgp()], [continue()], or [lgp()].
+#' @param object an instance of the `gp`, `dgp`, or `lgp` class.
 #' @param x the testing input data:
-#' * if `object` is a GP or DGP class, `x` is a matrix where each row is an input testing data point and each column is an input dimension.
-#' * if `object` is a linked (D)GP class, `x` can be a matrix or a list:
+#' * if `object` is an instance of the `gp` or `dgp` class, `x` is a matrix where each row is an input testing data point and each column is an input dimension.
+#' * if `object` is an instance of the `lgp` class, `x` can be a matrix or a list:
 #'    - if `x` is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 #'      The rows of `x` represent different input data points and the columns represent input dimensions across all emulators in
 #'      the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
@@ -30,13 +30,13 @@
 #'     when you have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to `FALSE`.
 #' @param ... N/A.
 #' @return
-#' * If `object` is produced by [gp()]:
+#' * If `object` is an instance of the `gp` class:
 #'   1. if `method = "mean_var"`: an updated `object` is returned with an additional slot called `results` that contains two matrices named `mean`
 #'      for the predictive means and `var` for the predictive variances. Each matrix has only one column with its rows
 #'      corresponding to testing positions (i.e., rows of `x`).
 #'   2. if `method = "sampling"`: an updated `object` is returned with an additional slot called `results` that contains a matrix whose rows correspond
 #'      to testing positions and columns correspond to `sample_size` number of samples drawn from the predictive distribution of GP.
-#' * If `object` is produced by [dgp()]:
+#' * If `object` is an instance of the `dgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that contains two
 #'      matrices named `mean` for the predictive means and `var` for the predictive variances respectively. Each matrix has its rows corresponding to testing
 #'      positions and columns corresponding to DGP global output dimensions (i.e., the number of GP/likelihood nodes in the final layer).
@@ -52,7 +52,7 @@
 #'      and contains *D* (i.e., the number of GP/likelihood nodes in the corresponding layer) matrices named `output1, output2,..., outputD`. Each matrix gives samples
 #'      of the output from one of *D* GP/likelihood nodes, and has its rows corresponding to testing positions and columns corresponding to samples
 #'      of size: `B * sample_size`, where `B` is the number of imputations specified in [dgp()].
-#' * If `object` is produced by [lgp()]:
+#' * If `object` is an instance of the `lgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that
 #'      contains two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list
 #'      contains *M* number (same number of emulators in the final layer of the system) of matrices named `emulator1, emulator2,..., emulatorM`.
@@ -83,10 +83,10 @@ NULL
 
 
 #' @rdname predict
-#' @method predict dgp_model
+#' @method predict dgp
 #' @export
-predict.dgp_model <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
-  if ( class(object)!='dgp_model' ) stop("'object' must be a DGP model produced by dgp().", call. = FALSE)
+predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
+  if ( class(object)!='dgp' ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
@@ -138,10 +138,10 @@ predict.dgp_model <- function(object, x, method = 'mean_var', full_layer = FALSE
 
 
 #' @rdname predict
-#' @method predict lgp_model
+#' @method predict lgp
 #' @export
-predict.lgp_model <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
-  if ( class(object)!='lgp_model' ) stop("'object' must be a linked (D)GP model produced by lgp().", call. = FALSE)
+predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
+  if ( class(object)!='lgp' ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   if ( !is.list(x) ) {
     if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   }
@@ -211,10 +211,10 @@ predict.lgp_model <- function(object, x, method = 'mean_var', full_layer = FALSE
 
 
 #' @rdname predict
-#' @method predict gp_model
+#' @method predict gp
 #' @export
-predict.gp_model <- function(object, x, method = 'mean_var', sample_size = 50, cores = 1, chunks = NULL, ...) {
-  if ( class(object)!='gp_model' ) stop("'object' must be a GP model produced by gp().", call. = FALSE)
+predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores = 1, chunks = NULL, ...) {
+  if ( class(object)!='gp' ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {

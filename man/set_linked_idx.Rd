@@ -7,10 +7,10 @@
 set_linked_idx(object, idx)
 }
 \arguments{
-\item{object}{the S3 class produced by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}.}
+\item{object}{an instance of the S3 class \code{gp} or \code{dgp}.}
 
-\item{idx}{indices of columns in the pooled output matrix (formed by column-combined outputs of all emulators
-in the feeding layer) that will feed into the (D)GP emulator represented by \code{object}.}
+\item{idx}{indices of columns in the pooled output matrix (formed by column-combining outputs of all emulators
+in the feeding layer) that will feed into the GP or DGP emulator represented by \code{object}.}
 }
 \value{
 An updated \code{object} with the information of \code{idx} incorporated.
@@ -23,8 +23,8 @@ when the emulator is constructed by \code{\link[=gp]{gp()}} or \code{\link[=dgp]
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-This function is useful when different models are emulated by different teams. Each team can create their (D)GP model
-even without knowing how different models are connected together. When this information is available and
+This function is useful when different models are emulated by different teams. Each team can create their (D)GP emulator
+even without knowing how different emulators are connected together. When this information is available and
 different emulators are collected, the connection information between emulators can then be assigned to
 individual emulators with this function.
 }

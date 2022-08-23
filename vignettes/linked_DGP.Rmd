@@ -1,10 +1,10 @@
 ---
-title: "Linked Emulation"
+title: "Linked (D)GP Emulation"
 output: rmarkdown::html_vignette
 description: >
   Linked (D)GP emulation of a synthetic system of two linked computer models.
 vignette: >
-  %\VignetteIndexEntry{Linked Emulation}
+  %\VignetteIndexEntry{Linked (D)GP Emulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -74,19 +74,19 @@ test_y <- as.matrix(sapply(test_x1, f12))
 
 ## Emulation of Model 1
 
-We construct and train a simple GP model with Matérn-2.5 kernel:
+We construct and train a GP emulator with Matérn-2.5 kernel:
 
 ```{r}
 m1 <- gp(X1, Y1, name = "matern2.5")
 ```
 
 ```
-## Auto-generating a GP structure ... done
-## Initializing the GP model ... done
-## Training the GP model ... done
+## Auto-generating a GP structure: done
+## Initializing the GP emulator ... done
+## Training the GP emulator ... done
 ```
 
-We now make predictions from the trained model to evaluate the emulation performance for Model 1 over $[0,1]$:
+We now make predictions from the trained GP emulator to evaluate the emulation performance for Model 1 over $[0,1]$:
 
 ```{r}
 m1 <- predict(m1, x = test_x1)
@@ -113,7 +113,7 @@ m1 <- set_linked_idx(m1, c(1))
 
 ## Emulation of Model 2
 
-We construct a two-layered DGP model with Matérn-2.5 kernels to emulate the Model 2:
+We construct a two-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 2:
 
 ```{r}
 m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
@@ -121,14 +121,14 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 
 ```
 ## Auto-generating a 2-layered DGP structure ... done
-## Initializing the DGP model ... done
-## Training the DGP model:
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 232.55it/s]
+## Initializing the DGP emulator ... done
+## Training the DGP emulator:
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 236.81it/s]
 ```
 
-Since all outputs (which is one-dimensional) from the emulators in the first layer (i.e., `m1`) feed into `m2`, we set `linked_idx = c(1)` in `dgp()` above. 
+Since all outputs of emulators in the first layer is from `m1` and these outputs all feed into `m2`, we set `linked_idx = c(1)` in `dgp()` above. 
 
-The following plot visualizes the emulation performance of the DGP emulator:
+The following plot visualizes the emulation performance of the trained DGP emulator `m2`:
 
 ```{r}
 # make predictions
@@ -154,15 +154,15 @@ With the GP emulator `m1` (for Model 1) and the DGP emulator `m2` (for Model 2) 
 
 ```{r}
 struc <- combine(list(m1), list(m2))
-lm <- lgp(struc)
+m_link <- lgp(struc)
 ```
 
-Note that each layer of a computer model system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulators in the list using `list()`.
+Note that each layer of an emulator system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulators in a list using `list()`.
 
-We can check the relations between connected emulators by using `summary()` on `lm`:
+We can check the relations between connected emulators by applying `summary()` to `m_link`:
 
 ```{r}
-summary(lm)
+summary(m_link)
 ```
 
 ```
@@ -186,15 +186,15 @@ m_gp <- gp(X_gp, Y_gp, name = 'matern2.5')
 
 ```
 ## Auto-generating a GP structure: done
-## Initializing the GP model: done
-## Training the GP model: done
+## Initializing the GP emulator ... done
+## Training the GP emulator ... done
 ```
 
 In this final step, we make predictions from both the GP emulator and the linked emulator:
 
 ```{r}
 # linked emulator
-lm <- predict(lm, x = test_x1)
+m_link <- predict(m_link, x = test_x1)
 # GP emulator
 m_gp <- predict(m_gp, x = test_x1)
 ```
@@ -203,8 +203,8 @@ and plot the predictions to compare their emulation performances:
 
 ```{r}
 # extract predictive means and variances from the linked emulator
-mu <- lm$results$mean$emulator1
-sd <- sqrt(lm$results$var$emulator1)
+mu <- m_link$results$mean$emulator1
+sd <- sqrt(m_link$results$var$emulator1)
 up <- mu + 2*sd
 lo <- mu - 2*sd
 
@@ -229,6 +229,6 @@ lines(test_x1, test_y, type = 'l', col = 'cornflowerblue', lwd = 2)
 lines(test_x1, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 ```
 
-![](images/linked_plot.png)
+![](images/linked_result.png)
 
 It can be seen from the above plot that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.

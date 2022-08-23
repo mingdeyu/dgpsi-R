@@ -2,23 +2,23 @@
 % Please edit documentation in R/utils.R
 \name{summary}
 \alias{summary}
-\alias{summary.gp_model}
-\alias{summary.dgp_model}
-\alias{summary.lgp_model}
+\alias{summary.gp}
+\alias{summary.dgp}
+\alias{summary.lgp}
 \title{Summary of a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
-\method{summary}{gp_model}(object, ...)
+\method{summary}{gp}(object, ...)
 
-\method{summary}{dgp_model}(object, ...)
+\method{summary}{dgp}(object, ...)
 
-\method{summary}{lgp_model}(object, ...)
+\method{summary}{lgp}(object, ...)
 }
 \arguments{
 \item{object}{can be one of the following:
 \itemize{
-\item the S3 class produced by \code{\link[=gp]{gp()}}.
-\item the S3 class produced by \code{\link[=dgp]{dgp()}}.
-\item the S3 class produced by \code{\link[=lgp]{lgp()}}.
+\item the S3 class \code{gp}.
+\item the S3 class \code{dgp}.
+\item the S3 class \code{lgp}.
 }}
 
 \item{...}{N/A.}

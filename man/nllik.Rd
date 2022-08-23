@@ -7,7 +7,7 @@
 nllik(object, x, y)
 }
 \arguments{
-\item{object}{a DGP class produced by \code{\link[=dgp]{dgp()}} that is specified in one of the following two settings:
+\item{object}{an instance of the \code{dgp} class and when it should be produced by \code{\link[=dgp]{dgp()}} with one of the following two settings:
 \enumerate{
 \item if \code{struc = NULL}, \code{likelihood} is not \code{NULL};
 \item if a customized structure is provided to \code{struc}, the final layer must be likelihood layer containing only one

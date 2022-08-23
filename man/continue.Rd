@@ -7,7 +7,7 @@
 continue(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 50)
 }
 \arguments{
-\item{object}{S3 class produced by \code{\link[=dgp]{dgp()}}.}
+\item{object}{an instance of the \code{dgp} class.}
 
 \item{N}{additional number of iterations for the DGP training. Defaults to \code{500}.}
 
@@ -34,7 +34,7 @@ more imputation uncertainties. This overrides the value of \code{B} set in \code
 An updated \code{object}.
 }
 \description{
-This function implements additional training iterations for a DGP model with at least two layers.
+This function implements additional training iterations for a DGP emulator with at least two layers.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

@@ -2,12 +2,12 @@
 % Please edit documentation in R/prediction.R
 \name{predict}
 \alias{predict}
-\alias{predict.dgp_model}
-\alias{predict.lgp_model}
-\alias{predict.gp_model}
+\alias{predict.dgp}
+\alias{predict.lgp}
+\alias{predict.gp}
 \title{Predictions from GP, DGP, or linked (D)GP emulators}
 \usage{
-\method{predict}{dgp_model}(
+\method{predict}{dgp}(
   object,
   x,
   method = "mean_var",
@@ -19,7 +19,7 @@
   ...
 )
 
-\method{predict}{lgp_model}(
+\method{predict}{lgp}(
   object,
   x,
   method = "mean_var",
@@ -31,7 +31,7 @@
   ...
 )
 
-\method{predict}{gp_model}(
+\method{predict}{gp}(
   object,
   x,
   method = "mean_var",
@@ -42,12 +42,12 @@
 )
 }
 \arguments{
-\item{object}{a GP, DGP, or linked (D)GP object produced by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}}, \code{\link[=continue]{continue()}}, or \code{\link[=lgp]{lgp()}}.}
+\item{object}{an instance of the \code{gp}, \code{dgp}, or \code{lgp} class.}
 
 \item{x}{the testing input data:
 \itemize{
-\item if \code{object} is a GP or DGP class, \code{x} is a matrix where each row is an input testing data point and each column is an input dimension.
-\item if \code{object} is a linked (D)GP class, \code{x} can be a matrix or a list:
+\item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{x} is a matrix where each row is an input testing data point and each column is an input dimension.
+\item if \code{object} is an instance of the \code{lgp} class, \code{x} can be a matrix or a list:
 \itemize{
 \item if \code{x} is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 The rows of \code{x} represent different input data points and the columns represent input dimensions across all emulators in
@@ -83,7 +83,7 @@ when you have a moderately large number of training data points as in such a cas
 }
 \value{
 \itemize{
-\item If \code{object} is produced by \code{\link[=gp]{gp()}}:
+\item If \code{object} is an instance of the \code{gp} class:
 \enumerate{
 \item if \code{method = "mean_var"}: an updated \code{object} is returned with an additional slot called \code{results} that contains two matrices named \code{mean}
 for the predictive means and \code{var} for the predictive variances. Each matrix has only one column with its rows
@@ -91,7 +91,7 @@ corresponding to testing positions (i.e., rows of \code{x}).
 \item if \code{method = "sampling"}: an updated \code{object} is returned with an additional slot called \code{results} that contains a matrix whose rows correspond
 to testing positions and columns correspond to \code{sample_size} number of samples drawn from the predictive distribution of GP.
 }
-\item If \code{object} is produced by \code{\link[=dgp]{dgp()}}:
+\item If \code{object} is an instance of the \code{dgp} class:
 \enumerate{
 \item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains two
 matrices named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each matrix has its rows corresponding to testing
@@ -109,7 +109,7 @@ and contains \emph{D} (i.e., the number of GP/likelihood nodes in the correspond
 of the output from one of \emph{D} GP/likelihood nodes, and has its rows corresponding to testing positions and columns corresponding to samples
 of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=dgp]{dgp()}}.
 }
-\item If \code{object} is produced by \code{\link[=lgp]{lgp()}}:
+\item If \code{object} is an instance of the \code{lgp} class:
 \enumerate{
 \item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that
 contains two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list

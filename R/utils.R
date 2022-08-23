@@ -24,7 +24,7 @@ combine <- function(...) {
 #'
 #' @description This function saves the constructed emulator to a `.pkl` file.
 #'
-#' @param object a GP, DGP, or linked (D)GP emulator produced by [gp()], [dgp()], or [lgp()].
+#' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
 #'
@@ -52,11 +52,11 @@ read <- function(pkl_file) {
   res <- pkg.env$dgpsi$read(pkl_file)
   type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
   if ( type=='emulator' ) {
-    class(res) <- "dgp_model"
+    class(res) <- "dgp"
   } else if ( type=='gp' ) {
-    class(res) <- "gp_model"
+    class(res) <- "gp"
   } else if ( type=='lgp' ) {
-    class(res) <- "lgp_model"
+    class(res) <- "lgp"
   }
   return(res)
 }
@@ -67,9 +67,9 @@ read <- function(pkl_file) {
 #' @description This function summarizes key information of a GP, DGP or linked (D)GP emulator.
 #'
 #' @param object can be one of the following:
-#' * the S3 class produced by [gp()].
-#' * the S3 class produced by [dgp()].
-#' * the S3 class produced by [lgp()].
+#' * the S3 class `gp`.
+#' * the S3 class `dgp`.
+#' * the S3 class `lgp`.
 #' @param ... N/A.
 #'
 #' @return A table summarizing key information contained in `object`.
@@ -80,23 +80,23 @@ read <- function(pkl_file) {
 NULL
 
 #' @rdname summary
-#' @method summary gp_model
+#' @method summary gp
 #' @export
-summary.gp_model <- function(object, ...) {
+summary.gp <- function(object, ...) {
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
 
 #' @rdname summary
-#' @method summary dgp_model
+#' @method summary dgp
 #' @export
-summary.dgp_model <- function(object, ...) {
+summary.dgp <- function(object, ...) {
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
 
 #' @rdname summary
-#' @method summary lgp_model
+#' @method summary lgp
 #' @export
-summary.lgp_model <- function(object, ...) {
+summary.lgp <- function(object, ...) {
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
 
@@ -106,14 +106,14 @@ summary.lgp_model <- function(object, ...) {
 #' @description This function sets the linked indices of a GP or DGP emulator if the information is not provided
 #'     when the emulator is constructed by [gp()] or [dgp()].
 #'
-#' @param object the S3 class produced by [gp()] or [dgp()].
-#' @param idx indices of columns in the pooled output matrix (formed by column-combined outputs of all emulators
-#'     in the feeding layer) that will feed into the (D)GP emulator represented by `object`.
+#' @param object an instance of the S3 class `gp` or `dgp`.
+#' @param idx indices of columns in the pooled output matrix (formed by column-combining outputs of all emulators
+#'     in the feeding layer) that will feed into the GP or DGP emulator represented by `object`.
 #'
 #' @return An updated `object` with the information of `idx` incorporated.
 #'
-#' @note This function is useful when different models are emulated by different teams. Each team can create their (D)GP model
-#'     even without knowing how different models are connected together. When this information is available and
+#' @note This function is useful when different models are emulated by different teams. Each team can create their (D)GP emulator
+#'     even without knowing how different emulators are connected together. When this information is available and
 #'     different emulators are collected, the connection information between emulators can then be assigned to
 #'     individual emulators with this function.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -131,7 +131,7 @@ set_linked_idx <- function(object, idx) {
 #' @description This function computes the negative predicted log-likelihood from a
 #'     DGP emulator with a likelihood layer.
 #'
-#' @param object a DGP class produced by [dgp()] that is specified in one of the following two settings:
+#' @param object an instance of the `dgp` class and when it should be produced by [dgp()] with one of the following two settings:
 #' 1. if `struc = NULL`, `likelihood` is not `NULL`;
 #' 2. if a customized structure is provided to `struc`, the final layer must be likelihood layer containing only one
 #'    likelihood node produced by [Poisson()], [Hetero()], or [NegBin()].
@@ -147,7 +147,7 @@ set_linked_idx <- function(object, idx) {
 #' @md
 #' @export
 nllik <- function(object, x, y) {
-  if ( class(object)!='dgp_model' ) stop("'object' must be a DGP model produced by dgp().", call. = FALSE)
+  if ( class(object)!='dgp' ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   if ( !is.matrix(y) ) stop("y must be a matrix", call. = FALSE)
   if ( nrow(x)!=nrow(y) ) stop("x and y have different number of rows.", call. = FALSE)
@@ -177,6 +177,6 @@ nllik <- function(object, x, y) {
 #' @export
 
 trace_plot <- function(object, layer_no, ker_no, width = 4., height = 1., ticksize = 5., labelsize = 8., hspace = 0.1) {
-  if ( class(object)!='dgp_model' ) stop("'object' must be a DGP model produced by dgp().", call. = FALSE)
+  if ( class(object)!='dgp' ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   object$trained_obj$plot(as.integer(layer_no), as.integer(ker_no), width, height, ticksize, labelsize, hspace)
 }

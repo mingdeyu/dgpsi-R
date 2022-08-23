@@ -9,7 +9,7 @@ lgp(struc, B = 50)
 \arguments{
 \item{struc}{a list contains \emph{L} (the number of layers in a systems of computer models) sub-lists,
 each of which represents a layer and contains (D)GP emulators (represented by
-the output classes produced by \code{\link[=dgp]{dgp()}}) of computer models. The sub-lists are placed in the list
+instances of S3 class \code{gp} or \code{dgp}) of computer models. The sub-lists are placed in the list
 in the same order of the specified computer model system's hierarchy.}
 
 \item{B}{the number of imputations to produce the predictions. Increase the value to account for more
@@ -17,7 +17,7 @@ imputation uncertainties. Decrease the value for lower imputation uncertainties 
 If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{50}.}
 }
 \value{
-An S3 class to be used by \code{\link[=predict]{predict()}} for linked (D)GP predictions.
+An S3 class named \code{lgp} to be used by \code{\link[=predict]{predict()}} for linked (D)GP predictions.
 }
 \description{
 This function constructs a linked (D)GP emulator.

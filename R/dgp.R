@@ -6,8 +6,8 @@
 #' @param Y a matrix containing observed training output data. The matrix has it rows being output data points and columns being
 #'     output dimensions. When `likelihood` (see below) is not `NULL`, `Y` must be a matrix with only one column.
 #' @param struc a list that specifies a user-defined DGP structure. It should contain *L* (the number of DGP layers) sub-lists,
-#'     each of which contains a number of GPs (defined by [kernel()]) in the corresponding layer. The sub-lists are placed in the list
-#'     in the same order of layers in the DGP model. The final layer of the DGP structure (i.e., final sub-list of `struc`) can be a likelihood
+#'     each of which represents a layer and contains a number of GP nodes (defined by [kernel()]) in the corresponding layer.
+#'     The final layer of the DGP structure (i.e., the final sub-list in `struc`) can be a likelihood
 #'     layer that contains a likelihood function (e.g., [Poisson()]). When `struc = NULL`,
 #'     the DGP structure is automatically generated and will be summarized in a table after [dgp()] is executed if `verb` (see below) is set to `2`.
 #'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `name`, `lengthscale`, `nugget_est`, `nugget`,
@@ -16,8 +16,8 @@
 #'     Defaults to `2`. This argument is only used when `struc = NULL`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
-#' @param lengthscale initial lengthscales for GP nodes in the DGP model. It can be a single numeric value or a vector:
-#' 1. if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP model.
+#' @param lengthscale initial lengthscales for GP nodes in the DGP emulator. It can be a single numeric value or a vector:
+#' 1. if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP hierarchy.
 #' 2. if it is a vector, each element of the vector specifies the initial lengthscales that will be applied to all GP nodes in the corresponding layer.
 #'    The vector should have a length of `depth` if `likelihood = NULL` or a length of `depth - 1` if `likelihood` is not `NULL`.
 #'
@@ -31,25 +31,25 @@
 #' Defaults to `FALSE`. This argument is only used when `struc = NULL`.
 #' @param nugget the initial nugget value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
 #'    in the final layer. If it is a vector (which must have a length of `ncol(Y)`), each numeric in the vector will be applied to the corresponding GP node
-#'    (if any) in the final layer. Set `nugget` to a small value and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the model outputs
-#'    interpolate the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic emulations where
-#'    model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used when `struc = NULL`.
+#'    (if any) in the final layer. Set `nugget` to a small value and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
+#'    interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic emulations where
+#'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used when `struc = NULL`.
 #' @param connect a bool indicating whether to implement global input connection to the DGP structure. Defaults to `TRUE`.
 #'     This argument is only used when `struc = NULL`.
-#' @param likelihood the likelihood type of a DGP model:
-#' 1. `NULL`: no likelihood layer is included in the model.
-#' 2. `"Hetero"`: a heteroskedastic likelihood layer is added for stochastic emulation where the model outputs are assumed to follow a heteroskedastic Gaussian distribution
-#'    (i.e., the model outputs have varying noises).
-#' 3. `"Poisson"`: a Poisson likelihood layer is added for stochastic emulation where the model outputs are assumed to a Poisson distribution.
-#' 4. `"NegBin"`: a negative Binomial likelihood layer is added for stochastic emulation where model outputs are assumed to follow a negative Binomial distribution.
+#' @param likelihood the likelihood type of a DGP emulator:
+#' 1. `NULL`: no likelihood layer is included in the emulator.
+#' 2. `"Hetero"`: a heteroskedastic likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
+#'    (i.e., the computer model outputs have varying noises).
+#' 3. `"Poisson"`: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.
+#' 4. `"NegBin"`: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.
 #'
 #' When `likelihood` is not `NULL`, the values of `nugget_est` and `nugget` are overridden by `FALSE` and `1e-6` respectively. Defaults to `NULL`. This argument is only used when `struc = NULL`.
 #' @param verb an integer indicating the level of information to be printed during the function execution:
-#' * `2`: trace information on DGP initialization and a summary table of the initialized DGP model.
+#' * `2`: trace information on DGP initialization and a summary table of the initialized DGP emulator.
 #' * `1`: all information as in `2` except for the summary table.
 #' * `0`: no trace information and the summary table.
 #'
-#' When `verb = 2`, you will have a chance to check the specified DGP model (especially when a customized `struc` is provided) and decide if you want to proceed to training. Defaults to `1`.
+#' When `verb = 2`, you will have a chance to check the specified DGP emulator (especially when a customized `struc` is provided) and decide if you want to proceed to training. Defaults to `1`.
 #' @param check_rep a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 #'     position has multiple outputs. Defaults to `TRUE`.
 #' @param rff a bool indicating whether to use random Fourier features to approximate the correlation matrices in training. Turning on this option could help accelerate
@@ -68,16 +68,17 @@
 #'     more imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 #'     Defaults to `50`.
 #' @param internal_input_idx column indices of `X` that are generated by the linked emulators in the feeding layer.
-#'     Set `internal_input_idx = NULL` if the model is not linked to an emulator or all columns in `X` are
-#'     generated by the linked emulators in the feeding layer. Defaults to `NULL`. This argument is only used when `struc = NULL`.
+#'     Set `internal_input_idx = NULL` if the DGP emulator is not linked to any emulator (e.g., the DGP emulator
+#'     is in the first layer of a system) or all columns in `X` are generated by the linked emulators in the feeding layer.
+#'     Defaults to `NULL`. This argument is only used when `struc = NULL`.
 #' @param linked_idx indices of columns in the pooled output matrix (formed by column-combined outputs of all emulators
 #'     in the feeding layer) that will feed into the DGP emulator. The length of `linked_idx` shall equal to the length of
-#'     `internal_input_idx` when `internal_input_idx` is not `NULL`. Set `linked_idx = NULL` if the model is not intended
+#'     `internal_input_idx` when `internal_input_idx` is not `NULL`. Set `linked_idx = NULL` if the DGP emulator is not intended
 #'     for linked emulations. If the DGP emulator is in the first layer of a system, `linked_idx` gives the column indices of the
-#'     global input (formed by column-combining all input matrices of emulators in the first layer) that the emulator will use.
+#'     global input (formed by column-combining all input matrices of emulators in the first layer) that the DGP emulator will use.
 #'     Defaults to `NULL`.
 #'
-#' @return An S3 class that can be used by
+#' @return An S3 class named `dgp` that can be used by
 #' * [predict()] for DGP predictions.
 #' * [continue()] to continue the DGP training with additional iterations.
 #' * [lgp()] to construct linked (D)GP emulators.
@@ -236,7 +237,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
     }
   }
 
-  if ( verb == 1|verb == 2 ) message("Initializing the DGP model ...", appendLF = FALSE)
+  if ( verb == 1|verb == 2 ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
   obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, rff, M)
 
@@ -250,11 +251,11 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
   } else if ( verb == 1 ) {
     disable <- FALSE
     Sys.sleep(0.5)
-    message("Training the DGP model:")
+    message("Training the DGP emulator:")
   } else if ( verb == 2 ) {
     disable <- FALSE
     Sys.sleep(0.5)
-    message("Summarizing the initialized DGP model ...", appendLF = FALSE)
+    message("Summarizing the initialized DGP emulator ...", appendLF = FALSE)
     pkg.env$dgpsi$summary(obj, 'pretty')
     Sys.sleep(0.5)
     message(" done")
@@ -264,7 +265,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
     if ( ans == 'N'|ans == 'n'|ans == 'No'|ans == 'no' ) {
         stop('Training is cancelled.', call. = FALSE)
     } else {
-      message("Training the DGP model:")
+      message("Training the DGP emulator:")
     }
   }
 
@@ -277,16 +278,16 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
   res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
   res[['emulator_obj']] <- emu_obj
 
-  class(res) <- "dgp_model"
+  class(res) <- "dgp"
   return(res)
 }
 
 
 #' @title Continue the training of a DGP emulator
 #'
-#' @description This function implements additional training iterations for a DGP model with at least two layers.
+#' @description This function implements additional training iterations for a DGP emulator with at least two layers.
 #'
-#' @param object S3 class produced by [dgp()].
+#' @param object an instance of the `dgp` class.
 #' @param N additional number of iterations for the DGP training. Defaults to `500`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`.
@@ -309,8 +310,8 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 #' @export
 
 continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 50) {
-  if ( class(object)!='dgp_model' ){
-    stop("'object' must be a DGP model produced by dgp().", call. = FALSE)
+  if ( class(object)!='dgp' ){
+    stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
   N <- as.integer(N)
   B <- as.integer(B)
