@@ -85,7 +85,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
     }
   }
 
-  if ( verb == 2|verb == 1 ) message("Initializing the GP model:", appendLF = FALSE)
+  if ( verb == 2|verb == 1 ) message("Initializing the GP model ...", appendLF = FALSE)
 
   obj <- pkg.env$dgpsi$gp(X, Y, struc)
 
@@ -93,7 +93,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
     Sys.sleep(0.5)
     message(" done")
     Sys.sleep(0.5)
-    message("Summarizing the initialized GP model:", appendLF = FALSE)
+    message("Summarizing the initialized GP model ...", appendLF = FALSE)
     pkg.env$dgpsi$summary(obj, 'pretty')
     Sys.sleep(0.5)
     message(" done")
@@ -103,13 +103,13 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
     if ( ans == 'N'|ans == 'n'|ans == 'No'|ans == 'no' ){
       stop('Training is cancelled.', call. = FALSE)
     } else {
-      message("Training the GP model:", appendLF = FALSE)
+      message("Training the GP model ...", appendLF = FALSE)
     }
   } else if ( verb == 1 ){
     Sys.sleep(0.5)
     message(" done")
     Sys.sleep(0.5)
-    message("Training the GP model:", appendLF = FALSE)
+    message("Training the GP model ...", appendLF = FALSE)
   }
 
   obj$train()

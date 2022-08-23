@@ -92,9 +92,9 @@ m_gp <- gp(X, Y, nugget_est = T, nugget = 1e-2, verb = 2)
 ```
 
 ```
-## Auto-generating a GP structure: done
-## Initializing the GP model: done
-## Summarizing the initialized GP model: done
+## Auto-generating a GP structure ... done
+## Initializing the GP model ... done
+## Summarizing the initialized GP model ... done
 ## +-------------+-----------------+----------+--------+------------+
 ## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
 ## +-------------+-----------------+----------+--------+------------+

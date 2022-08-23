@@ -81,9 +81,9 @@ m1 <- gp(X1, Y1, name = "matern2.5")
 ```
 
 ```
-## Auto-generating a GP structure: done
-## Initializing the GP model: done
-## Training the GP model: done
+## Auto-generating a GP structure ... done
+## Initializing the GP model ... done
+## Training the GP model ... done
 ```
 
 We now make predictions from the trained model to evaluate the emulation performance for Model 1 over $[0,1]$:
