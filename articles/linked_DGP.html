@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="Linked (D)GP emulation of a synthetic system of two linked computer models.
 ">
-<title>Linked Emulation • dgpsi</title>
+<title>Linked (D)GP Emulation • dgpsi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Linked Emulation">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Linked (D)GP Emulation">
 <meta property="og:description" content="Linked (D)GP emulation of a synthetic system of two linked computer models.
 ">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -48,7 +48,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -78,7 +78,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Linked Emulation</h1>
+      <img src="" class="logo" alt=""><h1>Linked (D)GP Emulation</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/vignettes/linked_DGP.Rmd" class="external-link"><code>vignettes/linked_DGP.Rmd</code></a></small>
@@ -135,13 +135,13 @@
 <div class="section level2">
 <h2 id="emulation-of-model-1">Emulation of Model 1<a class="anchor" aria-label="anchor" href="#emulation-of-model-1"></a>
 </h2>
-<p>We construct and train a simple GP model with Matérn-2.5 kernel:</p>
+<p>We construct and train a GP emulator with Matérn-2.5 kernel:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">X1</span>, <span class="va">Y1</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Auto-generating a GP structure ... done</span></span>
-<span><span class="co">## Initializing the GP model ... done</span></span>
-<span><span class="co">## Training the GP model ... done</span></span></code></pre>
-<p>We now make predictions from the trained model to evaluate the emulation performance for Model 1 over <span class="math inline">\([0,1]\)</span>:</p>
+<pre><code><span><span class="co">## Auto-generating a GP structure: done</span></span>
+<span><span class="co">## Initializing the GP emulator ... done</span></span>
+<span><span class="co">## Training the GP emulator ... done</span></span></code></pre>
+<p>We now make predictions from the trained GP emulator to evaluate the emulation performance for Model 1 over <span class="math inline">\([0,1]\)</span>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m1</span>, x <span class="op">=</span> <span class="va">test_x1</span><span class="op">)</span></span>
 <span></span>
@@ -163,15 +163,15 @@
 <div class="section level2">
 <h2 id="emulation-of-model-2">Emulation of Model 2<a class="anchor" aria-label="anchor" href="#emulation-of-model-2"></a>
 </h2>
-<p>We construct a two-layered DGP model with Matérn-2.5 kernels to emulate the Model 2:</p>
+<p>We construct a two-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 2:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X2</span>, <span class="va">Y2</span>, depth <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span>, linked_idx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
-<span><span class="co">## Initializing the DGP model ... done</span></span>
-<span><span class="co">## Training the DGP model:</span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 232.55it/s]</span></span></code></pre>
-<p>Since all outputs (which is one-dimensional) from the emulators in the first layer (i.e., <code>m1</code>) feed into <code>m2</code>, we set <code>linked_idx = c(1)</code> in <code><a href="../reference/dgp.html">dgp()</a></code> above.</p>
-<p>The following plot visualizes the emulation performance of the DGP emulator:</p>
+<span><span class="co">## Initializing the DGP emulator ... done</span></span>
+<span><span class="co">## Training the DGP emulator:</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 236.81it/s]</span></span></code></pre>
+<p>Since all outputs of emulators in the first layer is from <code>m1</code> and these outputs all feed into <code>m2</code>, we set <code>linked_idx = c(1)</code> in <code><a href="../reference/dgp.html">dgp()</a></code> above.</p>
+<p>The following plot visualizes the emulation performance of the trained DGP emulator <code>m2</code>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># make predictions</span></span>
 <span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m2</span>, x <span class="op">=</span> <span class="va">test_x2</span><span class="op">)</span></span>
@@ -194,11 +194,11 @@
 <p>With the GP emulator <code>m1</code> (for Model 1) and the DGP emulator <code>m2</code> (for Model 2) at hand, we are now ready to build the linked emulator by first using <code><a href="../reference/combine.html">combine()</a></code> to construct the system hierarchy <code>struc</code> and then applying <code><a href="../reference/lgp.html">lgp()</a></code> for the linked emulator.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">struc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine.html">combine</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span><span class="op">)</span></span></code></pre></div>
-<p>Note that each layer of a computer model system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulators in the list using <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
-<p>We can check the relations between connected emulators by using <code><a href="../reference/summary.html">summary()</a></code> on <code>lm</code>:</p>
+<span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span><span class="op">)</span></span></code></pre></div>
+<p>Note that each layer of an emulator system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulators in a list using <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>We can check the relations between connected emulators by applying <code><a href="../reference/summary.html">summary()</a></code> to <code>m_link</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">lm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_link</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## +-----------+--------------+------+----------------------------+-----------------+</span></span>
 <span><span class="co">## | Layer No. | Emulator No. | Type |         Connection         | External Inputs |</span></span>
 <span><span class="co">## +-----------+--------------+------+----------------------------+-----------------+</span></span>
@@ -213,19 +213,19 @@
 <span><span class="va">Y_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X_gp</span>, <span class="va">f12</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">X_gp</span>, <span class="va">Y_gp</span>, name <span class="op">=</span> <span class="st">'matern2.5'</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a GP structure: done</span></span>
-<span><span class="co">## Initializing the GP model: done</span></span>
-<span><span class="co">## Training the GP model: done</span></span></code></pre>
+<span><span class="co">## Initializing the GP emulator ... done</span></span>
+<span><span class="co">## Training the GP emulator ... done</span></span></code></pre>
 <p>In this final step, we make predictions from both the GP emulator and the linked emulator:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># linked emulator</span></span>
-<span><span class="va">lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">lm</span>, x <span class="op">=</span> <span class="va">test_x1</span><span class="op">)</span></span>
+<span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m_link</span>, x <span class="op">=</span> <span class="va">test_x1</span><span class="op">)</span></span>
 <span><span class="co"># GP emulator</span></span>
 <span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m_gp</span>, x <span class="op">=</span> <span class="va">test_x1</span><span class="op">)</span></span></code></pre></div>
 <p>and plot the predictions to compare their emulation performances:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract predictive means and variances from the linked emulator</span></span>
-<span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">lm</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span><span class="op">$</span><span class="va">emulator1</span></span>
-<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">lm</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="va">emulator1</span><span class="op">)</span></span>
+<span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m_link</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span><span class="op">$</span><span class="va">emulator1</span></span>
+<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m_link</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="va">emulator1</span><span class="op">)</span></span>
 <span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
 <span><span class="va">lo</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
 <span></span>
@@ -248,7 +248,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test_x1</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test_x1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'grey80'</span>, border <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x1</span>, <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x1</span>, <span class="va">mu</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'black'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/linked_plot.png"></p>
+<p><img src="images/linked_result.png"></p>
 <p>It can be seen from the above plot that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

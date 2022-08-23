@@ -29,7 +29,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -99,8 +99,8 @@ output dimensions. When <code>likelihood</code> (see below) is not <code>NULL</c
 
 <dt>struc</dt>
 <dd><p>a list that specifies a user-defined DGP structure. It should contain <em>L</em> (the number of DGP layers) sub-lists,
-each of which contains a number of GPs (defined by <code><a href="kernel.html">kernel()</a></code>) in the corresponding layer. The sub-lists are placed in the list
-in the same order of layers in the DGP model. The final layer of the DGP structure (i.e., final sub-list of <code>struc</code>) can be a likelihood
+each of which represents a layer and contains a number of GP nodes (defined by <code><a href="kernel.html">kernel()</a></code>) in the corresponding layer.
+The final layer of the DGP structure (i.e., the final sub-list in <code>struc</code>) can be a likelihood
 layer that contains a likelihood function (e.g., <code><a href="Poisson.html">Poisson()</a></code>). When <code>struc = NULL</code>,
 the DGP structure is automatically generated and will be summarized in a table after <code>dgp()</code> is executed if <code>verb</code> (see below) is set to <code>2</code>.
 If this argument is used (i.e., user provides a customized DGP structure), arguments <code>depth</code>, <code>name</code>, <code>lengthscale</code>, <code>nugget_est</code>, <code>nugget</code>,
@@ -118,7 +118,7 @@ Defaults to <code>2</code>. This argument is only used when <code>struc = NULL</
 
 
 <dt>lengthscale</dt>
-<dd><p>initial lengthscales for GP nodes in the DGP model. It can be a single numeric value or a vector:</p><ol><li><p>if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP model.</p></li>
+<dd><p>initial lengthscales for GP nodes in the DGP emulator. It can be a single numeric value or a vector:</p><ol><li><p>if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP hierarchy.</p></li>
 <li><p>if it is a vector, each element of the vector specifies the initial lengthscales that will be applied to all GP nodes in the corresponding layer.
 The vector should have a length of <code>depth</code> if <code>likelihood = NULL</code> or a length of <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
 </ol><p>Defaults to a numeric value of <code>1.0</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
@@ -135,9 +135,9 @@ bool element in the vector will be applied to the corresponding GP node (if any)
 <dt>nugget</dt>
 <dd><p>the initial nugget value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
 in the final layer. If it is a vector (which must have a length of <code>ncol(Y)</code>), each numeric in the vector will be applied to the corresponding GP node
-(if any) in the final layer. Set <code>nugget</code> to a small value and the corresponding bool in <code>nugget_est</code> to <code>FASLE</code> for deterministic emulations where the model outputs
-interpolate the training data points. Set <code>nugget</code> to a reasonable larger value and the corresponding bool in <code>nugget_est</code> to <code>TRUE</code> for stochastic emulations where
-model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-6</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+(if any) in the final layer. Set <code>nugget</code> to a small value and the corresponding bool in <code>nugget_est</code> to <code>FASLE</code> for deterministic emulations where the emulator
+interpolates the training data points. Set <code>nugget</code> to a reasonable larger value and the corresponding bool in <code>nugget_est</code> to <code>TRUE</code> for stochastic emulations where
+the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-6</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>connect</dt>
@@ -146,19 +146,19 @@ This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>likelihood</dt>
-<dd><p>the likelihood type of a DGP model:</p><ol><li><p><code>NULL</code>: no likelihood layer is included in the model.</p></li>
-<li><p><code>"Hetero"</code>: a heteroskedastic likelihood layer is added for stochastic emulation where the model outputs are assumed to follow a heteroskedastic Gaussian distribution
-(i.e., the model outputs have varying noises).</p></li>
-<li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for stochastic emulation where the model outputs are assumed to a Poisson distribution.</p></li>
-<li><p><code>"NegBin"</code>: a negative Binomial likelihood layer is added for stochastic emulation where model outputs are assumed to follow a negative Binomial distribution.</p></li>
+<dd><p>the likelihood type of a DGP emulator:</p><ol><li><p><code>NULL</code>: no likelihood layer is included in the emulator.</p></li>
+<li><p><code>"Hetero"</code>: a heteroskedastic likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
+(i.e., the computer model outputs have varying noises).</p></li>
+<li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.</p></li>
+<li><p><code>"NegBin"</code>: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.</p></li>
 </ol><p>When <code>likelihood</code> is not <code>NULL</code>, the values of <code>nugget_est</code> and <code>nugget</code> are overridden by <code>FALSE</code> and <code>1e-6</code> respectively. Defaults to <code>NULL</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>verb</dt>
-<dd><p>an integer indicating the level of information to be printed during the function execution:</p><ul><li><p><code>2</code>: trace information on DGP initialization and a summary table of the initialized DGP model.</p></li>
+<dd><p>an integer indicating the level of information to be printed during the function execution:</p><ul><li><p><code>2</code>: trace information on DGP initialization and a summary table of the initialized DGP emulator.</p></li>
 <li><p><code>1</code>: all information as in <code>2</code> except for the summary table.</p></li>
 <li><p><code>0</code>: no trace information and the summary table.</p></li>
-</ul><p>When <code>verb = 2</code>, you will have a chance to check the specified DGP model (especially when a customized <code>struc</code> is provided) and decide if you want to proceed to training. Defaults to <code>1</code>.</p></dd>
+</ul><p>When <code>verb = 2</code>, you will have a chance to check the specified DGP emulator (especially when a customized <code>struc</code> is provided) and decide if you want to proceed to training. Defaults to <code>1</code>.</p></dd>
 
 
 <dt>check_rep</dt>
@@ -201,16 +201,17 @@ Defaults to <code>50</code>.</p></dd>
 
 <dt>internal_input_idx</dt>
 <dd><p>column indices of <code>X</code> that are generated by the linked emulators in the feeding layer.
-Set <code>internal_input_idx = NULL</code> if the model is not linked to an emulator or all columns in <code>X</code> are
-generated by the linked emulators in the feeding layer. Defaults to <code>NULL</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+Set <code>internal_input_idx = NULL</code> if the DGP emulator is not linked to any emulator (e.g., the DGP emulator
+is in the first layer of a system) or all columns in <code>X</code> are generated by the linked emulators in the feeding layer.
+Defaults to <code>NULL</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>linked_idx</dt>
 <dd><p>indices of columns in the pooled output matrix (formed by column-combined outputs of all emulators
 in the feeding layer) that will feed into the DGP emulator. The length of <code>linked_idx</code> shall equal to the length of
-<code>internal_input_idx</code> when <code>internal_input_idx</code> is not <code>NULL</code>. Set <code>linked_idx = NULL</code> if the model is not intended
+<code>internal_input_idx</code> when <code>internal_input_idx</code> is not <code>NULL</code>. Set <code>linked_idx = NULL</code> if the DGP emulator is not intended
 for linked emulations. If the DGP emulator is in the first layer of a system, <code>linked_idx</code> gives the column indices of the
-global input (formed by column-combining all input matrices of emulators in the first layer) that the emulator will use.
+global input (formed by column-combining all input matrices of emulators in the first layer) that the DGP emulator will use.
 Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
@@ -218,7 +219,7 @@ Defaults to <code>NULL</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An S3 class that can be used by</p><ul><li><p><code><a href="predict.html">predict()</a></code> for DGP predictions.</p></li>
+<p>An S3 class named <code>dgp</code> that can be used by</p><ul><li><p><code><a href="predict.html">predict()</a></code> for DGP predictions.</p></li>
 <li><p><code><a href="continue.html">continue()</a></code> to continue the DGP training with additional iterations.</p></li>
 <li><p><code><a href="lgp.html">lgp()</a></code> to construct linked (D)GP emulators.</p></li>
 </ul></div>

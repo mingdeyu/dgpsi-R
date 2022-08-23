@@ -31,7 +31,7 @@ from GP, DGP, or linked (D)GP emulators."><!-- mathjax --><script src="https://c
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -65,7 +65,7 @@ from GP, DGP, or linked (D)GP emulators.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for dgp_model</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for dgp</span></span>
 <span><span class="fu">predict</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">x</span>,</span>
@@ -78,7 +78,7 @@ from GP, DGP, or linked (D)GP emulators.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for lgp_model</span></span>
+<span><span class="co"># S3 method for lgp</span></span>
 <span><span class="fu">predict</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">x</span>,</span>
@@ -91,7 +91,7 @@ from GP, DGP, or linked (D)GP emulators.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for gp_model</span></span>
+<span><span class="co"># S3 method for gp</span></span>
 <span><span class="fu">predict</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">x</span>,</span>
@@ -106,12 +106,12 @@ from GP, DGP, or linked (D)GP emulators.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>object</dt>
-<dd><p>a GP, DGP, or linked (D)GP object produced by <code><a href="gp.html">gp()</a></code>, <code><a href="dgp.html">dgp()</a></code>, <code><a href="continue.html">continue()</a></code>, or <code><a href="lgp.html">lgp()</a></code>.</p></dd>
+<dd><p>an instance of the <code>gp</code>, <code>dgp</code>, or <code>lgp</code> class.</p></dd>
 
 
 <dt>x</dt>
-<dd><p>the testing input data:</p><ul><li><p>if <code>object</code> is a GP or DGP class, <code>x</code> is a matrix where each row is an input testing data point and each column is an input dimension.</p></li>
-<li><p>if <code>object</code> is a linked (D)GP class, <code>x</code> can be a matrix or a list:</p><ul><li><p>if <code>x</code> is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
+<dd><p>the testing input data:</p><ul><li><p>if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class, <code>x</code> is a matrix where each row is an input testing data point and each column is an input dimension.</p></li>
+<li><p>if <code>object</code> is an instance of the <code>lgp</code> class, <code>x</code> can be a matrix or a list:</p><ul><li><p>if <code>x</code> is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 The rows of <code>x</code> represent different input data points and the columns represent input dimensions across all emulators in
 the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
 emulators in the first layer and there is no global input to emulators in other layers.</p></li>
@@ -162,13 +162,13 @@ when you have a moderately large number of training data points as in such a cas
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<ul><li><p>If <code>object</code> is produced by <code><a href="gp.html">gp()</a></code>:</p><ol><li><p>if <code>method = "mean_var"</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains two matrices named <code>mean</code>
+<ul><li><p>If <code>object</code> is an instance of the <code>gp</code> class:</p><ol><li><p>if <code>method = "mean_var"</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains two matrices named <code>mean</code>
 for the predictive means and <code>var</code> for the predictive variances. Each matrix has only one column with its rows
 corresponding to testing positions (i.e., rows of <code>x</code>).</p></li>
 <li><p>if <code>method = "sampling"</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains a matrix whose rows correspond
 to testing positions and columns correspond to <code>sample_size</code> number of samples drawn from the predictive distribution of GP.</p></li>
 </ol></li>
-<li><p>If <code>object</code> is produced by <code><a href="dgp.html">dgp()</a></code>:</p><ol><li><p>if <code>method = "mean_var"</code> and  <code>full_layer = FALSE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains two
+<li><p>If <code>object</code> is an instance of the <code>dgp</code> class:</p><ol><li><p>if <code>method = "mean_var"</code> and  <code>full_layer = FALSE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains two
 matrices named <code>mean</code> for the predictive means and <code>var</code> for the predictive variances respectively. Each matrix has its rows corresponding to testing
 positions and columns corresponding to DGP global output dimensions (i.e., the number of GP/likelihood nodes in the final layer).</p></li>
 <li><p>if <code>method = "mean_var"</code> and  <code>full_layer = TRUE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains two
@@ -184,7 +184,7 @@ and contains <em>D</em> (i.e., the number of GP/likelihood nodes in the correspo
 of the output from one of <em>D</em> GP/likelihood nodes, and has its rows corresponding to testing positions and columns corresponding to samples
 of size: <code>B * sample_size</code>, where <code>B</code> is the number of imputations specified in <code><a href="dgp.html">dgp()</a></code>.</p></li>
 </ol></li>
-<li><p>If <code>object</code> is produced by <code><a href="lgp.html">lgp()</a></code>:</p><ol><li><p>if <code>method = "mean_var"</code> and  <code>full_layer = FALSE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that
+<li><p>If <code>object</code> is an instance of the <code>lgp</code> class:</p><ol><li><p>if <code>method = "mean_var"</code> and  <code>full_layer = FALSE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that
 contains two sub-lists named <code>mean</code> for the predictive means and <code>var</code> for the predictive variances respectively. Each sub-list
 contains <em>M</em> number (same number of emulators in the final layer of the system) of matrices named <code>emulator1, emulator2,..., emulatorM</code>.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator

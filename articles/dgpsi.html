@@ -48,7 +48,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -118,27 +118,27 @@
 <div class="section level2">
 <h2 id="training">Training<a class="anchor" aria-label="anchor" href="#training"></a>
 </h2>
-<p>We now build and train a DGP model with three layers:</p>
+<p>We now build and train a DGP emulator with three layers:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, depth <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
-<span><span class="co">## Initializing the DGP model ... done</span></span>
-<span><span class="co">## Training the DGP model:</span></span>
-<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04&lt;00:00, 122.09it/s]</span></span></code></pre>
-<p>The progress bar displayed shows how long it will takes to finish the training. We are able to change some default settings. E.g., we can set <code>verb = 2</code> so a summary table of the initialized DGP model will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to <code>struc</code> and we want to check it before the training is implemented. Note that if we want to continue the training for further iterations, you can simply do <code>m_new &lt;- continue(m)</code> instead of rebuilding the DGP model.</p>
+<span><span class="co">## Initializing the DGP emulator ... done</span></span>
+<span><span class="co">## Training the DGP emulator:</span></span>
+<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03&lt;00:00, 126.27it/s]</span></span></code></pre>
+<p>The progress bar displayed shows how long it will takes to finish the training. We are able to change some default settings. E.g., we can set <code>verb = 2</code> so a summary table of the initialized DGP emulator will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to <code>struc</code> and we want to check it before the training is implemented. Note that if we want to continue the training for further iterations, you can simply do <code>m_new &lt;- continue(m)</code> instead of rebuilding the DGP emulator.</p>
 <p>The trained DGP emulator can be viewed using the <code><a href="../reference/summary.html">summary()</a></code> function:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.288]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.377]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
-<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.737]     |     0.465     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.343]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.125]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [3.046]     |     0.458     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.</span></span>
 <span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.</span></span></code></pre>
-<p>The summary table gives key information about the trained DGP model. Note that in the auto-generated model we have nugget terms fixed to <code>1e-6</code> for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer is estimated due to its attachment to the output. For further information about how to change the default settings to train a DGP emulator, see <code><a href="../reference/dgp.html">?dgp</a></code>.</p>
+<p>The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to <code>1e-6</code> for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to 1 while that for the GP node in the final layer is estimated due to its attachment to the output. For further information about how to change the default settings to train a DGP emulator, see <code><a href="../reference/dgp.html">?dgp</a></code>.</p>
 <p>At this point, you could use <code><a href="../reference/write.html">write()</a></code> to save the emulator <code>m</code> to a local file and then load it using <code><a href="../reference/read.html">read()</a></code> next time when you simply would like to make predictions from the emulator.</p>
 </div>
 <div class="section level2">
@@ -146,11 +146,11 @@
 </h2>
 <p>Once the emulator is ready, it is time to make predictions from it:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/predict.html">predict()</a></code> function returns an updated DGP class that contains a slot called <code>results</code> that gives the posterior predictive means and variances at testing positions. We can extract these information and plot the emulation results to check the predictive performance of our constructed DGP emulator:</p>
+<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="../reference/predict.html">predict()</a></code> function returns an updated DGP emulator <code>m</code> that contains a slot called <code>results</code> that gives the posterior predictive means and variances at testing positions. We can extract these information and plot the emulation results to check the predictive performance of our constructed DGP emulator:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m_pred</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span> <span class="co"># extract the predictive means </span></span>
-<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m_pred</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">)</span> <span class="co"># extract the predictive variance and compute the predictive standard deviations</span></span>
+<code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span> <span class="co"># extract the predictive means </span></span>
+<span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">)</span> <span class="co"># extract the predictive variance and compute the predictive standard deviations</span></span>
 <span><span class="co"># compute predictive bounds which are two predictive standard deviations above and below the predictive means</span></span>
 <span><span class="va">up</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span> </span>
 <span><span class="va">lo</span> <span class="op">&lt;-</span> <span class="va">mu</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span><span class="va">sd</span></span>
@@ -160,7 +160,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="st">'cornflowerblue'</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="co"># Underlying truth</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'black'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, type <span class="op">=</span> <span class="st">'p'</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Training data points</span></span></code></pre></div>
-<p><img src="images/step_fct_plot.png"></p>
+<p><img src="images/step_fct_result.png"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

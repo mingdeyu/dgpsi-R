@@ -31,7 +31,7 @@ DGP emulator with a likelihood layer."><!-- mathjax --><script src="https://cdnj
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -71,7 +71,7 @@ DGP emulator with a likelihood layer.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>object</dt>
-<dd><p>a DGP class produced by <code><a href="dgp.html">dgp()</a></code> that is specified in one of the following two settings:</p><ol><li><p>if <code>struc = NULL</code>, <code>likelihood</code> is not <code>NULL</code>;</p></li>
+<dd><p>an instance of the <code>dgp</code> class and when it should be produced by <code><a href="dgp.html">dgp()</a></code> with one of the following two settings:</p><ol><li><p>if <code>struc = NULL</code>, <code>likelihood</code> is not <code>NULL</code>;</p></li>
 <li><p>if a customized structure is provided to <code>struc</code>, the final layer must be likelihood layer containing only one
 likelihood node produced by <code><a href="Poisson.html">Poisson()</a></code>, <code><a href="Hetero.html">Hetero()</a></code>, or <code><a href="NegBin.html">NegBin()</a></code>.</p></li>
 </ol></dd>

@@ -29,7 +29,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -70,7 +70,7 @@
     <dl><dt>struc</dt>
 <dd><p>a list contains <em>L</em> (the number of layers in a systems of computer models) sub-lists,
 each of which represents a layer and contains (D)GP emulators (represented by
-the output classes produced by <code><a href="dgp.html">dgp()</a></code>) of computer models. The sub-lists are placed in the list
+instances of S3 class <code>gp</code> or <code>dgp</code>) of computer models. The sub-lists are placed in the list
 in the same order of the specified computer model system's hierarchy.</p></dd>
 
 
@@ -84,7 +84,7 @@ If the system consists only GP emulators, <code>B</code> is set to <code>1</code
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An S3 class to be used by <code><a href="predict.html">predict()</a></code> for linked (D)GP predictions.</p>
+<p>An S3 class named <code>lgp</code> to be used by <code><a href="predict.html">predict()</a></code> for linked (D)GP predictions.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

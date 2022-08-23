@@ -31,7 +31,7 @@ when the emulator is constructed by gp() or dgp()."><!-- mathjax --><script src=
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
 </a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked Emulation</a>
+    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
 </li>
 <li class="nav-item">
@@ -71,12 +71,12 @@ when the emulator is constructed by <code><a href="gp.html">gp()</a></code> or <
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>object</dt>
-<dd><p>the S3 class produced by <code><a href="gp.html">gp()</a></code> or <code><a href="dgp.html">dgp()</a></code>.</p></dd>
+<dd><p>an instance of the S3 class <code>gp</code> or <code>dgp</code>.</p></dd>
 
 
 <dt>idx</dt>
-<dd><p>indices of columns in the pooled output matrix (formed by column-combined outputs of all emulators
-in the feeding layer) that will feed into the (D)GP emulator represented by <code>object</code>.</p></dd>
+<dd><p>indices of columns in the pooled output matrix (formed by column-combining outputs of all emulators
+in the feeding layer) that will feed into the GP or DGP emulator represented by <code>object</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -91,8 +91,8 @@ in the feeding layer) that will feed into the (D)GP emulator represented by <cod
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>This function is useful when different models are emulated by different teams. Each team can create their (D)GP model
-even without knowing how different models are connected together. When this information is available and
+    <p>This function is useful when different models are emulated by different teams. Each team can create their (D)GP emulator
+even without knowing how different emulators are connected together. When this information is available and
 different emulators are collected, the connection information between emulators can then be assigned to
 individual emulators with this function.</p>
     </div>
