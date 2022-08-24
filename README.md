@@ -10,7 +10,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Deep Gaussian process emulation with flexible architecture construction: 
     - multiple layers;
     - multiple GP nodes;
-    - separable or non-separable squared exponential and Mat&eacute;rn2.5 kernels;
+    - separable or non-separable squared exponential and Mat&eacute;rn-2.5 kernels;
     - global input connections;
     - non-Gaussian likelihoods (Poisson, Negative-Binomial, heteroskedastic Gaussian, and more to come);
 * Linked emulation of feed-forward systems of computer models:
