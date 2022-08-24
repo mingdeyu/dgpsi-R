@@ -135,7 +135,7 @@ Defaults to \code{NULL}.}
 An S3 class named \code{dgp} that can be used by
 \itemize{
 \item \code{\link[=predict]{predict()}} for DGP predictions.
-\item \code{\link[=continue]{continue()}} to continue the DGP training with additional iterations.
+\item \code{\link[=continue]{continue()}} to implement additional DGP training iterations.
 \item \code{\link[=lgp]{lgp()}} to construct linked (D)GP emulators.
 }
 }

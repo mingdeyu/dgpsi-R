@@ -34,7 +34,7 @@ more imputation uncertainties. This overrides the value of \code{B} set in \code
 An updated \code{object}.
 }
 \description{
-This function implements additional training iterations for a DGP emulator with at least two layers.
+This function implements additional training iterations for a DGP emulator.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

@@ -80,7 +80,7 @@
 #'
 #' @return An S3 class named `dgp` that can be used by
 #' * [predict()] for DGP predictions.
-#' * [continue()] to continue the DGP training with additional iterations.
+#' * [continue()] to implement additional DGP training iterations.
 #' * [lgp()] to construct linked (D)GP emulators.
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/> and learn how to customize a DGP structure.
@@ -285,7 +285,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 
 #' @title Continue the training of a DGP emulator
 #'
-#' @description This function implements additional training iterations for a DGP emulator with at least two layers.
+#' @description This function implements additional training iterations for a DGP emulator.
 #'
 #' @param object an instance of the `dgp` class.
 #' @param N additional number of iterations for the DGP training. Defaults to `500`.
