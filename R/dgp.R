@@ -262,7 +262,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
     Sys.sleep(0.5)
     pkg.env$sys$stdout$flush()
     ans <- readline(prompt="Enter [Y] to continue or [N] to cancel the training: ")
-    if ( ans == 'N'|ans == 'n'|ans == 'No'|ans == 'no' ) {
+    if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
         stop('Training is cancelled.', call. = FALSE)
     } else {
       message("Training the DGP emulator:")

@@ -100,7 +100,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
     Sys.sleep(0.5)
     pkg.env$sys$stdout$flush()
     ans <- readline(prompt="Enter [Y] to continue or [N] to cancel the training: ")
-    if ( ans == 'N'|ans == 'n'|ans == 'No'|ans == 'no' ){
+    if ( tolower(ans)=='n'|tolower(ans)=='no' ){
       stop('Training is cancelled.', call. = FALSE)
     } else {
       message("Training the GP emulator ...", appendLF = FALSE)

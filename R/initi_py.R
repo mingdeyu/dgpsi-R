@@ -16,7 +16,7 @@ init_py <- function() {
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
     #If the user would like to have the conda binary to be installed
-    if (ans == 'Y'){
+    if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
       message("Installing the Conda binary...")
       reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
@@ -32,7 +32,7 @@ init_py <- function() {
         conda_list <- reticulate::conda_list(conda = conda_path)$name
         dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
         ans <- readline(prompt="I found Python environment(s) for old package versions. Do you want me to remove them for you? (Y/N) ")
-        if (ans == 'Y'){
+        if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
           message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
           for (item in dgpsi_list) {
             reticulate::conda_remove(envname = item, conda = conda_path)
@@ -42,7 +42,7 @@ init_py <- function() {
         install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
       } else {
         ans <- readline(prompt="Is this your first time installing the package? (Y/N) ")
-        if (ans == 'N'){
+        if ( tolower(ans)=='n'|tolower(ans)=='no' ){
               message("I am unable to find the required Python environment. It may be because your conda binary has changed. I am re-setting it for you now ...")
               install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
               } else {
