@@ -2,26 +2,26 @@
 % Please edit documentation in R/likelihood.R
 \name{Poisson}
 \alias{Poisson}
-\title{Initialize the Poisson likelihood}
+\title{Initialize a Poisson likelihood node}
 \usage{
 Poisson(input_dim = NULL)
 }
 \arguments{
-\item{input_dim}{a vector of length one that contains the indices of one GP in the feeding
-layer whose outputs feed into the likelihood node. When set to \code{NULL},
-all outputs from GPs of the feeding layer feed into the likelihood node, and in this case
-one needs to ensure there is only one GP node specified in the feeding layer..
+\item{input_dim}{a vector of length one that contains the indices of one GP node in the feeding
+layer whose outputs feed into this likelihood node. When set to \code{NULL},
+all outputs from GP nodes in the feeding layer feed into this likelihood node, and in such a case
+one needs to ensure that only one GP node is specified in the feeding layer.
 Defaults to \code{NULL}.}
 }
 \value{
-An object to represent the Poisson likelihood node.
+A likelihood object to represent a Poisson likelihood node.
 }
 \description{
-This function constructs an object for Poisson likelihood.
+This function constructs a likelihood object to represent a Poisson likelihood node.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-The Poisson likelihood node only needs one feeding GP node.
+The Poisson likelihood node can only be linked to one feeding GP node.
 }

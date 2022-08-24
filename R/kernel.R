@@ -1,44 +1,43 @@
-#' @title Initialize the kernel object
+#' @title Initialize a Gaussian process node
 #'
-#' @description This function constructs an object to represent properties of a
+#' @description This function constructs a kernel object to represent properties of a
 #'     Gaussian process node.
 #'
 #' @param length a vector of lengthscales. The length of the vector equals to:
 #' 1. either one if the lengthscales in the kernel function are assumed same across input dimensions; or
-#' 2. the total number of input dimensions, which is the sum of the number of feeding GPs
+#' 2. the total number of input dimensions, which is the sum of the number of feeding GP nodes
 #'    in the last layer (defined by the argument `input_dim`) and the number of connected global
 #'    input dimensions (defined by the argument `connect`), if the lengthscales in the kernel function
 #'    are assumed different across input dimensions.
-#' @param scale the variance of a GP. Defaults to `1`.
-#' @param nugget the nugget term of a GP. Defaults to `1e-6`.
+#' @param scale the variance of a GP node. Defaults to `1`.
+#' @param nugget the nugget term of a GP node. Defaults to `1e-6`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
-#'     `"matern2.5"` for Matern2.5 kernel. Defaults to `"sexp"`.
+#'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`.
 #' @param prior_name  prior options for the lengthscales and nugget term. Either gamma (`"ga"`) or inverse gamma (`"inv_ga"`) distribution for
 #'      the lengthscales and nugget term. Set `NULL` to disable the prior. Defaults to `"ga"`.
 #' @param prior_coef a vector that contains two values specifying the shape and rate
-#'      parameters of gamma prior, shape and scale parameters of inverse gamma prior. Defaults to ``c(1.6,0.3)``.
-#' @param nugget_est set to `TRUE` to estimate nugget term or to `FALSE` to fix the nugget term as specified
+#'      parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to `c(1.6,0.3)`.
+#' @param nugget_est set to `TRUE` to estimate the nugget term or to `FALSE` to fix the nugget term as specified
 #'      by the argument `nugget`. If set to `TRUE`, the value set to the argument `nugget` is used as the initial
 #'      value. Defaults to `FALSE`.
-#' @param scale_est set to `TRUE` to estimate the variance or to `FALSE` to fix the variance as specified
+#' @param scale_est set to `TRUE` to estimate the variance (i.e., scale) or to `FALSE` to fix the variance (i.e., scale) as specified
 #'      by the argument `scale`. Defaults to `FALSE`.
 #' @param input_dim a vector that contains either
-#' 1. the indices of GPs in the feeding layer whose outputs feed into the GP; or
-#' 2. the indices of dimensions in the global input if the GP is in the first layer.
+#' 1. the indices of GP nodes in the feeding layer whose outputs feed into this GP node; or
+#' 2. the indices of global input dimensions that are linked to the outputs of some feeding emulators,
+#'    if this GP node is in the first layer of a GP or DGP, which will be used for the linked emulation.
 #'
 #' When set to `NULL`,
-#' 1. all outputs from GPs in the feeding layer; or
-#' 2. all global input dimensions feed into the GP.
+#' 1. all outputs from the GP nodes in the feeding layer feed into this GP node; or
+#' 2. all global input dimensions feed into this GP node.
 #'
 #' Defaults to `NULL`.
 #' @param connect a vector that contains the indices of dimensions in the global
-#'      input connecting to the GP as additional input dimensions to the input obtained from the output of
-#'      GPs in the feeding layer (as determined by the argument `input_dim`). When set to `NULL`, no global input
-#'      connection is implemented. Defaults to `NULL`. When the [kernel()] function is used in GP/DGP emulators for linked
-#'      emulation and some input dimensions to the computer models are not connected to some feeding computer models,
-#'      set `connect` to a vector of indices of these external global input dimensions, and accordingly, set
-#'      `input_dim` to a vector of indices of the remaining input dimensions that are connected to the feeding
-#'      computer models.
+#'      input connecting to this GP node as additional input dimensions. When set to `NULL`, no global input
+#'      connection is implemented. Defaults to `NULL`. When this GP node is in the first layer of a GP or DGP emulator,
+#'      which will consequently be used for linked emulation, `connect` gives the indices of global input dimensions
+#'      that are not connected to some feeding emulators. In such a case, set `input_dim` to a vector of indices of
+#'      the remaining input dimensions that are connected to the feeding emulators.
 #'
 #' @return A kernel object to represent a GP node.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.

@@ -2,26 +2,26 @@
 % Please edit documentation in R/likelihood.R
 \name{Hetero}
 \alias{Hetero}
-\title{Initialize the heteroskedastic Gaussian likelihood}
+\title{Initialize a heteroskedastic Gaussian likelihood node}
 \usage{
 Hetero(input_dim = NULL)
 }
 \arguments{
-\item{input_dim}{a vector of length two that contains the indices of two GPs in the feeding
-layer whose outputs feed into the likelihood node. When set to \code{NULL},
-all outputs from GPs of feeding layer feed into the likelihood node, and in this case
-one needs to ensure there are only two GP nodes specified in the feeding layer..
+\item{input_dim}{a vector of length two that contains the indices of two GP nodes in the feeding
+layer whose outputs feed into this likelihood node. When set to \code{NULL},
+all outputs from GP nodes in the feeding layer feed into this likelihood node, and in such a case
+one needs to ensure that only two GP nodes are specified in the feeding layer.
 Defaults to \code{NULL}.}
 }
 \value{
-An object to represent the heteroskedastic Gaussian likelihood node.
+A likelihood object to represent a heteroskedastic Gaussian likelihood node.
 }
 \description{
-This function constructs an object for heteroskedastic Gaussian likelihood.
+This function constructs a likelihood object to represent a heteroskedastic Gaussian likelihood node.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-The heteroskedastic Gaussian likelihood node only needs two feeding GP nodes.
+The heteroskedastic Gaussian likelihood node can only be linked to two feeding GP nodes.
 }

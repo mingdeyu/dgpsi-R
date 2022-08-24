@@ -2,7 +2,7 @@
 % Please edit documentation in R/kernel.R
 \name{kernel}
 \alias{kernel}
-\title{Initialize the kernel object}
+\title{Initialize a Gaussian process node}
 \usage{
 kernel(
   length,
@@ -21,60 +21,59 @@ kernel(
 \item{length}{a vector of lengthscales. The length of the vector equals to:
 \enumerate{
 \item either one if the lengthscales in the kernel function are assumed same across input dimensions; or
-\item the total number of input dimensions, which is the sum of the number of feeding GPs
+\item the total number of input dimensions, which is the sum of the number of feeding GP nodes
 in the last layer (defined by the argument \code{input_dim}) and the number of connected global
 input dimensions (defined by the argument \code{connect}), if the lengthscales in the kernel function
 are assumed different across input dimensions.
 }}
 
-\item{scale}{the variance of a GP. Defaults to \code{1}.}
+\item{scale}{the variance of a GP node. Defaults to \code{1}.}
 
-\item{nugget}{the nugget term of a GP. Defaults to \code{1e-6}.}
+\item{nugget}{the nugget term of a GP node. Defaults to \code{1e-6}.}
 
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
-\code{"matern2.5"} for Matern2.5 kernel. Defaults to \code{"sexp"}.}
+\code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}.}
 
 \item{prior_name}{prior options for the lengthscales and nugget term. Either gamma (\code{"ga"}) or inverse gamma (\code{"inv_ga"}) distribution for
 the lengthscales and nugget term. Set \code{NULL} to disable the prior. Defaults to \code{"ga"}.}
 
 \item{prior_coef}{a vector that contains two values specifying the shape and rate
-parameters of gamma prior, shape and scale parameters of inverse gamma prior. Defaults to \code{c(1.6,0.3)}.}
+parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to \code{c(1.6,0.3)}.}
 
-\item{nugget_est}{set to \code{TRUE} to estimate nugget term or to \code{FALSE} to fix the nugget term as specified
+\item{nugget_est}{set to \code{TRUE} to estimate the nugget term or to \code{FALSE} to fix the nugget term as specified
 by the argument \code{nugget}. If set to \code{TRUE}, the value set to the argument \code{nugget} is used as the initial
 value. Defaults to \code{FALSE}.}
 
-\item{scale_est}{set to \code{TRUE} to estimate the variance or to \code{FALSE} to fix the variance as specified
+\item{scale_est}{set to \code{TRUE} to estimate the variance (i.e., scale) or to \code{FALSE} to fix the variance (i.e., scale) as specified
 by the argument \code{scale}. Defaults to \code{FALSE}.}
 
 \item{input_dim}{a vector that contains either
 \enumerate{
-\item the indices of GPs in the feeding layer whose outputs feed into the GP; or
-\item the indices of dimensions in the global input if the GP is in the first layer.
+\item the indices of GP nodes in the feeding layer whose outputs feed into this GP node; or
+\item the indices of global input dimensions that are linked to the outputs of some feeding emulators,
+if this GP node is in the first layer of a GP or DGP, which will be used for the linked emulation.
 }
 
 When set to \code{NULL},
 \enumerate{
-\item all outputs from GPs in the feeding layer; or
-\item all global input dimensions feed into the GP.
+\item all outputs from the GP nodes in the feeding layer feed into this GP node; or
+\item all global input dimensions feed into this GP node.
 }
 
 Defaults to \code{NULL}.}
 
 \item{connect}{a vector that contains the indices of dimensions in the global
-input connecting to the GP as additional input dimensions to the input obtained from the output of
-GPs in the feeding layer (as determined by the argument \code{input_dim}). When set to \code{NULL}, no global input
-connection is implemented. Defaults to \code{NULL}. When the \code{\link[=kernel]{kernel()}} function is used in GP/DGP emulators for linked
-emulation and some input dimensions to the computer models are not connected to some feeding computer models,
-set \code{connect} to a vector of indices of these external global input dimensions, and accordingly, set
-\code{input_dim} to a vector of indices of the remaining input dimensions that are connected to the feeding
-computer models.}
+input connecting to this GP node as additional input dimensions. When set to \code{NULL}, no global input
+connection is implemented. Defaults to \code{NULL}. When this GP node is in the first layer of a GP or DGP emulator,
+which will consequently be used for linked emulation, \code{connect} gives the indices of global input dimensions
+that are not connected to some feeding emulators. In such a case, set \code{input_dim} to a vector of indices of
+the remaining input dimensions that are connected to the feeding emulators.}
 }
 \value{
 A kernel object to represent a GP node.
 }
 \description{
-This function constructs an object to represent properties of a
+This function constructs a kernel object to represent properties of a
 Gaussian process node.
 }
 \details{
