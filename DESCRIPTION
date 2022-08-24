@@ -3,8 +3,10 @@ Type: Package
 Title: R Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
 Version: 2.1.2
 Authors@R: c(
-  person('Deyu', 'Ming', role = c('ctb', 'cre', 'cph', 'aut'),
-         email = 'deyu.ming.16@ucl.ac.uk')
+  person('Deyu', 'Ming', role = c('cre', 'cph', 'aut'),
+         email = 'deyu.ming.16@ucl.ac.uk'),
+  person('Daniel', 'Williamson', role = c('aut'),
+         email = 'd.williamson@exeter.ac.uk')
   )
 Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>
 Description: R wrapper to the Python package 'dgpsi' for Gaussian process, deep Gaussian process, 

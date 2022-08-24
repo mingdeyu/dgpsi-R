@@ -1,4 +1,4 @@
-# dgpsi-R
+# dgpsi
 <!-- badges: start -->
   [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
   ![GitHub](https://img.shields.io/github/license/mingdeyu/DGP)
