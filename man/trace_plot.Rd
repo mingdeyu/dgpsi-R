@@ -6,8 +6,8 @@
 \usage{
 trace_plot(
   object,
-  layer_no,
-  ker_no,
+  layer = NULL,
+  node = 1,
   width = 4,
   height = 1,
   ticksize = 5,
@@ -16,11 +16,12 @@ trace_plot(
 )
 }
 \arguments{
-\item{object}{The DGP emulator produced by \code{\link[=dgp]{dgp()}} function.}
+\item{object}{an instance of the \code{dgp} class.}
 
-\item{layer_no}{the index of the interested layer.}
+\item{layer}{the index of a layer. Defaults to \code{NULL} for the final layer.}
 
-\item{ker_no}{the index of the interested GP in the layer specified by \code{layer_no}.}
+\item{node}{the index of a GP node in the layer specified by \code{layer}. Defaults to \code{1} for the first GP node in the
+corresponding layer.}
 
 \item{width}{the overall plot width. Defaults to \code{4}.}
 
@@ -33,8 +34,8 @@ trace_plot(
 \item{hspace}{the space between sub-plots. Defaults to \code{0.1}.}
 }
 \description{
-This function plots the traces of model parameters of a particular GP node
-in a trained DGP emulator.
+This function plots the traces of model parameters of a chosen GP node
+in a DGP emulator.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.

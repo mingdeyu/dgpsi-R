@@ -9,7 +9,7 @@ continue(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 50)
 \arguments{
 \item{object}{an instance of the \code{dgp} class.}
 
-\item{N}{additional number of iterations for the DGP training. Defaults to \code{500}.}
+\item{N}{additional number of iterations for the DGP emulator training. Defaults to \code{500}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
 at each I-step of the training. Defaults to \code{10}.}
@@ -23,11 +23,11 @@ at each I-step of the training. Defaults to \code{10}.}
 Defaults to \code{TRUE}.}
 
 \item{burnin}{the number of training iterations to be discarded for
-point estimate calculation. Must be smaller than the overall training iterations
+point estimates calculation. Must be smaller than the overall training iterations
 so-far implemented. If this is not specified, only the last 25\% of iterations
 are used. This overrides the value of \code{burnin} set in \code{\link[=dgp]{dgp()}}. Defaults to \code{NULL}.}
 
-\item{B}{the number of imputations to produce the later predictions. Increase the value to account for
+\item{B}{the number of imputations to produce the predictions. Increase the value to account for
 more imputation uncertainties. This overrides the value of \code{B} set in \code{\link[=dgp]{dgp()}}. Defaults to \code{50}.}
 }
 \value{

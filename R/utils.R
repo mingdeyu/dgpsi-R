@@ -32,6 +32,7 @@ combine <- function(...) {
 #' @md
 #' @export
 write <- function(object, pkl_file) {
+  pkl_file <- tools::file_path_sans_ext(pkl_file)
   lst <- unclass(object)
   pkg.env$dgpsi$write(lst, pkl_file)
 }
@@ -49,6 +50,7 @@ write <- function(object, pkl_file) {
 #' @md
 #' @export
 read <- function(pkl_file) {
+  pkl_file <- tools::file_path_sans_ext(pkl_file)
   res <- pkg.env$dgpsi$read(pkl_file)
   type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
   if ( type=='emulator' ) {
@@ -131,7 +133,7 @@ set_linked_idx <- function(object, idx) {
 #' @description This function computes the negative predicted log-likelihood from a
 #'     DGP emulator with a likelihood layer.
 #'
-#' @param object an instance of the `dgp` class and when it should be produced by [dgp()] with one of the following two settings:
+#' @param object an instance of the `dgp` class and it should be produced by [dgp()] with one of the following two settings:
 #' 1. if `struc = NULL`, `likelihood` is not `NULL`;
 #' 2. if a customized structure is provided to `struc`, the final layer must be likelihood layer containing only one
 #'    likelihood node produced by [Poisson()], [Hetero()], or [NegBin()].
@@ -160,12 +162,13 @@ nllik <- function(object, x, y) {
 
 #' @title Plot of DGP model parameter traces
 #'
-#' @description This function plots the traces of model parameters of a particular GP node
-#'     in a trained DGP emulator.
+#' @description This function plots the traces of model parameters of a chosen GP node
+#'     in a DGP emulator.
 #'
-#' @param object The DGP emulator produced by [dgp()] function.
-#' @param layer_no the index of the interested layer.
-#' @param ker_no the index of the interested GP in the layer specified by `layer_no`.
+#' @param object an instance of the `dgp` class.
+#' @param layer the index of a layer. Defaults to `NULL` for the final layer.
+#' @param node the index of a GP node in the layer specified by `layer`. Defaults to `1` for the first GP node in the
+#'     corresponding layer.
 #' @param width the overall plot width. Defaults to `4`.
 #' @param height the overall plot height. Defaults to `1`.
 #' @param ticksize the size of sub-plot ticks. Defaults to `5`.
@@ -176,7 +179,10 @@ nllik <- function(object, x, y) {
 #' @md
 #' @export
 
-trace_plot <- function(object, layer_no, ker_no, width = 4., height = 1., ticksize = 5., labelsize = 8., hspace = 0.1) {
+trace_plot <- function(object, layer = NULL, node = 1, width = 4., height = 1., ticksize = 5., labelsize = 8., hspace = 0.1) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
-  object$trained_obj$plot(as.integer(layer_no), as.integer(ker_no), width, height, ticksize, labelsize, hspace)
+  if ( is.null(layer) ){
+    layer = 0
+  }
+  object$trained_obj$plot(as.integer(layer), as.integer(node), width, height, ticksize, labelsize, hspace)
 }

@@ -288,7 +288,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 #' @description This function implements additional training iterations for a DGP emulator.
 #'
 #' @param object an instance of the `dgp` class.
-#' @param N additional number of iterations for the DGP training. Defaults to `500`.
+#' @param N additional number of iterations for the DGP emulator training. Defaults to `500`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`.
 #' @param verb a bool indicating if the progress bar will be printed during the training:
@@ -297,10 +297,10 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 #'
 #' Defaults to `TRUE`.
 #' @param burnin the number of training iterations to be discarded for
-#'     point estimate calculation. Must be smaller than the overall training iterations
+#'     point estimates calculation. Must be smaller than the overall training iterations
 #'     so-far implemented. If this is not specified, only the last 25% of iterations
 #'     are used. This overrides the value of `burnin` set in [dgp()]. Defaults to `NULL`.
-#' @param B the number of imputations to produce the later predictions. Increase the value to account for
+#' @param B the number of imputations to produce the predictions. Increase the value to account for
 #'     more imputation uncertainties. This overrides the value of `B` set in [dgp()]. Defaults to `50`.
 #'
 #' @return An updated `object`.
