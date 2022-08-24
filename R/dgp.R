@@ -310,7 +310,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 #' @export
 
 continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 50) {
-  if ( !is(object,"dgp") ){
+  if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
   N <- as.integer(N)

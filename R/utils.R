@@ -147,7 +147,7 @@ set_linked_idx <- function(object, idx) {
 #' @md
 #' @export
 nllik <- function(object, x, y) {
-  if ( !is(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   if ( !is.matrix(y) ) stop("y must be a matrix", call. = FALSE)
   if ( nrow(x)!=nrow(y) ) stop("x and y have different number of rows.", call. = FALSE)
@@ -177,6 +177,6 @@ nllik <- function(object, x, y) {
 #' @export
 
 trace_plot <- function(object, layer_no, ker_no, width = 4., height = 1., ticksize = 5., labelsize = 8., hspace = 0.1) {
-  if ( !is(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   object$trained_obj$plot(as.integer(layer_no), as.integer(ker_no), width, height, ticksize, labelsize, hspace)
 }

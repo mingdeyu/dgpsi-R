@@ -86,7 +86,7 @@ NULL
 #' @method predict dgp
 #' @export
 predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
-  if ( !is(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
@@ -141,7 +141,7 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @method predict lgp
 #' @export
 predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
-  if ( !is(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
+  if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   if ( !is.list(x) ) {
     if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   }
@@ -214,7 +214,7 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @method predict gp
 #' @export
 predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores = 1, chunks = NULL, ...) {
-  if ( !is(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
+  if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
