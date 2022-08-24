@@ -72,7 +72,7 @@
 
 
 <dt>N</dt>
-<dd><p>additional number of iterations for the DGP training. Defaults to <code>500</code>.</p></dd>
+<dd><p>additional number of iterations for the DGP emulator training. Defaults to <code>500</code>.</p></dd>
 
 
 <dt>ess_burn</dt>
@@ -88,13 +88,13 @@ at each I-step of the training. Defaults to <code>10</code>.</p></dd>
 
 <dt>burnin</dt>
 <dd><p>the number of training iterations to be discarded for
-point estimate calculation. Must be smaller than the overall training iterations
+point estimates calculation. Must be smaller than the overall training iterations
 so-far implemented. If this is not specified, only the last 25% of iterations
 are used. This overrides the value of <code>burnin</code> set in <code><a href="dgp.html">dgp()</a></code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>B</dt>
-<dd><p>the number of imputations to produce the later predictions. Increase the value to account for
+<dd><p>the number of imputations to produce the predictions. Increase the value to account for
 more imputation uncertainties. This overrides the value of <code>B</code> set in <code><a href="dgp.html">dgp()</a></code>. Defaults to <code>50</code>.</p></dd>
 
 </dl></div>
