@@ -1,7 +1,6 @@
 pkg.env <- new.env(parent = emptyenv())
 pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
-pkg.env$sys <- NULL
 
 #' Initialize the Python environment
 #' @note See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -57,7 +56,6 @@ init_py <- function() {
 
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
   assign('py_buildin', reticulate::import_builtins(), pkg.env)
-  assign('sys', reticulate::import("sys"), pkg.env)
   message("The Python environment for dgpsi is successfully loaded.")
 }
 

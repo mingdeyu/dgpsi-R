@@ -39,3 +39,6 @@ This function implements additional training iterations for a DGP emulator.
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
+\note{
+One can also use this function to fit an untrained DGP emulator constructed by \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
+}

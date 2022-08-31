@@ -38,18 +38,17 @@
 #'     This argument is only used when `struc = NULL`.
 #' @param likelihood the likelihood type of a DGP emulator:
 #' 1. `NULL`: no likelihood layer is included in the emulator.
-#' 2. `"Hetero"`: a heteroskedastic likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
+#' 2. `"Hetero"`: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
 #'    (i.e., the computer model outputs have varying noises).
 #' 3. `"Poisson"`: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.
 #' 4. `"NegBin"`: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.
 #'
 #' When `likelihood` is not `NULL`, the values of `nugget_est` and `nugget` are overridden by `FALSE` and `1e-6` respectively. Defaults to `NULL`. This argument is only used when `struc = NULL`.
-#' @param verb an integer indicating the level of information to be printed during the function execution:
-#' * `2`: trace information on DGP initialization and a summary table of the initialized DGP emulator.
-#' * `1`: all information as in `2` except for the summary table.
-#' * `0`: no trace information and the summary table.
-#'
-#' When `verb = 2`, you will have a chance to check the specified DGP emulator (especially when a customized `struc` is provided) and decide if you want to proceed to training. Defaults to `1`.
+#' @param training a bool indicating if the initialized DGP emulator will be trained.
+#'     When set to `FALSE`, [dgp()] returns an untrained DGP emulator, to which one can apply [summary()] to inspect its specifications
+#'     (especially when a customized `struc` is provided) or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
+#' @param verb a bool indicating if the trace information on DGP emulator construction and training will be printed during the function execution.
+#'     Defaults to `TRUE`.
 #' @param check_rep a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 #'     position has multiple outputs. Defaults to `TRUE`.
 #' @param rff a bool indicating whether to use random Fourier features to approximate the correlation matrices in training. Turning on this option could help accelerate
@@ -57,13 +56,12 @@
 #' @param M the number of features to be used by random Fourier approximation. It is only used
 #'     when `rff` is set to `TRUE`. Defaults to `NULL`. If it is `NULL`, `M` is automatically set to
 #'     `max(100, ceiling(sqrt(nrow(X))*log(nrow(X)))))`.
-#' @param N number of iterations for the training. Defaults to `500`.
+#' @param N number of iterations for the training. Defaults to `500`. This argument is only used when `training = TRUE`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
-#'     at each I-step of the training. Defaults to `10`.
+#'     at each I-step of the training. Defaults to `10`. This argument is only used when `training = TRUE`.
 #' @param burnin the number of training iterations to be discarded for
-#'     point estimate calculation. Must be smaller than the SEM iterations
-#'     implemented. If this is not specified, only the last 25% of iterations
-#'     are used. Defaults to `NULL`.
+#'     point estimates of model parameters. Must be smaller than the training iterations `N`. If this is not specified, only the last 25% of iterations
+#'     are used. Defaults to `NULL`. This argument is only used when `training = TRUE`.
 #' @param B the number of imputations to produce the later predictions. Increase the value to account for
 #'     more imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 #'     Defaults to `50`.
@@ -87,7 +85,7 @@
 #' @md
 #' @export
 dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
-                nugget_est = FALSE, nugget = 1e-6, connect = TRUE, likelihood = NULL, verb = 1, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
+                nugget_est = FALSE, nugget = 1e-6, connect = TRUE, likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
                 burnin = NULL, B = 50, internal_input_idx = NULL, linked_idx = NULL) {
 
   if ( !is.matrix(X) ) stop("X must be a matrix", call. = FALSE)
@@ -181,7 +179,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
       external_input_idx = NULL
     }
 
-    if ( verb == 1|verb == 2 ) message(sprintf("Auto-generating a %i-layered DGP structure ...", depth ), appendLF = FALSE)
+    if ( verb ) message(sprintf("Auto-generating a %i-layered DGP structure ...", depth ), appendLF = FALSE)
 
     struc <- list()
     for ( l in 1:no_gp_layer ) {
@@ -231,50 +229,38 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
         struc[[depth]] <- c(pkg.env$dgpsi$NegBin())
       }
     }
-    if ( verb == 1|verb == 2 ) {
+    if ( verb ) {
       message(" done")
       Sys.sleep(0.5)
     }
   }
 
-  if ( verb == 1|verb == 2 ) message("Initializing the DGP emulator ...", appendLF = FALSE)
+  if ( verb ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
   obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, rff, M)
 
-  if ( verb == 1|verb == 2 ) {
+  if ( verb ) {
     message(" done")
     Sys.sleep(0.5)
   }
 
-  if ( verb == 0 ) {
-    disable <- TRUE
-  } else if ( verb == 1 ) {
-    disable <- FALSE
-    Sys.sleep(0.5)
-    message("Training the DGP emulator:")
-  } else if ( verb == 2 ) {
-    disable <- FALSE
-    Sys.sleep(0.5)
-    message("Summarizing the initialized DGP emulator ...", appendLF = FALSE)
-    pkg.env$dgpsi$summary(obj, 'pretty')
-    Sys.sleep(0.5)
-    message(" done")
-    Sys.sleep(0.5)
-    pkg.env$sys$stdout$flush()
-    ans <- readline(prompt="Enter [Y] to continue or [N] to cancel the training: ")
-    if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-        stop('Training is cancelled.', call. = FALSE)
+  if ( training ) {
+    if ( verb ){
+      disable <- FALSE
+      message("Training the DGP emulator ...", appendLF = FALSE)
     } else {
-      message("Training the DGP emulator:")
+      disable <- TRUE
     }
+    obj$train(N, ess_burn, disable)
+    est_obj <- obj$estimate(burnin)
+  } else {
+    est_obj <- obj$estimate(NULL)
   }
 
-  obj$train(N, ess_burn, disable)
-  est_obj <- obj$estimate(burnin)
   emu_obj <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
 
   res <- list()
-  res[['trained_obj']] <- obj
+  res[['constructor_obj']] <- obj
   res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
   res[['emulator_obj']] <- emu_obj
 
@@ -306,6 +292,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
 #' @return An updated `object`.
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @note One can also use this function to fit an untrained DGP emulator constructed by [dgp()] with `training = FALSE`.
 #' @md
 #' @export
 
@@ -330,8 +317,8 @@ continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL,
 
   linked_idx <- object$container_obj$local_input_idx
 
-  object$trained_obj$train(N, ess_burn, disable)
-  est_obj <- object$trained_obj$estimate(burnin)
+  object$constructor_obj$train(N, ess_burn, disable)
+  est_obj <- object$constructor_obj$estimate(burnin)
   object$emulator_obj <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
   object$container_obj <- pkg.env$dgpsi$container(est_obj, linked_idx)
   return(object)

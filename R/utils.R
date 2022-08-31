@@ -29,6 +29,7 @@ combine <- function(...) {
 #'     the emulator `object` is saved.
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @note Since the constructed emulators are Python objects, [save()] from R will not work as it is only for R objects.
 #' @md
 #' @export
 write <- function(object, pkl_file) {
@@ -184,5 +185,5 @@ trace_plot <- function(object, layer = NULL, node = 1, width = 4., height = 1., 
   if ( is.null(layer) ){
     layer = 0
   }
-  object$trained_obj$plot(as.integer(layer), as.integer(node), width, height, ticksize, labelsize, hspace)
+  object$constructor_obj$plot(as.integer(layer), as.integer(node), width, height, ticksize, labelsize, hspace)
 }

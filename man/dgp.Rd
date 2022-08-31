@@ -15,7 +15,8 @@ dgp(
   nugget = 1e-06,
   connect = TRUE,
   likelihood = NULL,
-  verb = 1,
+  training = TRUE,
+  verb = TRUE,
   check_rep = TRUE,
   rff = FALSE,
   M = NULL,
@@ -78,7 +79,7 @@ This argument is only used when \code{struc = NULL}.}
 \item{likelihood}{the likelihood type of a DGP emulator:
 \enumerate{
 \item \code{NULL}: no likelihood layer is included in the emulator.
-\item \code{"Hetero"}: a heteroskedastic likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
+\item \code{"Hetero"}: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
 (i.e., the computer model outputs have varying noises).
 \item \code{"Poisson"}: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.
 \item \code{"NegBin"}: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.
@@ -86,14 +87,12 @@ This argument is only used when \code{struc = NULL}.}
 
 When \code{likelihood} is not \code{NULL}, the values of \code{nugget_est} and \code{nugget} are overridden by \code{FALSE} and \code{1e-6} respectively. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
 
-\item{verb}{an integer indicating the level of information to be printed during the function execution:
-\itemize{
-\item \code{2}: trace information on DGP initialization and a summary table of the initialized DGP emulator.
-\item \code{1}: all information as in \code{2} except for the summary table.
-\item \code{0}: no trace information and the summary table.
-}
+\item{training}{a bool indicating if the initialized DGP emulator will be trained.
+When set to \code{FALSE}, \code{\link[=dgp]{dgp()}} returns an untrained DGP emulator, to which one can apply \code{\link[=summary]{summary()}} to inspect its specifications
+(especially when a customized \code{struc} is provided) or apply \code{\link[=predict]{predict()}} to check its emulation performance before the training. Defaults to \code{TRUE}.}
 
-When \code{verb = 2}, you will have a chance to check the specified DGP emulator (especially when a customized \code{struc} is provided) and decide if you want to proceed to training. Defaults to \code{1}.}
+\item{verb}{a bool indicating if the trace information on DGP emulator construction and training will be printed during the function execution.
+Defaults to \code{TRUE}.}
 
 \item{check_rep}{a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 position has multiple outputs. Defaults to \code{TRUE}.}
@@ -105,15 +104,14 @@ the training when the training data is relatively large but may reduce the quali
 when \code{rff} is set to \code{TRUE}. Defaults to \code{NULL}. If it is \code{NULL}, \code{M} is automatically set to
 \verb{max(100, ceiling(sqrt(nrow(X))*log(nrow(X)))))}.}
 
-\item{N}{number of iterations for the training. Defaults to \code{500}.}
+\item{N}{number of iterations for the training. Defaults to \code{500}. This argument is only used when \code{training = TRUE}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
-at each I-step of the training. Defaults to \code{10}.}
+at each I-step of the training. Defaults to \code{10}. This argument is only used when \code{training = TRUE}.}
 
 \item{burnin}{the number of training iterations to be discarded for
-point estimate calculation. Must be smaller than the SEM iterations
-implemented. If this is not specified, only the last 25\% of iterations
-are used. Defaults to \code{NULL}.}
+point estimates of model parameters. Must be smaller than the training iterations \code{N}. If this is not specified, only the last 25\% of iterations
+are used. Defaults to \code{NULL}. This argument is only used when \code{training = TRUE}.}
 
 \item{B}{the number of imputations to produce the later predictions. Increase the value to account for
 more imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.

@@ -18,3 +18,6 @@ This function saves the constructed emulator to a \code{.pkl} file.
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
+\note{
+Since the constructed emulators are Python objects, \code{\link[=save]{save()}} from R will not work as it is only for R objects.
+}
