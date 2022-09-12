@@ -1,7 +1,7 @@
 Package: dgpsi
 Type: Package
 Title: R Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
-Version: 2.1.2
+Version: 2.1.3
 Authors@R: c(
   person('Deyu', 'Ming', role = c('aut', 'cre', 'cph'),
          email = 'deyu.ming.16@ucl.ac.uk'),
@@ -22,12 +22,16 @@ Depends:
     R (>= 4.0)
 Imports:
     reticulate (>= 1.25),
-    benchmarkme (>= 1.0.8)
+    benchmarkme (>= 1.0.8),
+    utils,
+    devtools,
+    ggplot2,
+    reshape2,
+    patchwork
 Suggests:
     knitr,
     rmarkdown,
     MASS,
-    utils,
     R.utils
 LazyData: false
 VignetteBuilder:

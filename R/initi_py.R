@@ -1,6 +1,7 @@
 pkg.env <- new.env(parent = emptyenv())
 pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
+pkg.env$np <- NULL
 
 #' Initialize the Python environment
 #' @note See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -9,8 +10,8 @@ pkg.env$py_buildin <- NULL
 #' @export
 init_py <- function() {
   py_ver <- '3.9.13'
-  dgpsi_ver <- 'dgpsi==2.1.2'
-  env_name <- 'dgp_si_R_2_1_2'
+  dgpsi_ver <- 'dgpsi==2.1.3'
+  env_name <- 'dgp_si_R_2_1_3'
   #Check if there is any conda binary installed, if not, request to install it.
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
@@ -51,12 +52,12 @@ init_py <- function() {
     }
   }
 
-  Sys.unsetenv("RETICULATE_PYTHON")
-  with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE))
+  warning_error_handler(with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)))
 
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
   assign('py_buildin', reticulate::import_builtins(), pkg.env)
-  message("The Python environment for dgpsi is successfully loaded.")
+  assign('np', reticulate::import("numpy"), pkg.env)
+  message("The Python environment for 'dgpsi' is successfully loaded.")
 }
 
 install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
@@ -74,10 +75,32 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
 
 with_warning_handler <- function(...)
 {
+  Sys.unsetenv("RETICULATE_PYTHON")
   withCallingHandlers(..., warning = function(w)
   { condition <- conditionMessage(w)
   reg1 <- "Previous request to"
   reg2 <- "will be ignored. It is superseded by request to"
   if(grepl(reg1, condition) & grepl(reg2, condition)) invokeRestart("muffleWarning")
   })
+}
+
+warning_error_handler <- function(...){
+  tryCatch(...,
+           error = function(r)
+           { condition <- conditionMessage(r)
+           reg <- "wrong length for argument"
+           if(grepl(reg, condition)) {
+             message("A Python binding error has occurred. It seems that the error is fixed in the dev version of 'reticulate'.")
+             ans <- readline(prompt="Would you like me to install the dev version for you? (Y/N) ")
+             if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
+               utils::remove.packages('reticulate')
+               devtools::install_github("rstudio/reticulate")
+               cat("Dev version has been installed. Please restart RStudio, reload 'dgpsi', and run 'init_py()' again.")
+             } else {
+               message("The initialization of Python environment for 'dgpsi' fails.")
+             }
+           } else {
+             message(paste("ERROR in", condition))
+           }
+           })
 }

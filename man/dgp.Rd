@@ -31,14 +31,14 @@ dgp(
 \arguments{
 \item{X}{a matrix where each row is an input training data point and each column is an input dimension.}
 
-\item{Y}{a matrix containing observed training output data. The matrix has it rows being output data points and columns being
+\item{Y}{a matrix containing observed training output data. The matrix has its rows being output data points and columns being
 output dimensions. When \code{likelihood} (see below) is not \code{NULL}, \code{Y} must be a matrix with only one column.}
 
 \item{struc}{a list that specifies a user-defined DGP structure. It should contain \emph{L} (the number of DGP layers) sub-lists,
 each of which represents a layer and contains a number of GP nodes (defined by \code{\link[=kernel]{kernel()}}) in the corresponding layer.
 The final layer of the DGP structure (i.e., the final sub-list in \code{struc}) can be a likelihood
 layer that contains a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}). When \code{struc = NULL},
-the DGP structure is automatically generated and will be summarized in a table after \code{\link[=dgp]{dgp()}} is executed if \code{verb} (see below) is set to \code{2}.
+the DGP structure is automatically generated and can be checked by applying \code{\link[=summary]{summary()}} to the output from \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
 If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{name}, \code{lengthscale}, \code{nugget_est}, \code{nugget},
 \code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
 

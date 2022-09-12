@@ -28,7 +28,7 @@ init_py()
 ```
 
 ```
-## The Python environment for dgpsi is successfully loaded.
+## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 ## Set up the step function

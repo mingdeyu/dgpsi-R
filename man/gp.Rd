@@ -21,7 +21,7 @@ gp(
 \arguments{
 \item{X}{a matrix where each row is an input data point and each column is an input dimension.}
 
-\item{Y}{a matrix with only one column and each row being an input data point.}
+\item{Y}{a matrix with only one column and each row being an output data point.}
 
 \item{struc}{an object produced by \code{\link[=kernel]{kernel()}} that gives a user-defined GP specifications. When \code{struc = NULL},
 the GP specifications are automatically generated using information provided in \code{name}, \code{lengthscale},
@@ -40,13 +40,17 @@ Defaults to a vector of 0.2. This argument is only used when \code{struc = NULL}
 
 \item{nugget_est}{a bool indicating if the nugget term is to be estimated:
 \enumerate{
-\item \code{FALSE}: the nugget term is fixed to $1e-6$ for deterministic emulation where the emulator interpolates the training data points.
-\item \code{TRUE}: the nugget term will be estimated for stochastic emulation where computer model outputs are assumed to follow a homogeneous Gaussian distribution.
+\item \code{FALSE}: the nugget term is fixed to \code{nugget}.
+\item \code{TRUE}: the nugget term will be estimated.
 }
 
 Defaults to \code{FALSE}. This argument is only used when \code{struc = NULL}.}
 
-\item{nugget}{the initial nugget value. If \code{nugget_est = FALSE}, the assigned value is fixed during the training. Defaults to \code{1e-6}.}
+\item{nugget}{the initial nugget value. If \code{nugget_est = FALSE}, the assigned value is fixed during the training.
+Set \code{nugget} to a small value (e.g., \code{1e-6}) and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
+interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic
+emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used
+when \code{struc = NULL}.}
 
 \item{training}{a bool indicating if the initialized GP emulator will be trained.
 When set to \code{FALSE}, \code{\link[=gp]{gp()}} returns an untrained GP emulator, to which one can apply \code{\link[=summary]{summary()}} to inspect its specifications

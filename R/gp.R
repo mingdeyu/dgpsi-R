@@ -3,7 +3,7 @@
 #' @description This function builds and trains a GP emulator.
 #'
 #' @param X a matrix where each row is an input data point and each column is an input dimension.
-#' @param Y a matrix with only one column and each row being an input data point.
+#' @param Y a matrix with only one column and each row being an output data point.
 #' @param struc an object produced by [kernel()] that gives a user-defined GP specifications. When `struc = NULL`,
 #'     the GP specifications are automatically generated using information provided in `name`, `lengthscale`,
 #'     `nugget_est`, `nugget`, and `internal_input_idx`. Defaults to `NULL`.
@@ -15,11 +15,15 @@
 #'
 #' Defaults to a vector of 0.2. This argument is only used when `struc = NULL`.
 #' @param nugget_est a bool indicating if the nugget term is to be estimated:
-#' 1. `FALSE`: the nugget term is fixed to $1e-6$ for deterministic emulation where the emulator interpolates the training data points.
-#' 2. `TRUE`: the nugget term will be estimated for stochastic emulation where computer model outputs are assumed to follow a homogeneous Gaussian distribution.
+#' 1. `FALSE`: the nugget term is fixed to `nugget`.
+#' 2. `TRUE`: the nugget term will be estimated.
 #'
 #' Defaults to `FALSE`. This argument is only used when `struc = NULL`.
-#' @param nugget the initial nugget value. If `nugget_est = FALSE`, the assigned value is fixed during the training. Defaults to `1e-6`.
+#' @param nugget the initial nugget value. If `nugget_est = FALSE`, the assigned value is fixed during the training.
+#'     Set `nugget` to a small value (e.g., `1e-6`) and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
+#'     interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic
+#'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used
+#'     when `struc = NULL`.
 #' @param training a bool indicating if the initialized GP emulator will be trained.
 #'     When set to `FALSE`, [gp()] returns an untrained GP emulator, to which one can apply [summary()] to inspect its specifications
 #'     (especially when a customized `struc` is provided) or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
@@ -42,8 +46,8 @@
 #' @md
 #' @export
 gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), nugget_est = FALSE, nugget = 1e-6, training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
-  if (!is.matrix(X)) stop("X must be a matrix", call. = FALSE)
-  if (!is.matrix(Y)) stop("Y must be a matrix", call. = FALSE)
+  if (!is.matrix(X)) stop("X must be a matrix.", call. = FALSE)
+  if (!is.matrix(Y)) stop("Y must be a matrix.", call. = FALSE)
   if ( nrow(X)!=nrow(Y) ) stop("X and Y have different number of rows.", call. = FALSE)
   n_dim_X <- ncol(X)
   n_dim_Y <- ncol(Y)
@@ -56,7 +60,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
   }
 
   if ( is.null(struc) ) {
-    if ( verb ) message("Auto-generating a GP structure:", appendLF = FALSE)
+    if ( verb ) message("Auto-generating a GP structure ...", appendLF = FALSE)
 
     if ( length(lengthscale) != 1 & length(lengthscale) != n_dim_X) {
       stop("length(lengthscale) must be 1 or ncol(X).", call. = FALSE)
@@ -100,8 +104,6 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
     }
     obj$train()
     if ( verb ) message(" done")
-  } else {
-    obj$kernel$compute_stats()
   }
 
   res <- list()

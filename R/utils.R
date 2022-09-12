@@ -170,20 +170,48 @@ nllik <- function(object, x, y) {
 #' @param layer the index of a layer. Defaults to `NULL` for the final layer.
 #' @param node the index of a GP node in the layer specified by `layer`. Defaults to `1` for the first GP node in the
 #'     corresponding layer.
-#' @param width the overall plot width. Defaults to `4`.
-#' @param height the overall plot height. Defaults to `1`.
-#' @param ticksize the size of sub-plot ticks. Defaults to `5`.
-#' @param labelsize the font size of y labels. Defaults to `8`.
-#' @param hspace the space between sub-plots. Defaults to `0.1`.
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
 
-trace_plot <- function(object, layer = NULL, node = 1, width = 4., height = 1., ticksize = 5., labelsize = 8., hspace = 0.1) {
+trace_plot <- function(object, layer = NULL, node = 1) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+
+  all_layer <- object$constructor_obj$all_layer
+
+  layer_no <- length(all_layer)
+
   if ( is.null(layer) ){
-    layer = 0
+    layer = layer_no
   }
-  object$constructor_obj$plot(as.integer(layer), as.integer(node), width, height, ticksize, labelsize, hspace)
+
+  layer_l <- all_layer[[layer]]
+  kernel_no <- length(layer_l)
+  kernel <- layer_l[[node]]
+  if (kernel$type == 'gp'){
+    path <- kernel$para_path
+    n_para <- ncol(path)
+    dat <- as.data.frame(path)
+    for ( i in 1:n_para){
+      if ( i==1 ){
+        colnames(dat)[i] <- 'Variance'
+      } else if ( i==n_para ){
+        colnames(dat)[i] <- 'Nugget'
+      } else {
+        colnames(dat)[i] <- paste('Lengthscale', i-1, sep = ' ')
+      }
+    }
+    dat$Iteration <-  seq(nrow(path))
+    mm <- reshape2::melt(dat, id.var="Iteration")
+
+    color <- c("#E69F00", rep("#56B4E9",n_para-2), "#009E73")
+    ggplot2::ggplot(mm, ggplot2::aes_(x = ~Iteration, y = ~value)) + ggplot2::geom_line(ggplot2::aes_(color = ~variable)) +
+      ggplot2::facet_grid(variable ~ ., scales = "free_y") + ggplot2::theme(legend.position = "none", plot.title = ggplot2::element_text(hjust = 0.5)) +
+      ggplot2::labs(title=paste("Node ", node, "(", kernel_no, ")", " in Layer ", layer, "(", layer_no, ")", sep = ""), x ="Iteration", y = "Parameter value") +
+      ggplot2::scale_color_manual(values = color)
+  } else {
+    message('There is nothing to plot for a likelihood node, please choose a GP node instead.')
+  }
+
 }

@@ -4,16 +4,7 @@
 \alias{trace_plot}
 \title{Plot of DGP model parameter traces}
 \usage{
-trace_plot(
-  object,
-  layer = NULL,
-  node = 1,
-  width = 4,
-  height = 1,
-  ticksize = 5,
-  labelsize = 8,
-  hspace = 0.1
-)
+trace_plot(object, layer = NULL, node = 1)
 }
 \arguments{
 \item{object}{an instance of the \code{dgp} class.}
@@ -22,16 +13,6 @@ trace_plot(
 
 \item{node}{the index of a GP node in the layer specified by \code{layer}. Defaults to \code{1} for the first GP node in the
 corresponding layer.}
-
-\item{width}{the overall plot width. Defaults to \code{4}.}
-
-\item{height}{the overall plot height. Defaults to \code{1}.}
-
-\item{ticksize}{the size of sub-plot ticks. Defaults to \code{5}.}
-
-\item{labelsize}{the font size of y labels. Defaults to \code{8}.}
-
-\item{hspace}{the space between sub-plots. Defaults to \code{0.1}.}
 }
 \description{
 This function plots the traces of model parameters of a chosen GP node

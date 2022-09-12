@@ -3,13 +3,13 @@
 #' @description This function builds and trains a DGP emulator.
 #'
 #' @param X a matrix where each row is an input training data point and each column is an input dimension.
-#' @param Y a matrix containing observed training output data. The matrix has it rows being output data points and columns being
+#' @param Y a matrix containing observed training output data. The matrix has its rows being output data points and columns being
 #'     output dimensions. When `likelihood` (see below) is not `NULL`, `Y` must be a matrix with only one column.
 #' @param struc a list that specifies a user-defined DGP structure. It should contain *L* (the number of DGP layers) sub-lists,
 #'     each of which represents a layer and contains a number of GP nodes (defined by [kernel()]) in the corresponding layer.
 #'     The final layer of the DGP structure (i.e., the final sub-list in `struc`) can be a likelihood
 #'     layer that contains a likelihood function (e.g., [Poisson()]). When `struc = NULL`,
-#'     the DGP structure is automatically generated and will be summarized in a table after [dgp()] is executed if `verb` (see below) is set to `2`.
+#'     the DGP structure is automatically generated and can be checked by applying [summary()] to the output from [dgp()] with `training = FALSE`.
 #'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `name`, `lengthscale`, `nugget_est`, `nugget`,
 #'     `connect`, `likelihood`, and `internal_input_idx` will NOT be used. Defaults to `NULL`.
 #' @param depth number of layers (including the likelihood layer) for a DGP structure. `depth` must be at least `2`.
@@ -88,8 +88,8 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 nugget_est = FALSE, nugget = 1e-6, connect = TRUE, likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
                 burnin = NULL, B = 50, internal_input_idx = NULL, linked_idx = NULL) {
 
-  if ( !is.matrix(X) ) stop("X must be a matrix", call. = FALSE)
-  if ( !is.matrix(Y) ) stop("Y must be a matrix", call. = FALSE)
+  if ( !is.matrix(X) ) stop("X must be a matrix.", call. = FALSE)
+  if ( !is.matrix(Y) ) stop("Y must be a matrix.", call. = FALSE)
   if ( nrow(X)!=nrow(Y) ) stop("X and Y have different number of rows.", call. = FALSE)
 
   n_dim_X <- ncol(X)
@@ -179,7 +179,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
       external_input_idx = NULL
     }
 
-    if ( verb ) message(sprintf("Auto-generating a %i-layered DGP structure ...", depth ), appendLF = FALSE)
+    if ( isTRUE(verb) ) message(sprintf("Auto-generating a %i-layered DGP structure ...", depth ), appendLF = FALSE)
 
     struc <- list()
     for ( l in 1:no_gp_layer ) {
@@ -229,25 +229,25 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
         struc[[depth]] <- c(pkg.env$dgpsi$NegBin())
       }
     }
-    if ( verb ) {
+    if ( isTRUE(verb) ) {
       message(" done")
       Sys.sleep(0.5)
     }
   }
 
-  if ( verb ) message("Initializing the DGP emulator ...", appendLF = FALSE)
+  if ( isTRUE(verb) ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
   obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, rff, M)
 
-  if ( verb ) {
+  if ( isTRUE(verb) ) {
     message(" done")
     Sys.sleep(0.5)
   }
 
   if ( training ) {
-    if ( verb ){
+    if ( isTRUE(verb) ){
       disable <- FALSE
-      message("Training the DGP emulator ...", appendLF = FALSE)
+      message("Training the DGP emulator: ")
     } else {
       disable <- TRUE
     }
@@ -316,10 +316,13 @@ continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL,
   }
 
   linked_idx <- object$container_obj$local_input_idx
-
   object$constructor_obj$train(N, ess_burn, disable)
   est_obj <- object$constructor_obj$estimate(burnin)
-  object$emulator_obj <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
-  object$container_obj <- pkg.env$dgpsi$container(est_obj, linked_idx)
-  return(object)
+
+  new_object <- list()
+  new_object[['constructor_obj']] <- object$constructor_obj
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  class(new_object) <- "dgp"
+  return(new_object)
 }
