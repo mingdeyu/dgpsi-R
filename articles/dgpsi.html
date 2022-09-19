@@ -46,7 +46,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood 
+    <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
 </a>
     <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
   </div>
@@ -147,7 +147,7 @@
 <span><span class="co">## Post-processing LOO results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
 <p><img src="images/step_fct_loo.png"></p>
-<p>The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points:</p>
+<p>The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oos_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">oos_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">oos_x</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -162,7 +162,7 @@
 <div class="section level2">
 <h2 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
 </h2>
-<p>Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over <span class="math inline">\([0,1]\)</span>”</p>
+<p>Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over <span class="math inline">\([0,1]\)</span></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
