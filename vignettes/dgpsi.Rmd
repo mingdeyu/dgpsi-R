@@ -104,7 +104,7 @@ plot(m)
 
 ![](images/step_fct_loo.png) 
 
-The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points:
+The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points
 
 ```{r}
 oos_x <- as.matrix(sample(seq(0, 1, length = 200),10))
@@ -127,7 +127,7 @@ plot(m,oos_x,oos_y)
 
 ## Prediction
 
-Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over $[0,1]$"
+Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over $[0,1]$
 
 ```{r}
 test_x <- as.matrix(seq(0, 1, length = 200))

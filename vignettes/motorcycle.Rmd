@@ -1,6 +1,6 @@
 ---
 title: >
-  DGP Emulation with the Heteroskedastic Gaussian Likelihood 
+  DGP Emulation with the Heteroskedastic Gaussian Likelihood
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
