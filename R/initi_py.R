@@ -52,7 +52,7 @@ init_py <- function() {
     }
   }
 
-  warning_error_handler(with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)))
+  with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE))
 
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
   assign('py_buildin', reticulate::import_builtins(), pkg.env)
@@ -82,25 +82,4 @@ with_warning_handler <- function(...)
   reg2 <- "will be ignored. It is superseded by request to"
   if(grepl(reg1, condition) & grepl(reg2, condition)) invokeRestart("muffleWarning")
   })
-}
-
-warning_error_handler <- function(...){
-  tryCatch(...,
-           error = function(r)
-           { condition <- conditionMessage(r)
-           reg <- "wrong length for argument"
-           if(grepl(reg, condition)) {
-             message("A Python binding error has occurred. It seems that the error is fixed in the dev version of 'reticulate'.")
-             ans <- readline(prompt="Would you like me to install the dev version for you? (Y/N) ")
-             if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
-               utils::remove.packages('reticulate')
-               devtools::install_github("rstudio/reticulate")
-               cat("Dev version has been installed. Please restart RStudio, reload 'dgpsi', and run 'init_py()' again.")
-             } else {
-               message("The initialization of Python environment for 'dgpsi' fails.")
-             }
-           } else {
-             message(paste("ERROR in", condition))
-           }
-           })
 }

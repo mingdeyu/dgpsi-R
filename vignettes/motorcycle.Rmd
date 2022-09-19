@@ -22,16 +22,17 @@ This vignette gives a demonstration of the package on emulating the popular moto
 
 ## Load packages and data
 
-We start by first loading the package and setting up the required Python environment via `init_py()` 
+We start by first loading packages and setting up the required Python environment via `init_py()` 
 
 ```{r}
 library(dgpsi)
 library(MASS)
+library(patchwork)
 init_py()
 ```
 
 ```
-## The Python environment for dgpsi is successfully loaded.
+## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 `init_py()` provides an automatic Python environment setup and initialization routine and must be run every time after the package is loaded. We now load the training data points,
@@ -56,12 +57,23 @@ plot(X, Y, pch = 16, cex = 1, xlab = 'Time', ylab = 'Acceleration', cex.axis = 1
 
 ![](images/motorcycle_data.png)
 
+Before constructing an emulator, we first split a training data set and a testing data set:
+
+```{r}
+test_idx <- sample(seq_len(nrow(X)), size = 20)
+
+train_X <- X[-test_idx, , drop = F]
+train_Y <- Y[-test_idx, , drop = F]
+test_x <- X[test_idx, , drop = F]
+test_y <- Y[test_idx, , drop = F]
+```
+
 ## Construct and train a DGP emulator
 
 We consider a three-layered DGP emulator with squared exponential kernels:
 
 ```{r}
-m_dgp <- dgp(X, Y, depth = 3, lengthscale = c(0.5, 0.2), likelihood = "Hetero", training = FALSE)
+m_dgp <- dgp(train_X, train_Y, depth = 3, lengthscale = c(0.5, 0.2), likelihood = "Hetero", training = FALSE)
 ```
 
 ```
@@ -84,28 +96,9 @@ summary(m_dgp)
 ## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [0.200]     |     1.000     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
-## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
+## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
+## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.
 ```
-
-We can also use the untrained DGP emulator to make predictions so we can see how the emulation performance changes after the training:
-
-```{r}
-test_x <- as.matrix(seq(0, 1, length = 200))
-m_dgp <- predict(m_dgp, x = test_x)
-
-mu_dgp <- m_dgp$results$mean # predictive means
-sd_dgp <- sqrt(m_dgp$results$var) # predictive variances and compute predictive standard deviations
-up_dgp <- mu_dgp + 2*sd_dgp # predictive upper bound
-lo_dgp <- mu_dgp - 2*sd_dgp # predictive lower bound
-
-plot(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue', main = "DGP", xlab = 'Time', ylab = 'Acceleration', ylim = c(-3.2,3.2))
-polygon(c(test_x, rev(test_x)), c(up_dgp, rev(lo_dgp)), col = 'grey80', border = F)
-lines(X, Y, type = 'p',pch = 16, cex = 0.8)
-lines(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
-```
-
-![](images/motorcycle_dgp.png)
 
 For a DGP emulator, we can use `continue()` to invoke the training for the constructed `m_dgp` instead of re-building everything from scratch by re-running `dgp()`:
 
@@ -115,40 +108,40 @@ m_dgp <- continue(m_dgp)
 
 ```
 ## Continue the training:
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:20<00:00, 24.17it/s]
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:18<00:00, 27.49it/s]
 ```
 
 For comparison, we also build a GP emulator (by `gp()`) that incorporates homogeneous noises by setting `nugget_est = T` and the initial nugget value to $0.01$. We set `training` to `FALSE` so we can use `summary()` to check the generated GP structure before training:
 
 ```{r}
-m_gp <- gp(X, Y, nugget_est = T, nugget = 1e-2, training = FALSE)
+m_gp <- gp(train_X, train_Y, nugget_est = T, nugget = 1e-2, training = FALSE)
 summary(m_gp)
 ```
 
 ```
-## Auto-generating a GP structure: done
+## Auto-generating a GP structure ... done
 ## Initializing the GP emulator ... done
 ## +-------------+-----------------+----------+--------+------------+
 ## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
 ## +-------------+-----------------+----------+--------+------------+
 ## | Squared-Exp |     [0.200]     |  1.000   | 0.010  |    [1]     |
 ## +-------------+-----------------+----------+--------+------------+
-## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.
+## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.
 ```
 
 We now train the GP emulator by re-running the above function with `training = TRUE`, which is the default setting:
 
 ```{r}
-m_gp <- gp(X, Y, nugget_est = T, nugget = 1e-2)
+m_gp <- gp(train_X, train_Y, nugget_est = T, nugget = 1e-2)
 ```
 
 ```
-## Auto-generating a GP structure: done
+## Auto-generating a GP structure ... done
 ## Initializing the GP emulator ... done
 ## Training the GP emulator ... done
 ```
 
-Before we make predictions, we can summarize the trained DGP emulator:
+Before we validate the constructed emulators, we can summarize the trained DGP emulator:
 
 ```{r}
 summary(m_dgp)
@@ -158,13 +151,13 @@ summary(m_dgp)
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [1.081]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.385]     |     1.127     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [0.688]     |    10.511     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.683]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.905]     |     0.833     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.962]     |    26.665     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
-## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
+## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
+## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.
 ```
 
 and GP emulator:
@@ -177,54 +170,64 @@ summary(m_gp)
 ## +-------------+-----------------+----------+--------+------------+
 ## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
 ## +-------------+-----------------+----------+--------+------------+
-## | Squared-Exp |     [0.132]     |  0.780   | 0.282  |    [1]     |
+## | Squared-Exp |     [0.127]     |  0.728   | 0.321  |    [1]     |
 ## +-------------+-----------------+----------+--------+------------+
-## 'Input Dims' indicates the dimensions (i.e., columns) of your input data that are actually used for GP training.
+## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.
 ```
 
-## Prediction
+## Validation
 
-We are now ready to make predictions from both emulators via `predict()` at 200 testing positions over $[0,1]$:
+We are now ready to validate both emulators via `validate()` at 20 out-of-sample testing positions generated earlier:
 
 ```{r}
-test_x <- as.matrix(seq(0, 1, length = 200))
-m_dgp <- predict(m_dgp, x = test_x)
-m_gp <- predict(m_gp, x = test_x)
+m_dgp <- validate(m_dgp, test_x, test_y)
 ```
 
-Finally, we plot the predictions from both emulators to check their emulation performance:
+```
+## Initializing the OOS ... done
+## Calculating the OOS ... done
+## Saving results to the slot 'oos' in the dgp object ... done
+```
 
 ```{r}
-# extract predictive means and variances from DGP
-mu_dgp <- m_dgp$results$mean # predictive means
-sd_dgp <- sqrt(m_dgp$results$var) # predictive variances and compute predictive standard deviations
-up_dgp <- mu_dgp + 2*sd_dgp # predictive upper bound
-lo_dgp <- mu_dgp - 2*sd_dgp # predictive lower bound
-
-# extract predictive means and variances from GP
-mu_gp <- m_gp$results$mean
-sd_gp <- sqrt(m_gp$results$var)
-up_gp <- mu_gp + 2*sd_gp
-lo_gp <- mu_gp - 2*sd_gp
-
-par(cex=0.7, mar = c(5, 5, 0.9, 0.9)+0.2)
-#GP
-par(fig = c(0, 0.5, 0.2, 0.8))
-plot(test_x, mu_gp, type = 'l', lwd = 1.5, col = 'cornflowerblue', main = "GP", xlab = 'Time', ylab = 'Acceleration', ylim = c(-3.2,3.2))
-polygon(c(test_x, rev(test_x)), c(up_gp, rev(lo_gp)), col = 'grey80', border = F)
-lines(X, Y, type = 'p',pch = 16, cex = 0.8)
-lines(test_x, mu_gp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
-#DGP
-par(fig = c(0.5, 1, 0.2, 0.8), new = TRUE)
-plot(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue', main = "DGP", xlab = 'Time', ylab = 'Acceleration', ylim = c(-3.2,3.2))
-polygon(c(test_x, rev(test_x)), c(up_dgp, rev(lo_dgp)), col = 'grey80', border = F)
-lines(X, Y, type = 'p',pch = 16, cex = 0.8)
-lines(test_x, mu_dgp, type = 'l', lwd = 1.5, col = 'cornflowerblue')
+m_gp <- validate(m_gp, test_x, test_y)
 ```
 
-![](images/motorcycle_result.png)
+```
+## Initializing the OOS ... done
+## Calculating the OOS ... done
+## Saving results to the slot 'oos' in the gp object ... done
+```
 
-The visualization shows that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noises embedded in the underlying dataset.
+Note that using [validate()] before plotting can saving computations involved in [plot()] because [validate()] stores validation results in the emulator objects. Finally, we plot the OOS validations for the GP emulator:
+
+```{r}
+plot(m_gp, test_x, test_y)
+```
+
+```
+## Initializing ... done
+## Post-processing OOS results ... done
+## Plotting ... done
+```
+
+![](images/motorcycle_gp_oos.png)
+
+and for the DGP emulator:
+
+```{r}
+plot(m_dgp, test_x, test_y)
+```
+
+```
+## Initializing ... done
+## Post-processing OOS results ... done
+## Plotting ... done
+```
+
+![](images/motorcycle_dgp_oos.png)
+
+Note that we still need to provide `test_x` and `test_y` to [plot()] even they have already been provided to [validate()]. Otherwise, [plot()] will draw the LOO cross validation plot. The visualizations above show that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noises embedded in the underlying data set, even though they have quite similar NRMSEs.
 
 ### References
 

@@ -26,7 +26,7 @@ init_py()
 ```
 
 ```
-## The Python environment for dgpsi is successfully loaded.
+## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 ## Construct two synthetic models and their linked model
@@ -59,19 +59,6 @@ X2 <- as.matrix(seq(0, 1, length = 13))
 Y2 <- as.matrix(sapply(X2, f2))
 ```
 
-We also generate 300 testing data points over $[0,1]$:
-
-```{r}
-# Model 1
-test_x1 <- as.matrix(seq(0, 1, length = 300))
-test_y1 <- as.matrix(sapply(test_x1, f1))
-# Model 2
-test_x2 <- as.matrix(seq(0, 1, length = 300))
-test_y2 <- as.matrix(sapply(test_x2, f2))
-# Linked Model
-test_y <- as.matrix(sapply(test_x1, f12))
-```
-
 ## Emulation of Model 1
 
 We construct and train a GP emulator with Matérn-2.5 kernel:
@@ -81,29 +68,24 @@ m1 <- gp(X1, Y1, name = "matern2.5")
 ```
 
 ```
-## Auto-generating a GP structure: done
+## Auto-generating a GP structure ... done
 ## Initializing the GP emulator ... done
 ## Training the GP emulator ... done
 ```
 
-We now make predictions from the trained GP emulator to evaluate the emulation performance for Model 1 over $[0,1]$:
+We now validate the trained GP emulator by [plot()] by LOO (alternatively, one can first use [validate()] to store the LOO results before plotting with [plot()]):
 
 ```{r}
-m1 <- predict(m1, x = test_x1)
-
-mu1 <- m1$results$mean # predictive mean
-sd1 <- sqrt(m1$results$var) # predictive standard deviations
-up1 <- mu1 + 2*sd1 # predictive upper bound
-lo1 <- mu1 - 2*sd1 # predictive lower bound
-
-plot(test_x1, mu1, type = 'l', lty = 2, lwd = 1.5, col = 'black', xlab = 'x1', cex.axis = 1, cex.lab = 1, ylab = 'y1 (x2)', ylim = c(-0.2,1.2))  # predictive means 
-polygon(c(test_x1, rev(test_x1)), c(up1,rev(lo1)), col = 'grey80', border = F) # predictive bounds
-lines(test_x1, test_y1, type = 'l', col = 'cornflowerblue', lwd = 2) # Underlying truth
-lines(test_x1, mu1, type = 'l', lty = 2, lwd = 1.5, col = 'black')
-lines(X1, Y1, type = 'p', pch = 16, cex = 1) # Training data points
+plot(m1)
 ```
 
-![](images/model_1.png)
+```
+## Initializing ... done
+## Post-processing LOO results ... done
+## Plotting ... done
+```
+
+![](images/model_1_loo.png)
 
 Since we will use `m1` later for linked emulation, we must specify how it links to the emulators in the feeding layer through `linked_idx` in `dgp()`. Since `m1` is in the first layer of the system, `linked_idx` refers to the column indices of the global input `X` that will feed intp `m1`, and therefore we should have set `linked_idx = c(1)` in `dgp()` when we first constructed the emulator. Instead of re-training the emulator to provide this information, we can simply use `set_linked_idx()` to add this information to `m1`:
 
@@ -123,30 +105,24 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 236.81it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 241.56it/s]
 ```
 
 Since all outputs of emulators in the first layer is from `m1` and these outputs all feed into `m2`, we set `linked_idx = c(1)` in `dgp()` above. 
 
-The following plot visualizes the emulation performance of the trained DGP emulator `m2`:
+The following plot visualizes the LOO of the trained DGP emulator `m2`:
 
 ```{r}
-# make predictions
-m2 <- predict(m2, x = test_x2)
-
-mu2 <- m2$results$mean
-sd2 <- sqrt(m2$results$var)
-up2 <- mu2 + 2*sd2
-lo2 <- mu2 - 2*sd2
-
-plot(test_x2, mu2, type = 'l', lty = 2, lwd = 1.5, col = 'black', xlab = 'x2 (y1)', cex.axis = 1, cex.lab = 1, ylab = 'y2', ylim = c(-1.2,1.7))  # predictive means 
-polygon(c(test_x2, rev(test_x2)), c(up2, rev(lo2)), col = 'grey80', border = F) # predictive bounds
-lines(test_x2, test_y2, type = 'l', col = 'cornflowerblue', lwd = 2) # underlying truth
-lines(test_x2, mu2, type = 'l', lty = 2, lwd = 1.5, col = 'black')
-lines(X2, Y2, type = 'p', pch = 16, cex = 1) # training data points
+plot(m2)
 ```
 
-![](images/model_2.png)
+```
+Initializing ... done
+Post-processing LOO results ... done
+Plotting ... done
+```
+
+![](images/model_2_loo.png)
 
 ## Emulation of Model 1 + Model 2
 
@@ -157,7 +133,7 @@ struc <- combine(list(m1), list(m2))
 m_link <- lgp(struc)
 ```
 
-Note that each layer of an emulator system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulators in a list using `list()`.
+Note that each layer of an emulator system is represented by a list. In our case, there is one GP emulator in the first layer and a DGP emulator in the second layer. Therefore, we need to put the corresponding emulator in a list using `list()`.
 
 We can check the relations between connected emulators by applying `summary()` to `m_link`:
 
@@ -172,8 +148,8 @@ summary(m_link)
 ## |  Layer 1  |    Emu 1     |  GP  |     Global input: [1]      |       No        |
 ## |  Layer 2  |    Emu 1     | DGP  | Emu 1 in Layer 1: output 1 |       No        |
 ## +-----------+--------------+------+----------------------------+-----------------+
-## 1. 'Connection' gives the indices of emulators and the associated output dimensions that are linked to the current emulator.
-## 2. 'External Inputs' indicates if the current emulator has external inputs that are not provided by the feeding emulators.
+## 1. 'Connection' gives the indices of emulators and the associated output dimensions that are linked to the emulator referred by 'Layer No.' and 'Emulator No.'.
+## 2. 'External Inputs' indicates if the emulator (referred by 'Layer No.' and 'Emulator No.') has external inputs that are not provided by the feeding emulators.
 ```
 
 For comparison, we construct a GP emulator for the whole system by generating 13 training data points from Model 1 and Model 2:
@@ -185,18 +161,25 @@ m_gp <- gp(X_gp, Y_gp, name = 'matern2.5')
 ```
 
 ```
-## Auto-generating a GP structure: done
+## Auto-generating a GP structure ... done
 ## Initializing the GP emulator ... done
 ## Training the GP emulator ... done
 ```
 
-In this final step, we make predictions from both the GP emulator and the linked emulator:
+Finally, we make predictions from both the GP emulator and the linked emulator at 300 testing data points over $[0,1]$:
+
+```{r}
+# Testing input
+test_x <- as.matrix(seq(0, 1, length = 300))
+# Testing output
+test_y <- as.matrix(sapply(test_x, f12))
+```
 
 ```{r}
 # linked emulator
-m_link <- predict(m_link, x = test_x1)
+m_link <- predict(m_link, x = test_x)
 # GP emulator
-m_gp <- predict(m_gp, x = test_x1)
+m_gp <- predict(m_gp, x = test_x)
 ```
 
 and plot the predictions to compare their emulation performances:
@@ -217,18 +200,43 @@ lo_gp <- mu_gp - 2*sd_gp
 par(cex=0.7, mar = c(5, 5, 0.9, 0.9)+0.2)
 # GP emulator
 par(fig = c(0, 0.5, 0.2, 0.8))
-plot(test_x1, mu_gp, type = 'l', lty = 2, lwd = 1.5, col = 'black', main = "GP Emulator", xlab = 'x1', ylab = 'y2', ylim=c(-1.7,1.7))
-polygon(c(test_x1, rev(test_x1)), c(up_gp, rev(lo_gp)), col = 'grey80', border = F)
-lines(test_x1, test_y, type = 'l', col = 'cornflowerblue', lwd = 2) 
-lines(test_x1, mu_gp, type = 'l', lty = 2, lwd = 1.5, col = 'black')
+plot(test_x, mu_gp, type = 'l', lty = 2, lwd = 1.5, col = 'black', main = "GP Emulator", xlab = 'x1', ylab = 'y2', ylim=c(-1.7,1.7))
+polygon(c(test_x, rev(test_x)), c(up_gp, rev(lo_gp)), col = 'grey80', border = F)
+lines(test_x, test_y, type = 'l', col = "#D55E00", lwd = 2) 
+lines(test_x, mu_gp, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 # linked emulator
 par(fig = c(0.5, 1, 0.2, 0.8), new = TRUE)
-plot(test_x1, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black', main = "Linked Emulator", xlab = 'x1', ylab = 'y2', ylim=c(-1.7,1.7))
-polygon(c(test_x1, rev(test_x1)), c(up, rev(lo)), col = 'grey80', border = F)
-lines(test_x1, test_y, type = 'l', col = 'cornflowerblue', lwd = 2) 
-lines(test_x1, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
+plot(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black', main = "Linked Emulator", xlab = 'x1', ylab = 'y2', ylim=c(-1.7,1.7))
+polygon(c(test_x, rev(test_x)), c(up, rev(lo)), col = 'grey80', border = F)
+lines(test_x, test_y, type = 'l', col = "#D55E00", lwd = 2) 
+lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 ```
 
 ![](images/linked_result.png)
+It can be seen from the above plots that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.
 
-It can be seen from the above plot that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.
+In real-life applications, we are rarely able to generate this many testing data points from the underlying computer simulators to evaluate the emulators over the whole input space. However, we are still able to retain some available realizations from the computer simulators for the linked emulator validation. Say we were able to afford 20 runs of the above linked computer system:
+
+```{r}
+# OOS testing input
+test_x_oos <- as.matrix(sample(seq(0, 1, length = 300), 20))
+# OOS testing output
+test_y_oos <- as.matrix(sapply(test_x_oos, f12))
+```
+
+Then, we can conduct OOS validations for the GP emulator:
+
+```{r}
+plot(m_gp, test_x_oos, test_y_oos, style = 2)
+```
+
+![](images/gp_oos.png)
+
+and the linked emulator:
+
+```{r}
+plot(m_link, test_x_oos, test_y_oos, style = 2)
+```
+
+![](images/linked_oos.png)
+which show that the linked emulator outperforms the GP emulator with significantly better predictive accuracy and lower NRMSE.

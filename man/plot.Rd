@@ -88,7 +88,10 @@ emulator object with validation results. Instead, it only returns the plotting o
 training or testing data points), direct execution of \code{\link[=plot]{plot()}} is fine. However, for moderate- to large-scale validations,
 it is recommended to first run \code{\link[=validate]{validate()}} to obtain and store validation results in the emulator object, and then supply the
 object to \code{\link[=plot]{plot()}}. This is because if an emulator object has the validation results stored, each time when \code{\link[=plot]{plot()}}
-is invoked, unnecessary evaluations of repetitive LOO or OSS validation will not be implemented.
+is invoked, unnecessary evaluations of repetitive LOO or OOS validation will not be implemented.
+\item \code{\link[=plot]{plot()}} uses information provided in \code{x_test} and \code{y_test} to produce the OOS validation plots. Therefore, if validation results
+are already stored in \code{x}, unless \code{x_test} and \code{y_test} are identical to those used by \code{\link[=validate]{validate()}}, \code{\link[=plot]{plot()}} will re-evaluate OOS
+validations before plotting.
 \item The returned \code{patchwork} object contains the \code{ggplot2} objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See \url{https://patchwork.data-imaginist.com/} for further information.
 }

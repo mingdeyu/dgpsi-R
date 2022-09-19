@@ -49,13 +49,6 @@ X <- as.matrix(seq(0, 1, length = 10))
 Y <- as.matrix(sapply(X, f))
 ```
 
-and 200 testing data points over $[0,1]$:
-
-```{r}
-test_x <- as.matrix(seq(0, 1, length = 200))
-test_y <- as.matrix(sapply(test_x, f))
-```
-
 ## Training
 
 We now build and train a DGP emulator with three layers:
@@ -67,8 +60,8 @@ m <- dgp(X, Y, depth = 3)
 ```
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
-## Training the DGP emulator:
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 126.27it/s]
+## Training the DGP emulator: 
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 127.33it/s]
 ```
 
 The progress bar displayed shows how long it takes to finish the training. We are able to change some default settings. E.g., we can set `verb = 2` so a summary table of the initialized DGP emulator will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to `struc` and we want to check it before the training is implemented. Note that if we want to train the DGP emulator `m` for additional iterations, we can simply do `m <- continue(m)` instead of rebuilding the DGP emulator.
@@ -83,21 +76,65 @@ summary(m)
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.343]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.125]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [3.046]     |     0.458     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.580]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [0.753]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.395]     |     0.476     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs are used as the input to the current GP.
-## 2. 'Global Connection' indicates the dimensions (i.e., column numbers) of the global input data that are used as additional input dimensions to the current GP.
+## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
+## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.
 ```
 
 The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
 
 At this point, you could use `write()` to save the emulator `m` to a local file and then load it using `read()` next time when you would like to make predictions from the emulator.
 
+## Validation
+
+After we have the emulator, we can validate it by drawing the validation plots. There are two types of validation plots provided by the package. The first one is the Leave-One-Out (LOO) cross validation plot:
+
+```{r}
+plot(m)
+```
+
+```
+## Initializing ... done
+## Post-processing LOO results ... done
+## Plotting ... done
+```
+
+![](images/step_fct_loo.png) 
+
+The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points:
+
+```{r}
+oos_x <- as.matrix(sample(seq(0, 1, length = 200),10))
+oos_y <- as.matrix(sapply(oos_x, f))
+```
+
+for the validation:
+
+```{r}
+plot(m,oos_x,oos_y)
+```
+
+```
+## Initializing ... done
+## Post-processing OOS results ... done
+## Plotting ... done
+```
+
+![](images/step_fct_oos.png) 
+
 ## Prediction
 
-Once the emulator is ready, it is time to make predictions from it:
+Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over $[0,1]$"
+
+```{r}
+test_x <- as.matrix(seq(0, 1, length = 200))
+test_y <- as.matrix(sapply(test_x, f))
+```
+
+for predictions:
 
 ```{r}
 m <- predict(m, x = test_x)
@@ -114,9 +151,9 @@ lo <- mu - 2*sd
 
 plot(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black', xlab = 'x', cex.axis = 1.3, cex.lab = 1.3, ylab = 'y', ylim = c(-1.5,1.5))  # predictive means 
 polygon(c(test_x, rev(test_x)), c(up,rev(lo)), col = 'grey80', border = F) # predictive bounds
-lines(test_x, test_y, type = 'l', col = 'cornflowerblue', lwd = 2) # Underlying truth
+lines(test_x, test_y, type = 'l', col = "#D55E00", lwd = 2) # Underlying truth
 lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
-lines(X, Y, type = 'p', pch = 16, cex = 1) # Training data points
+lines(X, Y, type = 'p', pch = 16, cex = 1, col = "#0072B2") # Training data points
 ```
 
 ![](images/step_fct_result.png) 

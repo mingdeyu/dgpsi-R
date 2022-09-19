@@ -168,6 +168,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     return(object)
     #For OOS
   } else if (!is.null(x_test) & !is.null(y_test)) {
+    x_test <- unname(x_test)
+    y_test <- unname(y_test)
     if ( !is.matrix(x_test) ) stop("'x_test' must be a matrix.", call. = FALSE)
     if ( !is.matrix(y_test) ) stop("'y_test' must be a matrix.", call. = FALSE)
     if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of rows.", call. = FALSE)
@@ -317,6 +319,8 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     return(object)
     #For OOS
   } else if (!is.null(x_test) & !is.null(y_test)) {
+    x_test <- unname(x_test)
+    y_test <- unname(y_test)
     if ( !is.matrix(x_test) ) stop("'x_test' must be a matrix.", call. = FALSE)
     if ( !is.matrix(y_test) ) stop("'y_test' must be a matrix.", call. = FALSE)
     if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of rows.", call. = FALSE)
@@ -403,6 +407,8 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
   #For OOS
   if (!is.null(x_test) & !is.null(y_test)) {
+    x_test <- unname(x_test)
+    y_test <- unname(y_test)
     #check testing input
     if ( !is.list(x_test) ) {
       if ( !is.matrix(x_test) ) {

@@ -17,6 +17,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
     - linking GP emulators of deterministic individual computer models;
     - linking GP and DGP emulators of deterministic individual computer models;
 * Multi-core predictions from GP, DGP, and Linked (D)GP emulators.
+* Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
 
 ## Documentation
 See [https://mingdeyu.github.io/dgpsi-R](https://mingdeyu.github.io/dgpsi-R/) to learn more about the package.
