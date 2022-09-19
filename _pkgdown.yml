@@ -45,7 +45,7 @@ reference:
 
 - title: "GP, DGP, and Linked (D)GP"
   desc: >
-    Functions to train and make predictions from GP, DGP, and Linked (D)GP.
+    Functions to train, validate, and make predictions from GP, DGP, and Linked (D)GP.
   contents:
   - gp
   - dgp
@@ -53,6 +53,8 @@ reference:
   - continue
   - combine
   - predict
+  - validate
+  - plot
 
 - title: "Helpers"
   contents:
