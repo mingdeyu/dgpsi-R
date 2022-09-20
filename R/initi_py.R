@@ -10,8 +10,8 @@ pkg.env$np <- NULL
 #' @export
 init_py <- function() {
   py_ver <- '3.9.13'
-  dgpsi_ver <- 'dgpsi==2.1.3'
-  env_name <- 'dgp_si_R_2_1_3'
+  dgpsi_ver <- 'dgpsi==2.1.4'
+  env_name <- 'dgp_si_R_2_1_4'
   #Check if there is any conda binary installed, if not, request to install it.
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
