@@ -80,6 +80,8 @@
 #' @return An S3 class named `dgp` that can be used by
 #' * [predict()] for DGP predictions.
 #' * [continue()] to implement additional DGP training iterations.
+#' * [validate()] to implement LOO and OOS validations.
+#' * [plot()] to draw the validation plots.
 #' * [lgp()] to construct linked (D)GP emulators.
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/> and learn how to customize a DGP structure.

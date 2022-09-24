@@ -10,7 +10,10 @@
 #'     imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 #'     If the system consists only GP emulators, `B` is set to `1` automatically. Defaults to `50`.
 #'
-#' @return An S3 class named `lgp` to be used by [predict()] for linked (D)GP predictions.
+#' @return An S3 class named `lgp` to be used by
+#' * [predict()] for linked (D)GP predictions.
+#' * [validate()] to implement the OOS validation.
+#' * [plot()] to draw the validation plots.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export

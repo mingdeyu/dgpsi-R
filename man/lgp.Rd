@@ -17,7 +17,12 @@ imputation uncertainties. Decrease the value for lower imputation uncertainties 
 If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{50}.}
 }
 \value{
-An S3 class named \code{lgp} to be used by \code{\link[=predict]{predict()}} for linked (D)GP predictions.
+An S3 class named \code{lgp} to be used by
+\itemize{
+\item \code{\link[=predict]{predict()}} for linked (D)GP predictions.
+\item \code{\link[=validate]{validate()}} to implement the OOS validation.
+\item \code{\link[=plot]{plot()}} to draw the validation plots.
+}
 }
 \description{
 This function constructs a linked (D)GP emulator.

@@ -74,6 +74,8 @@ Defaults to \code{NULL}.}
 An S3 class named \code{gp} that can be used by
 \itemize{
 \item \code{\link[=predict]{predict()}} for GP predictions.
+\item \code{\link[=validate]{validate()}} to implement LOO and OOS validations.
+\item \code{\link[=plot]{plot()}} to draw the validation plots.
 \item \code{\link[=lgp]{lgp()}} to construct linked (D)GP emulators.
 }
 }

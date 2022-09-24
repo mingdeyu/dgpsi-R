@@ -41,6 +41,8 @@
 #'
 #' @return An S3 class named `gp` that can be used by
 #' * [predict()] for GP predictions.
+#' * [validate()] to implement LOO and OOS validations.
+#' * [plot()] to draw the validation plots.
 #' * [lgp()] to construct linked (D)GP emulators.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column

@@ -137,6 +137,8 @@ An S3 class named \code{dgp} that can be used by
 \itemize{
 \item \code{\link[=predict]{predict()}} for DGP predictions.
 \item \code{\link[=continue]{continue()}} to implement additional DGP training iterations.
+\item \code{\link[=validate]{validate()}} to implement LOO and OOS validations.
+\item \code{\link[=plot]{plot()}} to draw the validation plots.
 \item \code{\link[=lgp]{lgp()}} to construct linked (D)GP emulators.
 }
 }
