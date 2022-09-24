@@ -28,8 +28,8 @@
 #' * if `x` is an instance of the `dgp` class, `y_test` is a matrix with its rows being testing output data points and columns being
 #'   output dimensions.
 #' * if `x` is an instance of the `lgp` class, `y_test` can be a single matrix or a list of matrices:
-#'   - if `y_test` is a single matrix, then there is only one emulator in the linked emulator system and `y_test` represents its output with
-#'     rows being testing positions and columns being output dimensions.
+#'   - if `y_test` is a single matrix, then there is only one emulator in the final layer of the linked emulator system and `y_test`
+#'     represents the emulator's output with rows being testing positions and columns being output dimensions.
 #'   - if `y_test` is a list, then `y_test` should have *M* number (the same number of emulators in the final layer of the system) of matrices.
 #'     Each matrix has its rows corresponding to testing positions and columns corresponding to output dimensions of the associated emulator
 #'     in the final layer.
@@ -87,10 +87,13 @@
 #' Each element in `mean`, `median`, `std`, `lower`, `upper`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 #' emulator.
 #'
-#' @note When both `x_test` and `y_test` are `NULL`, the LOO cross validation will be implemented. Otherwise, OOS validation will
-#'     be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., `x` is an instance of the `gp` or `dgp`
-#'     class). If a linked (D)GP emulator (i.e., `x` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
-#'     also be provided for OOS validation.
+#' @note
+#' * When both `x_test` and `y_test` are `NULL`, the LOO cross validation will be implemented. Otherwise, OOS validation will
+#'   be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., `x` is an instance of the `gp` or `dgp`
+#'   class). If a linked (D)GP emulator (i.e., `x` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
+#'   also be provided for OOS validation.
+#' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
+#'   R matrix.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @name validate
@@ -170,9 +173,11 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
   } else if (!is.null(x_test) & !is.null(y_test)) {
     x_test <- unname(x_test)
     y_test <- unname(y_test)
-    if ( !is.matrix(x_test) ) stop("'x_test' must be a matrix.", call. = FALSE)
-    if ( !is.matrix(y_test) ) stop("'y_test' must be a matrix.", call. = FALSE)
-    if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of rows.", call. = FALSE)
+    if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
+    if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
+    if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
+    if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
+    if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
 
     #check existing OOS
     if ( isFALSE(force) ){
@@ -321,9 +326,11 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
   } else if (!is.null(x_test) & !is.null(y_test)) {
     x_test <- unname(x_test)
     y_test <- unname(y_test)
-    if ( !is.matrix(x_test) ) stop("'x_test' must be a matrix.", call. = FALSE)
-    if ( !is.matrix(y_test) ) stop("'y_test' must be a matrix.", call. = FALSE)
-    if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of rows.", call. = FALSE)
+    if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
+    if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
+    if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
+    if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
+    if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
 
     #check existing OOS
     if ( isFALSE(force) ){
@@ -407,29 +414,33 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
   #For OOS
   if (!is.null(x_test) & !is.null(y_test)) {
-    x_test <- unname(x_test)
-    y_test <- unname(y_test)
     #check testing input
     if ( !is.list(x_test) ) {
-      if ( !is.matrix(x_test) ) {
-        stop("'x_test' must be a matrix.", call. = FALSE)
+      if ( !is.matrix(x_test)&!is.vector(x_test) ) {
+        stop("'x_test' must be a vector or a matrix.", call. = FALSE)
       } else {
+        x_test <- unname(x_test)
+        if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
         nrow_x <- nrow(x_test)
       }
     } else {
       for ( l in 1:length(x_test) ){
         if ( l==1 ){
-          if ( !is.matrix(x_test[[l]]) ) {
-            stop("The first element of 'x_test' must be a matrix.", call. = FALSE)
+          if ( !is.matrix(x_test[[l]])&!is.vector(x_test[[l]]) ) {
+            stop("The first element of 'x_test' must be a vector or a matrix.", call. = FALSE)
           } else {
+            x_test[[l]] <- unname(x_test[[l]])
+            if ( is.vector(x_test[[l]]) ) x_test[[l]] <- as.matrix(x_test[[l]])
             nrow_x <- nrow(x_test[[l]])
           }
         } else {
           for ( k in 1:length(x_test[[l]]) ){
-            if ( !is.matrix(x_test[[l]][[k]])&!is.null(x_test[[l]][[k]]) ) stop(sprintf("The element %i in the sublist %i of 'x_test' must be a matrix or 'NULL'.", k, l), call. = FALSE)
-            if ( is.matrix(x_test[[l]][[k]]) ){
+            if ( !is.matrix(x_test[[l]][[k]])&!is.null(x_test[[l]][[k]])&!is.vector(x_test[[l]][[k]]) ) stop(sprintf("The element %i in the sublist %i of 'x_test' must be a vector, a matrix, or 'NULL'.", k, l), call. = FALSE)
+            if ( is.matrix(x_test[[l]][[k]])|is.vector(x_test[[l]][[k]]) ){
+              x_test[[l]][[k]] <- unname(x_test[[l]][[k]])
+              if (is.vector(x_test[[l]][[k]])) x_test[[l]][[k]] <- as.matrix(x_test[[l]][[k]])
               if ( nrow(x_test[[l]][[k]])!=nrow_x ) {
-                stop(sprintf("The matrix %i in the sublist %i of 'x_test' has inconsistent number of rows with the first element of 'x_test'.", k, l), call. = FALSE)
+                stop(sprintf("The element %i in the sublist %i of 'x_test' has inconsistent number of data points with the first element of 'x_test'.", k, l), call. = FALSE)
               }
             }
           }
@@ -439,17 +450,21 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
     #check testing output
     if ( !is.list(y_test) ) {
-      if ( !is.matrix(y_test) ) {
-        stop("'y_test' must be a matrix.", call. = FALSE)
+      if ( !is.matrix(y_test)&!is.vector(y_test) ) {
+        stop("'y_test' must be a vector or a matrix.", call. = FALSE)
       } else {
+        y_test <- unname(y_test)
+        if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
         nrow_y <- nrow(y_test)
         if ( nrow_y!=nrow_x ) stop("The number of data points are inconsistent between 'x_test' and 'y_test'.", call. = FALSE)
         }
     } else {
       for ( l in 1:length(y_test) ){
-          if ( !is.matrix(y_test[[l]]) ) {
-            stop(sprintf("The element %i of 'y_test' must be a matrix.", l), call. = FALSE)
+          if ( !is.matrix(y_test[[l]])&!is.vector(y_test[[l]]) ) {
+            stop(sprintf("The element %i of 'y_test' must be a vector or a matrix.", l), call. = FALSE)
           } else {
+            y_test[[l]] <- unname(y_test[[l]])
+            if ( is.vector(y_test[[l]]) ) y_test[[l]] <- as.matrix(y_test[[l]])
             nrow_y <- nrow(y_test[[l]])
             if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points are inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
           }

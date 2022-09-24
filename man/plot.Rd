@@ -11,6 +11,7 @@
   x,
   x_test = NULL,
   y_test = NULL,
+  dim = NULL,
   method = "mean_var",
   style = 1,
   verb = TRUE,
@@ -24,6 +25,7 @@
   x,
   x_test = NULL,
   y_test = NULL,
+  dim = NULL,
   method = "mean_var",
   style = 1,
   verb = TRUE,
@@ -37,6 +39,7 @@
   x,
   x_test = NULL,
   y_test = NULL,
+  dim = NULL,
   method = "mean_var",
   style = 1,
   verb = TRUE,
@@ -46,7 +49,7 @@
 )
 }
 \arguments{
-\item{x}{can be one of the following:
+\item{x}{can be one of the following emulator classes:
 \itemize{
 \item the S3 class \code{gp}.
 \item the S3 class \code{dgp}.
@@ -56,6 +59,21 @@
 \item{x_test}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{y_test}{same as that of \code{\link[=validate]{validate()}}.}
+
+\item{dim}{if \code{dim = NULL}, the index of an emulator's input will be shown on the x-axis in validation plots. Otherwise, \code{dim} indicates
+which dimension of an emulator's input will be shown on the x-axis in validation plots:
+\itemize{
+\item If \code{x} is an instance of the \code{gp} of \code{dgp} class, \code{dim} is an integer.
+\item If \code{x} is an instance of the \code{lgp} class, \code{dim} can be
+\enumerate{
+\item an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
+\item a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
+(specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
+system.
+}
+}
+
+This argument is only used when \code{style = 1} and the emulator input is at least two-dimensional. Defaults to \code{NULL}.}
 
 \item{method}{same as that of \code{\link[=validate]{validate()}}.}
 
@@ -92,6 +110,8 @@ is invoked, unnecessary evaluations of repetitive LOO or OOS validation will not
 \item \code{\link[=plot]{plot()}} uses information provided in \code{x_test} and \code{y_test} to produce the OOS validation plots. Therefore, if validation results
 are already stored in \code{x}, unless \code{x_test} and \code{y_test} are identical to those used by \code{\link[=validate]{validate()}}, \code{\link[=plot]{plot()}} will re-evaluate OOS
 validations before plotting.
+\item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
+R matrix.
 \item The returned \code{patchwork} object contains the \code{ggplot2} objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See \url{https://patchwork.data-imaginist.com/} for further information.
 }

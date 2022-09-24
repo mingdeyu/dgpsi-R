@@ -28,6 +28,8 @@ init_py()
 ```
 
 ```
+## Connecting to Python ... done
+## Importing required Python modules ... done
 ## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
@@ -61,7 +63,7 @@ m <- dgp(X, Y, depth = 3)
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 127.33it/s]
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04<00:00, 123.37it/s]
 ```
 
 The progress bar displayed shows how long it takes to finish the training. We are able to change some default settings. E.g., we can set `verb = 2` so a summary table of the initialized DGP emulator will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to `struc` and we want to check it before the training is implemented. Note that if we want to train the DGP emulator `m` for additional iterations, we can simply do `m <- continue(m)` instead of rebuilding the DGP emulator.
@@ -76,9 +78,9 @@ summary(m)
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.580]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [0.753]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.395]     |     0.476     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.285]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.773]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.339]     |     0.475     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
 ## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.

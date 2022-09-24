@@ -43,16 +43,21 @@
 #' * [predict()] for GP predictions.
 #' * [lgp()] to construct linked (D)GP emulators.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
+#'     R matrix.
 #' @md
 #' @export
 gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), nugget_est = FALSE, nugget = 1e-6, training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
-  if (!is.matrix(X)) stop("X must be a matrix.", call. = FALSE)
-  if (!is.matrix(Y)) stop("Y must be a matrix.", call. = FALSE)
-  if ( nrow(X)!=nrow(Y) ) stop("X and Y have different number of rows.", call. = FALSE)
+  if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
+  if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
+  if ( is.vector(X) ) X <- as.matrix(X)
+  if ( is.vector(Y) ) Y <- as.matrix(Y)
+
+  if ( nrow(X)!=nrow(Y) ) stop("'X' and 'Y' have different number of data points.", call. = FALSE)
   n_dim_X <- ncol(X)
   n_dim_Y <- ncol(Y)
   if ( n_dim_Y != 1 ) {
-    stop('Y must be a matrix with only one column for a GP emulator.', call. = FALSE)
+    stop("'Y' must be a vector or a matrix with only one column for a GP emulator.", call. = FALSE)
   }
 
   if( !is.null(linked_idx) ) {

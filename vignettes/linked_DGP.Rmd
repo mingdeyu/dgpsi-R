@@ -26,6 +26,8 @@ init_py()
 ```
 
 ```
+## Connecting to Python ... done
+## Importing required Python modules ... done
 ## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
@@ -105,7 +107,7 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 241.56it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 239.77it/s]
 ```
 
 Since all outputs of emulators in the first layer is from `m1` and these outputs all feed into `m2`, we set `linked_idx = c(1)` in `dgp()` above. 

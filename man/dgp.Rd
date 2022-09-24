@@ -11,6 +11,7 @@ dgp(
   depth = 2,
   name = "sexp",
   lengthscale = 1,
+  share = TRUE,
   nugget_est = FALSE,
   nugget = 1e-06,
   connect = TRUE,
@@ -56,6 +57,8 @@ The vector should have a length of \code{depth} if \code{likelihood = NULL} or a
 }
 
 Defaults to a numeric value of \code{1.0}. This argument is only used when \code{struc = NULL}.}
+
+\item{share}{a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to \code{TRUE}.}
 
 \item{nugget_est}{a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each
@@ -142,4 +145,8 @@ This function builds and trains a DGP emulator.
 }
 \details{
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/} and learn how to customize a DGP structure.
+}
+\note{
+Any R vector detected in \code{X} and \code{Y} will be treated as a column vector and automatically converted into a single-column
+R matrix.
 }

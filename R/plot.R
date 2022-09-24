@@ -2,12 +2,22 @@
 #'
 #' @description This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 #'
-#' @param x can be one of the following:
+#' @param x can be one of the following emulator classes:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `lgp`.
 #' @param x_test same as that of [validate()].
 #' @param y_test same as that of [validate()].
+#' @param dim if `dim = NULL`, the index of an emulator's input will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
+#'     which dimension of an emulator's input will be shown on the x-axis in validation plots:
+#' * If `x` is an instance of the `gp` of `dgp` class, `dim` is an integer.
+#' * If `x` is an instance of the `lgp` class, `dim` can be
+#'   1. an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
+#'   2. a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
+#'   (specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
+#'   system.
+#'
+#' This argument is only used when `style = 1` and the emulator input is at least two-dimensional. Defaults to `NULL`.
 #' @param method same as that of [validate()].
 #' @param style either `1` or `2`, indicating two different types of validation plots.
 #' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
@@ -29,6 +39,8 @@
 #' * [plot()] uses information provided in `x_test` and `y_test` to produce the OOS validation plots. Therefore, if validation results
 #'   are already stored in `x`, unless `x_test` and `y_test` are identical to those used by [validate()], [plot()] will re-evaluate OOS
 #'   validations before plotting.
+#' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
+#'   R matrix.
 #' * The returned `patchwork` object contains the `ggplot2` objects. One can modify the included individual ggplots
 #'   by accessing them with double-bracket indexing. See <https://patchwork.data-imaginist.com/> for further information.
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -40,7 +52,7 @@ NULL
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -60,9 +72,16 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
       # create indices
       if ( ncol(loo_res$x_train)==1 ){
         idx <- loo_res$x_train[,1]
+        isdup <- TRUE
       } else {
-        rep <- pkg.env$np$unique(loo_res$x_train,return_inverse=TRUE, axis=0L)
-        idx <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+        if ( is.null(dim) ) {
+          rep <- pkg.env$np$unique(loo_res$x_train,return_inverse=TRUE, axis=0L)
+          idx <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          isdup <- TRUE
+        } else {
+          idx <- loo_res$x_train[,dim]
+          isdup <- FALSE
+        }
       }
       for (l in 1:ncol(loo_res$y_train) ) {
         dat <- list()
@@ -80,7 +99,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
         dat[["upper"]] <- loo_res$upper[,l]
         dat[["y_validate"]] <- loo_res$y_train[,l]
         dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-        p_list[[l]] <- plot_style_1(as.data.frame(dat), method) +
+        p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
           ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
@@ -195,8 +214,14 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
         }
         # If input is at least 2d
       } else {
-        rep <- pkg.env$np$unique(oos_res$x_test,return_inverse=TRUE, axis=0L)
-        idx <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+        if ( is.null(dim) ){
+          rep <- pkg.env$np$unique(oos_res$x_test,return_inverse=TRUE, axis=0L)
+          idx <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          isdup <- TRUE
+        } else {
+          idx <- oos_res$x_test[,dim]
+          isdup <- FALSE
+        }
         for (l in 1:ncol(oos_res$y_test) ) {
           dat <- list()
           dat[["idx"]] <- idx
@@ -213,7 +238,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
           dat[["upper"]] <- oos_res$upper[,l]
           dat[["y_validate"]] <- oos_res$y_test[,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-          p_list[[l]] <- plot_style_1(as.data.frame(dat), method) +
+          p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
             ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -278,7 +303,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -385,7 +410,33 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
       }
       # If input is at least 2d
     } else {
-      idx <- seq(1,nrow(y_test_list[[1]]))
+      if ( is.null(dim) ) {
+        idx <- seq(1,nrow(y_test_list[[1]]))
+        isdup <- FALSE
+      } else {
+        if ( is.list(oos_res$x_test) ){
+          if ( length(dim)==1 ){
+            idx <- oos_res$x_test[[1]][,dim]
+            dim <- c(1,dim)
+          } else if ( length(dim)==3 ){
+            if ( dim[1]<2 ) stop("The first element of 'dim' must be equal or greater than 2. See documentation for details.", call. = FALSE)
+            target_emulator_input <- oos_res$x_test[[dim[1]]][[dim[2]]]
+            if ( is.null(target_emulator_input) ) stop("The emulator specified by the first two elements of 'dim' has no global input.", call. = FALSE)
+            idx <- target_emulator_input[,dim[3]]
+          } else {
+            stop("'dim' must be a vector of length 1 or 3. See documentation for details.", call. = FALSE)
+          }
+        } else {
+          if ( length(dim)==1 ){
+            idx <- oos_res$x_test[,dim]
+            dim <- c(1,dim)
+          } else {
+            stop("'dim' must be a vector of length 1. See documentation for details.", call. = FALSE)
+          }
+        }
+        isdup <- FALSE
+      }
+
       counter <- 1
       for ( k in 1:length(oos_res$nrmse) ) {
         for ( l in 1:length(oos_res$nrmse[[k]]) ) {
@@ -404,7 +455,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
           dat[["upper"]] <- oos_res$upper[[k]][,l]
           dat[["y_validate"]] <- y_test_list[[k]][,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-          p_list[[counter]] <- plot_style_1(as.data.frame(dat), method) +
+          p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
             ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           counter <- counter + 1
@@ -474,7 +525,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -494,9 +545,16 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style 
       # create indices
       if ( ncol(loo_res$x_train)==1 ){
         dat[["idx"]] <- loo_res$x_train[,1]
+        isdup <- TRUE
       } else {
-        rep <- pkg.env$np$unique(loo_res$x_train,return_inverse=TRUE, axis=0L)
-        dat[["idx"]] <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+        if ( is.null(dim) ){
+          rep <- pkg.env$np$unique(loo_res$x_train,return_inverse=TRUE, axis=0L)
+          dat[["idx"]] <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          isdup <- TRUE
+        } else {
+          dat[["idx"]] <- loo_res$x_train[,dim]
+          isdup <- FALSE
+        }
       }
       # extract mean or median
       if ( "mean" %in% names(loo_res) ){
@@ -511,7 +569,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style 
       dat[["upper"]] <- loo_res$upper[,1]
       dat[["y_validate"]] <- loo_res$y_train[,1]
       dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-      p <- plot_style_1(as.data.frame(dat), method) +
+      p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
         ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
         ggplot2::theme(plot.title = ggplot2::element_text(size=10))
     } else if ( style==2 ) {
@@ -605,8 +663,14 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style 
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         # If input is at least 2d
       } else {
-        rep <- pkg.env$np$unique(oos_res$x_test,return_inverse=TRUE, axis=0L)
-        dat[["idx"]] <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+        if ( is.null(dim) ){
+          rep <- pkg.env$np$unique(oos_res$x_test,return_inverse=TRUE, axis=0L)
+          dat[["idx"]] <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          isdup <- TRUE
+        } else {
+          dat[["idx"]] <- oos_res$x_test[,dim]
+          isdup <- FALSE
+        }
         # extract mean or median
         if ( "mean" %in% names(oos_res) ){
           dat[["mean"]] <- oos_res$mean[,1]
@@ -620,7 +684,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style 
         dat[["upper"]] <- oos_res$upper[,1]
         dat[["y_validate"]] <- oos_res$y_test[,1]
         dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-        p <- plot_style_1(as.data.frame(dat), method) +
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
           ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
@@ -675,9 +739,27 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, method = 'mean_var', style 
 }
 
 
-plot_style_1 <- function(dat, method) {
-  dup <- duplicated(dat$idx)
+plot_style_1 <- function(dat, method, dim, isdup) {
+  if ( isTRUE(isdup) ){
+    dup <- duplicated(dat$idx)
+  } else {
+    dup <- as.logical(rep(0, length(dat$idx)))
+  }
+
+  if ( is.null(dim) ){
+    x_lab <- "Input position"
+  } else {
+    if ( length(dim)==1 ){
+      x_lab <- sprintf("Input dimension %i", dim)
+    } else if ( length(dim)==2 ){
+      x_lab <- sprintf("Input dimension %i of emulators in layer %i", dim[2], dim[1])
+    } else if ( length(dim)==3 ){
+      x_lab <- sprintf("Global input dimension %i of emulator %i in layer %i", dim[3], dim[2], dim[1])
+    }
+  }
+
   coverage <- dat$coverage
+
   if ( all(coverage)|all(!coverage) ){
     p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation Point"))
     if ( method=="sampling" ){
@@ -692,7 +774,7 @@ plot_style_1 <- function(dat, method) {
 
     p <- p +
       ggplot2::geom_point(size=0.8) +
-      ggplot2::labs(x ="Input position (unique)", y = "Model output") +
+      ggplot2::labs(x =x_lab, y = "Model output") +
       ggplot2::theme(
         legend.position = "bottom",
         legend.text = ggplot2::element_text(size = 7),
@@ -713,7 +795,7 @@ plot_style_1 <- function(dat, method) {
 
     p <- p +
       ggplot2::geom_point(size=0.8) +
-      ggplot2::labs(x ="Input position (unique)", y = "Model output") +
+      ggplot2::labs(x =x_lab, y = "Model output") +
       ggplot2::theme(
         legend.position = "bottom",
         legend.text = ggplot2::element_text(size = 7),

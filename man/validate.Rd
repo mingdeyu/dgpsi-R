@@ -80,8 +80,8 @@ set \code{NULL} in the corresponding sub-list of \code{x_test}.
 output dimensions.
 \item if \code{x} is an instance of the \code{lgp} class, \code{y_test} can be a single matrix or a list of matrices:
 \itemize{
-\item if \code{y_test} is a single matrix, then there is only one emulator in the linked emulator system and \code{y_test} represents its output with
-rows being testing positions and columns being output dimensions.
+\item if \code{y_test} is a single matrix, then there is only one emulator in the final layer of the linked emulator system and \code{y_test}
+represents the emulator's output with rows being testing positions and columns being output dimensions.
 \item if \code{y_test} is a list, then \code{y_test} should have \emph{M} number (the same number of emulators in the final layer of the system) of matrices.
 Each matrix has its rows corresponding to testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.
@@ -167,8 +167,12 @@ cross validation or Out-Of-Sample (OOS) validation.
 See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-When both \code{x_test} and \code{y_test} are \code{NULL}, the LOO cross validation will be implemented. Otherwise, OOS validation will
+\itemize{
+\item When both \code{x_test} and \code{y_test} are \code{NULL}, the LOO cross validation will be implemented. Otherwise, OOS validation will
 be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., \code{x} is an instance of the \code{gp} or \code{dgp}
 class). If a linked (D)GP emulator (i.e., \code{x} is an instance of the \code{lgp} class) is provided, \code{x_test} and \code{y_test} must
 also be provided for OOS validation.
+\item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
+R matrix.
+}
 }

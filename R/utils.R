@@ -147,13 +147,22 @@ set_linked_idx <- function(object, idx) {
 #'     log-likelihood for each testing data point.
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @note Any R vector detected in `x` and `y` will be treated as a column vector and automatically converted into a single-column
+#'     R matrix.
 #' @md
 #' @export
 nllik <- function(object, x, y) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
-  if ( !is.matrix(x) ) stop("x must be a matrix", call. = FALSE)
-  if ( !is.matrix(y) ) stop("y must be a matrix", call. = FALSE)
-  if ( nrow(x)!=nrow(y) ) stop("x and y have different number of rows.", call. = FALSE)
+  if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
+  if ( !is.matrix(y)&!is.vector(y) ) stop("'y' must be a vector or a matrix.", call. = FALSE)
+  if ( is.vector(x) ) x <- as.matrix(x)
+  if ( is.vector(y) ) y <- as.matrix(y)
+
+  if ( nrow(x)!=nrow(y) ) stop("'x' and 'y' have different number of data points.", call. = FALSE)
+  n_dim_y <- ncol(y)
+  if ( n_dim_y != 1 ) {
+    stop("'y' must be a vector or a matrix with only one column.", call. = FALSE)
+  }
   res <- object$emulator_obj$nllik(x, y)
   named_res <- list("meanNLL" = res[[1]], "allNLL" = res[[2]])
   object$NLL <- named_res
@@ -208,7 +217,7 @@ trace_plot <- function(object, layer = NULL, node = 1) {
     color <- c("#E69F00", rep("#56B4E9",n_para-2), "#009E73")
     ggplot2::ggplot(mm, ggplot2::aes_(x = ~Iteration, y = ~value)) + ggplot2::geom_line(ggplot2::aes_(color = ~variable)) +
       ggplot2::facet_grid(variable ~ ., scales = "free_y") + ggplot2::theme(legend.position = "none", plot.title = ggplot2::element_text(hjust = 0.5)) +
-      ggplot2::labs(title=paste("Node ", node, "(", kernel_no, ")", " in Layer ", layer, "(", layer_no, ")", sep = ""), x ="Iteration", y = "Parameter value") +
+      ggplot2::labs(title=paste("Node ", node, " (of ", kernel_no, ")", " in Layer ", layer, " (of ", layer_no, ")", sep = ""), x ="Iteration", y = "Parameter value") +
       ggplot2::scale_color_manual(values = color)
   } else {
     message('There is nothing to plot for a likelihood node, please choose a GP node instead.')

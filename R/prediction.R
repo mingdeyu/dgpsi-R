@@ -77,6 +77,7 @@
 #'      samples of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
 #'
 #' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @note Any R vector detected in `x` will be treated as a column vector and automatically converted into a single-column R matrix.
 #' @md
 #' @name predict
 NULL
@@ -87,7 +88,8 @@ NULL
 #' @export
 predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
-  if ( !is.matrix(x) ) stop("x must be a matrix.", call. = FALSE)
+  if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
+  if ( is.vector(x) ) x <- as.matrix(x)
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
@@ -143,8 +145,34 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   if ( !is.list(x) ) {
-    if ( !is.matrix(x) ) stop("x must be a matrix.", call. = FALSE)
+    if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
+    x <- unname(x)
+    if ( is.vector(x) ) x <- as.matrix(x)
+  } else {
+    for ( l in 1:length(x) ){
+      if ( l==1 ){
+        if ( !is.matrix(x[[l]])&!is.vector(x[[l]]) ) {
+          stop("The first element of 'x' must be a vector or a matrix.", call. = FALSE)
+        } else {
+          x[[l]] <- unname(x[[l]])
+          if ( is.vector(x[[l]]) ) x[[l]] <- as.matrix(x[[l]])
+          nrow_x <- nrow(x[[l]])
+        }
+      } else {
+        for ( k in 1:length(x[[l]]) ){
+          if ( !is.matrix(x[[l]][[k]])&!is.null(x[[l]][[k]])&!is.vector(x[[l]][[k]]) ) stop(sprintf("The element %i in the sublist %i of 'x' must be a vector, a matrix, or 'NULL'.", k, l), call. = FALSE)
+          if ( is.matrix(x[[l]][[k]])|is.vector(x[[l]][[k]]) ){
+            x[[l]][[k]] <- unname(x[[l]][[k]])
+            if (is.vector(x[[l]][[k]])) x[[l]][[k]] <- as.matrix(x[[l]][[k]])
+            if ( nrow(x[[l]][[k]])!=nrow_x ) {
+              stop(sprintf("The element %i in the sublist %i of 'x' has inconsistent number of data points with the first element of 'x'.", k, l), call. = FALSE)
+            }
+          }
+        }
+      }
+    }
   }
+
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
@@ -215,7 +243,8 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @export
 predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores = 1, chunks = NULL, ...) {
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
-  if ( !is.matrix(x) ) stop("x must be a matrix.", call. = FALSE)
+  if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
+  if ( is.vector(x) ) x <- as.matrix(x)
   sample_size <- as.integer(sample_size)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)

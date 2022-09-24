@@ -52,11 +52,16 @@ init_py <- function() {
     }
   }
 
-  with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE))
+  message("Connecting to Python ...", appendLF = FALSE)
+  warning_error_handler(with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)))
+  message(" done")
 
+  message("Importing required Python modules ...", appendLF = FALSE)
   assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
   assign('py_buildin', reticulate::import_builtins(), pkg.env)
   assign('np', reticulate::import("numpy"), pkg.env)
+  message(" done")
+  Sys.sleep(0.5)
   message("The Python environment for 'dgpsi' is successfully loaded.")
 }
 
@@ -82,4 +87,17 @@ with_warning_handler <- function(...)
   reg2 <- "will be ignored. It is superseded by request to"
   if(grepl(reg1, condition) & grepl(reg2, condition)) invokeRestart("muffleWarning")
   })
+}
+
+warning_error_handler <- function(...){
+  tryCatch(...,
+           error = function(r)
+           { condition <- conditionMessage(r)
+           reg <- "failed to initialize requested version of Python"
+           if(grepl(reg, condition)) {
+             cat("NOTE: please clear your R workspace and delete the workspace image file '.RData' before restarting the R session.")
+           } else {
+             message(paste("ERROR in", condition))
+           }
+           })
 }
