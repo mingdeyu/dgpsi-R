@@ -94,7 +94,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## The Python environment for 'dgpsi' is successfully loaded.</span></span></code></pre>
+<pre><code><span><span class="co">## Connecting to Python ... done</span></span>
+<span><span class="co">## Importing required Python modules ... done</span></span>
+<span><span class="co">## The Python environment for 'dgpsi' is successfully loaded.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="construct-two-synthetic-models-and-their-linked-model">Construct two synthetic models and their linked model<a class="anchor" aria-label="anchor" href="#construct-two-synthetic-models-and-their-linked-model"></a>
@@ -151,7 +153,7 @@
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator:</span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 241.56it/s]</span></span></code></pre>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 239.77it/s]</span></span></code></pre>
 <p>Since all outputs of emulators in the first layer is from <code>m1</code> and these outputs all feed into <code>m2</code>, we set <code>linked_idx = c(1)</code> in <code><a href="../reference/dgp.html">dgp()</a></code> above.</p>
 <p>The following plot visualizes the LOO of the trained DGP emulator <code>m2</code>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">

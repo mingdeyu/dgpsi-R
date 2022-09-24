@@ -67,6 +67,7 @@
 <span>  <span class="va">x</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
 <span>  style <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -81,6 +82,7 @@
 <span>  <span class="va">x</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
 <span>  style <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -95,6 +97,7 @@
 <span>  <span class="va">x</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
 <span>  style <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -107,7 +110,7 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>can be one of the following:</p><ul><li><p>the S3 class <code>gp</code>.</p></li>
+<dd><p>can be one of the following emulator classes:</p><ul><li><p>the S3 class <code>gp</code>.</p></li>
 <li><p>the S3 class <code>dgp</code>.</p></li>
 <li><p>the S3 class <code>lgp</code>.</p></li>
 </ul></dd>
@@ -119,6 +122,17 @@
 
 <dt>y_test</dt>
 <dd><p>same as that of <code><a href="validate.html">validate()</a></code>.</p></dd>
+
+
+<dt>dim</dt>
+<dd><p>if <code>dim = NULL</code>, the index of an emulator's input will be shown on the x-axis in validation plots. Otherwise, <code>dim</code> indicates
+which dimension of an emulator's input will be shown on the x-axis in validation plots:</p><ul><li><p>If <code>x</code> is an instance of the <code>gp</code> of <code>dgp</code> class, <code>dim</code> is an integer.</p></li>
+<li><p>If <code>x</code> is an instance of the <code>lgp</code> class, <code>dim</code> can be</p><ol><li><p>an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or</p></li>
+<li><p>a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
+(specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
+system.</p></li>
+</ol></li>
+</ul><p>This argument is only used when <code>style = 1</code> and the emulator input is at least two-dimensional. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>method</dt>
@@ -172,6 +186,8 @@ is invoked, unnecessary evaluations of repetitive LOO or OOS validation will not
 <li><p><code>plot()</code> uses information provided in <code>x_test</code> and <code>y_test</code> to produce the OOS validation plots. Therefore, if validation results
 are already stored in <code>x</code>, unless <code>x_test</code> and <code>y_test</code> are identical to those used by <code><a href="validate.html">validate()</a></code>, <code>plot()</code> will re-evaluate OOS
 validations before plotting.</p></li>
+<li><p>Any R vector detected in <code>x_test</code> and <code>y_test</code> will be treated as a column vector and automatically converted into a single-column
+R matrix.</p></li>
 <li><p>The returned <code>patchwork</code> object contains the <code>ggplot2</code> objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See <a href="https://patchwork.data-imaginist.com/" class="external-link">https://patchwork.data-imaginist.com/</a> for further information.</p></li>
 </ul></div>
