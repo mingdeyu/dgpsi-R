@@ -56,7 +56,7 @@
 #'     the training when the training data is relatively large but may reduce the quality of the resulting emulator. Defaults to `FALSE`.
 #' @param M the number of features to be used by random Fourier approximation. It is only used
 #'     when `rff` is set to `TRUE`. Defaults to `NULL`. If it is `NULL`, `M` is automatically set to
-#'     `max(100, ceiling(sqrt(nrow(X))*log(nrow(X)))))`.
+#'     `max(100, ceiling(sqrt(nrow(X))*log(nrow(X))))`.
 #' @param N number of iterations for the training. Defaults to `500`. This argument is only used when `training = TRUE`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`. This argument is only used when `training = TRUE`.

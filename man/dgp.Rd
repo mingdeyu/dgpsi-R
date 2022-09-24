@@ -105,7 +105,7 @@ the training when the training data is relatively large but may reduce the quali
 
 \item{M}{the number of features to be used by random Fourier approximation. It is only used
 when \code{rff} is set to \code{TRUE}. Defaults to \code{NULL}. If it is \code{NULL}, \code{M} is automatically set to
-\verb{max(100, ceiling(sqrt(nrow(X))*log(nrow(X)))))}.}
+\code{max(100, ceiling(sqrt(nrow(X))*log(nrow(X))))}.}
 
 \item{N}{number of iterations for the training. Defaults to \code{500}. This argument is only used when \code{training = TRUE}.}
 
