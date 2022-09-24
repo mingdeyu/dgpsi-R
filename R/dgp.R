@@ -22,7 +22,7 @@
 #'    The vector should have a length of `depth` if `likelihood = NULL` or a length of `depth - 1` if `likelihood` is not `NULL`.
 #'
 #' Defaults to a numeric value of `1.0`. This argument is only used when `struc = NULL`.
-#' @param share a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to `TRUE`.
+#' @param share a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to `TRUE`. This argument is only used when `struc = NULL`.
 #' @param nugget_est a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 #'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
 #'     bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
