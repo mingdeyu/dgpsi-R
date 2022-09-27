@@ -30,7 +30,7 @@ This is a resubmission. Following the comments (see below) from CRAN in the firs
 
   **CRAN**: Please add small executable examples in your Rd-files to illustrate the use of the exported function but also enable automatic testing.
   
-  **Maintainer's Response**: Small examples are added to key functions `gp()`, `dgp()`, and `lgp()` of the package. Since the examples involve the implementations of other exported methods, we did not repeat the same examples in their Rd-files. Instead, we highlight in `Examples` sections of these methods that their usages can be found in `Examples` sections of `gp()`, `dgp()`, and `lgp()`. Since the package depends on the underlying 'python' implementation, the added small examples are wrapped in `\dontrun{}`, following other similar packages, such as [`{reticulate}`](https://github.com/rstudio/reticulate), [`{keras}`](https://github.com/rstudio/keras), etc. All small examples were carefully tested before being included in the Rd-files. 
+  **Maintainer's Response**: Small examples are added to key functions `gp()`, `dgp()`, and `lgp()` of the package. Since the examples involve the implementations of other exported functions, we did not repeat the same examples in different Rd-files. Instead, we highlight in `Examples` sections of other exported functions that their usages can be found in `Examples` sections of `gp()`, `dgp()`, and `lgp()`. Since the package depends on the underlying 'python' implementation, the added small examples are wrapped in `\dontrun{}`, following other similar packages, such as [`{reticulate}`](https://github.com/rstudio/reticulate), [`{keras}`](https://github.com/rstudio/keras), etc. All small examples were carefully tested before being included in Rd-files. 
 
 ## Test environments
 
@@ -47,7 +47,7 @@ This is a resubmission. Following the comments (see below) from CRAN in the firs
 
 ## R CMD check results
 
-- There were no ERRORs, WARNINGs and NOTEs on Local Test, GitHub Actions, and macOS builder.
+- There were no ERRORs, WARNINGs and NOTEs on Local Test and GitHub Actions.
 
 - There were no ERRORs, WARNINGs and 5 NOTEs on R-Hub:
 
