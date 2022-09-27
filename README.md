@@ -23,7 +23,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 See [https://mingdeyu.github.io/dgpsi-R](https://mingdeyu.github.io/dgpsi-R/) to learn more about the package.
 
 ## Installation
-You can install development version of the package from this GitHub repo:
+You can install development version of the package from the GitHub repo:
 
 1. In your RStudio Console, type:
 ```r
