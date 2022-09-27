@@ -1,32 +1,31 @@
 # Resubmission
-This is a resubmission. Following the comments from the first submission, we have made the following changes in this version `2.1.5`:
+This is a resubmission. Following the comments from the first submission, the following changes have been made in this version (`2.1.5`):
 
-- Comment 1:
+- **Comment 1**:
 
   **CRAN**: Please omit the redundant "R" at the start of your title and the description.
 
   **Maintainer's Response**: Done.
 
-- Comment 2:
-
+- **Comment 2**:
 
   **CRAN**: Please always write package names, software names and API (application programming interface) names in single quotes in title and description. e.g: --> 'python' Please note that package names are case sensitive.
   
   **Maintainer's Response**: All package names, software names, and API mentioned in title and description are now in single quotes. 
 
-- Comment 3:
+- **Comment 3**:
 
   **CRAN**: Please add \value to .Rd files regarding exported methods and explain the functions results in the documentation. Please write about the structure of the output (class) and also what the output means. (If a function does not return a value, please document that too, e.g. \value{No return value, called for side effects} or similar). 
-Missing Rd-tags:
-init_py.Rd: \arguments,  \value
-trace_plot.Rd: \value
-write.Rd: \value
+  
+  Missing Rd-tags:
+  * init_py.Rd: \arguments,  \value
+  * trace_plot.Rd: \value
+  * write.Rd: \value
   
   **Maintainer's Response**: All exported methods now have \arguments and \value in their .Rd files. The structure of the output (class) from exported methods are now all carefully explained.
 
-- Comment 4:
+- **Comment 4**:
 
-  
   **CRAN**: Please add small executable examples in your Rd-files to illustrate the use of the exported function but also enable automatic testing.
   
   **Maintainer's Response**: Small examples are added to key functions `gp()`, `dgp()`, and `lgp()` of the package. Since the examples involve the implementations of other exported methods, we did not repeat the same examples in their Rd-files. Instead, we highlight in `Examples` sections of these methods that their usages can be found in `Examples` sections of `gp()`, `dgp()`, and `lgp()`. Since the package depends on the underlying 'python' implementation, the added small examples are wrapped in `\dontrun{}`, following other similar packages, such as [`{reticulate}`](https://github.com/rstudio/reticulate), [`{keras}`](https://github.com/rstudio/keras), etc. All small examples were carefully tested before being included in the Rd-files. 
