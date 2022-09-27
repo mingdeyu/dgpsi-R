@@ -99,10 +99,10 @@
 <span><span class="co">## The Python environment for 'dgpsi' is successfully loaded.</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="construct-a-synthetic-model">Construct a synthetic model<a class="anchor" aria-label="anchor" href="#construct-a-synthetic-model"></a>
+<h2 id="construct-a-synthetic-system">Construct a synthetic system<a class="anchor" aria-label="anchor" href="#construct-a-synthetic-system"></a>
 </h2>
 <p>We consider the following synthetic system</p>
-<p><img src="images/linked_model.png"></p>
+<p><img src="images/linked_model.png" style="width:60.0%"></p>
 <p>that involves three models defined by:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Model 1</span></span>
@@ -192,7 +192,7 @@ Plotting ... done</code></pre>
 <p><img src="images/model_3_loo.png"></p>
 </div>
 <div class="section level2">
-<h2 id="emulation-of-model-1-model-2">Emulation of Model 1 + Model 2<a class="anchor" aria-label="anchor" href="#emulation-of-model-1-model-2"></a>
+<h2 id="emulation-of-linked-model">Emulation of Linked Model<a class="anchor" aria-label="anchor" href="#emulation-of-linked-model"></a>
 </h2>
 <p>With the GP emulator <code>m1</code> (for Model 1), the DGP emulator <code>m2</code> (for Model 2), and the DGP emulator <code>m3</code> (for Model 3) at hand, we are now ready to build the linked emulator by first using <code><a href="../reference/combine.html">combine()</a></code> to construct the system hierarchy <code>struc</code> and then applying <code><a href="../reference/lgp.html">lgp()</a></code> for the linked emulator.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
