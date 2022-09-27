@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,15 +84,73 @@ If the system consists only GP emulators, <code>B</code> is set to <code>1</code
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An S3 class named <code>lgp</code> to be used by</p><ul><li><p><code><a href="predict.html">predict()</a></code> for linked (D)GP predictions.</p></li>
-<li><p><code><a href="validate.html">validate()</a></code> to implement the OOS validation.</p></li>
-<li><p><code><a href="plot.html">plot()</a></code> to draw the validation plots.</p></li>
+<p>An S3 class named <code>lgp</code> that contains a slot called <code>emulator_obj</code>, which is a 'python' object that
+stores the information for predictions from the linked emulator. The returned <code>lgp</code> object can be used by</p><ul><li><p><code><a href="predict.html">predict()</a></code> for linked (D)GP predictions.</p></li>
+<li><p><code><a href="validate.html">validate()</a></code> for the OOS validation.</p></li>
+<li><p><code><a href="plot.html">plot()</a></code> for the validation plots.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See examples in Articles at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># load the package and the Python env</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># model 1</span></span></span>
+<span class="r-in"><span><span class="va">f1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">7.5</span><span class="op">*</span><span class="va">x</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># model 2</span></span></span>
+<span class="r-in"><span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fl">2</span><span class="op">/</span><span class="fl">3</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">+</span><span class="fl">4</span><span class="op">/</span><span class="fl">3</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span><span class="op">*</span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># linked model</span></span></span>
+<span class="r-in"><span><span class="va">f12</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">f2</span><span class="op">(</span><span class="fu">f1</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># training data for Model 1</span></span></span>
+<span class="r-in"><span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Y1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X1</span>, <span class="va">f1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># training data for Model 2</span></span></span>
+<span class="r-in"><span><span class="va">X2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">13</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Y2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X2</span>, <span class="va">f2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># emulation of model 1</span></span></span>
+<span class="r-in"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="gp.html">gp</a></span><span class="op">(</span><span class="va">X1</span>, <span class="va">Y1</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span>, linked_idx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># emulation of model 2</span></span></span>
+<span class="r-in"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="dgp.html">dgp</a></span><span class="op">(</span><span class="va">X2</span>, <span class="va">Y2</span>, depth <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># assign linking information after the emulation construction</span></span></span>
+<span class="r-in"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="set_linked_idx.html">set_linked_idx</a></span><span class="op">(</span><span class="va">m2</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># emulation of the linked model</span></span></span>
+<span class="r-in"><span><span class="va">struc</span> <span class="op">&lt;-</span> <span class="fu"><a href="combine.html">combine</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu">lgp</span><span class="op">(</span><span class="va">struc</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># summarizing</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="summary.html">summary</a></span><span class="op">(</span><span class="va">m_link</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># prediction</span></span></span>
+<span class="r-in"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="predict.html">predict</a></span><span class="op">(</span><span class="va">m_link</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># OOS validation</span></span></span>
+<span class="r-in"><span><span class="va">validate_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">validate_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">validate_x</span>, <span class="va">f12</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span><span class="va">m_link</span>, <span class="va">validate_x</span>, <span class="va">validate_y</span>, style <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># write and read the constructed linked emulator</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="write.html">write</a></span><span class="op">(</span><span class="va">m_link</span>, <span class="st">'linked_emulator'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="read.html">read</a></span><span class="op">(</span><span class="st">'linked_emulator'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
