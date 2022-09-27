@@ -31,11 +31,11 @@ init_py()
 ## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
-## Construct a synthetic model
+## Construct a synthetic system
 
 We consider the following synthetic system
 
-![](images/linked_model.png)
+![](images/linked_model.png){width=60%}
 
 that involves three models defined by:
 
@@ -170,7 +170,7 @@ Plotting ... done
 
 
 
-## Emulation of Model 1 + Model 2
+## Emulation of Linked Model
 
 With the GP emulator `m1` (for Model 1), the DGP emulator `m2` (for Model 2), and the DGP emulator `m3` (for Model 3) at hand, we are now ready to build the linked emulator by first using `combine()` to construct the system hierarchy `struc` and then applying `lgp()` for the linked emulator.  
 
