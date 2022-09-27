@@ -97,7 +97,7 @@ A \code{patchwork} object.
 This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{
@@ -114,5 +114,11 @@ validations before plotting.
 R matrix.
 \item The returned \code{patchwork} object contains the \code{ggplot2} objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See \url{https://patchwork.data-imaginist.com/} for further information.
+}
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
 }
 }

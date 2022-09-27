@@ -23,5 +23,11 @@ A list defining a DGP structure (for \code{struc} of \code{\link[=dgp]{dgp()}}) 
 This function combines customized layers into a DGP or linked (D)GP structure.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\examples{
+\dontrun{
+
+# See lgp() for an example.
+}
 }

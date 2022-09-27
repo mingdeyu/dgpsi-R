@@ -76,8 +76,13 @@
 #'      the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 #'      samples of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `x` will be treated as a column vector and automatically converted into a single-column R matrix.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #' @md
 #' @name predict
 NULL

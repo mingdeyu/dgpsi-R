@@ -11,7 +11,12 @@
 #' @return A list defining a DGP structure (for `struc` of [dgp()]) or a linked (D)GP structure
 #'     (for `struc` for [lgp()]).
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See lgp() for an example.
+#' }
 #' @md
 #' @export
 combine <- function(...) {
@@ -28,8 +33,15 @@ combine <- function(...) {
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note Since the constructed emulators are Python objects, [save()] from R will not work as it is only for R objects.
+#' @return No return value. `object` will be save to a local `.pkl` file specified by `pkl_file`.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @note Since the constructed emulators are 'python' objects, [save()] from R will not work as it is only for R objects.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #' @md
 #' @export
 write <- function(object, pkl_file) {
@@ -47,7 +59,12 @@ write <- function(object, pkl_file) {
 #'
 #' @return A GP, DGP or linked (D)GP emulator S3 class.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #' @md
 #' @export
 read <- function(pkl_file) {
@@ -77,7 +94,12 @@ read <- function(pkl_file) {
 #'
 #' @return A table summarizing key information contained in `object`.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #' @md
 #' @name summary
 NULL
@@ -119,7 +141,12 @@ summary.lgp <- function(object, ...) {
 #'     even without knowing how different emulators are connected together. When this information is available and
 #'     different emulators are collected, the connection information between emulators can then be assigned to
 #'     individual emulators with this function.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See lgp() for an example.
+#' }
 #' @md
 #' @export
 set_linked_idx <- function(object, idx) {
@@ -146,9 +173,16 @@ set_linked_idx <- function(object, idx) {
 #'     across all testing data points. The second one, named `allNLL`, is a vector that gives the negative predicted
 #'     log-likelihood for each testing data point.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `x` and `y` will be treated as a column vector and automatically converted into a single-column
 #'     R matrix.
+#' @examples
+#' \dontrun{
+#'
+#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
+#' # on how to compute the negative predicted log-likelihood
+#' # using nllik().
+#' }
 #' @md
 #' @export
 nllik <- function(object, x, y) {
@@ -180,7 +214,14 @@ nllik <- function(object, x, y) {
 #' @param node the index of a GP node in the layer specified by `layer`. Defaults to `1` for the first GP node in the
 #'     corresponding layer.
 #'
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @return A `ggplot` object.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See dgp() for an example.
+#' }
 #' @md
 #' @export
 

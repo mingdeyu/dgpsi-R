@@ -43,7 +43,12 @@
 #'   R matrix.
 #' * The returned `patchwork` object contains the `ggplot2` objects. One can modify the included individual ggplots
 #'   by accessing them with double-bracket indexing. See <https://patchwork.data-imaginist.com/> for further information.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #' @md
 #' @name plot
 NULL

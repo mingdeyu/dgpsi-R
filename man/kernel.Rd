@@ -70,12 +70,19 @@ that are not connected to some feeding emulators. In such a case, set \code{inpu
 the remaining input dimensions that are connected to the feeding emulators.}
 }
 \value{
-A kernel object to represent a GP node.
+A 'python' object to represent a GP node.
 }
 \description{
 This function constructs a kernel object to represent properties of a
 Gaussian process node.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\examples{
+\dontrun{
+
+# Check https://mingdeyu.github.io/dgpsi-R/ for examples
+# on how to customize DGP structures using kernel().
+}
 }

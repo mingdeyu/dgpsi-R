@@ -14,14 +14,21 @@ one needs to ensure that only two GP nodes are specified in the feeding layer.
 Defaults to \code{NULL}.}
 }
 \value{
-A likelihood object to represent a negative Binomial likelihood node.
+A 'python' object to represent a negative Binomial likelihood node.
 }
 \description{
 This function constructs a likelihood object to represent a negative Binomial likelihood node.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 The negative Binomial likelihood node can only be linked to two feeding GP nodes.
+}
+\examples{
+\dontrun{
+
+# Check https://mingdeyu.github.io/dgpsi-R/ for examples
+# on how to customize DGP structures using NegBin().
+}
 }

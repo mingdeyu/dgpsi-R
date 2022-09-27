@@ -12,12 +12,21 @@ write(object, pkl_file)
 \item{pkl_file}{the path to and the name of the \code{.pkl} file to which
 the emulator \code{object} is saved.}
 }
+\value{
+No return value. \code{object} will be save to a local \code{.pkl} file specified by \code{pkl_file}.
+}
 \description{
 This function saves the constructed emulator to a \code{.pkl} file.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-Since the constructed emulators are Python objects, \code{\link[=save]{save()}} from R will not work as it is only for R objects.
+Since the constructed emulators are 'python' objects, \code{\link[=save]{save()}} from R will not work as it is only for R objects.
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
+}
 }

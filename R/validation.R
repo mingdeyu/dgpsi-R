@@ -94,7 +94,12 @@
 #'   also be provided for OOS validation.
 #' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #' @md
 #' @name validate
 #' @export

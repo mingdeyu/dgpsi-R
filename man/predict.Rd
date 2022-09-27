@@ -141,8 +141,14 @@ This function implements single-core or multi-core predictions (with or without 
 from GP, DGP, or linked (D)GP emulators.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 Any R vector detected in \code{x} will be treated as a column vector and automatically converted into a single-column R matrix.
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
+}
 }

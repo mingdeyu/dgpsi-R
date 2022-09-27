@@ -47,8 +47,8 @@ f <- function(x) {
 Then we generate ten training data points:
 
 ```{r}
-X <- as.matrix(seq(0, 1, length = 10))
-Y <- as.matrix(sapply(X, f))
+X <- seq(0, 1, length = 10)
+Y <- sapply(X, f)
 ```
 
 ## Training
@@ -109,8 +109,8 @@ plot(m)
 The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points
 
 ```{r}
-oos_x <- as.matrix(sample(seq(0, 1, length = 200),10))
-oos_y <- as.matrix(sapply(oos_x, f))
+oos_x <- sample(seq(0, 1, length = 200),10)
+oos_y <- sapply(oos_x, f)
 ```
 
 for the validation:
@@ -132,8 +132,8 @@ plot(m,oos_x,oos_y)
 Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over $[0,1]$
 
 ```{r}
-test_x <- as.matrix(seq(0, 1, length = 200))
-test_y <- as.matrix(sapply(test_x, f))
+test_x <- seq(0, 1, length = 200)
+test_y <- sapply(test_x, f)
 ```
 
 for predictions:

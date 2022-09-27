@@ -3,15 +3,35 @@ pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
 pkg.env$np <- NULL
 
-#' Initialize the Python environment
-#' @note See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @title 'python' environment initialization
+#'
+#' @description This function initializes the 'python' environment for the package.
+#'
+#' @param py_ver a string that gives the 'python' version to be installed. If `py_ver = NULL`, the default 'python'
+#'     version '3.9.13' will be installed.
+#' @param dgpsi_ver a string that gives the 'python' version of 'dgpsi' to be used.
+#'     If `dgpsi_ver = NULL`, the latest 'python' version of 'dgpsi' will be used.
+#'
+#' @return No return value, called to install required 'python' environment.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See gp(), dgp(), or lgp() for an example.
+#' }
 #'
 #' @md
 #' @export
-init_py <- function() {
-  py_ver <- '3.9.13'
-  dgpsi_ver <- 'dgpsi==2.1.4'
-  env_name <- 'dgp_si_R_2_1_4'
+init_py <- function(py_ver = NULL, dgpsi_ver = NULL) {
+  if ( is.null(py_ver) ) py_ver <- '3.9.13'
+  if ( is.null(dgpsi_ver) ) {
+    dgpsi_ver <- 'dgpsi==2.1.5'
+    env_name <- 'dgp_si_R_2_1_5'
+  } else {
+    env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
+    dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
+  }
   #Check if there is any conda binary installed, if not, request to install it.
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
@@ -31,7 +51,7 @@ init_py <- function() {
       if (any(grepl('^dgp_si_R', reticulate::conda_list(conda = conda_path)$name))){
         conda_list <- reticulate::conda_list(conda = conda_path)$name
         dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
-        ans <- readline(prompt="I found Python environment(s) for old package versions. Do you want me to remove them for you? (Y/N) ")
+        ans <- readline(prompt="I found Python environment(s) for other versions of the package. Do you want me to remove them? (Y/N) ")
         if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
           message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
           for (item in dgpsi_list) {

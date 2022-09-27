@@ -14,10 +14,19 @@ trace_plot(object, layer = NULL, node = 1)
 \item{node}{the index of a GP node in the layer specified by \code{layer}. Defaults to \code{1} for the first GP node in the
 corresponding layer.}
 }
+\value{
+A \code{ggplot} object.
+}
 \description{
 This function plots the traces of model parameters of a chosen GP node
 in a DGP emulator.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\examples{
+\dontrun{
+
+# See dgp() for an example.
+}
 }

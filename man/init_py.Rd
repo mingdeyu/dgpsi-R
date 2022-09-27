@@ -2,13 +2,30 @@
 % Please edit documentation in R/initi_py.R
 \name{init_py}
 \alias{init_py}
-\title{Initialize the Python environment}
+\title{'python' environment initialization}
 \usage{
-init_py()
+init_py(py_ver = NULL, dgpsi_ver = NULL)
+}
+\arguments{
+\item{py_ver}{a string that gives the 'python' version to be installed. If \code{py_ver = NULL}, the default 'python'
+version '3.9.13' will be installed.}
+
+\item{dgpsi_ver}{a string that gives the 'python' version of 'dgpsi' to be used.
+If \code{dgpsi_ver = NULL}, the latest 'python' version of 'dgpsi' will be used.}
+}
+\value{
+No return value, called to install required 'python' environment.
 }
 \description{
-Initialize the Python environment
+This function initializes the 'python' environment for the package.
 }
-\note{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+\details{
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
+}
+
 }

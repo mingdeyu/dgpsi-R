@@ -47,8 +47,8 @@ Y <- mcycle$accel
 scale them,
 
 ```{r}
-X <- as.matrix((X - min(X))/(max(X)-min(X)))
-Y <- as.matrix(scale(Y, center = TRUE, scale = TRUE))
+X <- (X - min(X))/(max(X)-min(X))
+Y <- scale(Y, center = TRUE, scale = TRUE)
 ```
 
 and plot them:
@@ -62,12 +62,12 @@ plot(X, Y, pch = 16, cex = 1, xlab = 'Time', ylab = 'Acceleration', cex.axis = 1
 Before constructing an emulator, we first split a training data set and a testing data set:
 
 ```{r}
-test_idx <- sample(seq_len(nrow(X)), size = 20)
+test_idx <- sample(seq_len(length(X)), size = 20)
 
-train_X <- X[-test_idx, , drop = F]
-train_Y <- Y[-test_idx, , drop = F]
-test_x <- X[test_idx, , drop = F]
-test_y <- Y[test_idx, , drop = F]
+train_X <- X[-test_idx]
+train_Y <- Y[-test_idx,]
+test_x <- X[test_idx]
+test_y <- Y[test_idx,]
 ```
 
 ## Construct and train a DGP emulator
@@ -201,7 +201,7 @@ m_gp <- validate(m_gp, test_x, test_y)
 ## Saving results to the slot 'oos' in the gp object ... done
 ```
 
-Note that using [validate()] before plotting can saving computations involved in [plot()] because [validate()] stores validation results in the emulator objects. Finally, we plot the OOS validations for the GP emulator:
+Note that using `validate()` before plotting can saving computations involved in `plot()` because `validate()` stores validation results in the emulator objects. Finally, we plot the OOS validations for the GP emulator:
 
 ```{r}
 plot(m_gp, test_x, test_y)
@@ -229,7 +229,7 @@ plot(m_dgp, test_x, test_y)
 
 ![](images/motorcycle_dgp_oos.png)
 
-Note that we still need to provide `test_x` and `test_y` to [plot()] even they have already been provided to [validate()]. Otherwise, [plot()] will draw the LOO cross validation plot. The visualizations above show that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noises embedded in the underlying data set, even though they have quite similar NRMSEs.
+Note that we still need to provide `test_x` and `test_y` to `plot()` even they have already been provided to `validate()`. Otherwise, `plot()` will draw the LOO cross validation plot. The visualizations above show that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noises embedded in the underlying data set, even though they have quite similar NRMSEs.
 
 ### References
 

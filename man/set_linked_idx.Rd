@@ -20,11 +20,17 @@ This function sets the linked indices of a GP or DGP emulator if the information
 when the emulator is constructed by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 This function is useful when different models are emulated by different teams. Each team can create their (D)GP emulator
 even without knowing how different emulators are connected together. When this information is available and
 different emulators are collected, the connection information between emulators can then be assigned to
 individual emulators with this function.
+}
+\examples{
+\dontrun{
+
+# See lgp() for an example.
+}
 }

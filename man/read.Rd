@@ -16,5 +16,11 @@ A GP, DGP or linked (D)GP emulator S3 class.
 This function loads the \code{.pkl} file that stores the emulator.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
+}
 }

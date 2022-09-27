@@ -39,8 +39,14 @@
 #'      that are not connected to some feeding emulators. In such a case, set `input_dim` to a vector of indices of
 #'      the remaining input dimensions that are connected to the feeding emulators.
 #'
-#' @return A kernel object to represent a GP node.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @return A 'python' object to represent a GP node.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
+#' # on how to customize DGP structures using kernel().
+#' }
 #' @md
 #' @export
 kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = c(1.6,0.3), nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {

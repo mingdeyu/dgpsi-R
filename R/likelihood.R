@@ -8,9 +8,15 @@
 #'     one needs to ensure that only one GP node is specified in the feeding layer.
 #'     Defaults to `NULL`.
 #'
-#' @return A likelihood object to represent a Poisson likelihood node.
+#' @return A 'python' object to represent a Poisson likelihood node.
 #' @note The Poisson likelihood node can only be linked to one feeding GP node.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
+#' # on how to customize DGP structures using Poisson().
+#' }
 #' @md
 #' @export
 Poisson <- function(input_dim = NULL) {
@@ -32,9 +38,15 @@ Poisson <- function(input_dim = NULL) {
 #'     one needs to ensure that only two GP nodes are specified in the feeding layer.
 #'     Defaults to `NULL`.
 #'
-#' @return A likelihood object to represent a heteroskedastic Gaussian likelihood node.
+#' @return A 'python' object to represent a heteroskedastic Gaussian likelihood node.
 #' @note The heteroskedastic Gaussian likelihood node can only be linked to two feeding GP nodes.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
+#' # on how to customize DGP structures using Hetero().
+#' }
 #' @md
 #' @export
 Hetero <- function(input_dim = NULL) {
@@ -55,9 +67,15 @@ Hetero <- function(input_dim = NULL) {
 #'     one needs to ensure that only two GP nodes are specified in the feeding layer.
 #'     Defaults to `NULL`.
 #'
-#' @return A likelihood object to represent a negative Binomial likelihood node.
+#' @return A 'python' object to represent a negative Binomial likelihood node.
 #' @note The negative Binomial likelihood node can only be linked to two feeding GP nodes.
-#' @details See examples in Articles at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
+#' # on how to customize DGP structures using NegBin().
+#' }
 #' @md
 #' @export
 NegBin <- function(input_dim = NULL) {

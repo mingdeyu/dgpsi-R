@@ -29,9 +29,17 @@ This function computes the negative predicted log-likelihood from a
 DGP emulator with a likelihood layer.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 Any R vector detected in \code{x} and \code{y} will be treated as a column vector and automatically converted into a single-column
 R matrix.
+}
+\examples{
+\dontrun{
+
+# Check https://mingdeyu.github.io/dgpsi-R/ for examples
+# on how to compute the negative predicted log-likelihood
+# using nllik().
+}
 }

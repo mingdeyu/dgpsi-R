@@ -164,7 +164,7 @@ This function validate a constructed GP, DGP, or linked (D)GP emulator via the L
 cross validation or Out-Of-Sample (OOS) validation.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{
@@ -174,5 +174,11 @@ class). If a linked (D)GP emulator (i.e., \code{x} is an instance of the \code{l
 also be provided for OOS validation.
 \item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
 R matrix.
+}
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
 }
 }

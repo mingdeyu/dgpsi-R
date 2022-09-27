@@ -30,5 +30,11 @@ A table summarizing key information contained in \code{object}.
 This function summarizes key information of a GP, DGP or linked (D)GP emulator.
 }
 \details{
-See examples in Articles at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\examples{
+\dontrun{
+
+# See gp(), dgp(), or lgp() for an example.
+}
 }

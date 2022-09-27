@@ -1,7 +1,7 @@
 Package: dgpsi
 Type: Package
-Title: R Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
-Version: 2.1.4
+Title: Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
+Version: 2.1.5
 Authors@R: c(
   person('Deyu', 'Ming', role = c('aut', 'cre', 'cph'),
          email = 'deyu.ming.16@ucl.ac.uk'),
@@ -9,7 +9,7 @@ Authors@R: c(
          email = 'd.williamson@exeter.ac.uk')
   )
 Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>
-Description: R wrapper to the Python package 'dgpsi' for Gaussian process, deep Gaussian process, 
+Description: Interface to the 'python' package 'dgpsi' for Gaussian process, deep Gaussian process, 
              and linked Gaussian process emulations of computer models and systems of computer
              models. The implementations follow Ming & Guillas (2021) <doi:10.1137/20M1323771> and 
              Ming, Williamson, & Guillas (2022) <arXiv:2107.01590>. To get started with the package, 
