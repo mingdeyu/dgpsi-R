@@ -9,6 +9,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 
 **You don't need prior knowledge of Python to start using the package, all you need is a single click in R (see [Installation](#installation) section below) that automatically installs and activates the Python environment required to initialize the package!**
 
+## Features
 `dgpsi` currently has following features:
 
 * Deep Gaussian process emulation with flexible architecture construction: 
