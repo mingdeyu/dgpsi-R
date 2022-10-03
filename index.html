@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.5-9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,8 +74,9 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="dgpsi">dgpsi<a class="anchor" aria-label="anchor" href="#dgpsi"></a>
 </h1></div>
-<!-- badges: start -->
-<p>The R package <code>dgpsi</code> provides R interface to Python package <a href="https://github.com/mingdeyu/DGP" class="external-link"><code>dgpsi</code></a> for deep and linked Gaussian process emulations. The package currently has following features:</p>
+
+<p>The R package <code>dgpsi</code> provides R interface to Python package <a href="https://github.com/mingdeyu/DGP" class="external-link"><code>dgpsi</code></a> for deep and linked Gaussian process emulations. <strong>You don’t need prior knowledge of Python to start using the package, all you need is a single click in R (see <a href="#installation">Installation</a> section below) that automatically installs and activates the Python environment required to initialize the package!</strong></p>
+<p><code>dgpsi</code> currently has following features:</p>
 <ul>
 <li>Deep Gaussian process emulation with flexible architecture construction:<ul>
 <li>multiple layers;</li>
@@ -101,17 +102,18 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install development version of the package from the GitHub repo:</p>
-<ol style="list-style-type: decimal"><li>In your RStudio Console, type:</li></ol>
+<p>You can install the package from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'mingdeyu/dgpsi-R'</span><span class="op">)</span></span></code></pre></div>
-<ol start="2" style="list-style-type: decimal">
-<li><p>Restart your RStudio.</p></li>
-<li><p>Load the package and initialize the required Python environment:</p></li>
-</ol>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'dgpsi'</span><span class="op">)</span></span></code></pre></div>
+<p>or its development version from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'mingdeyu/dgpsi-R'</span><span class="op">)</span></span></code></pre></div>
+<p>After the installation, run</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>to install and activate the required Python environment. That’s it, the package is now ready to use!</p>
+<p><strong>Remark</strong>: always run <code><a href="reference/init_py.html">init_py()</a></code> after <code><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">library(dgpsi)</a></code>, telling R to invoke the required Python environment.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -157,6 +159,8 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://www.r-pkg.org/badges/version/dgpsi" alt="CRAN_Status_Badge"></a></li>
+<li><a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen" alt="Download"></a></li>
 <li><a href="https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://epubs.siam.org/doi/abs/10.1137/20M1323771" class="external-link"><img src="https://img.shields.io/badge/DOI-10.1137%2F20M1323771-informational" alt="DOI"></a></li>
 </ul>
