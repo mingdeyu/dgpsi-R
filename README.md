@@ -51,8 +51,7 @@ init_py()
 
 to install and activate the required Python environment. That's it, the package is now ready to use!
 
-> **Note** 
->
+> **Note**  
 > Always run `init_py()` after `library(dgpsi)`, telling R to invoke the required Python environment.
 
 ## References
