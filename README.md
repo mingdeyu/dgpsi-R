@@ -24,9 +24,6 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 
-## Documentation
-See [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
-
 ## Installation
 You can install the package from CRAN:
 
@@ -51,6 +48,9 @@ to install and activate the required Python environment. That's it, the package 
 
 > **Note**  
 > Always run `init_py()` after `library(dgpsi)`, telling R to invoke the required Python environment.
+
+## Getting started
+Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
 
 ## References
 > [Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i> (to appear).](https://arxiv.org/abs/2107.01590)
