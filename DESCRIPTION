@@ -1,7 +1,7 @@
 Package: dgpsi
 Type: Package
 Title: Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
-Version: 2.1.5
+Version: 2.1.5-9000
 Authors@R: c(
   person('Deyu', 'Ming', role = c('aut', 'cre', 'cph'),
          email = 'deyu.ming.16@ucl.ac.uk'),

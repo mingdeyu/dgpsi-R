@@ -1,11 +1,13 @@
 # dgpsi
-<!-- badges: start -->
+  [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dgpsi)](https://CRAN.R-project.org/package=dgpsi)
+  [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
   [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
-  ![GitHub](https://img.shields.io/github/license/mingdeyu/DGP)
+  ![CRAN/METACRAN](https://img.shields.io/cran/l/dgpsi?color=green)
   [![DOI](https://img.shields.io/badge/DOI-10.1137%2F20M1323771-informational)](https://epubs.siam.org/doi/abs/10.1137/20M1323771)
-<!-- badges: end -->
   
-The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations. The package currently has following features:
+The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations. **You don't need prior knowledge of Python to start using the package, all you need is a single click in R (see [Installation](#installation) section below) that automatically installs and activates the Python environment required to initialize the package!**
+
+`dgpsi` currently has following features:
 
 * Deep Gaussian process emulation with flexible architecture construction: 
     - multiple layers;
@@ -23,20 +25,28 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 See [https://mingdeyu.github.io/dgpsi-R](https://mingdeyu.github.io/dgpsi-R/) to learn more about the package.
 
 ## Installation
-You can install development version of the package from the GitHub repo:
+You can install the package from CRAN:
 
-1. In your RStudio Console, type:
+```r
+install.packages('dgpsi')
+```
+
+or its development version from GitHub:
+
 ```r
 devtools::install_github('mingdeyu/dgpsi-R')
 ```
 
-2. Restart your RStudio.
+After the installation, run 
 
-3. Load the package and initialize the required Python environment:
 ```r
 library(dgpsi)
 init_py()
 ```
+
+to install and activate the required Python environment. That's it, the package is now ready to use!
+
+**Remark**: always run `init_py()` after `library(dgpsi)`, telling R to invoke the required Python environment.
 
 ## References
 > [Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i> (to appear).](https://arxiv.org/abs/2107.01590)

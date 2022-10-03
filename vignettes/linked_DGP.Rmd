@@ -2,7 +2,7 @@
 title: "Linked (D)GP Emulation"
 output: rmarkdown::html_vignette
 description: >
-  Linked (D)GP emulation of a synthetic system of two linked computer models.
+  Linked (D)GP emulation of a synthetic system of three linked computer models.
 vignette: >
   %\VignetteIndexEntry{Linked (D)GP Emulation}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to use the package to emulate a feed-forward system of two synthetic computer models.
+This vignette shows how to use the package to emulate a feed-forward system of three synthetic computer models.
 
 ## Load the package
 

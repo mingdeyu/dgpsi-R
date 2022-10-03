@@ -22,7 +22,7 @@ articles:
   - dgpsi
 
 - title: Linked (D)GP Emulation
-  desc: Linked (D)GP emulation of a synthetic system of two linked computer models.
+  desc: Linked (D)GP emulation of a synthetic system of three linked computer models.
   navbar: ~
   contents:
   - linked_DGP
