@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-`dgpsi` provides a flexible toolbox for Gaussian process (GP), deep Gaussian process (DGP) and linked (D)GP emulations. In this guide, we shows how to use the package to emulate a step function with a three-layered DGP structure. There are other examples showing the functionality of the package in [`Articles`](https://mingdeyu.github.io/dgpsi-R/articles/index.html) on the package website, and how to customize a DGP structure. A comprehensive reference of available functions is documented in [`Reference`](https://mingdeyu.github.io/dgpsi-R/reference/index.html) section of the package website. 
+`dgpsi` provides a flexible toolbox for Gaussian process (GP), deep Gaussian process (DGP) and linked (D)GP emulations. In this guide, we show how to use the package to emulate a step function with a three-layered DGP structure. There are other examples showing the functionality of the package in [`Articles`](https://mingdeyu.github.io/dgpsi-R/articles/index.html) on the package website, and how to customize a DGP structure. A comprehensive reference of available functions is documented in [`Reference`](https://mingdeyu.github.io/dgpsi-R/reference/index.html) section of the package website. 
 
 ## Load the package
 
@@ -66,7 +66,7 @@ m <- dgp(X, Y, depth = 3)
 ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04<00:00, 123.37it/s]
 ```
 
-The progress bar displayed shows how long it takes to finish the training. We are able to change some default settings. E.g., we can set `verb = 2` so a summary table of the initialized DGP emulator will be printed out before we proceed to training. This is particularly useful if a customized structure is provided to `struc` and we want to check it before the training is implemented. Note that if we want to train the DGP emulator `m` for additional iterations, we can simply do `m <- continue(m)` instead of rebuilding the DGP emulator.
+The progress bar displayed shows how long it takes to finish the training. We are able to switch off the progress bar and the trace information by setting `verb = FALSE`. Note that if we want to train the DGP emulator `m` for additional iterations, we can simply do `m <- continue(m)` instead of rebuilding the DGP emulator.
 
 The trained DGP emulator can be viewed using the `summary()` function:
 
@@ -86,9 +86,9 @@ summary(m)
 ## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.
 ```
 
-The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
+The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating a deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
 
-At this point, you could use `write()` to save the emulator `m` to a local file and then load it using `read()` next time when you would like to make predictions from the emulator.
+At this point, you could use `write()` to save the emulator `m` to a local file and then load it using `read()` when you would like to make predictions from the emulator, e.g., on another laptop that also has the package installed.
 
 ## Validation
 
@@ -129,7 +129,7 @@ plot(m,oos_x,oos_y)
 
 ## Prediction
 
-Once the validation is done, we can make predictions from it. We generate 200 data points from the step function over $[0,1]$
+Once the validation is done, we can make predictions from the DGP emulator. We generate 200 data points from the step function over $[0,1]$
 
 ```{r}
 test_x <- seq(0, 1, length = 200)
@@ -152,7 +152,7 @@ up <- mu + 2*sd
 lo <- mu - 2*sd
 
 plot(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black', xlab = 'x', cex.axis = 1.3, cex.lab = 1.3, ylab = 'y', ylim = c(-1.5,1.5))  # predictive means 
-polygon(c(test_x, rev(test_x)), c(up,rev(lo)), col = 'grey80', border = F) # predictive bounds
+polygon(c(test_x, rev(test_x)), c(up,rev(lo)), col = 'grey80', border = F) # credible interval
 lines(test_x, test_y, type = 'l', col = "#D55E00", lwd = 2) # Underlying truth
 lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 lines(X, Y, type = 'p', pch = 16, cex = 1, col = "#0072B2") # Training data points
