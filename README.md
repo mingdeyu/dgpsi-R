@@ -3,8 +3,8 @@
   [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
   [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
   ![CRAN_License](https://img.shields.io/cran/l/dgpsi?color=green)
-  [![DOI](https://img.shields.io/badge/DOI-Linked%20GP-informational)](https://epubs.siam.org/doi/abs/10.1137/20M1323771)
-  [![DOI](https://img.shields.io/badge/DOI-Deep%20GP-informational)](https://doi.org/10.1080/00401706.2022.2124311)
+  [![DOC](https://img.shields.io/badge/DOC-Linked%20GP-informational)](https://epubs.siam.org/doi/abs/10.1137/20M1323771)
+  [![DOC](https://img.shields.io/badge/DOC-Deep%20GP-informational)](https://doi.org/10.1080/00401706.2022.2124311)
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations. 
 
