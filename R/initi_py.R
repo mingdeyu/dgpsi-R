@@ -9,8 +9,13 @@ pkg.env$np <- NULL
 #'
 #' @param py_ver a string that gives the 'python' version to be installed. If `py_ver = NULL`, the default 'python'
 #'     version '3.9.13' will be installed.
-#' @param dgpsi_ver a string that gives the 'python' version of 'dgpsi' to be used.
-#'     If `dgpsi_ver = NULL`, the latest 'python' version of 'dgpsi' will be used.
+#' @param dgpsi_ver a string that gives the 'python' version of 'dgpsi' to be used. If `dgpsi_ver = NULL`,
+#' * the latest 'python' version of 'dgpsi' will be used, if you install the package from CRAN;
+#' * the development 'python' version of 'dgpsi' will be used, if you install the package from GitHub.
+#' @param reinstall a bool that indicates whether to reinstall the 'python' version of 'dgpsi' specified
+#'    in `dgpsi_ver` if it has already been installed. This argument is useful when the development version
+#'    of the R package is installed and one may want to regularly update the development 'python' version
+#'    of 'dgpsi'. Defaults to `FALSE`.
 #'
 #' @return No return value, called to install required 'python' environment.
 #'
@@ -23,11 +28,17 @@ pkg.env$np <- NULL
 #'
 #' @md
 #' @export
-init_py <- function(py_ver = NULL, dgpsi_ver = NULL) {
+init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
   if ( is.null(py_ver) ) py_ver <- '3.9.13'
   if ( is.null(dgpsi_ver) ) {
-    dgpsi_ver <- 'dgpsi==2.1.5'
-    env_name <- 'dgp_si_R_2_1_5'
+    ##For devel version
+    dgpsi_ver <- c('cython>=0.29.30', 'dill>=0.3.2', 'jupyter>=1.0.0', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
+                   'numpy >=1.18.2', 'pathos >=0.2.9', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
+                   'scikit-build >=0.15.0', 'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7')
+    env_name <- 'dgp_si_R_2_1_5_9000'
+    ##For release version
+    #dgpsi_ver <- 'dgpsi==2.1.5'
+    #env_name <- 'dgp_si_R_2_1_5'
   } else {
     env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
     dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
@@ -69,6 +80,10 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL) {
                 install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
               }
       }
+    } else {
+      if (isTRUE(reinstall)) {
+        reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+      }
     }
   }
 
@@ -95,6 +110,9 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"') , conda = conda_path)
   } else {
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
+  }
+  if (grepl('9000',env_name)) {
+    reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE)
   }
 }
 

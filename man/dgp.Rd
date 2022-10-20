@@ -76,8 +76,8 @@ in the final layer. If it is a vector (which must have a length of \code{ncol(Y)
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic emulations where
 the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used when \code{struc = NULL}.}
 
-\item{connect}{a bool indicating whether to implement global input connection to the DGP structure. Defaults to \code{TRUE}.
-This argument is only used when \code{struc = NULL}.}
+\item{connect}{a bool indicating whether to implement global input connection to the DGP structure. Setting it to \code{FALSE} may produce a better emulator in some cases at
+the cost of slower training. Defaults to \code{TRUE}. This argument is only used when \code{struc = NULL}.}
 
 \item{likelihood}{the likelihood type of a DGP emulator:
 \enumerate{
@@ -169,7 +169,7 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/} 
 }
 \note{
 Any R vector detected in \code{X} and \code{Y} will be treated as a column vector and automatically converted into a single-column
-R matrix.
+R matrix. Thus, if \code{X} is a single data point with multiple dimensions, it must be given as a matrix.
 }
 \examples{
 \dontrun{

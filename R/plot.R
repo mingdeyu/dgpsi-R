@@ -40,7 +40,7 @@
 #'   are already stored in `x`, unless `x_test` and `y_test` are identical to those used by [validate()], [plot()] will re-evaluate OOS
 #'   validations before plotting.
 #' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
-#'   R matrix.
+#'   R matrix. Thus, if `x_test` or `y_test` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' * The returned `patchwork` object contains the `ggplot2` objects. One can modify the included individual ggplots
 #'   by accessing them with double-bracket indexing. See <https://patchwork.data-imaginist.com/> for further information.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.

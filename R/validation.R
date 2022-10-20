@@ -93,7 +93,7 @@
 #'   class). If a linked (D)GP emulator (i.e., `x` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
 #'   also be provided for OOS validation.
 #' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
-#'   R matrix.
+#'   R matrix. Thus, if `x_test` or `y_test` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
 #' \dontrun{

@@ -61,7 +61,7 @@
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
-#'     R matrix.
+#'     R matrix. Thus, if `X` is a single data point with multiple dimensions, it must be given as a matrix.
 #' @examples
 #' \dontrun{
 #' # load the package and the Python env

@@ -78,6 +78,7 @@
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `x` will be treated as a column vector and automatically converted into a single-column R matrix.
+#'     Thus, if `x` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @examples
 #' \dontrun{
 #'

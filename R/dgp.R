@@ -35,8 +35,8 @@
 #'    (if any) in the final layer. Set `nugget` to a small value and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
 #'    interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic emulations where
 #'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used when `struc = NULL`.
-#' @param connect a bool indicating whether to implement global input connection to the DGP structure. Defaults to `TRUE`.
-#'     This argument is only used when `struc = NULL`.
+#' @param connect a bool indicating whether to implement global input connection to the DGP structure. Setting it to `FALSE` may produce a better emulator in some cases at
+#'    the cost of slower training. Defaults to `TRUE`. This argument is only used when `struc = NULL`.
 #' @param likelihood the likelihood type of a DGP emulator:
 #' 1. `NULL`: no likelihood layer is included in the emulator.
 #' 2. `"Hetero"`: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
@@ -101,7 +101,7 @@
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/> and learn how to customize a DGP structure.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
-#'     R matrix.
+#'     R matrix. Thus, if `X` is a single data point with multiple dimensions, it must be given as a matrix.
 #' @examples
 #' \dontrun{
 #'

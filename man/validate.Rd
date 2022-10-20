@@ -173,7 +173,7 @@ be implemented. The LOO validation is only applicable to a GP or DGP emulator (i
 class). If a linked (D)GP emulator (i.e., \code{x} is an instance of the \code{lgp} class) is provided, \code{x_test} and \code{y_test} must
 also be provided for OOS validation.
 \item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
-R matrix.
+R matrix. Thus, if \code{x_test} or \code{y_test} is a single testing data point with multiple dimensions, it must be given as a matrix.
 }
 }
 \examples{
