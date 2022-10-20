@@ -147,8 +147,8 @@ the computer model outputs are assumed to follow a homogeneous Gaussian distribu
 
 
 <dt>connect</dt>
-<dd><p>a bool indicating whether to implement global input connection to the DGP structure. Defaults to <code>TRUE</code>.
-This argument is only used when <code>struc = NULL</code>.</p></dd>
+<dd><p>a bool indicating whether to implement global input connection to the DGP structure. Setting it to <code>FALSE</code> may produce a better emulator in some cases at
+the cost of slower training. Defaults to <code>TRUE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>likelihood</dt>
@@ -252,7 +252,7 @@ to add linking information to the DGP emulator. Defaults to <code>NULL</code>.</
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Any R vector detected in <code>X</code> and <code>Y</code> will be treated as a column vector and automatically converted into a single-column
-R matrix.</p>
+R matrix. Thus, if <code>X</code> is a single data point with multiple dimensions, it must be given as a matrix.</p>
     </div>
 
     <div class="section level2">

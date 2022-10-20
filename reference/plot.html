@@ -187,7 +187,7 @@ is invoked, unnecessary evaluations of repetitive LOO or OOS validation will not
 are already stored in <code>x</code>, unless <code>x_test</code> and <code>y_test</code> are identical to those used by <code><a href="validate.html">validate()</a></code>, <code>plot()</code> will re-evaluate OOS
 validations before plotting.</p></li>
 <li><p>Any R vector detected in <code>x_test</code> and <code>y_test</code> will be treated as a column vector and automatically converted into a single-column
-R matrix.</p></li>
+R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testing data point with multiple dimensions, it must be given as a matrix.</p></li>
 <li><p>The returned <code>patchwork</code> object contains the <code>ggplot2</code> objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See <a href="https://patchwork.data-imaginist.com/" class="external-link">https://patchwork.data-imaginist.com/</a> for further information.</p></li>
 </ul></div>
