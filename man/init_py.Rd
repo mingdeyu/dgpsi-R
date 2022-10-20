@@ -12,8 +12,8 @@ version '3.9.13' will be installed.}
 
 \item{dgpsi_ver}{a string that gives the 'python' version of 'dgpsi' to be used. If \code{dgpsi_ver = NULL},
 \itemize{
-\item the latest 'python' version of 'dgpsi' will be used, if you install the package from CRAN;
-\item the development 'python' version of 'dgpsi' will be used, if you install the package from GitHub.
+\item the latest 'python' version of 'dgpsi' will be used, if the package is installed from CRAN;
+\item the development 'python' version of 'dgpsi' will be used, if the package is installed from GitHub.
 }}
 
 \item{reinstall}{a bool that indicates whether to reinstall the 'python' version of 'dgpsi' specified

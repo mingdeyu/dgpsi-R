@@ -10,8 +10,8 @@ pkg.env$np <- NULL
 #' @param py_ver a string that gives the 'python' version to be installed. If `py_ver = NULL`, the default 'python'
 #'     version '3.9.13' will be installed.
 #' @param dgpsi_ver a string that gives the 'python' version of 'dgpsi' to be used. If `dgpsi_ver = NULL`,
-#' * the latest 'python' version of 'dgpsi' will be used, if you install the package from CRAN;
-#' * the development 'python' version of 'dgpsi' will be used, if you install the package from GitHub.
+#' * the latest 'python' version of 'dgpsi' will be used, if the package is installed from CRAN;
+#' * the development 'python' version of 'dgpsi' will be used, if the package is installed from GitHub.
 #' @param reinstall a bool that indicates whether to reinstall the 'python' version of 'dgpsi' specified
 #'    in `dgpsi_ver` if it has already been installed. This argument is useful when the development version
 #'    of the R package is installed and one may want to regularly update the development 'python' version
