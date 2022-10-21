@@ -25,6 +25,9 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 
+## Getting started
+Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
+
 ## Installation
 You can install the package from CRAN:
 
@@ -65,25 +68,32 @@ to install and activate the required Python environment. That's it, the package 
 >    ```
 >    conda activate dgp_si_R_X_Y_Z
 >    ```
->    
 >    if you installed the release version `X.Y.Z`; or
 >    
 >    ```
 >    conda activate dgp_si_R_X_Y_Z
 >    ```
->   
 >    if you installed the development version `X.Y.Z-9000`.
 > 3. Install the `libstdcxx-ng` package:
->    `conda install -c conda-forge libstdcxx-ng`
+>
+>    ```
+>    conda install -c conda-forge libstdcxx-ng
+>    ```
 > 4. Search for the path of the latest version of `libstdc++.so` (e.g., `libstdc++.so.6.0.30`):
->    `find / -name "libstdc++.so*"`
+>
+>    ```
+>    find / -name "libstdc++.so*"
+>    ```
 > 5. Remove the current version of `libstdc++.so` installed in the system:
->    `sudo rm /usr/lib/x86_64-linux-gnu/libstdc++.so.6`
+>
+>    ```
+>    sudo rm /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>    ```
 > 6. Create a symlink in the system lib to the latest version of `libstdc++.so` found in Step 4 above:
->    `sudo ln -s PATH-FOUND-IN-STEP4 /usr/lib/x86_64-linux-gnu/libstdc++.so.6`
-
-## Getting started
-Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
+>
+>    ```
+>    sudo ln -s PATH-FOUND-IN-STEP4 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>    ```
 
 ## References
 > [Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i>. 0(0), 1-12.](https://doi.org/10.1080/00401706.2022.2124311)
