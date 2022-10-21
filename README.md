@@ -52,13 +52,27 @@ to install and activate the required Python environment. That's it, the package 
 
 > **Warning**  
 > If you are Linux users and encountered importing errors similar to
-> `/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found`
+>
+> ```
+> /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found`
+> ```
+>
 > during the execution of `init_py()`, please try the following procedure to resolve the issue:
 > 
 > 1. Open your terminal.
 > 2. Activate the conda env:
->    `conda activate dgp_si_R_X_Y_Z` if you installed the release version `X.Y.Z`; or
->    `conda activate dgp_si_R_X_Y_Z_9000` if you installed the development version `X.Y.Z-9000`.
+>
+>    ```
+>    conda activate dgp_si_R_X_Y_Z
+>    ```
+>    
+>    if you installed the release version `X.Y.Z`; or
+>    
+>    ```
+>    conda activate dgp_si_R_X_Y_Z
+>    ```
+>   
+>    if you installed the development version `X.Y.Z-9000`.
 > 3. Install the `libstdcxx-ng` package:
 >    `conda install -c conda-forge libstdcxx-ng`
 > 4. Search for the path of the latest version of `libstdc++.so` (e.g., `libstdc++.so.6.0.30`):
