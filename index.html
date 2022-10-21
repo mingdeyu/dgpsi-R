@@ -121,32 +121,32 @@ Always run <code><a href="reference/init_py.html">init_py()</a></code> after <co
 <blockquote>
 <p><strong>Warning</strong><br>
 If you are Linux users and encountered importing errors similar to</p>
-<pre><code>/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found</code></pre>
+<pre class="shell"><code>/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found</code></pre>
 <p>during the execution of <code><a href="reference/init_py.html">init_py()</a></code>, please try the following procedure to resolve the issue:</p>
 <ol style="list-style-type: decimal">
 <li><p>Open your terminal.</p></li>
 <li>
 <p>Activate the conda environment</p>
-<pre><code>conda activate dgp_si_R_X_Y_Z</code></pre>
+<pre class="shell"><code>conda activate dgp_si_R_X_Y_Z</code></pre>
 <p>if you installed the release version <code>X.Y.Z</code>, or</p>
-<pre><code>conda activate dgp_si_R_X_Y_Z</code></pre>
+<pre class="shell"><code>conda activate dgp_si_R_X_Y_Z_9000</code></pre>
 <p>if you installed the development version <code>X.Y.Z-9000</code>.</p>
 </li>
 <li>
 <p>Install the <code>libstdcxx-ng</code> package:</p>
-<pre><code>conda install -c conda-forge libstdcxx-ng</code></pre>
+<pre class="shell"><code>conda install -c conda-forge libstdcxx-ng</code></pre>
 </li>
 <li>
 <p>Search for the path of the latest version of <code>libstdc++.so</code> (e.g., <code>libstdc++.so.6.0.30</code>):</p>
-<pre><code>find / -name "libstdc++.so*"</code></pre>
+<pre class="shell"><code>find / -name "libstdc++.so*"</code></pre>
 </li>
 <li>
 <p>Remove the current version of <code>libstdc++.so</code> installed in the system:</p>
-<pre><code>sudo rm /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code></pre>
+<pre class="shell"><code>sudo rm /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code></pre>
 </li>
 <li>
 <p>Create a symlink in the system lib to the latest version of <code>libstdc++.so</code> found in Step 4:</p>
-<pre><code>sudo ln -s PATH-FOUND-IN-STEP4 /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code></pre>
+<pre class="shell"><code>sudo ln -s PATH-FOUND-IN-STEP4 /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code></pre>
 </li>
 <li><p>Restart R and reload the package.</p></li>
 </ol>
