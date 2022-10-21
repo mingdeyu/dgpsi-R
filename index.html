@@ -115,18 +115,22 @@ You don’t need prior knowledge of Python to start using the package, all you n
 Always run <code><a href="reference/init_py.html">init_py()</a></code> after <code><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">library(dgpsi)</a></code>, telling R to invoke the required Python environment.</p></blockquote>
 <blockquote>
 <p><strong>Warning</strong><br>
-If you are Linux users and encountered importing errors similar to <code>/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found</code> during the execution of <code><a href="reference/init_py.html">init_py()</a></code>, please try the following procedure to resolve the issue:</p>
+If you are Linux users and encountered importing errors similar to</p>
+<pre><code>/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found`</code></pre>
+<p>during the execution of <code><a href="reference/init_py.html">init_py()</a></code>, please try the following procedure to resolve the issue:</p>
 <ol style="list-style-type: decimal">
-<li>Open your terminal.</li>
-<li>Activate the conda env: <code>conda activate dgp_si_R_X_Y_Z</code> if you installed the release version <code>X.Y.Z</code>; or <code>conda activate dgp_si_R_X_Y_Z_9000</code> if you installed the development version <code>X.Y.Z-9000</code>.</li>
-<li>Install the <code>libstdcxx-ng</code> package: <code>conda install -c conda-forge libstdcxx-ng</code>
+<li><p>Open your terminal.</p></li>
+<li>
+<p>Activate the conda env:</p>
+<pre><code>conda activate dgp_si_R_X_Y_Z</code></pre>
+<p>if you installed the release version <code>X.Y.Z</code>; or</p>
+<pre><code>conda activate dgp_si_R_X_Y_Z</code></pre>
+<p>if you installed the development version <code>X.Y.Z-9000</code>.</p>
 </li>
-<li>Search for the path of the latest version of <code>libstdc++.so</code> (e.g., <code>libstdc++.so.6.0.30</code>): <code>find / -name "libstdc++.so*"</code>
-</li>
-<li>Remove the current version of <code>libstdc++.so</code> installed in the system: <code>sudo rm /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code>
-</li>
-<li>Create a symlink in the system lib to the latest version of <code>libstdc++.so</code> found in Step 4 above: <code>sudo ln -s PATH-FOUND-IN-STEP4 /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code>
-</li>
+<li><p>Install the <code>libstdcxx-ng</code> package: <code>conda install -c conda-forge libstdcxx-ng</code></p></li>
+<li><p>Search for the path of the latest version of <code>libstdc++.so</code> (e.g., <code>libstdc++.so.6.0.30</code>): <code>find / -name "libstdc++.so*"</code></p></li>
+<li><p>Remove the current version of <code>libstdc++.so</code> installed in the system: <code>sudo rm /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code></p></li>
+<li><p>Create a symlink in the system lib to the latest version of <code>libstdc++.so</code> found in Step 4 above: <code>sudo ln -s PATH-FOUND-IN-STEP4 /usr/lib/x86_64-linux-gnu/libstdc++.so.6</code></p></li>
 </ol>
 </blockquote>
 </div>
