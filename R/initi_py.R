@@ -87,6 +87,13 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
     }
   }
 
+  if (Sys.info()[["sysname"]] == 'Linux'){
+    libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
+    libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+    system(paste("sudo rm",libstdc_sys_path))
+    system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
+  }
+
   message("Connecting to Python ...", appendLF = FALSE)
   warning_error_handler(with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)))
   message(" done")
