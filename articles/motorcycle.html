@@ -90,11 +90,14 @@
 
     
     
-<p>This vignette gives a demonstration of the package on emulating the popular motorcycle dataset <span class="citation">(Silverman 1985)</span>.</p>
+<p>This vignette gives a demonstration of the package on emulating the
+popular motorcycle dataset <span class="citation">(Silverman
+1985)</span>.</p>
 <div class="section level2">
 <h2 id="load-packages-and-data">Load packages and data<a class="anchor" aria-label="anchor" href="#load-packages-and-data"></a>
 </h2>
-<p>We start by first loading packages and setting up the required Python environment via <code><a href="../reference/init_py.html">init_py()</a></code></p>
+<p>We start by first loading packages and setting up the required Python
+environment via <code><a href="../reference/init_py.html">init_py()</a></code></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/" class="external-link">MASS</a></span><span class="op">)</span></span>
@@ -103,7 +106,9 @@
 <pre><code><span><span class="co">## Connecting to Python ... done</span></span>
 <span><span class="co">## Importing required Python modules ... done</span></span>
 <span><span class="co">## The Python environment for 'dgpsi' is successfully loaded.</span></span></code></pre>
-<p><code><a href="../reference/init_py.html">init_py()</a></code> provides an automatic Python environment setup and initialization routine and must be run every time after the package is loaded. We now load the training data points,</p>
+<p><code><a href="../reference/init_py.html">init_py()</a></code> provides an automatic Python environment setup
+and initialization routine and must be run every time after the package
+is loaded. We now load the training data points,</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">mcycle</span><span class="op">$</span><span class="va">times</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">mcycle</span><span class="op">$</span><span class="va">accel</span></span></code></pre></div>
@@ -115,7 +120,8 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">1</span>, xlab <span class="op">=</span> <span class="st">'Time'</span>, ylab <span class="op">=</span> <span class="st">'Acceleration'</span>, cex.axis <span class="op">=</span> <span class="fl">1.3</span>, cex.lab <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/motorcycle_data.png"></p>
-<p>Before constructing an emulator, we first split a training data set and a testing data set:</p>
+<p>Before constructing an emulator, we first split a training data set
+and a testing data set:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
@@ -127,12 +133,23 @@
 <div class="section level2">
 <h2 id="construct-and-train-a-dgp-emulator">Construct and train a DGP emulator<a class="anchor" aria-label="anchor" href="#construct-and-train-a-dgp-emulator"></a>
 </h2>
-<p>We consider a three-layered DGP emulator with squared exponential kernels:</p>
+<p>We consider a three-layered DGP emulator with squared exponential
+kernels:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">train_X</span>, <span class="va">train_Y</span>, depth <span class="op">=</span> <span class="fl">3</span>, lengthscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.2</span><span class="op">)</span>, likelihood <span class="op">=</span> <span class="st">"Hetero"</span>, training <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span></code></pre>
-<p>We choose a heteroskedastic Gaussian likelihood by setting <code>likelihood = "Hetero"</code> since the data drawn in the plot show varying noises. <code>lengthscale</code> is set to <code>c(0.5, 0.2)</code> where <code>0.5</code> is the initial lengthscale value for kernel functions of all GP nodes in the first layer and <code>0.2</code> is the initial lengthscale value for kernel functions of all GP nodes in the second layer. We set <code>training = FALSE</code> so <code><a href="../reference/dgp.html">dgp()</a></code> only constructs a DGP structure and we can use <code><a href="../reference/summary.html">summary()</a></code> to check if our specifications for the DGP emulator is correct before proceeding to training:</p>
+<p>We choose a heteroskedastic Gaussian likelihood by setting
+<code>likelihood = "Hetero"</code> since the data drawn in the plot show
+varying noises. <code>lengthscale</code> is set to
+<code>c(0.5, 0.2)</code> where <code>0.5</code> is the initial
+lengthscale value for kernel functions of all GP nodes in the first
+layer and <code>0.2</code> is the initial lengthscale value for kernel
+functions of all GP nodes in the second layer. We set
+<code>training = FALSE</code> so <code><a href="../reference/dgp.html">dgp()</a></code> only constructs a
+DGP structure and we can use <code><a href="../reference/summary.html">summary()</a></code> to check if our
+specifications for the DGP emulator is correct before proceeding to
+training:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_dgp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
@@ -145,12 +162,18 @@
 <span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.</span></span>
 <span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.</span></span></code></pre>
-<p>For a DGP emulator, we can use <code><a href="../reference/continue.html">continue()</a></code> to invoke the training for the constructed <code>m_dgp</code> instead of re-building everything from scratch by re-running <code><a href="../reference/dgp.html">dgp()</a></code>:</p>
+<p>For a DGP emulator, we can use <code><a href="../reference/continue.html">continue()</a></code> to invoke the
+training for the constructed <code>m_dgp</code> instead of re-building
+everything from scratch by re-running <code><a href="../reference/dgp.html">dgp()</a></code>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/continue.html">continue</a></span><span class="op">(</span><span class="va">m_dgp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Continue the training:</span></span>
 <span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:18&lt;00:00, 27.49it/s]</span></span></code></pre>
-<p>For comparison, we also build a GP emulator (by <code><a href="../reference/gp.html">gp()</a></code>) that incorporates homogeneous noises by setting <code>nugget_est = T</code> and the initial nugget value to <span class="math inline">\(0.01\)</span>. We set <code>training</code> to <code>FALSE</code> so we can use <code><a href="../reference/summary.html">summary()</a></code> to check the generated GP structure before training:</p>
+<p>For comparison, we also build a GP emulator (by <code><a href="../reference/gp.html">gp()</a></code>)
+that incorporates homogeneous noises by setting
+<code>nugget_est = T</code> and the initial nugget value to <span class="math inline">\(0.01\)</span>. We set <code>training</code> to
+<code>FALSE</code> so we can use <code><a href="../reference/summary.html">summary()</a></code> to check the
+generated GP structure before training:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">train_X</span>, <span class="va">train_Y</span>, nugget_est <span class="op">=</span> <span class="cn">T</span>, nugget <span class="op">=</span> <span class="fl">1e-2</span>, training <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_gp</span><span class="op">)</span></span></code></pre></div>
@@ -162,13 +185,15 @@
 <span><span class="co">## | Squared-Exp |     [0.200]     |  1.000   | 0.010  |    [1]     |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.</span></span></code></pre>
-<p>We now train the GP emulator by re-running the above function with <code>training = TRUE</code>, which is the default setting:</p>
+<p>We now train the GP emulator by re-running the above function with
+<code>training = TRUE</code>, which is the default setting:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">train_X</span>, <span class="va">train_Y</span>, nugget_est <span class="op">=</span> <span class="cn">T</span>, nugget <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a GP structure ... done</span></span>
 <span><span class="co">## Initializing the GP emulator ... done</span></span>
 <span><span class="co">## Training the GP emulator ... done</span></span></code></pre>
-<p>Before we validate the constructed emulators, we can summarize the trained DGP emulator:</p>
+<p>Before we validate the constructed emulators, we can summarize the
+trained DGP emulator:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_dgp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
@@ -194,7 +219,9 @@
 <div class="section level2">
 <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
 </h2>
-<p>We are now ready to validate both emulators via <code><a href="../reference/validate.html">validate()</a></code> at 20 out-of-sample testing positions generated earlier:</p>
+<p>We are now ready to validate both emulators via
+<code><a href="../reference/validate.html">validate()</a></code> at 20 out-of-sample testing positions generated
+earlier:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m_dgp</span>, <span class="va">test_x</span>, <span class="va">test_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing the OOS ... done</span></span>
@@ -205,7 +232,10 @@
 <pre><code><span><span class="co">## Initializing the OOS ... done</span></span>
 <span><span class="co">## Calculating the OOS ... done</span></span>
 <span><span class="co">## Saving results to the slot 'oos' in the gp object ... done</span></span></code></pre>
-<p>Note that using <code><a href="../reference/validate.html">validate()</a></code> before plotting can saving computations involved in <code><a href="../reference/plot.html">plot()</a></code> because <code><a href="../reference/validate.html">validate()</a></code> stores validation results in the emulator objects. Finally, we plot the OOS validations for the GP emulator:</p>
+<p>Note that using <code><a href="../reference/validate.html">validate()</a></code> before plotting can saving
+computations involved in <code><a href="../reference/plot.html">plot()</a></code> because
+<code><a href="../reference/validate.html">validate()</a></code> stores validation results in the emulator
+objects. Finally, we plot the OOS validations for the GP emulator:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_gp</span>, <span class="va">test_x</span>, <span class="va">test_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
@@ -219,13 +249,22 @@
 <span><span class="co">## Post-processing OOS results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
 <p><img src="images/motorcycle_dgp_oos.png"></p>
-<p>Note that we still need to provide <code>test_x</code> and <code>test_y</code> to <code><a href="../reference/plot.html">plot()</a></code> even they have already been provided to <code><a href="../reference/validate.html">validate()</a></code>. Otherwise, <code><a href="../reference/plot.html">plot()</a></code> will draw the LOO cross validation plot. The visualizations above show that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noises embedded in the underlying data set, even though they have quite similar NRMSEs.</p>
+<p>Note that we still need to provide <code>test_x</code> and
+<code>test_y</code> to <code><a href="../reference/plot.html">plot()</a></code> even they have already been
+provided to <code><a href="../reference/validate.html">validate()</a></code>. Otherwise, <code><a href="../reference/plot.html">plot()</a></code> will
+draw the LOO cross validation plot. The visualizations above show that
+the DGP emulator gives a better performance than the GP emulator on
+modeling the heteroskedastic noises embedded in the underlying data set,
+even though they have quite similar NRMSEs.</p>
 <div class="section level3 unnumbered">
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-silverman1985" class="csl-entry">
-Silverman, Bernhard W. 1985. <span>“Some Aspects of the Spline Smoothing Approach to Non-Parametric Regression Curve Fitting.”</span> <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 47 (1): 1–21.
+Silverman, Bernhard W. 1985. <span>“Some Aspects of the Spline Smoothing
+Approach to Non-Parametric Regression Curve Fitting.”</span> <em>Journal
+of the Royal Statistical Society: Series B (Methodological)</em> 47 (1):
+1–21.
 </div>
 </div>
 </div>
