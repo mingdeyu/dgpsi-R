@@ -77,7 +77,7 @@ Only used when \code{cores} is not \code{1}. If not specified (i.e., \code{chunk
 Defaults to \code{NULL}.}
 
 \item{threading}{a bool indicating whether to use the multi-threading to accelerate the predictions of DGP or linked (D)GP emulators. Turn this option on
-when you have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to \code{FALSE}.}
+when you use the Matérn-2.5 kernel and have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to \code{FALSE}.}
 
 \item{...}{N/A.}
 }

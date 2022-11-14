@@ -14,6 +14,7 @@
   dim = NULL,
   method = "mean_var",
   style = 1,
+  min_max = TRUE,
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -28,6 +29,7 @@
   dim = NULL,
   method = "mean_var",
   style = 1,
+  min_max = TRUE,
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -42,6 +44,7 @@
   dim = NULL,
   method = "mean_var",
   style = 1,
+  min_max = TRUE,
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -78,6 +81,9 @@ This argument is only used when \code{style = 1} and the emulator input is at le
 \item{method}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{style}{either \code{1} or \code{2}, indicating two different types of validation plots.}
+
+\item{min_max}{a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
+emulator. Defaults to \code{TRUE}.}
 
 \item{verb}{a bool indicating if the trace information on plotting will be printed during the function execution.
 Defaults to \code{TRUE}.}

@@ -27,7 +27,7 @@
 #'     Only used when `cores` is not `1`. If not specified (i.e., `chunks = NULL`), the number of chunks is set to the value of `cores`.
 #'     Defaults to `NULL`.
 #' @param threading a bool indicating whether to use the multi-threading to accelerate the predictions of DGP or linked (D)GP emulators. Turn this option on
-#'     when you have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to `FALSE`.
+#'     when you use the Matérn-2.5 kernel and have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to `FALSE`.
 #' @param ... N/A.
 #' @return
 #' * If `object` is an instance of the `gp` class:

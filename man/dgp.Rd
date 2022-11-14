@@ -14,6 +14,8 @@ dgp(
   share = TRUE,
   nugget_est = FALSE,
   nugget = 1e-06,
+  scale_est = TRUE,
+  scale = 1,
   connect = TRUE,
   likelihood = NULL,
   training = TRUE,
@@ -41,7 +43,7 @@ The final layer of the DGP structure (i.e., the final sub-list in \code{struc}) 
 layer that contains a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}). When \code{struc = NULL},
 the DGP structure is automatically generated and can be checked by applying \code{\link[=summary]{summary()}} to the output from \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
 If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{name}, \code{lengthscale}, \code{nugget_est}, \code{nugget},
-\code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
+\code{scale_est}, \code{scale}, \code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
 
 \item{depth}{number of layers (including the likelihood layer) for a DGP structure. \code{depth} must be at least \code{2}.
 Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}
@@ -75,6 +77,20 @@ in the final layer. If it is a vector (which must have a length of \code{ncol(Y)
 (if any) in the final layer. Set \code{nugget} to a small value and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic emulations where
 the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used when \code{struc = NULL}.}
+
+\item{scale_est}{a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
+provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each
+bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
+\itemize{
+\item \code{FALSE}: the variance of the corresponding GP in the final layer is fixed to the corresponding value defined in \code{scale} (see below).
+\item \code{TRUE}: the variance of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in \code{scale} (see below).
+}
+
+Defaults to \code{TRUE}. This argument is only used when \code{struc = NULL}.}
+
+\item{scale}{the initial variance value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
+in the final layer. If it is a vector (which must have a length of \code{ncol(Y)}), each numeric in the vector will be applied to the corresponding GP node
+(if any) in the final layer. Defaults to \code{1}. This argument is only used when \code{struc = NULL}.}
 
 \item{connect}{a bool indicating whether to implement global input connection to the DGP structure. Setting it to \code{FALSE} may produce a better emulator in some cases at
 the cost of slower training. Defaults to \code{TRUE}. This argument is only used when \code{struc = NULL}.}
@@ -145,8 +161,9 @@ Set \code{linked_idx = NULL} if the DGP emulator will not be used for linked emu
 to add linking information to the DGP emulator. Defaults to \code{NULL}.}
 }
 \value{
-An S3 class named \code{dgp} that contains three slots:
+An S3 class named \code{dgp} that contains four slots:
 \itemize{
+\item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
 \item \code{constructor_obj}: a 'python' object that stores the information of the constructed DGP emulator.
 \item \code{container_obj}: a 'python' object that stores the information for the linked emulation.
 \item \code{emulator_obj}: a 'python' object that stores the information for the predictions from the DGP emulator.
@@ -159,6 +176,7 @@ The returned \code{dgp} object can be used by
 \item \code{\link[=validate]{validate()}} for LOO and OOS validations.
 \item \code{\link[=plot]{plot()}} for validation plots.
 \item \code{\link[=lgp]{lgp()}} for linked (D)GP emulator constructions.
+\item \code{\link[=design]{design()}} for sequential designs.
 }
 }
 \description{

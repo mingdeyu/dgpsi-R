@@ -45,7 +45,7 @@
 #'     the number of cores is set to `(max physical cores available - 1)`. Defaults to `1`.
 #' @param threading a bool indicating whether to use the multi-threading to accelerate the LOO or OOS.
 #'     Turning this option on could improve the speed of validations when the emulator is built with a moderately large number of
-#'     training data points.
+#'     training data points and the Matérn-2.5 kernel.
 #' @param ... N/A.
 #'
 #' @return
@@ -57,6 +57,7 @@
 #'   - three column matrices called `std`, `lower`, and `upper` that contain the predictive standard deviations and credible intervals of the
 #'     GP emulator at validation positions. If `method = "mean_var"`, the upper and lower bounds of a credible interval are two standard deviations above
 #'     and below the predictive mean. If `method = "sampling"`, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
+#'   - a numeric value called `rmse` that contains the root mean/median squared error of the GP emulator.
 #'   - a numeric value called `nrmse` that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
 #'
@@ -69,6 +70,8 @@
 #'   - three matrices called `std`, `lower`, and `upper` that contain the predictive standard deviations and credible intervals of the
 #'     DGP emulator at validation positions. If `method = "mean_var"`, the upper and lower bounds of a credible interval are two standard deviations above
 #'     and below the predictive mean. If `method = "sampling"`, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
+#'   - a vector called `rmse` that contains the root mean/median squared errors of the DGP emulator across different output
+#'     dimensions.
 #'   - a vector called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 #'     dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
 #'
@@ -81,10 +84,11 @@
 #'   - three lists called `std`, `lower`, and `upper` that contain the predictive standard deviations and credible intervals of
 #'     the linked (D)GP emulator at validation positions. If `method = "mean_var"`, the upper and lower bounds of a credible interval are two standard
 #'     deviations above and below the predictive mean. If `method = "sampling"`, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
+#'   - a list called `rmse` that contains the root mean/median squared errors of the linked (D)GP emulator.
 #'   - a list called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_test`.
 #'
-#' Each element in `mean`, `median`, `std`, `lower`, `upper`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
+#' Each element in `mean`, `median`, `std`, `lower`, `upper`, `rmse`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 #' emulator.
 #'
 #' @note
@@ -159,7 +163,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["std"]] <- sqrt(res[[2]])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["nrmse"]] <- sqrt(mean((dat$mean-dat$y_train)^2))/(max(dat$y_train)-min(dat$y_train))
+      dat[["rmse"]] <- sqrt(mean((dat$mean-dat$y_train)^2))
+      dat[["nrmse"]] <- dat$rmse/(max(dat$y_train)-min(dat$y_train))
     } else if ( method=='sampling' ){
       quant <- t(pkg.env$np$quantile(res, c(0.025, 0.5, 0.975), axis=1L))
       std <- pkg.env$np$std(res, axis=1L, keepdims=TRUE)
@@ -167,7 +172,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["std"]] <- std
       dat[["lower"]] <- quant[,1,drop=F]
       dat[["upper"]] <- quant[,3,drop=F]
-      dat[["nrmse"]] <- sqrt(mean((dat$median-dat$y_train)^2))/(max(dat$y_train)-min(dat$y_train))
+      dat[["rmse"]] <- sqrt(mean((dat$median-dat$y_train)^2))
+      dat[["nrmse"]] <- dat$rmse/(max(dat$y_train)-min(dat$y_train))
     }
     object$loo <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -228,7 +234,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["std"]] <- sqrt(res[[2]][rep,,drop=FALSE])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["nrmse"]] <- sqrt(mean((dat$mean-dat$y_test)^2))/(max(dat$y_test)-min(dat$y_test))
+      dat[["rmse"]] <- sqrt(mean((dat$mean-dat$y_test)^2))
+      dat[["nrmse"]] <- dat$rmse/(max(dat$y_test)-min(dat$y_test))
     } else if ( method == 'sampling' ){
       quant <- t(pkg.env$np$quantile(res, c(0.025, 0.5, 0.975), axis=1L))[rep,,drop=FALSE]
       std <- pkg.env$np$std(res, axis=1L, keepdims=TRUE)[rep,,drop=FALSE]
@@ -236,7 +243,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["std"]] <- std
       dat[["lower"]] <- quant[,1,drop=F]
       dat[["upper"]] <- quant[,3,drop=F]
-      dat[["nrmse"]] <- sqrt(mean((dat$median-dat$y_test)^2))/(max(dat$y_test)-min(dat$y_test))
+      dat[["rmse"]] <- sqrt(mean((dat$median-dat$y_test)^2))
+      dat[["nrmse"]] <- dat$rmse/(max(dat$y_test)-min(dat$y_test))
     }
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -314,13 +322,15 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["std"]] <- t(std)
       dat[["lower"]] <- as.matrix(quant[1,,])
       dat[["upper"]] <- as.matrix(quant[3,,])
-      dat[["nrmse"]] <- sqrt(colMeans((dat$median-dat$y_train)^2))/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
+      dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_train)^2))
+      dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
     } else if ( method == 'mean_var' ) {
       dat[["mean"]] <- res[[1]]
       dat[["std"]] <- sqrt(res[[2]])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["nrmse"]] <- sqrt(colMeans((dat$mean-dat$y_train)^2))/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
+      dat[["rmse"]] <- sqrt(colMeans((dat$mean-dat$y_train)^2))
+      dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
     }
     object$loo <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -384,13 +394,15 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["std"]] <- t(std)[rep,,drop=F]
       dat[["lower"]] <- as.matrix(quant[1,,])[rep,,drop=F]
       dat[["upper"]] <- as.matrix(quant[3,,])[rep,,drop=F]
-      dat[["nrmse"]] <- sqrt(colMeans((dat$median-dat$y_test)^2))/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
+      dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_test)^2))
+      dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
     } else if ( method == 'mean_var' ) {
       dat[["mean"]] <- res[[1]][rep,,drop=F]
       dat[["std"]] <- sqrt(res[[2]][rep,,drop=F])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["nrmse"]] <- sqrt(colMeans((dat$mean-dat$y_test)^2))/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
+      dat[["rmse"]] <- sqrt(colMeans((dat$mean-dat$y_test)^2))
+      dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
     }
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -517,6 +529,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       std_lst <- list()
       lower_lst <- list()
       upper_lst <- list()
+      rmse_lst <- list()
       nrmse_lst <- list()
       for ( l in 1:length(res) ) {
         quant <- pkg.env$np$transpose(pkg.env$np$quantile(res[[l]], c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
@@ -525,30 +538,35 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         std_lst[[l]] <- t(std)
         lower_lst[[l]] <- as.matrix(quant[1,,])
         upper_lst[[l]] <- as.matrix(quant[3,,])
-        nrmse_lst[[l]] <- sqrt(colMeans((median_lst[[l]]-y_test[[l]])^2))/(pkg.env$np$amax(y_test[[l]], axis=0L)-pkg.env$np$amin(y_test[[l]], axis=0L))
+        rmse_lst[[l]] <- sqrt(colMeans((median_lst[[l]]-y_test[[l]])^2))
+        nrmse_lst[[l]] <- rmse_lst[[l]]/(pkg.env$np$amax(y_test[[l]], axis=0L)-pkg.env$np$amin(y_test[[l]], axis=0L))
       }
       dat[["median"]] <- median_lst
       dat[["std"]] <- std_lst
       dat[["lower"]] <- lower_lst
       dat[["upper"]] <- upper_lst
+      dat[["rmse"]] <- rmse_lst
       dat[["nrmse"]] <- nrmse_lst
     } else if ( method == 'mean_var' ) {
       mean_lst <- list()
       std_lst <- list()
       lower_lst <- list()
       upper_lst <- list()
+      rmse_lst <- list()
       nrmse_lst <- list()
       for ( l in 1:length(res[[1]]) ) {
         mean_lst[[l]] <- res[[1]][[l]]
         std_lst[[l]] <- sqrt(res[[2]][[l]])
         lower_lst[[l]] <- mean_lst[[l]]-2*std_lst[[l]]
         upper_lst[[l]] <- mean_lst[[l]]+2*std_lst[[l]]
-        nrmse_lst[[l]] <- sqrt(colMeans((mean_lst[[l]]-y_test[[l]])^2))/(pkg.env$np$amax(y_test[[l]], axis=0L)-pkg.env$np$amin(y_test[[l]], axis=0L))
+        rmse_lst[[l]] <- sqrt(colMeans((mean_lst[[l]]-y_test[[l]])^2))
+        nrmse_lst[[l]] <- rmse_lst[[l]]/(pkg.env$np$amax(y_test[[l]], axis=0L)-pkg.env$np$amin(y_test[[l]], axis=0L))
       }
       dat[["mean"]] <- mean_lst
       dat[["std"]] <- std_lst
       dat[["lower"]] <- lower_lst
       dat[["upper"]] <- upper_lst
+      dat[["rmse"]] <- rmse_lst
       dat[["nrmse"]] <- nrmse_lst
     }
     object$oos <- dat

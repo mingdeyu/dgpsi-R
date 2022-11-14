@@ -106,7 +106,7 @@ the number of cores is set to \verb{(max physical cores available - 1)}. Default
 
 \item{threading}{a bool indicating whether to use the multi-threading to accelerate the LOO or OOS.
 Turning this option on could improve the speed of validations when the emulator is built with a moderately large number of
-training data points.}
+training data points and the Matérn-2.5 kernel.}
 }
 \value{
 \itemize{
@@ -119,6 +119,7 @@ GP emulator at validation positions.
 \item three column matrices called \code{std}, \code{lower}, and \code{upper} that contain the predictive standard deviations and credible intervals of the
 GP emulator at validation positions. If \code{method = "mean_var"}, the upper and lower bounds of a credible interval are two standard deviations above
 and below the predictive mean. If \code{method = "sampling"}, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
+\item a numeric value called \code{rmse} that contains the root mean/median squared error of the GP emulator.
 \item a numeric value called \code{nrmse} that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
 }
@@ -135,6 +136,8 @@ DGP emulator at validation positions.
 \item three matrices called \code{std}, \code{lower}, and \code{upper} that contain the predictive standard deviations and credible intervals of the
 DGP emulator at validation positions. If \code{method = "mean_var"}, the upper and lower bounds of a credible interval are two standard deviations above
 and below the predictive mean. If \code{method = "sampling"}, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
+\item a vector called \code{rmse} that contains the root mean/median squared errors of the DGP emulator across different output
+dimensions.
 \item a vector called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
 }
@@ -151,12 +154,13 @@ the linked (D)GP emulator at validation positions.
 \item three lists called \code{std}, \code{lower}, and \code{upper} that contain the predictive standard deviations and credible intervals of
 the linked (D)GP emulator at validation positions. If \code{method = "mean_var"}, the upper and lower bounds of a credible interval are two standard
 deviations above and below the predictive mean. If \code{method = "sampling"}, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
+\item a list called \code{rmse} that contains the root mean/median squared errors of the linked (D)GP emulator.
 \item a list called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_test}.
 }
 }
 
-Each element in \code{mean}, \code{median}, \code{std}, \code{lower}, \code{upper}, and \code{nrmse} corresponds to a (D)GP emulator in the final layer of the linked (D)GP
+Each element in \code{mean}, \code{median}, \code{std}, \code{lower}, \code{upper}, \code{rmse}, and \code{nrmse} corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 emulator.
 }
 \description{

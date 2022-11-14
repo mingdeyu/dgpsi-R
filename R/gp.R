@@ -6,7 +6,7 @@
 #' @param Y a matrix with only one column and each row being an output data point.
 #' @param struc an object produced by [kernel()] that gives a user-defined GP specifications. When `struc = NULL`,
 #'     the GP specifications are automatically generated using information provided in `name`, `lengthscale`,
-#'     `nugget_est`, `nugget`, and `internal_input_idx`. Defaults to `NULL`.
+#'     `nugget_est`, `nugget`, `scale_est`, `scale`,and `internal_input_idx`. Defaults to `NULL`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
 #' @param lengthscale initial values of lengthscales in the kernel function. It can be a single numeric value or a vector:
@@ -24,6 +24,13 @@
 #'     interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic
 #'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used
 #'     when `struc = NULL`.
+#' @param scale_est a bool indicating if the variance is to be estimated:
+#' 1. `FALSE`: the variance is fixed to `scale`.
+#' 2. `TRUE`: the variance term will be estimated.
+#'
+#' Defaults to `TRUE`. This argument is only used when `struc = NULL`.
+#' @param scale the initial variance value. If `scale_est = FALSE`, the assigned value is fixed during the training.
+#'     Defaults to `1`. This argument is only used when `struc = NULL`.
 #' @param training a bool indicating if the initialized GP emulator will be trained.
 #'     When set to `FALSE`, [gp()] returns an untrained GP emulator, to which one can apply [summary()] to inspect its specifications
 #'     (especially when a customized `struc` is provided) or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
@@ -48,7 +55,8 @@
 #' Set `linked_idx = NULL` if the GP emulator will not be used for linked emulations. However, if this is no longer the case, one can use [set_linked_idx()]
 #' to add linking information to the GP emulator. Defaults to `NULL`.
 #'
-#' @return An S3 class named `gp` that contains three slots:
+#' @return An S3 class named `gp` that contains four slots:
+#' * `data`: a list that contains two elements: `X` and `Y` which are the training input and output data respectively.
 #' * `constructor_obj`: a 'python' object that stores the information of the constructed GP emulator.
 #' * `container_obj`: a 'python' object that stores the information for the linked emulation.
 #' * `emulator_obj`: a 'python' object that stores the information for the predictions from the GP emulator.
@@ -58,6 +66,7 @@
 #' * [validate()] for LOO and OOS validations.
 #' * [plot()] for validation plots.
 #' * [lgp()] for linked (D)GP emulator constructions.
+#' * [design()] for sequential designs.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
@@ -104,7 +113,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), nugget_est = FALSE, nugget = 1e-6, training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)
@@ -147,7 +156,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
       external_input_idx = NULL
     }
 
-    struc <- pkg.env$dgpsi$kernel(length = reticulate::np_array(lengthscale), name = name, scale_est = TRUE, nugget = nugget, nugget_est = nugget_est,
+    struc <- pkg.env$dgpsi$kernel(length = reticulate::np_array(lengthscale), name = name, scale = scale, scale_est = scale_est, nugget = nugget, nugget_est = nugget_est,
                                   input_dim = internal_input_idx, connect = external_input_idx)
 
     if ( verb ) {
@@ -175,6 +184,8 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
   }
 
   res <- list()
+  res[['data']][['X']] <- unname(X)
+  res[['data']][['Y']] <- unname(Y)
   res[['constructor_obj']] <- obj
   res[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
   res[['emulator_obj']] <- obj

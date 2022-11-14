@@ -24,6 +24,97 @@ combine <- function(...) {
   return(res)
 }
 
+#' @title Pack GP and DGP emulators into a bundle
+#'
+#' @description This function packs GP emulators and DGP emulators (without likelihood layers) into a `bundle` class for
+#'     sequential designs if each emulator emulates one output dimension of the underlying simulator.
+#'
+#' @param ... a sequence of emulators produced by [gp()] or [dgp()].
+#'
+#' @return An S3 class named `bundle` to be used by [design()] for sequential designs. It has:
+#' - *N* slots, each of which contains a GP or DGP emulator, where *N* is the number of emulators that are provided to the function.
+#' - a slot called `data` which is a list that contains two elements `X` and `Y`. `X` is the training input data that is common to all
+#'   emulators, and `Y` is a matrix with each column corresponding to the training output data of an emulator.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # load packages and the Python env
+#' library(lhs)
+#' library(dgpsi)
+#' init_py()
+#'
+#' # construct a function with antwo-dimensional output
+#' f <- function(x) {
+#'  y1 = sin(30*((2*x-1)/2-0.4)^5)*cos(20*((2*x-1)/2-0.4))
+#'  y2 = 1/3*sin(2*(2*x - 1))+2/3*exp(-30*(2*(2*x-1))^2)+1/3
+#'  return(c(y1,y2))
+#' }
+#'
+#' # generate the initial design
+#' X <- maximinLHS(10,1)
+#' Y <- t(apply(X, 1, f))
+#'
+#' # generate the validation data
+#' validate_x <- maximinLHS(30,1)
+#' validate_y <- t(apply(validate_x, f, MARGIN = 1))
+#'
+#' # training a 2-layered DGP emulator with respect to each output with the global connection off
+#' m1 <- dgp(X, Y[,1], connect=F)
+#' m2 <- dgp(X, Y[,2], connect=F)
+#'
+#' # specify the range of the input dimension
+#' lim <- c(0, 1)
+#'
+#' # pack emulators to form an emulator bundle
+#' m <- pack(m1, m2)
+#'
+#' # 1st wave of the sequential design with 10 steps
+#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+#'
+#' # 2nd wave of the sequential design with 10 steps
+#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+#'
+#' # 3rd wave of the sequential design with 10 steps using the aggregation function that
+#' # takes the average of the criterion values across the two outputs
+#' g <- function(x){
+#'   return(mean(x))
+#' }
+#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, aggregate = g)
+#'
+#' # draw the design created by the sequential design
+#' draw(m,'design')
+#'
+#' # inspect the trace of RMSEs during the sequential design
+#' draw(m,'rmse')
+#' }
+#' @md
+#' @export
+pack <- function(...) {
+  res = list(...)
+  if ( length(res)==1 ) stop("The function needs at least two emulators to pack.", call. = FALSE)
+  training_input <- res[[1]]$data$X
+  training_output <- c()
+  for ( i in 1:length(res) ){
+    if ( !inherits(res[[i]],"gp") & !inherits(res[[i]],"dgp") ) stop("The function only accepts GP or DGP emulators as inputs.", call. = FALSE)
+    if ( inherits(res[[i]],"dgp") ){
+      if ( res[[i]]$constructor_obj$all_layer[[res[[i]]$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
+        stop("The function can only pack DGP emulators without likelihood layers.", call. = FALSE)
+      }
+    }
+    if ( !identical(res[[i]]$data$X, training_input) ) stop("The function can only pack emulators with common training input data.", call. = FALSE)
+    Y_dim <- ncol(res[[i]]$data$Y)
+    if ( Y_dim!=1 ) stop(sprintf("The function is only applicable to emulators with 1D output. Your emulator %i has %i output dimensions.", i, Y_dim), call. = FALSE)
+    training_output <- cbind(training_output, res[[i]]$data$Y)
+    names(res)[i] <- paste('emulator', i, sep="")
+  }
+  res[['data']][['X']] <- unname(training_input)
+  res[['data']][['Y']] <- unname(training_output)
+  class(res) <- "bundle"
+  return(res)
+}
+
 
 #' @title Save the constructed emulator
 #'
@@ -153,6 +244,53 @@ set_linked_idx <- function(object, idx) {
   idx <- reticulate::np_array(as.integer(idx - 1))
   object$container_obj$set_local_input(idx)
   return(object)
+}
+
+#' @title Reset number of imputations for a DGP emulator
+#'
+#' @description This function resets the number of imputations for predictions from a DGP emulator.
+#'
+#' @param object an instance of the S3 class `dgp`.
+#' @param B the number of imputations to produce predictions from `object`.
+#'     Defaults to `10` for faster predictions.
+#'
+#' @return An updated `object` with the information of `B` incorporated.
+#'
+#' @note
+#' * This function is useful when a DGP emulator has been trained and one wants to make faster predictions by decreasing
+#'    the number of imputations without rebuilding the emulator.
+#' * The following slots:
+#'   - `loo` and `oos` created by [validate()]; and
+#'   - `results` created by [predict()]
+#'   in `object` will be removed and not contained in the returned object.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See design() for an example.
+#' }
+#' @md
+#' @export
+set_imp <- function(object, B = 10) {
+  if ( !inherits(object,"dgp") ){
+    stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  }
+  B <- as.integer(B)
+
+  linked_idx <- object$container_obj$local_input_idx
+  constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
+  burnin <- constructor_obj_cp$burnin
+  est_obj <- constructor_obj_cp$estimate(burnin)
+
+  new_object <- list()
+  new_object[['data']][['X']] <- object$data$X
+  new_object[['data']][['Y']] <- object$data$Y
+  new_object[['constructor_obj']] <- constructor_obj_cp
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  if ( "design" %in% names(object) ) new_object[['design']] <- object$design
+  class(new_object) <- "dgp"
+  return(new_object)
 }
 
 

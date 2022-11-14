@@ -20,6 +20,8 @@
 #' This argument is only used when `style = 1` and the emulator input is at least two-dimensional. Defaults to `NULL`.
 #' @param method same as that of [validate()].
 #' @param style either `1` or `2`, indicating two different types of validation plots.
+#' @param min_max a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
+#'     emulator. Defaults to `TRUE`.
 #' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param force same as that of [validate()].
@@ -57,7 +59,7 @@ NULL
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -104,9 +106,15 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         dat[["upper"]] <- loo_res$upper[,l]
         dat[["y_validate"]] <- loo_res$y_train[,l]
         dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-        p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-          ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
-          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        if ( min_max ){
+          p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        } else {
+          p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        }
       }
     } else if ( style==2 ) {
       for (l in 1:ncol(loo_res$y_train) ) {
@@ -121,9 +129,15 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         }
         dat[["y_validate"]] <- loo_res$y_train[,l]
         dat[["std"]] <- loo_res$std[,l]
-        p_list[[l]] <- plot_style_2(as.data.frame(dat), method) +
-          ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
-          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        if ( min_max ){
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        } else {
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+            ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        }
       }
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -135,12 +149,24 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         patchwork::plot_annotation(
           title = 'Leave-One-Out (LOO) Cross Validation',
           caption = if ( style== 1) {
-            'Oi = Output i of the DGP emulator
-             NRMSE = Normalized Root Mean Squared Error
-             CI = Credible Interval'
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Mean Squared Error
+               CI = Credible Interval'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Mean Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'Oi = Output i of the DGP emulator
-             NRMSE = Normalized Root Mean Squared Error'}
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Mean Squared Error'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Mean Squared Error'
+            }
+            }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
     } else if ( method == "sampling" ){
@@ -148,12 +174,23 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         patchwork::plot_annotation(
           title = 'Leave-One-Out (LOO) Cross Validation',
           caption = if ( style== 1) {
-             'Oi = Output i of the DGP emulator
-              NRMSE = Normalized Root Median Squared Error
-              CI = Credible Interval'
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Median Squared Error
+               CI = Credible Interval'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Median Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'Oi = Output i of the DGP emulator
-             NRMSE = Normalized Root Median Squared Error'
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Median Squared Error'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Median Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -213,9 +250,15 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
             dat_range[["lower"]] <- quant[1,,l]
             dat_range[["upper"]] <- quant[3,,l]
           }
-          p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
-            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          if ( min_max ) {
+            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+              ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          } else {
+            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+              ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          }
         }
         # If input is at least 2d
       } else {
@@ -243,9 +286,15 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
           dat[["upper"]] <- oos_res$upper[,l]
           dat[["y_validate"]] <- oos_res$y_test[,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-          p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          if ( min_max ) {
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          } else {
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          }
         }
       }
     } else if ( style==2 ) {
@@ -261,9 +310,15 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         }
         dat[["y_validate"]] <- oos_res$y_test[,l]
         dat[["std"]] <- oos_res$std[,l]
-        p_list[[l]] <- plot_style_2(as.data.frame(dat), method) +
-          ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
-          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        if ( min_max ) {
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        } else {
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+            ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        }
       }
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -275,12 +330,23 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         patchwork::plot_annotation(
           title = 'Out-Of-Sample (OOS) Validation',
           caption = if ( style==1 ){
+            if ( min_max ) {
               'Oi = Output i of the DGP emulator
                NRMSE = Normalized Root Mean Squared Error
                CI = Credible Interval'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Mean Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'Oi = Output i of the DGP emulator
-             NRMSE = Normalized Root Mean Squared Error'
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Mean Squared Error'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Mean Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -289,12 +355,23 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         patchwork::plot_annotation(
           title = 'Out-Of-Sample (OOS) Validation',
           caption = if ( style==1 ){
-            'Oi = Output i of the DGP emulator
-             NRMSE = Normalized Root Median Squared Error
-             CI = Credible Interval'
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Median Squared Error
+               CI = Credible Interval'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Median Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'Oi = Output i of the DGP emulator
-             NRMSE = Normalized Root Median Squared Error'
+            if ( min_max ) {
+              'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Median Squared Error'
+            } else {
+              'Oi = Output i of the DGP emulator
+               RMSE = Root Median Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -308,7 +385,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -407,9 +484,15 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
             dat_range[["lower"]] <- quant[1,,l]
             dat_range[["upper"]] <- quant[3,,l]
           }
-          p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method) +
-            ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          if ( min_max ) {
+            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method) +
+              ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          } else {
+            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method) +
+              ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          }
           counter <- counter + 1
         }
       }
@@ -460,9 +543,15 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
           dat[["upper"]] <- oos_res$upper[[k]][,l]
           dat[["y_validate"]] <- y_test_list[[k]][,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-          p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-            ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          if ( min_max ) {
+            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          } else {
+            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          }
           counter <- counter + 1
         }
       }
@@ -482,9 +571,15 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         }
         dat[["y_validate"]] <- y_test_list[[k]][,l]
         dat[["std"]] <- oos_res$std[[k]][,l]
-        p_list[[counter]] <- plot_style_2(as.data.frame(dat), method) +
-          ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
-          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        if ( min_max ) {
+          p_list[[counter]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+            ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        } else {
+          p_list[[counter]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+            ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        }
         counter <- counter + 1
       }
     }
@@ -498,12 +593,23 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
       patchwork::plot_annotation(
         title = 'Out-Of-Sample (OOS) Validation',
         caption = if ( style==1 ){
-          'EiOj = Output j of Emulator i in the final layer of the linked emulator
-           NRMSE = Normalized Root Mean Squared Error
-           CI = Credible Interval'
+          if ( min_max ) {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             NRMSE = Normalized Root Mean Squared Error
+             CI = Credible Interval'
+          } else {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             RMSE = Root Mean Squared Error
+             CI = Credible Interval'
+          }
         } else {
-          'EiOj = Output j of Emulator i in the final layer of the linked emulator
-           NRMSE = Normalized Root Mean Squared Error'
+          if ( min_max ) {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             NRMSE = Normalized Root Mean Squared Error'
+          } else {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             RMSE = Root Mean Squared Error'
+          }
         }
       ) +
       patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -512,12 +618,23 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
       patchwork::plot_annotation(
         title = 'Out-Of-Sample (OOS) Validation',
         caption = if ( style==1 ){
-          'EiOj = Output j of Emulator i in the final layer of the linked emulator
-           NRMSE = Normalized Root Median Squared Error
-           CI = Credible Interval'
+          if ( min_max ) {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             NRMSE = Normalized Root Median Squared Error
+             CI = Credible Interval'
+          } else {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             RMSE = Root Median Squared Error
+             CI = Credible Interval'
+          }
         } else {
-          'EiOj = Output j of Emulator i in the final layer of the linked emulator
-           NRMSE = Normalized Root Median Squared Error'
+          if ( min_max ) {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             NRMSE = Normalized Root Median Squared Error'
+          } else {
+            'EiOj = Output j of Emulator i in the final layer of the linked emulator
+             RMSE = Root Median Squared Error'
+          }
         }
       ) +
       patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -530,7 +647,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -574,9 +691,15 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
       dat[["upper"]] <- loo_res$upper[,1]
       dat[["y_validate"]] <- loo_res$y_train[,1]
       dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-      p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-        ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
-        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      if ( min_max ) {
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+          ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+          ggplot2::ggtitle(sprintf('RMSE = %.6f', loo_res$rmse)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      }
     } else if ( style==2 ) {
       # extract mean or median
       if ( "mean" %in% names(loo_res) ){
@@ -588,9 +711,15 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
       }
       dat[["y_validate"]] <- loo_res$y_train[,1]
       dat[["std"]] <- loo_res$std[,1]
-      p <- plot_style_2(as.data.frame(dat), method) +
-        ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
-        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      if ( min_max ) {
+        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+          ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
+        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+          ggplot2::ggtitle(sprintf('RMSE = %.6f', loo_res$rmse)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      }
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -601,10 +730,19 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         patchwork::plot_annotation(
           title = 'Leave-One-Out (LOO) Cross Validation',
           caption = if ( style==1 ){
-            'NRMSE = Normalized Root Mean Squared Error
-             CI = Credible Interval'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Mean Squared Error
+               CI = Credible Interval'
+            } else {
+              'RMSE = Root Mean Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'NRMSE = Normalized Root Mean Squared Error'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Mean Squared Error'
+            } else {
+              'RMSE = Root Mean Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -613,10 +751,19 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         patchwork::plot_annotation(
           title = 'Leave-One-Out (LOO) Cross Validation',
           caption = if ( style==1 ){
-            'NRMSE = Normalized Root Median Squared Error
-             CI = Credible Interval'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Median Squared Error
+               CI = Credible Interval'
+            } else {
+              'RMSE = Root Median Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'NRMSE = Normalized Root Median Squared Error'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Median Squared Error'
+            } else {
+              'RMSE = Root Median Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -663,9 +810,15 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
           dat_range[["lower"]] <- quant[,1]
           dat_range[["upper"]] <- quant[,3]
         }
-        p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
-          ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
-          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        if ( min_max ) {
+          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+            ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        } else {
+          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+            ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        }
         # If input is at least 2d
       } else {
         if ( is.null(dim) ){
@@ -689,9 +842,15 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         dat[["upper"]] <- oos_res$upper[,1]
         dat[["y_validate"]] <- oos_res$y_test[,1]
         dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-        p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-          ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
-          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        if ( min_max ) {
+          p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        } else {
+          p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        }
       }
     } else if ( style==2 ) {
       # extract mean or median
@@ -704,9 +863,15 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
       }
       dat[["y_validate"]] <- oos_res$y_test[,1]
       dat[["std"]] <- oos_res$std[,1]
-      p <- plot_style_2(as.data.frame(dat), method) +
-        ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
-        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      if ( min_max ) {
+        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+          ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
+        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+          ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      }
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -717,10 +882,19 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         patchwork::plot_annotation(
           title = 'Out-Of-Sample (OOS) Validation',
           caption = if ( style==1 ){
-            'NRMSE = Normalized Root Mean Squared Error
-             CI = Credible Interval'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Mean Squared Error
+               CI = Credible Interval'
+            } else {
+              'RMSE = Root Mean Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'NRMSE = Normalized Root Mean Squared Error'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Mean Squared Error'
+            } else {
+              'RMSE = Root Mean Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -729,10 +903,19 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         patchwork::plot_annotation(
           title = 'Out-Of-Sample (OOS) Validation',
           caption = if ( style==1 ){
-            'NRMSE = Normalized Root Median Squared Error
-             CI = Credible Interval'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Median Squared Error
+               CI = Credible Interval'
+            } else {
+              'RMSE = Root Median Squared Error
+               CI = Credible Interval'
+            }
           } else {
-            'NRMSE = Normalized Root Median Squared Error'
+            if ( min_max ) {
+              'NRMSE = Normalized Root Median Squared Error'
+            } else {
+              'RMSE = Root Median Squared Error'
+            }
           }
         ) +
         patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
@@ -765,16 +948,18 @@ plot_style_1 <- function(dat, method, dim, isdup) {
 
   coverage <- dat$coverage
 
-  if ( all(coverage)|all(!coverage) ){
-    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation Point"))
+  if ( all(coverage) ){
+    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation point inside CI"))
     if ( method=="sampling" ){
       p <- p +
         ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
-        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation Point"="#E69F00"))
+        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
+                                    limits = c("Median and 95% CI", "Validation point outside CI", "Validation point inside CI"))
     } else if ( method=="mean_var" ) {
       p <- p +
         ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
-        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation Point"="#E69F00"))
+        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
+                                    limits = c("Mean and CI (+/-2SD)", "Validation point outside CI", "Validation point inside CI"))
     }
 
     p <- p +
@@ -785,7 +970,30 @@ plot_style_1 <- function(dat, method, dim, isdup) {
         legend.text = ggplot2::element_text(size = 7),
         legend.title = ggplot2::element_blank()
       ) +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank"))))
+      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank", "blank"))))
+  } else if ( all(!coverage) ){
+    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation point outside CI"))
+    if ( method=="sampling" ){
+      p <- p +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
+        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
+                                    limits = c("Median and 95% CI", "Validation point outside CI", "Validation point inside CI"))
+    } else if ( method=="mean_var" ) {
+      p <- p +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
+        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
+                                    limits = c("Mean and CI (+/-2SD)", "Validation point outside CI", "Validation point inside CI"))
+    }
+
+    p <- p +
+      ggplot2::geom_point(size=0.8) +
+      ggplot2::labs(x =x_lab, y = "Model output") +
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.text = ggplot2::element_text(size = 7),
+        legend.title = ggplot2::element_blank()
+      ) +
+      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank", "blank"))))
   } else {
     p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = ~coverage))
     if ( method=="sampling" ){
@@ -811,24 +1019,43 @@ plot_style_1 <- function(dat, method, dim, isdup) {
   return(p)
 }
 
-plot_style_2 <- function(dat, method) {
+plot_style_2 <- function(dat, method, min_max) {
   y_min <- min(dat$y_validate)
   y_max <- max(dat$y_validate)
   std_min <- min(dat$std)
   std_max <- max(dat$std)
-  if ( method=="sampling" ){
-    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~(median-y_min)/(y_max-y_min), y=~(y_validate-y_min)/(y_max-y_min), color= ~(std-std_min)/(std_max-std_min))) +
-      ggplot2::labs(x ="Normalized predictive median", y = "Normalized model output")
-  } else if ( method=="mean_var" ) {
-    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~(mean-y_min)/(y_max-y_min), y=~(y_validate-y_min)/(y_max-y_min), color= ~(std-std_min)/(std_max-std_min))) +
-      ggplot2::labs(x ="Normalized predictive mean", y = "Normalized model output")
+  if (isTRUE(min_max)){
+    if ( method=="sampling" ){
+      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~(median-y_min)/(y_max-y_min), y=~(y_validate-y_min)/(y_max-y_min), color= ~(std-std_min)/(std_max-std_min))) +
+        ggplot2::labs(x ="Normalized predictive median", y = "Normalized model output")
+    } else if ( method=="mean_var" ) {
+      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~(mean-y_min)/(y_max-y_min), y=~(y_validate-y_min)/(y_max-y_min), color= ~(std-std_min)/(std_max-std_min))) +
+        ggplot2::labs(x ="Normalized predictive mean", y = "Normalized model output")
+    }
+  } else {
+    if ( method=="sampling" ){
+      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~median, y=~y_validate, color=~std)) +
+        ggplot2::labs(x ="Predictive median", y = "Model output")
+    } else if ( method=="mean_var" ) {
+      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~mean, y=~y_validate, color=~std)) +
+        ggplot2::labs(x ="Predictive mean", y = "Model output")
+    }
   }
+
   p <- p +
     ggplot2::geom_abline(alpha=0.6,intercept = 0, slope = 1) +
-    ggplot2::geom_point(alpha=0.8, size=1.5) +
-    ggplot2::scale_colour_viridis_c("Normalized Pred. SD", option = 'turbo', breaks=seq(0,1,0.2), labels=c('0.0','0.2','0.4','0.6','0.8','1.0')) +
+    ggplot2::geom_point(alpha=0.8, size=1.5)
+
+  if (isTRUE(min_max)){
+    p <- p + ggplot2::scale_colour_viridis_c("Normalized Predictive SD", option = 'turbo', breaks=seq(0,1,0.2), labels=c('0.0','0.2','0.4','0.6','0.8','1.0'))
+  } else {
+    p <- p + ggplot2::scale_colour_viridis_c("Predictive SD", option = 'turbo')
+  }
+
+  p <- p +
     ggplot2::theme(
       legend.position = "bottom",
+      legend.key.width = ggplot2::unit(1, "cm"),
       legend.text = ggplot2::element_text(size = 7),
       legend.title = ggplot2::element_text(size = 7),
       legend.title.align=0.5

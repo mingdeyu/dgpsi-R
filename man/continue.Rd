@@ -40,7 +40,15 @@ This function implements additional training iterations for a DGP emulator.
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-One can also use this function to fit an untrained DGP emulator constructed by \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
+\itemize{
+\item One can also use this function to fit an untrained DGP emulator constructed by \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
+\item The following slots:
+\itemize{
+\item \code{loo} and \code{oos} created by \code{\link[=validate]{validate()}}; and
+\item \code{results} created by \code{\link[=predict]{predict()}}
+in \code{object} will be removed and not contained in the returned object.
+}
+}
 }
 \examples{
 \dontrun{

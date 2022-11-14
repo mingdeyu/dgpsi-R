@@ -8,6 +8,9 @@ template:
   bootstrap: 5
   bootswatch: litera
 
+development:
+  mode: auto
+
 articles:
 - title: DGP Emulation with the Heteroskedastic Gaussian Likelihood
   desc: DGP modeling of the motorcycle accident data.
@@ -27,6 +30,12 @@ articles:
   contents:
   - linked_DGP
 
+- title: Sequential Design
+  desc: Sequential design for the DGP emulator of a non-stationary simulator.
+  navbar: ~
+  contents:
+  - seq_design
+
 reference:
 - title: "Initalization"
   desc: >
@@ -36,16 +45,16 @@ reference:
 
 - title: "Basic Nodes"
   desc: >
-    Functions to customize GP and DGP stuctures.
+    Functions to customize stuctures of GP and DGP emulators.
   contents:
   - kernel
   - Hetero
   - Poisson
   - NegBin
 
-- title: "GP, DGP, and Linked (D)GP"
+- title: "GP, DGP, and Linked (D)GP Emulations"
   desc: >
-    Functions to train, validate, and make predictions from GP, DGP, and Linked (D)GP.
+    Functions to train, validate, and make predictions from GP, DGP, and Linked (D)GP emulators.
   contents:
   - gp
   - dgp
@@ -56,12 +65,23 @@ reference:
   - validate
   - plot
 
+- title: "Sequential Design"
+  desc: >
+    Functions to implement sequential designs for (D)GP and bundleS of (D)GP emulators.
+  contents:
+  - design
+  - locate
+  - update
+  - draw
+  - pack
+
 - title: "Helpers"
   contents:
   - summary
   - write
   - read
   - set_linked_idx
+  - set_imp
   - trace_plot
   - nllik
 

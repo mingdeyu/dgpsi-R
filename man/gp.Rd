@@ -12,6 +12,8 @@ gp(
   lengthscale = rep(0.2, ncol(X)),
   nugget_est = FALSE,
   nugget = 1e-06,
+  scale_est = TRUE,
+  scale = 1,
   training = TRUE,
   verb = TRUE,
   internal_input_idx = NULL,
@@ -25,7 +27,7 @@ gp(
 
 \item{struc}{an object produced by \code{\link[=kernel]{kernel()}} that gives a user-defined GP specifications. When \code{struc = NULL},
 the GP specifications are automatically generated using information provided in \code{name}, \code{lengthscale},
-\code{nugget_est}, \code{nugget}, and \code{internal_input_idx}. Defaults to \code{NULL}.}
+\code{nugget_est}, \code{nugget}, \code{scale_est}, \code{scale},and \code{internal_input_idx}. Defaults to \code{NULL}.}
 
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}
@@ -51,6 +53,17 @@ Set \code{nugget} to a small value (e.g., \code{1e-6}) and the corresponding boo
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic
 emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used
 when \code{struc = NULL}.}
+
+\item{scale_est}{a bool indicating if the variance is to be estimated:
+\enumerate{
+\item \code{FALSE}: the variance is fixed to \code{scale}.
+\item \code{TRUE}: the variance term will be estimated.
+}
+
+Defaults to \code{TRUE}. This argument is only used when \code{struc = NULL}.}
+
+\item{scale}{the initial variance value. If \code{scale_est = FALSE}, the assigned value is fixed during the training.
+Defaults to \code{1}. This argument is only used when \code{struc = NULL}.}
 
 \item{training}{a bool indicating if the initialized GP emulator will be trained.
 When set to \code{FALSE}, \code{\link[=gp]{gp()}} returns an untrained GP emulator, to which one can apply \code{\link[=summary]{summary()}} to inspect its specifications
@@ -82,8 +95,9 @@ Set \code{linked_idx = NULL} if the GP emulator will not be used for linked emul
 to add linking information to the GP emulator. Defaults to \code{NULL}.}
 }
 \value{
-An S3 class named \code{gp} that contains three slots:
+An S3 class named \code{gp} that contains four slots:
 \itemize{
+\item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
 \item \code{constructor_obj}: a 'python' object that stores the information of the constructed GP emulator.
 \item \code{container_obj}: a 'python' object that stores the information for the linked emulation.
 \item \code{emulator_obj}: a 'python' object that stores the information for the predictions from the GP emulator.
@@ -95,6 +109,7 @@ The returned \code{gp} object can be used by
 \item \code{\link[=validate]{validate()}} for LOO and OOS validations.
 \item \code{\link[=plot]{plot()}} for validation plots.
 \item \code{\link[=lgp]{lgp()}} for linked (D)GP emulator constructions.
+\item \code{\link[=design]{design()}} for sequential designs.
 }
 }
 \description{

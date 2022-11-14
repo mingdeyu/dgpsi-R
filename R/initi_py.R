@@ -2,6 +2,7 @@ pkg.env <- new.env(parent = emptyenv())
 pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
 pkg.env$np <- NULL
+pkg.env$copy <- NULL
 
 #' @title 'python' environment initialization
 #'
@@ -44,6 +45,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
     dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
   }
   #Check if there is any conda binary installed, if not, request to install it.
+  restart <- FALSE
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
     #If the user would like to have the conda binary to be installed
@@ -52,6 +54,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
       reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
       install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+      restart <- TRUE
     } else{
       stop("Please first install Miniforge, Miniconda, or Anaconda, and then re-initialize the Python environment.", call. = FALSE)
     }
@@ -71,33 +74,51 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
           message("Done.")
         }
         install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+        restart <- TRUE
       } else {
         ans <- readline(prompt="Is this your first time installing the package? (Y/N) ")
         if ( tolower(ans)=='n'|tolower(ans)=='no' ){
               message("I am unable to find the required Python environment. It may be because your conda binary has changed. I am re-setting it for you now ...")
               install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+              restart <- TRUE
               } else {
                 install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+                restart <- TRUE
               }
       }
     } else {
       if (isTRUE(reinstall)) {
-        reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+        if (grepl('9000',env_name)) {
+          reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+        } else {
+          reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
+        }
+        if (Sys.info()[["sysname"]] == 'Linux'){
+          libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
+          libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+          system(paste("sudo rm",libstdc_sys_path))
+          system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
+        }
+        message("Installation finished. Please restart R.")
+        restart <- TRUE
       }
     }
   }
 
-  message("Connecting to Python ...", appendLF = FALSE)
-  warning_error_handler(with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)))
-  message(" done")
+  if ( isFALSE(restart) ){
+    message("Connecting to Python ...", appendLF = FALSE)
+    warning_error_handler(with_warning_handler(reticulate::use_condaenv(condaenv = env_name, conda = conda_path, required = TRUE)))
+    message(" done")
 
-  message("Importing required Python modules ...", appendLF = FALSE)
-  assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
-  assign('py_buildin', reticulate::import_builtins(), pkg.env)
-  assign('np', reticulate::import("numpy"), pkg.env)
-  message(" done")
-  Sys.sleep(0.5)
-  message("The Python environment for 'dgpsi' is successfully loaded.")
+    message("Importing required Python modules ...", appendLF = FALSE)
+    assign('dgpsi', reticulate::import("dgpsi"), pkg.env)
+    assign('py_buildin', reticulate::import_builtins(), pkg.env)
+    assign('np', reticulate::import("numpy"), pkg.env)
+    assign('copy', reticulate::import("copy"), pkg.env)
+    message(" done")
+    Sys.sleep(0.5)
+    message("The Python environment for 'dgpsi' is successfully loaded.")
+  }
 }
 
 install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
@@ -119,6 +140,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
     libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
     system(paste("sudo rm",libstdc_sys_path))
     system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
+    message("Installation finished. Please restart R.")
   }
 }
 
