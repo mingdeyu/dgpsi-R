@@ -2,11 +2,12 @@
   [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dgpsi)](https://CRAN.R-project.org/package=dgpsi)
   [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
   [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
-  [![tutorial](https://img.shields.io/badge/tutorial-devel-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
-  ![CRAN_License](https://img.shields.io/cran/l/dgpsi?color=green)
+  [![tutorial](https://img.shields.io/badge/tutorial-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
+  [![tutorial](https://img.shields.io/badge/tutorial-devel-brightgreen)](https://mingdeyu.github.io/dgpsi-R/dev)
   [![REF](https://img.shields.io/badge/REF-Linked%20GP-informational)](https://epubs.siam.org/doi/abs/10.1137/20M1323771)
   [![REF](https://img.shields.io/badge/REF-Deep%20GP-informational)](https://doi.org/10.1080/00401706.2022.2124311)
   [![python](https://img.shields.io/badge/python-dgpsi%20v2.1.5-informational)](https://github.com/mingdeyu/DGP)
+  ![CRAN_License](https://img.shields.io/cran/l/dgpsi?color=green)
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations. 
 
@@ -26,10 +27,11 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Linked emulations of feed-forward systems of computer models by linking (D)GP emulators of deterministic individual computer models.
 * Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
-* *(Development Version)* Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
+* **(Development Version)** Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 
 ## Getting started
-Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
+* Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
+* Check [Sequential Design](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) to have a taste of this new feature available in our development version.
 
 ## Installation
 You can install the package from CRAN:

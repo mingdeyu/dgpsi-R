@@ -119,6 +119,7 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
 ## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 232.30it/s]
+## Imputing ... done
 ```
 
 Since all outputs of emulators in the first layer is from `m1` and `m2` uses the output from `m1` as its input, we set `linked_idx = c(1)` in `dgp()` above. 
@@ -150,6 +151,7 @@ m3 <- dgp( X3, Y3, depth = 3, name = "matern2.5", linked_idx = list( c(1), c(1) 
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
 ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:06<00:00, 72.56it/s]
+## Imputing ... done
 ```
 
 Since `m3` takes both outputs from `m1` in layer 1 and `m2` in layer 2, we set `linked_idx = list( c(1), c(1) )`. The first vector in the list says that the output dimension 1 from all emulators (i.e., `m1`) in the first layer feeds into `m3` and the second vector in the list says that the output dimension 1 from all emulators (i.e., `m2`) in the second layer feeds into `m3`. Note that the dimensions in `X3` is ordered in consistent with `linked_idx`, i.e., the first and second columns of `X3` correspond to the output of `m1` and `m2` respectively.

@@ -81,6 +81,7 @@ m_dgp <- dgp(train_X, train_Y, depth = 3, lengthscale = c(0.5, 0.2), likelihood 
 ```
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
+## Imputing ... done
 ```
 
 We choose a heteroskedastic Gaussian likelihood by setting `likelihood = "Hetero"` since the data drawn in the plot show varying noises. `lengthscale` is set to `c(0.5, 0.2)` where `0.5` is the initial lengthscale value for kernel functions of all GP nodes in the first layer and `0.2` is the initial lengthscale value for kernel functions of all GP nodes in the second layer. We set `training = FALSE` so `dgp()` only constructs a DGP structure and we can use `summary()` to check if our specifications for the DGP emulator is correct before proceeding to training:
@@ -111,6 +112,7 @@ m_dgp <- continue(m_dgp)
 ```
 ## Continue the training:
 ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:18<00:00, 27.49it/s]
+## Imputing ... done
 ```
 
 For comparison, we also build a GP emulator (by `gp()`) that incorporates homogeneous noises by setting `nugget_est = T` and the initial nugget value to $0.01$. We set `training` to `FALSE` so we can use `summary()` to check the generated GP structure before training:

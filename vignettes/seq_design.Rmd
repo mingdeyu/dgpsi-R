@@ -35,7 +35,7 @@ init_py()
 
 ## Construct a synthetic simulator
 
-We consider a non-stationary synthetic simulator which has a 2-dimensional input with the functional form [@Ba2018] defined by:
+We consider a non-stationary synthetic simulator which has a 2-dimensional input with the functional form [@ba2018] defined by:
 
 ```{r}
 f <- function(x) {
