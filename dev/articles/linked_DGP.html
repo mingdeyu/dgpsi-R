@@ -178,7 +178,8 @@ emulate the Model 2:</p>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator:</span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 232.30it/s]</span></span></code></pre>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 232.30it/s]</span></span>
+<span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Since all outputs of emulators in the first layer is from
 <code>m1</code> and <code>m2</code> uses the output from <code>m1</code>
 as its input, we set <code>linked_idx = c(1)</code> in
@@ -202,7 +203,8 @@ to emulate the Model 3:</p>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator:</span></span>
-<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:06&lt;00:00, 72.56it/s]</span></span></code></pre>
+<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:06&lt;00:00, 72.56it/s]</span></span>
+<span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Since <code>m3</code> takes both outputs from <code>m1</code> in
 layer 1 and <code>m2</code> in layer 2, we set
 <code>linked_idx = list( c(1), c(1) )</code>. The first vector in the

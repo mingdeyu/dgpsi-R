@@ -107,7 +107,7 @@ design for adaptive improvements of a DGP emulator.</p>
 <h2 id="construct-a-synthetic-simulator">Construct a synthetic simulator<a class="anchor" aria-label="anchor" href="#construct-a-synthetic-simulator"></a>
 </h2>
 <p>We consider a non-stationary synthetic simulator which has a
-2-dimensional input with the functional form <span class="citation">[@Ba2018]</span> defined by:</p>
+2-dimensional input with the functional form <span class="citation">[@ba2018]</span> defined by:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="op">(</span><span class="fl">0.7</span><span class="op">*</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span>,drop<span class="op">=</span><span class="cn">F</span><span class="op">]</span><span class="op">+</span><span class="fl">0.3</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fl">0.7</span><span class="op">*</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span>,drop<span class="op">=</span><span class="cn">F</span><span class="op">]</span><span class="op">+</span><span class="fl">0.3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
