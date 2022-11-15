@@ -7,13 +7,25 @@
 \alias{locate.bundle}
 \title{Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators}
 \usage{
-locate(object, x_cand, n_cand, limits, method, nugget_s, verb, cores, ...)
+locate(
+  object,
+  x_cand,
+  n_cand,
+  limits,
+  batch_size,
+  method,
+  nugget_s,
+  verb,
+  cores,
+  ...
+)
 
 \method{locate}{gp}(
   object,
   x_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  batch_size = 1,
   method = "ALM",
   nugget_s = 1,
   verb = TRUE,
@@ -26,6 +38,7 @@ locate(object, x_cand, n_cand, limits, method, nugget_s, verb, cores, ...)
   x_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  batch_size = 1,
   method = "ALM",
   nugget_s = 1,
   verb = TRUE,
@@ -40,6 +53,7 @@ locate(object, x_cand, n_cand, limits, method, nugget_s, verb, cores, ...)
   x_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  batch_size = 1,
   method = "ALM",
   nugget_s = 1,
   verb = TRUE,
@@ -69,6 +83,9 @@ input dimension. If a vector is provided, it will be converted to a two-column r
 to input dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions.
 If \code{limits = NULL}, the ranges of input dimensions will be determined from the training data contained in \code{object}. This
 argument is used when \code{x_cand = NULL}. Defaults to \code{NULL}.}
+
+\item{batch_size}{an integer that gives the number of design points (for each simulator output dimension if \code{aggregate = NULL}) to be chosen.
+Defaults to \code{1}.}
 
 \item{method}{the criterion used to locate the next design point: ALM (\code{"ALM"}) or MICE (\code{"MICE"}). See references below.
 Defaults to \code{"ALM"}.}
@@ -101,47 +118,74 @@ Set to \code{NULL} to disable the aggregation. Defaults to \code{NULL}.}
 \itemize{
 \item If \code{object} is an instance of the \code{gp} class, a list is returned:
 \itemize{
-\item when \code{x_cand = NULL}, the list has one slot called \code{location} that contains a vector that gives the position of determined
-design point.
-\item when \code{x_cand} is not \code{NULL}, the list has two slots. The first slot is called \code{index} that gives the row index of the next design point in
-\code{x_cand}. The second slot is called \code{location} that gives the position of the determined design point.
+\item when \code{x_cand = NULL}, the list has one slot called \code{location} that contains
+\itemize{
+\item a single-row matrix that gives the position of determined design point, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS} where \code{S = batch_size}, each of which is a single-row matrix giving the position of
+a determined design point, if \code{batch_size} is greater than \code{1}.
+}
+\item when \code{x_cand} is not \code{NULL}, the list has an additional slot called \code{index} that contains
+\itemize{
+\item the row index of the next design point in \code{x_cand}, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS} giving indices of next design points in \code{x_cand}, if \code{batch_size} is greater than \code{1}.
+}
 }
 \item If \code{object} is an instance of the \code{dgp} class, a list is returned:
 \itemize{
-\item when \code{x_cand = NULL} and \code{aggregate = NULL}, the list has one slot called \code{location} that contains a matrix whose rows give the positions of
-determined design points with respect to different output dimensions;
-\item when \code{x_cand = NULL} and \code{aggregate} is provided, the list has one slot called \code{location} that contains a single-row matrix that gives the
-position of the determined design point.
-\item when \code{x_cand} is not \code{NULL} and \code{aggregate = NULL}, the list has two slots:
+\item when \code{x_cand = NULL} and \code{aggregate = NULL}, the list has one slot called \code{location} that contains
 \itemize{
-\item the first slot is called \code{index} that contains a vector giving the row indices of determined design points in \code{x_cand} with respect to
-different output dimensions.
-\item the second slot is called \code{location} that contains a matrix whose rows give the positions of determined design points with respect to
-different output dimensions.
+\item a matrix whose rows give the positions of determined design points with respect to different output dimensions, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS} where \code{S = batch_size}, each of which is a matrix giving the position of determined
+design points with respect to different output dimensions, if \code{batch_size} is greater than \code{1}.
 }
-\item when \code{x_cand} is not \code{NULL} and \code{aggregate} is provided, the list has two slots:
+
+when \code{x_cand} is not \code{NULL}, the list has an additional slot called \code{index} that contains
 \itemize{
-\item the first slot is called \code{index} that contains the row index of the next design point in \code{x_cand}.
-\item the second slot is called \code{location} that contains a single-row matrix that gives the position of the determined design point.
+\item a vector giving the row indices of determined design points in \code{x_cand} with respect to different output dimensions, if \code{batch_size = 1}; or
+\item a number of vectors named \verb{position1,...,positionS}, each of which gives indices of determined design points in \code{x_cand} with respect to
+different output dimensions, if \code{batch_size} is greater than \code{1}.
+}
+\item when \code{x_cand = NULL} and \code{aggregate} is provided, the list has one slot called \code{location} that contains
+\itemize{
+\item a single-row matrix that gives the position of the determined design point, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS} where \code{S = batch_size}, each of which is a single-row matrix giving the position of
+the determined design point, if \code{batch_size} is greater than \code{1}.
+}
+
+when \code{x_cand} is not \code{NULL}, the list has an additional slot called \code{index} that contains
+\itemize{
+\item the row index of the next design point in \code{x_cand}, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS}, each of which gives the index of a determined design point in \code{x_cand}, if \code{batch_size}
+is greater than \code{1}.
 }
 }
 \item If \code{object} is an instance of the \code{bundle} class, a list is returned:
 \itemize{
-\item when \code{x_cand = NULL} and \code{aggregate = NULL}, the list has one slot called \code{location} that contains a matrix whose rows give the positions of
-determined design points with respect to different emulators in the bundle;
-\item when \code{x_cand = NULL} and \code{aggregate} is provided, the list has one slot called \code{location} that contains a single-row matrix that gives the
-position of the determined design point.
-\item when \code{x_cand} is not \code{NULL} and \code{aggregate = NULL}, the list has two slots:
+\item when \code{x_cand = NULL} and \code{aggregate = NULL}, the list has one slot called \code{location} that contains
 \itemize{
-\item the first slot is called \code{index} that contains a vector giving the row indices of determined design points in \code{x_cand} with respect to
-different emulators in the bundle.
-\item the second slot is called \code{location} that contains a matrix whose rows give the positions of determined design points with respect to
-different emulators in the bundle.
+\item a matrix whose rows give the positions of determined design points with respect to different emulators in the bundle, if \code{batch_size = 1};
+\item a number of slots named \verb{position1,...,positionS} where \code{S = batch_size}, each of which is a matrix giving the position of determined
+design points with respect to different emulators in the bundle, if \code{batch_size} is greater than \code{1}.
 }
-\item when \code{x_cand} is not \code{NULL} and \code{aggregate} is provided, the list has two slots:
+
+when \code{x_cand} is not \code{NULL}, the list has an additional slot called \code{index} that contains
 \itemize{
-\item the first slot is called \code{index} that contains the row index of the next design point in \code{x_cand}.
-\item the second slot is called \code{location} that contains a single-row matrix that gives the position of the determined design point.
+\item a vector giving the row indices of determined design points in \code{x_cand} with respect to different emulators in the bundle, if \code{batch_size = 1}; or
+\item a number of vectors named \verb{position1,...,positionS}, each of which gives indices of determined design points in \code{x_cand} with respect to
+different emulators in the bundle, if \code{batch_size} is greater than \code{1}.
+}
+\item when \code{x_cand = NULL} and \code{aggregate} is provided, the list has one slot called \code{location} that contains
+\itemize{
+\item a single-row matrix that gives the position of the determined design point, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS} where \code{S = batch_size}, each of which is a single-row matrix giving the position of
+the determined design point, if \code{batch_size} is greater than \code{1}.
+}
+
+when \code{x_cand} is not \code{NULL}, the list has an additional slot called \code{index} that contains
+\itemize{
+\item the row index of the next design point in \code{x_cand}, if \code{batch_size = 1}; or
+\item a number of slots named \verb{position1,...,positionS}, each of which gives the index of a determined design point in \code{x_cand}, if \code{batch_size}
+is greater than \code{1}.
 }
 }
 }
@@ -175,7 +219,7 @@ f <- function(x) {
 
 # generate the initial design
 X <- maximinLHS(10,1)
-Y <- as.matrix(sapply(X, f))
+Y <- f(X)
 
 # training a 2-layered DGP emulator with the global connection off
 m <- dgp(X, Y, connect = F)

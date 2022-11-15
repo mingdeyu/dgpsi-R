@@ -45,20 +45,20 @@ combine <- function(...) {
 #' library(dgpsi)
 #' init_py()
 #'
-#' # construct a function with antwo-dimensional output
+#' # construct a function with a two-dimensional output
 #' f <- function(x) {
 #'  y1 = sin(30*((2*x-1)/2-0.4)^5)*cos(20*((2*x-1)/2-0.4))
 #'  y2 = 1/3*sin(2*(2*x - 1))+2/3*exp(-30*(2*(2*x-1))^2)+1/3
-#'  return(c(y1,y2))
+#'  return(cbind(y1,y2))
 #' }
 #'
 #' # generate the initial design
 #' X <- maximinLHS(10,1)
-#' Y <- t(apply(X, 1, f))
+#' Y <- f(X)
 #'
 #' # generate the validation data
 #' validate_x <- maximinLHS(30,1)
-#' validate_y <- t(apply(validate_x, f, MARGIN = 1))
+#' validate_y <- f(validate_x)
 #'
 #' # training a 2-layered DGP emulator with respect to each output with the global connection off
 #' m1 <- dgp(X, Y[,1], connect=F)

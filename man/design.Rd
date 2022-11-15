@@ -14,6 +14,7 @@ design(
   y_cand,
   n_cand,
   limits,
+  batch_size,
   f,
   freq,
   x_test,
@@ -33,6 +34,7 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  batch_size = 1,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
@@ -52,6 +54,7 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  batch_size = 1,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
@@ -74,6 +77,7 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  batch_size = 1,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
@@ -120,6 +124,10 @@ input dimension. If a vector is provided, it will be converted to a two-column r
 dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
 \code{limits = NULL}, the ranges of input dimensions will be determined from the training data contained in \code{object}. This argument
 is used when \code{x_cand = NULL} and \code{y_cand = NULL}. Defaults to \code{NULL}.}
+
+\item{batch_size}{an integer or a vector of integers that gives the number of design points (for each simulator output dimension if
+\code{aggregate = NULL}) to be chosen at each step of the sequential design. If an integer is given, it will be applied to all steps
+of the sequential design. If a vector is given, it must have a length of \code{N}. Defaults to \code{1}.}
 
 \item{f}{an R function that represents the simulator. See \emph{Note} section below for details on specifications of \code{f}.}
 
@@ -177,13 +185,15 @@ emulators contained in an emulator bundle. See \emph{Note} section below for det
 An updated \code{object} is returned with a slot called \code{design} that contains:
 \itemize{
 \item \emph{S} slots, named \verb{wave1, wave2,..., waveS}, that contain information of \emph{S} waves of sequential designs that have been applied to the emulator.
-Each slot contains two elements:
+Each slot contains the following elements:
 \itemize{
 \item \code{N}, an integer that gives the numbers of steps implemented in the corresponding wave;
 \item \code{rmse}, a matrix that gives the RMSEs of emulators constructed during the corresponding wave;
 \item \code{freq}, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.
 \item \code{aggregation}, a bool that indicates if the aggregation is applied (i.e., if \code{aggregate} is supplied) to locate the design points for a DGP
 emulator or a bundle of (D)GP emulators during the corresponding wave.
+\item \code{batch_size}, a vector of size \code{N} that contains the information given by the argument \code{batch_size}.
+\item \code{enrichment}, a vector of size \code{N} that gives the number of new design points added after each step of the sequential design.
 }
 \item a slot called \code{type} that gives the type of validations, either LOO (\code{loo}) or OOS (\code{oos}) used to calculate the RMSEs of emulators constructed
 in the sequential design. See \code{\link[=validate]{validate()}} for more information about LOO and OOS.
@@ -227,13 +237,13 @@ at a design point.
 aggregation. The values of the aggregation parameters should be specified by setting them as the default values of the second argument of
 \code{aggregate}.
 }
-\item \code{f} should be defined as a function with only one argument which is a vector giving values of different simulator input dimensions. \code{f}
-can return a single or two outputs.
+\item \code{f} should be defined as a function with only one argument which is a matrix with each row giving values of an input position to the simulator.
+\code{f} can return a single or two outputs.
 \itemize{
-\item if \code{f} has one output, it should return a vector that gives values of different simulator output dimensions.
+\item if \code{f} has one output, it should return a matrix with each row being the output from the simulator given the corresponding input.
 \item if \code{f} has two outputs, it should return a list with two slots:
 \itemize{
-\item the first slot is a vector that gives values of different simulator output dimensions.
+\item the first slot is a matrix that gives values of outputs generated from the simulator.
 \item the second slot is a vector that gives values of aggregation parameters that will be used to update the criterion aggregation via \code{aggregate}
 after each step of the sequential design.
 }
@@ -242,9 +252,9 @@ In the two-output case, \code{aggregate} must be provided and defined with two a
 }
 \item When defining \code{f} and \code{aggregate}, it is important to ensure that:
 \itemize{
-\item the positions of input dimensions of \code{f} are consistent with those of the emulator;
-\item the positions of output dimensions of \code{f} are consistent with those of the emulator, or the order of emulators placed in \code{object} if \code{object} is an
-instance of the \code{bundle} class;
+\item the positions of input dimensions (i.e, the order of columns of the input matrix) of \code{f} are consistent with those of the emulator;
+\item the positions of output dimensions (i.e, the order of columns of the output matrix) of \code{f} are consistent with those of the emulator, or the order
+of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
 \item the positions of elements in the first argument of \code{aggregate} are consistent with the positions of output dimensions of the emulator, or the
 order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
 \item the positions of elements in the second output (if defined) of \code{f} are consistent with the positions of elements in the second argument of \code{aggregate}.
@@ -261,18 +271,18 @@ library(lhs)
 library(dgpsi)
 init_py()
 
-# construct a 2D non-stationary function
+# construct a 2D non-stationary function that takes a matrix as the input
 f <- function(x) {
- sin(1/((0.7*x[1]+0.3)*(0.7*x[2]+0.3)))
- }
+  sin(1/((0.7*x[,1,drop=F]+0.3)*(0.7*x[,2,drop=F]+0.3)))
+}
 
 # generate the initial design
 X <- maximinLHS(5,2)
-Y <- apply(X, f, MARGIN = 1)
+Y <- f(X)
 
 # generate the validation data
 validate_x <- maximinLHS(30,2)
-validate_y <- apply(validate_x, f, MARGIN = 1)
+validate_y <- f(validate_x)
 
 # training a 2-layered DGP emulator with the initial design
 m <- dgp(X, Y)

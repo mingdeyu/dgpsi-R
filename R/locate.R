@@ -17,6 +17,8 @@
 #'     to input dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions.
 #'     If `limits = NULL`, the ranges of input dimensions will be determined from the training data contained in `object`. This
 #'     argument is used when `x_cand = NULL`. Defaults to `NULL`.
+#' @param batch_size an integer that gives the number of design points (for each simulator output dimension if `aggregate = NULL`) to be chosen.
+#'     Defaults to `1`.
 #' @param method the criterion used to locate the next design point: ALM (`"ALM"`) or MICE (`"MICE"`). See references below.
 #'     Defaults to `"ALM"`.
 #' @param nugget_s the value of the smoothing nugget term used when `method = "MICE"`. Defaults to `1.0`.
@@ -38,38 +40,53 @@
 #'
 #' @return
 #' * If `object` is an instance of the `gp` class, a list is returned:
-#'   - when `x_cand = NULL`, the list has one slot called `location` that contains a vector that gives the position of determined
-#'     design point.
-#'   - when `x_cand` is not `NULL`, the list has two slots. The first slot is called `index` that gives the row index of the next design point in
-#'     `x_cand`. The second slot is called `location` that gives the position of the determined design point.
+#'   - when `x_cand = NULL`, the list has one slot called `location` that contains
+#'     - a single-row matrix that gives the position of determined design point, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS` where `S = batch_size`, each of which is a single-row matrix giving the position of
+#'       a determined design point, if `batch_size` is greater than `1`.
+#'   - when `x_cand` is not `NULL`, the list has an additional slot called `index` that contains
+#'     - the row index of the next design point in `x_cand`, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS` giving indices of next design points in `x_cand`, if `batch_size` is greater than `1`.
 #
 #' * If `object` is an instance of the `dgp` class, a list is returned:
-#'   - when `x_cand = NULL` and `aggregate = NULL`, the list has one slot called `location` that contains a matrix whose rows give the positions of
-#'     determined design points with respect to different output dimensions;
-#'   - when `x_cand = NULL` and `aggregate` is provided, the list has one slot called `location` that contains a single-row matrix that gives the
-#'     position of the determined design point.
-#'   - when `x_cand` is not `NULL` and `aggregate = NULL`, the list has two slots:
-#'     - the first slot is called `index` that contains a vector giving the row indices of determined design points in `x_cand` with respect to
-#'       different output dimensions.
-#'     - the second slot is called `location` that contains a matrix whose rows give the positions of determined design points with respect to
-#'       different output dimensions.
-#'   - when `x_cand` is not `NULL` and `aggregate` is provided, the list has two slots:
-#'     - the first slot is called `index` that contains the row index of the next design point in `x_cand`.
-#'     - the second slot is called `location` that contains a single-row matrix that gives the position of the determined design point.
+#'   - when `x_cand = NULL` and `aggregate = NULL`, the list has one slot called `location` that contains
+#'     - a matrix whose rows give the positions of determined design points with respect to different output dimensions, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS` where `S = batch_size`, each of which is a matrix giving the position of determined
+#'       design points with respect to different output dimensions, if `batch_size` is greater than `1`.
+#'
+#'     when `x_cand` is not `NULL`, the list has an additional slot called `index` that contains
+#'     - a vector giving the row indices of determined design points in `x_cand` with respect to different output dimensions, if `batch_size = 1`; or
+#'     - a number of vectors named `position1,...,positionS`, each of which gives indices of determined design points in `x_cand` with respect to
+#'       different output dimensions, if `batch_size` is greater than `1`.
+#'   - when `x_cand = NULL` and `aggregate` is provided, the list has one slot called `location` that contains
+#'     - a single-row matrix that gives the position of the determined design point, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS` where `S = batch_size`, each of which is a single-row matrix giving the position of
+#'       the determined design point, if `batch_size` is greater than `1`.
+#'
+#'     when `x_cand` is not `NULL`, the list has an additional slot called `index` that contains
+#'     - the row index of the next design point in `x_cand`, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS`, each of which gives the index of a determined design point in `x_cand`, if `batch_size`
+#'       is greater than `1`.
 #'
 #' * If `object` is an instance of the `bundle` class, a list is returned:
-#'   - when `x_cand = NULL` and `aggregate = NULL`, the list has one slot called `location` that contains a matrix whose rows give the positions of
-#'     determined design points with respect to different emulators in the bundle;
-#'   - when `x_cand = NULL` and `aggregate` is provided, the list has one slot called `location` that contains a single-row matrix that gives the
-#'     position of the determined design point.
-#'   - when `x_cand` is not `NULL` and `aggregate = NULL`, the list has two slots:
-#'     - the first slot is called `index` that contains a vector giving the row indices of determined design points in `x_cand` with respect to
-#'       different emulators in the bundle.
-#'     - the second slot is called `location` that contains a matrix whose rows give the positions of determined design points with respect to
-#'       different emulators in the bundle.
-#'   - when `x_cand` is not `NULL` and `aggregate` is provided, the list has two slots:
-#'     - the first slot is called `index` that contains the row index of the next design point in `x_cand`.
-#'     - the second slot is called `location` that contains a single-row matrix that gives the position of the determined design point.
+#'   - when `x_cand = NULL` and `aggregate = NULL`, the list has one slot called `location` that contains
+#'     - a matrix whose rows give the positions of determined design points with respect to different emulators in the bundle, if `batch_size = 1`;
+#'     - a number of slots named `position1,...,positionS` where `S = batch_size`, each of which is a matrix giving the position of determined
+#'       design points with respect to different emulators in the bundle, if `batch_size` is greater than `1`.
+#'
+#'     when `x_cand` is not `NULL`, the list has an additional slot called `index` that contains
+#'     - a vector giving the row indices of determined design points in `x_cand` with respect to different emulators in the bundle, if `batch_size = 1`; or
+#'     - a number of vectors named `position1,...,positionS`, each of which gives indices of determined design points in `x_cand` with respect to
+#'       different emulators in the bundle, if `batch_size` is greater than `1`.
+#'   - when `x_cand = NULL` and `aggregate` is provided, the list has one slot called `location` that contains
+#'     - a single-row matrix that gives the position of the determined design point, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS` where `S = batch_size`, each of which is a single-row matrix giving the position of
+#'       the determined design point, if `batch_size` is greater than `1`.
+#'
+#'     when `x_cand` is not `NULL`, the list has an additional slot called `index` that contains
+#'     - the row index of the next design point in `x_cand`, if `batch_size = 1`; or
+#'     - a number of slots named `position1,...,positionS`, each of which gives the index of a determined design point in `x_cand`, if `batch_size`
+#'       is greater than `1`.
 #' @note
 #' * The function is only applicable to GP emulators, DGP emulators without likelihood layers, or bundles of (D)GP emulators created by [pack()].
 #' * Any R vector detected in `x_cand` will be treated as a column vector and automatically converted into a single-column
@@ -95,7 +112,7 @@
 #'
 #' # generate the initial design
 #' X <- maximinLHS(10,1)
-#' Y <- as.matrix(sapply(X, f))
+#' Y <- f(X)
 #'
 #' # training a 2-layered DGP emulator with the global connection off
 #' m <- dgp(X, Y, connect = F)
@@ -123,14 +140,14 @@
 #' @md
 #' @name locate
 #' @export
-locate <- function(object, x_cand, n_cand, limits, method, nugget_s, verb, cores, ...){
+locate <- function(object, x_cand, n_cand, limits, batch_size, method, nugget_s, verb, cores, ...){
   UseMethod("locate")
 }
 
 #' @rdname locate
 #' @method locate gp
 #' @export
-locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, cores = 1, ...) {
+locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, method = 'ALM', nugget_s = 1., verb = TRUE, cores = 1, ...) {
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   #check core number
@@ -139,11 +156,14 @@ locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, method
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
 
+  batch_size <- as.integer(batch_size)
+  if ( batch_size < 1 ) stop("'batch_size' must be >= 1.", call. = FALSE)
+
   #extract input dimensions
   training_input <- object$data$X
   n_dim_X <- ncol(training_input)
   n_points <- nrow(training_input)
-  if ( isTRUE(verb) ) message("Locating the next design point ...", appendLF = FALSE)
+  if ( isTRUE(verb) ) message("Locating the next design point(s) ...", appendLF = FALSE)
   #locate next design point
   if ( is.null(x_cand) ){
     #check limits
@@ -180,24 +200,49 @@ locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, method
       }
     }
     if ( identical(cores,as.integer(1)) ){
-      res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s)
+      res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
     } else {
-      res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, core_num = cores)
+      res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
     }
-    dat <- list('location' = x_cand[res[[1]]+1,])
+    dat <- list()
+    if ( batch_size==1 ){
+      dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+    } else {
+      for (j in 1:batch_size){
+        dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j]+1,,drop=FALSE]
+      }
+    }
   } else {
     if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
     if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
     if ( identical(cores,as.integer(1)) ){
-      res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s)
+      res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
     } else {
-      res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, core_num = cores)
+      res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
     }
-    dat <- list('index' = res[[1]]+1, 'location' = x_cand[res[[1]]+1,])
+    dat <- list()
+    if ( batch_size==1 ){
+      dat[['index']] <- res[[1]]+1
+      dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+    } else {
+      for (j in 1:batch_size){
+        dat[['index']][[paste('position', j, sep="")]] <- res[[1]][j]+1
+        dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j]+1,,drop=FALSE]
+      }
+    }
   }
   if ( isTRUE(verb) ) message(" done")
-  if ( isTRUE(verb) ) message(paste(c("The next design point is:\n", sprintf("%.06f", dat[['location']])), collapse=" "))
+  if ( isTRUE(verb) ) {
+    if ( batch_size==1 ){
+      message(paste(c("The next design point(s):\n", sprintf("%.06f", dat[['location']])), collapse=" "))
+    } else {
+      message(paste(c("The next design points(s):")))
+      for (i in 1:length(dat[['location']]) ){
+        message(paste(" Position", i, ": ", paste(c(sprintf("%.06f", dat[['location']][[paste('position',i,sep="")]])), collapse=" "), sep=""))
+      }
+    }
+  }
   return(dat)
 }
 
@@ -205,7 +250,7 @@ locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, method
 #' @rdname locate
 #' @method locate dgp
 #' @export
-locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, cores = 1, threading = FALSE, aggregate = NULL, ...) {
+locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, method = 'ALM', nugget_s = 1., verb = TRUE, cores = 1, threading = FALSE, aggregate = NULL, ...) {
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
@@ -216,6 +261,9 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
+
+  batch_size <- as.integer(batch_size)
+  if ( batch_size < 1 ) stop("'batch_size' must be >= 1.", call. = FALSE)
 
   object$emulator_obj$set_nb_parallel(threading)
   #extract input dimensions
@@ -228,7 +276,7 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
     if ( isTRUE(verb) ) message("The emulator output is one-dimensional, the provided 'aggregate' function will be ignored.")
     aggregate <- NULL
   }
-  if ( isTRUE(verb) ) message("Locating the next design point ...", appendLF = FALSE)
+  if ( isTRUE(verb) ) message("Locating the next design point(s) ...", appendLF = FALSE)
   #locate next design point
   if ( is.null(x_cand) ){
     #check limits
@@ -269,11 +317,18 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
 
     if ( is.null(aggregate) ){
       if ( identical(cores,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s)
+        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
       } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, core_num = cores)
+        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
       }
-      dat <- list('location' = x_cand[res[[1]]+1,,drop=FALSE])
+      dat <- list()
+      if ( batch_size==1 ){
+        dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+      } else {
+        for (j in 1:batch_size){
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j,]+1,,drop=FALSE]
+        }
+      }
     } else {
       if ( identical(cores,as.integer(1)) ){
         res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
@@ -281,8 +336,16 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
         res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
       }
       agg_scores <- apply(res, 1, aggregate)
-      idx <- which.max(agg_scores)
-      dat <- list('location' = x_cand[idx,,drop=FALSE])
+      dat <- list()
+      if ( batch_size==1 ){
+        idx <- which.max(agg_scores)
+        dat[['location']] <- x_cand[idx,,drop=FALSE]
+      } else {
+        idx <- order(agg_scores, decreasing=TRUE)[1:batch_size]
+        for (j in 1:batch_size){
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j],,drop=FALSE]
+        }
+      }
     }
   } else {
     if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
@@ -290,11 +353,20 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
     if ( is.null(aggregate) ){
       if ( identical(cores,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s)
+        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
       } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, core_num = cores)
+        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
       }
-      dat <- list('index' = res[[1]]+1, 'location' = x_cand[res[[1]]+1,,drop=FALSE])
+      dat <- list()
+      if ( batch_size==1 ){
+        dat[['index']] <- res[[1]]+1
+        dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+      } else {
+        for (j in 1:batch_size){
+          dat[['index']][[paste('position', j, sep="")]] <- res[[1]][j,]+1
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j,]+1,,drop=FALSE]
+        }
+      }
     } else {
       if ( identical(cores,as.integer(1)) ){
         res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
@@ -302,18 +374,43 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
         res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
       }
       agg_scores <- apply(res, 1, aggregate)
-      idx <- which.max(agg_scores)
-      dat <- list('index' = idx, 'location' = x_cand[idx,,drop=FALSE])
+      dat <- list()
+      if ( batch_size==1 ){
+        idx <- which.max(agg_scores)
+        dat[['index']] <- idx
+        dat[['location']] <- x_cand[idx,,drop=FALSE]
+      } else {
+        idx <- order(agg_scores, decreasing=TRUE)[1:batch_size]
+        for (j in 1:batch_size){
+          dat[['index']][[paste('position', j, sep="")]] <- idx[j]
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j],,drop=FALSE]
+        }
+      }
     }
   }
   if ( isTRUE(verb) ) message(" done")
   if ( isTRUE(verb) ) {
-    if ( nrow(dat[['location']])==1 ){
-       message(paste(c("The next design point is:\n", sprintf("%.06f", dat[['location']][1,])), collapse=" "))
+    if ( batch_size==1 ){
+      if ( nrow(dat[['location']])==1 ){
+        message(paste(c("The next design point(s):\n", sprintf("%.06f", dat[['location']][1,])), collapse=" "))
+      } else {
+        message(paste(c("The next design point(s):")))
+        for (i in 1:nrow(dat[['location']]) ){
+          message(paste(" Output", i, ": ", paste(c(sprintf("%.06f", dat[['location']][i,])), collapse=" "), sep=""))
+        }
+      }
     } else {
-      message(paste(c("The next design point is:")))
-      for (i in 1:nrow(dat[['location']]) ){
-        message(paste(" Output", i, ": ", paste(c(sprintf("%.06f", dat[['location']][i,])), collapse=" "), sep=""))
+      message(paste(c("The next design point(s):")))
+      for (i in 1:batch_size ){
+        pos_i <- dat[['location']][[paste('position',i,sep="")]]
+        n_pos <- nrow(pos_i)
+        if ( n_pos==1 ){
+          message(paste(" Position", i, ": ", paste(c(sprintf("%.06f", pos_i[1,])), collapse=" "), sep=""))
+        } else {
+          for (j in 1:n_pos){
+            message(paste(" Position", i, " for Output", j, ": ", paste(c(sprintf("%.06f", pos_i[j,])), collapse=" "), sep=""))
+          }
+        }
       }
     }
   }
@@ -324,7 +421,7 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, metho
 #' @rdname locate
 #' @method locate bundle
 #' @export
-locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, cores = 1, threading = FALSE, aggregate = NULL, ...) {
+locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, method = 'ALM', nugget_s = 1., verb = TRUE, cores = 1, threading = FALSE, aggregate = NULL, ...) {
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
 
@@ -333,6 +430,8 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, me
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
+
+  batch_size <- as.integer(batch_size)
 
   training_input <- object$data$X
   n_dim_X <- ncol(training_input)
@@ -370,13 +469,18 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, me
   }
 
   if ( is.null(aggregate) ) {
-    location <- c()
-    if ( !x_cand_null ) indice <- c()
+    if ( batch_size==1 ){
+      location <- c()
+      if ( !x_cand_null ) indice <- c()
+    } else {
+      location <- list()
+      if ( !x_cand_null ) indice <- list()
+    }
   } else {
     score <- c()
   }
 
-  if ( isTRUE(verb) ) message("Locating the next design point ...", appendLF = FALSE)
+  if ( isTRUE(verb) ) message("Locating the next design point(s) ...", appendLF = FALSE)
   n_emulators <- length(object)
   if ( "data" %in% names(object) ) n_emulators <- n_emulators - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
@@ -384,9 +488,16 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, me
     obj_i <- object[[paste('emulator',i,sep='')]]
     if ( inherits(obj_i,"gp") ){
       if ( is.null(aggregate) ){
-        res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s)
-        location <- rbind(location, x_cand[res[[1]]+1,])
-        if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
+        res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+        if ( batch_size==1 ){
+          location <- rbind(location, x_cand[res[[1]]+1,])
+          if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
+        } else {
+          for ( j in 1:batch_size ){
+            location[[paste('position',j,sep="")]] <- rbind(location[[paste('position',j,sep="")]], x_cand[res[[1]][j]+1,])
+            if ( !x_cand_null ) indice[[paste('position',j,sep="")]] <- c(indice[[paste('position',j,sep="")]], res[[1]][j]+1)
+          }
+        }
       } else {
         res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
         score <- cbind(score, res)
@@ -396,12 +507,19 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, me
       #locate next design point
       if ( is.null(aggregate) ){
         if ( identical(cores,as.integer(1)) ){
-          res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s)
+          res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
         } else {
-          res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, core_num = cores)
+          res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
         }
-        location <- rbind(location, x_cand[res[[1]]+1,,drop=FALSE])
-        if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
+        if ( batch_size==1 ){
+          location <- rbind(location, x_cand[res[[1]]+1,,drop=FALSE])
+          if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
+        } else {
+          for ( j in 1:batch_size ){
+            location[[paste('position',j,sep="")]] <- rbind(location[[paste('position',j,sep="")]], x_cand[res[[1]][j]+1,,drop=FALSE])
+            if ( !x_cand_null ) indice[[paste('position',j,sep="")]] <- c(indice[[paste('position',j,sep="")]], res[[1]][j]+1)
+          }
+        }
       } else {
         if ( identical(cores,as.integer(1)) ){
           res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
@@ -415,10 +533,23 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, me
   if ( isTRUE(verb) ) message(" done")
 
   if ( is.null(aggregate) ) {
-    if ( isTRUE(verb) ) {
-      message(paste(c("The next design point is:")))
-      for (i in 1:nrow(location) ){
-        message(paste(" Emulator", i, ": ", paste(c(sprintf("%.06f", location[i,])), collapse=" "), sep=""))
+    if ( batch_size==1 ){
+      if ( isTRUE(verb) ) {
+        message(paste(c("The next design point(s):")))
+        for (i in 1:nrow(location) ){
+          message(paste(" Emulator", i, ": ", paste(c(sprintf("%.06f", location[i,])), collapse=" "), sep=""))
+        }
+      }
+    } else {
+      if ( isTRUE(verb) ) {
+        message(paste(c("The next design point(s):")))
+        for (i in 1:batch_size ){
+          pos_i <- location[[paste('position',i,sep="")]]
+          n_pos <- nrow(pos_i)
+          for (j in 1:n_pos){
+            message(paste(" Position", i, " for Emulator", j, ": ", paste(c(sprintf("%.06f", pos_i[j,])), collapse=" "), sep=""))
+          }
+        }
       }
     }
     if ( x_cand_null ) {
@@ -428,13 +559,30 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, me
     }
   } else {
     agg_scores <- apply(score, 1, aggregate)
-    idx <- which.max(agg_scores)
-    if ( x_cand_null ) {
-      dat <- list('location' = x_cand[idx,,drop=FALSE])
+    dat <- list()
+    if ( batch_size==1 ){
+      idx <- which.max(agg_scores)
+      if ( !x_cand_null ) dat[['index']] <- idx
+      dat[['location']] <- x_cand[idx,,drop=FALSE]
     } else {
-      dat <- list('index' = idx, 'location' = x_cand[idx,,drop=FALSE])
+      idx <- order(agg_scores, decreasing=TRUE)[1:batch_size]
+      for (j in 1:batch_size){
+        if ( !x_cand_null ) dat[['index']][[paste('position', j, sep="")]] <- idx[j]
+        dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j],,drop=FALSE]
+      }
     }
-    if ( isTRUE(verb) ) message(paste(c("The next design point is:\n", sprintf("%.06f", dat[['location']][1,])), collapse=" "))
+
+    if ( isTRUE(verb) ) {
+      if ( batch_size==1 ){
+        message(paste(c("The next design point(s):\n", sprintf("%.06f", dat[['location']][1,])), collapse=" "))
+      } else {
+        message(paste(c("The next design point(s):")))
+        for (i in 1:batch_size ){
+          pos_i <- dat[['location']][[paste('position',i,sep="")]]
+          message(paste(" Position", i, ": ", paste(c(sprintf("%.06f", pos_i[1,])), collapse=" "), sep=""))
+        }
+      }
+    }
   }
   return(dat)
 }

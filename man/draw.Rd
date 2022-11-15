@@ -7,13 +7,13 @@
 \alias{draw.bundle}
 \title{Validation plots of a sequential design}
 \usage{
-draw(object, type, ...)
+draw(object, type, log, ...)
 
-\method{draw}{gp}(object, type = "rmse", ...)
+\method{draw}{gp}(object, type = "rmse", log = FALSE, ...)
 
-\method{draw}{dgp}(object, type = "rmse", ...)
+\method{draw}{dgp}(object, type = "rmse", log = FALSE, ...)
 
-\method{draw}{bundle}(object, type = "rmse", ...)
+\method{draw}{bundle}(object, type = "rmse", log = FALSE, ...)
 }
 \arguments{
 \item{object}{can be one of the following emulator classes:
@@ -25,6 +25,8 @@ draw(object, type, ...)
 
 \item{type}{either \code{rmse}, for the trace plot of RMSEs of emulators constructed during the sequential designs,
 or \code{design}, for visualizations of input designs created by the sequential design procedure. Defaults to \code{rmse}.}
+
+\item{log}{a bool that indicates whether to plot RMSEs in log-scale if \code{type = "rmse"}. Defaults to \code{FALSE}.}
 
 \item{...}{N/A.}
 }

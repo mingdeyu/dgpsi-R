@@ -8,6 +8,7 @@
 #' * the S3 class `bundle`.
 #' @param type either `rmse`, for the trace plot of RMSEs of emulators constructed during the sequential designs,
 #'     or `design`, for visualizations of input designs created by the sequential design procedure. Defaults to `rmse`.
+#' @param log a bool that indicates whether to plot RMSEs in log-scale if `type = "rmse"`. Defaults to `FALSE`.
 #' @param ... N/A.
 #'
 #' @return A `patchwork` object.
@@ -21,14 +22,14 @@
 #' @md
 #' @name draw
 #' @export
-draw <- function(object, type, ...){
+draw <- function(object, type, log, ...){
   UseMethod("draw")
 }
 
 #' @rdname draw
 #' @method draw gp
 #' @export
-draw.gp <- function(object, type = 'rmse', ...){
+draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
   #check class
   if ( !inherits(object,"gp") ){
     stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
@@ -51,7 +52,7 @@ draw.gp <- function(object, type = 'rmse', ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      Ni <- object$design[[paste('wave',i,sep='')]]$N
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
       wave <- c(wave, rep(paste("wave",i,sep=""), Ni))
       seq_N <- seq_N + Ni
     }
@@ -85,7 +86,7 @@ draw.gp <- function(object, type = 'rmse', ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      Ni <- object$design[[paste('wave',i,sep='')]]$N
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
       seq_N <- seq_N + Ni
     }
     init_N <- total_N - seq_N
@@ -96,9 +97,11 @@ draw.gp <- function(object, type = 'rmse', ...){
       Ni <- object$design[[paste('wave',i,sep='')]]$N
       rmsei <- object$design[[paste('wave',i,sep='')]]$rmse
       Fi <- object$design[[paste('wave',i,sep='')]]$freq
-      design_Ni <- seq(0, Ni, Fi)
-      if ( design_Ni[length(design_Ni)]!=Ni ) design_Ni <- c(design_Ni, Ni)
-      design_Ni <- design_Ni + init_N
+      enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment)
+      enrichi <- c(init_N, init_N + enrichi)
+      step_Ni <- seq(0, Ni, Fi)
+      if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
+      design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
       wave <- c(wave, rep(paste("wave",i,sep=""), nrow(rmsei)))
       rmse <- rbind(rmse, rmsei)
@@ -108,7 +111,7 @@ draw.gp <- function(object, type = 'rmse', ...){
     dat[["N"]] <- design_N
     dat[["rmse"]] <- rmse[,1]
     dat[["Design"]] <- wave
-    p <- draw_seq_design(as.data.frame(dat))
+    p <- draw_seq_design(as.data.frame(dat),log = log)
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
         title = 'Sequential Design Validation',
@@ -122,7 +125,7 @@ draw.gp <- function(object, type = 'rmse', ...){
 #' @rdname draw
 #' @method draw dgp
 #' @export
-draw.dgp <- function(object, type = 'rmse', ...){
+draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
   #check class
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -145,12 +148,7 @@ draw.dgp <- function(object, type = 'rmse', ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      if ( object$design[[paste('wave',i,sep='')]]$aggregation ){
-        num_added <- 1
-      } else {
-        num_added <- ncol(object$design[[paste('wave',i,sep='')]]$rmse)
-      }
-      Ni <- object$design[[paste('wave',i,sep='')]]$N*num_added
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
       wave <- c(wave, rep(paste("wave",i,sep=""), Ni))
       seq_N <- seq_N + Ni
     }
@@ -185,12 +183,7 @@ draw.dgp <- function(object, type = 'rmse', ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      if ( object$design[[paste('wave',i,sep='')]]$aggregation ){
-        num_added <- 1
-      } else {
-        num_added <- ncol(object$design[[paste('wave',i,sep='')]]$rmse)
-      }
-      Ni <- object$design[[paste('wave',i,sep='')]]$N * num_added
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
       seq_N <- seq_N + Ni
     }
     init_N <- total_N - seq_N
@@ -198,21 +191,14 @@ draw.dgp <- function(object, type = 'rmse', ...){
     rmse <- c()
     wave <- c()
     for ( i in 1:wave_N ){
-      if ( object$design[[paste('wave',i,sep='')]]$aggregation ){
-        num_added <- 1
-      } else {
-        num_added <- ncol(object$design[[paste('wave',i,sep='')]]$rmse)
-      }
       Ni <- object$design[[paste('wave',i,sep='')]]$N
       rmsei <- object$design[[paste('wave',i,sep='')]]$rmse
       Fi <- object$design[[paste('wave',i,sep='')]]$freq
-      design_Ni <- seq(0, Ni, Fi)
-      if ( design_Ni[length(design_Ni)]!=Ni ) {
-        design_Ni <- c(design_Ni, Ni) * num_added
-      } else {
-        design_Ni <- design_Ni * num_added
-      }
-      design_Ni <- design_Ni + init_N
+      enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment)
+      enrichi <- c(init_N, init_N + enrichi)
+      step_Ni <- seq(0, Ni, Fi)
+      if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
+      design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
       wave <- c(wave, rep(paste("wave",i,sep=""), nrow(rmsei)))
       rmse <- rbind(rmse, rmsei)
@@ -224,7 +210,7 @@ draw.dgp <- function(object, type = 'rmse', ...){
       dat[["N"]] <- design_N
       dat[["rmse"]] <- rmse[,l]
       dat[["Design"]] <- wave
-      p_list[[l]] <- draw_seq_design(as.data.frame(dat)) +
+      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log) +
         ggplot2::ggtitle(sprintf("O%i", l)) +
         ggplot2::theme(plot.title = ggplot2::element_text(size=10))
     }
@@ -239,30 +225,11 @@ draw.dgp <- function(object, type = 'rmse', ...){
   p_patch
 }
 
-draw_seq_design <- function(dat) {
-  c24 <- c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
-           "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
-           "darkorange4", "brown")
-  p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~N, y=~rmse, group=~Design)) +
-    ggplot2::geom_line(ggplot2::aes_(color=~Design), alpha=0.8) +
-    ggplot2::geom_point(ggplot2::aes_(color=~Design), size=1.5, alpha=0.8) +
-    ggplot2::scale_colour_manual(values = c24, breaks=unique(dat$Design)) +
-    ggplot2::theme(
-      plot.title = ggplot2::element_blank(),
-      legend.position = "bottom",
-      legend.key.width = ggplot2::unit(0.5, "cm"),
-      legend.text = ggplot2::element_text(size = 7),
-      legend.title = ggplot2::element_blank()
-    ) +
-    ggplot2::labs(x ="Number of design points", y = "RMSE")
-    return(p)
-}
-
 
 #' @rdname draw
 #' @method draw bundle
 #' @export
-draw.bundle <- function(object, type = 'rmse', ...){
+draw.bundle <- function(object, type = 'rmse', log = FALSE, ...){
   #check class
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
@@ -285,12 +252,7 @@ draw.bundle <- function(object, type = 'rmse', ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      if ( object$design[[paste('wave',i,sep='')]]$aggregation ){
-        num_added <- 1
-      } else {
-        num_added <- ncol(object$design[[paste('wave',i,sep='')]]$rmse)
-      }
-      Ni <- object$design[[paste('wave',i,sep='')]]$N*num_added
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
       wave <- c(wave, rep(paste("wave",i,sep=""), Ni))
       seq_N <- seq_N + Ni
     }
@@ -325,12 +287,7 @@ draw.bundle <- function(object, type = 'rmse', ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      if ( object$design[[paste('wave',i,sep='')]]$aggregation ){
-        num_added <- 1
-      } else {
-        num_added <- ncol(object$design[[paste('wave',i,sep='')]]$rmse)
-      }
-      Ni <- object$design[[paste('wave',i,sep='')]]$N * num_added
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
       seq_N <- seq_N + Ni
     }
     init_N <- total_N - seq_N
@@ -338,21 +295,14 @@ draw.bundle <- function(object, type = 'rmse', ...){
     rmse <- c()
     wave <- c()
     for ( i in 1:wave_N ){
-      if ( object$design[[paste('wave',i,sep='')]]$aggregation ){
-        num_added <- 1
-      } else {
-        num_added <- ncol(object$design[[paste('wave',i,sep='')]]$rmse)
-      }
       Ni <- object$design[[paste('wave',i,sep='')]]$N
       rmsei <- object$design[[paste('wave',i,sep='')]]$rmse
       Fi <- object$design[[paste('wave',i,sep='')]]$freq
-      design_Ni <- seq(0, Ni, Fi)
-      if ( design_Ni[length(design_Ni)]!=Ni ) {
-        design_Ni <- c(design_Ni, Ni) * num_added
-      } else {
-        design_Ni <- design_Ni * num_added
-      }
-      design_Ni <- design_Ni + init_N
+      enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment)
+      enrichi <- c(init_N, init_N + enrichi)
+      step_Ni <- seq(0, Ni, Fi)
+      if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
+      design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
       wave <- c(wave, rep(paste("wave",i,sep=""), nrow(rmsei)))
       rmse <- rbind(rmse, rmsei)
@@ -364,7 +314,7 @@ draw.bundle <- function(object, type = 'rmse', ...){
       dat[["N"]] <- design_N
       dat[["rmse"]] <- rmse[,l]
       dat[["Design"]] <- wave
-      p_list[[l]] <- draw_seq_design(as.data.frame(dat)) +
+      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log) +
         ggplot2::ggtitle(sprintf("E%i", l)) +
         ggplot2::theme(plot.title = ggplot2::element_text(size=10))
     }
@@ -379,7 +329,7 @@ draw.bundle <- function(object, type = 'rmse', ...){
   p_patch
 }
 
-draw_seq_design <- function(dat) {
+draw_seq_design <- function(dat, log) {
   c24 <- c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
            "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
            "darkorange4", "brown")
@@ -393,8 +343,15 @@ draw_seq_design <- function(dat) {
       legend.key.width = ggplot2::unit(0.5, "cm"),
       legend.text = ggplot2::element_text(size = 7),
       legend.title = ggplot2::element_blank()
-    ) +
-    ggplot2::labs(x ="Number of design points", y = "RMSE")
+    )
+
+  if ( log ){
+    p <- p + ggplot2::scale_y_continuous(trans='log10') +
+      ggplot2::labs(x ="Number of design points", y = "RMSE (log-scale)")
+  } else {
+    p <- p +
+      ggplot2::labs(x ="Number of design points", y = "RMSE")
+  }
   return(p)
 }
 
