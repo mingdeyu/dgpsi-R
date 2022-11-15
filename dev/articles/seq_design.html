@@ -127,7 +127,7 @@ design, we generate a validation dataset:</p>
 <span><span class="va">validate_y</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">validate_x</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="dgp-emulation-with-the-sequential-design">DGP emulation with the sequential design<a class="anchor" aria-label="anchor" href="#dgp-emulation-with-the-sequential-design"></a>
+<h2 id="dgp-emulation-with-sequential-designs">DGP emulation with sequential designs<a class="anchor" aria-label="anchor" href="#dgp-emulation-with-sequential-designs"></a>
 </h2>
 <p>To start with the sequential design, we initialize a two-layered DGP
 emulator using the generated initial design:</p>
@@ -229,8 +229,11 @@ the validation dataset) of emulators constructed during the three waves
 of sequential designs:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'rmse'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/seq_rmse.png"> ## Comparison to DGP emulators with
-space-filling designs</p>
+<p><img src="images/seq_rmse.png"></p>
+</div>
+<div class="section level2">
+<h2 id="comparison-to-dgp-emulators-with-space-filling-designs">Comparison to DGP emulators with space-filling designs<a class="anchor" aria-label="anchor" href="#comparison-to-dgp-emulators-with-space-filling-designs"></a>
+</h2>
 <p>We build four DGP emulators with static space-filling Latin hypercube
 designs (LHD) of size 10, 20, 30, and 40 respectively:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
