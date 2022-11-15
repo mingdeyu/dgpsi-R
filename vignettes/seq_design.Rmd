@@ -1,6 +1,7 @@
 ---
 title: "Sequential Design"
 output: rmarkdown::html_vignette
+bibliography: references.bib 
 description: >
   Sequential design for the DGP emulator of a non-stationary simulator.
 vignette: >
