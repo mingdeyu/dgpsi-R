@@ -107,7 +107,8 @@ design for adaptive improvements of a DGP emulator.</p>
 <h2 id="construct-a-synthetic-simulator">Construct a synthetic simulator<a class="anchor" aria-label="anchor" href="#construct-a-synthetic-simulator"></a>
 </h2>
 <p>We consider a non-stationary synthetic simulator which has a
-2-dimensional input with the functional form <span class="citation">[@ba2018]</span> defined by:</p>
+2-dimensional input with the functional form <span class="citation">(Ba
+and Joseph 2018)</span> defined by:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="op">(</span><span class="fl">0.7</span><span class="op">*</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span>,drop<span class="op">=</span><span class="cn">F</span><span class="op">]</span><span class="op">+</span><span class="fl">0.3</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fl">0.7</span><span class="op">*</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span>,drop<span class="op">=</span><span class="cn">F</span><span class="op">]</span><span class="op">+</span><span class="fl">0.3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -281,9 +282,15 @@ size increases. This is because increasing the size of a space-filling
 design may not capture regions where the simulator exhibits more
 variations, and thus cause DGP emulators with higher RMSEs than those
 constructed through the sequential design.</p>
-<div class="section level3">
-<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<div class="section level3 unnumbered">
+<h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-ba2018" class="csl-entry">
+Ba, Shan, and V. Roshan Joseph. 2018. <em><span>CGP: Composite Gaussian
+Process Models</span></em>. <a href="https://CRAN.R-project.org/package=CGP" class="external-link">https://CRAN.R-project.org/package=CGP</a>.
+</div>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
