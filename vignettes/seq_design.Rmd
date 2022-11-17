@@ -1,11 +1,11 @@
 ---
-title: "Sequential Design"
+title: "Sequential Design I"
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
   Sequential design for the DGP emulator of a non-stationary simulator.
 vignette: >
-  %\VignetteIndexEntry{Sequential Design}
+  %\VignetteIndexEntry{Sequential Design I}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

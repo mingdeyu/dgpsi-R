@@ -38,6 +38,8 @@
 #'   output dimensions.
 #'
 #' Set to `NULL` for the LOO-based emulator validation. Defaults to `NULL`.
+#' @param target a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to `NULL`, in which
+#'     case the sequential design stops after `N` steps. See *Note* section below for further information about `target`.
 #' @param method the criterion used to locate the design points: ALM (`"ALM"`) or MICE (`"MICE"`). See references below.
 #'     Defaults to `"ALM"`.
 #' @param nugget_s the value of the smoothing nugget term used when `method = "MICE"`. Defaults to `1.0`.
@@ -72,7 +74,14 @@
 #'     - `aggregation`, a bool that indicates if the aggregation is applied (i.e., if `aggregate` is supplied) to locate the design points for a DGP
 #'       emulator or a bundle of (D)GP emulators during the corresponding wave.
 #'     - `batch_size`, a vector of size `N` that contains the information given by the argument `batch_size`.
-#'     - `enrichment`, a vector of size `N` that gives the number of new design points added after each step of the sequential design.
+#'     - `enrichment`, a vector of size `N` that gives the number of new design points added after each step of the sequential design (if `object` is
+#'        an instance of the `gp` or `dgp` class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
+#'        the sequential design (if `object` is an instance of the `bundle` class).
+#'
+#'     If `target` is not `NULL`, the following additional elements are also included:
+#'     - `target`, the target RMSE(s) to stop the sequential design.
+#'     - `reached`, a bool (if `object` is an instance of the `gp` or `dgp` class) or a vector of bools (if `object` is an instance of the `bundle`
+#'       class) that indicate if the target RMSEs are reached at the end of the sequential design.
 #'   - a slot called `type` that gives the type of validations, either LOO (`loo`) or OOS (`oos`) used to calculate the RMSEs of emulators constructed
 #'     in the sequential design. See [validate()] for more information about LOO and OOS.
 #'   - two slots called `x_test` and `y_test` that contain the data points for the OOS validation if the `type` slot is `oos`.
@@ -88,10 +97,15 @@
 #'   - the validation type (LOO or OOS) of the current wave of the sequential design is the same as the validation types in previous waves, and
 #'   - if the validation type is OOS, `x_test` and `y_test` in the current wave of the sequential design are identical to those in the previous waves.
 #'
-#'   When the above conditions are met, the information (`N` and `rmse`) of the current wave of the sequential design will be added to
+#'   When the above conditions are met, the information of the current wave of the sequential design will be added to
 #'       the `design` slot of the returned object under the name `waveS`.
 #' * If `object` is an instance of the `gp` class, the matrix in the `rmse` slot is single-columned. If `object` is an instance of
-#'   the `dgp` class, the matrix in the `rmse` slot can have multiple columns that correspond to different output dimensions.
+#'   the `dgp` or `bundle` class, the matrix in the `rmse` slot can have multiple columns that correspond to different output dimensions
+#'   or different emulators in the bundle.
+#' * If `object` is an instance of the `gp` class, `target` needs to be a single value giving the RMSE threshold. If `object` is an instance of the `dgp`
+#'   or `bundle` class, `target` can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
+#'   single value is provided, it will be used as the RMSE threshold for all output dimensions (if `object` is an instance of the `dgp`) or all emulators
+#'   (if `object` is an instance of the `bundle`).
 #' * `aggregate` can be defined as an R function with either one or two arguments.
 #'   - if `aggregate` has one argument, the argument should be a vector representing values of ALM or MICE criterion across
 #'     - different output dimensions of a DGP emulator; or
@@ -178,14 +192,14 @@
 #' @md
 #' @name design
 #' @export
-design <- function(object, N, x_cand, y_cand, n_cand, limits, batch_size, f, freq, x_test, y_test, method, nugget_s, verb, check_point, cores, ...){
+design <- function(object, N, x_cand, y_cand, n_cand, limits, batch_size, f, freq, x_test, y_test, target, method, nugget_s, verb, check_point, cores, ...){
   UseMethod("design")
 }
 
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, check_point = NULL, cores = c(1, 1), ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, check_point = NULL, cores = c(1, 1), ...) {
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   #if candidate set is given
   N <- as.integer(N)
@@ -268,75 +282,96 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     rmse_records <- rmse
 
-    for ( i in 1:N ){
-      if ( verb ) {
-        message(sprintf("Iteration %i:", i))
-        message(" - Locating ...", appendLF = FALSE)
+    if ( !is.null(target) ){
+      istarget <- rmse<=target
+      if ( istarget ){
+        run <- FALSE
+      } else {
+        run <- TRUE
       }
-      res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
-      if ( verb ) {
-        message(" done")
-        if ( batch_size[i]==1 ){
-          message(paste(c(" * Next design point:", sprintf("%.06f", res$location)), collapse=" "))
-        } else {
-          for (j in 1:batch_size[i] ){
-            message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", res[['location']][[paste('position',j,sep="")]])), collapse=" "))
+    } else {
+      run <- TRUE
+    }
+
+    if ( run ){
+      for ( i in 1:N ){
+        if ( verb ) {
+          message(sprintf("Iteration %i:", i))
+          message(" - Locating ...", appendLF = FALSE)
+        }
+        res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
+        if ( verb ) {
+          message(" done")
+          if ( batch_size[i]==1 ){
+            message(paste(c(" * Next design point:", sprintf("%.06f", res$location)), collapse=" "))
+          } else {
+            for (j in 1:batch_size[i] ){
+              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", res[['location']][[paste('position',j,sep="")]])), collapse=" "))
+            }
           }
         }
-      }
 
-      if ( batch_size[i]==1 ){
-        new_X <- res$location
-      } else {
-        new_X <- c()
-        for (j in 1:batch_size[i] ){
-          new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
-        }
-      }
-
-      N_acq <- c(N_acq, nrow(new_X))
-      X <- rbind(X, new_X)
-      Y <- rbind(Y, f(new_X))
-
-      if ( i %% freq[1]==0 | i==N){
-        if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = TRUE, verb = FALSE)
-        if ( verb ) message(" done")
-      } else {
-        if ( verb ) message(" - Updating ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = FALSE, verb = FALSE)
-        if ( verb ) Sys.sleep(0.5)
-        if ( verb ) message(" done")
-      }
-
-      if ( i %% freq[2]==0 | i==N ){
-        if (is.null(x_test) & is.null(y_test)){
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
-          if ( verb ) message(" done")
-          rmse <- object$loo$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+        if ( batch_size[i]==1 ){
+          new_X <- res$location
         } else {
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
-          if ( verb ) message(" done")
-          rmse <- object$oos$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          new_X <- c()
+          for (j in 1:batch_size[i] ){
+            new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+          }
         }
-        rmse_records <- rbind(rmse_records, rmse)
-      }
 
-      if ( !is.null(check_point) ){
-        if (i %in% check_point ){
-          ans <- readline(prompt="Do you want to continue? (Y/N) ")
-          if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-            message(sprintf("The sequential design is terminated at step %i.", i))
+        N_acq <- c(N_acq, nrow(new_X))
+        X <- rbind(X, new_X)
+        Y <- rbind(Y, f(new_X))
+
+        if ( i %% freq[1]==0 | i==N){
+          if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = TRUE, verb = FALSE)
+          if ( verb ) message(" done")
+        } else {
+          if ( verb ) message(" - Updating ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = FALSE, verb = FALSE)
+          if ( verb ) Sys.sleep(0.5)
+          if ( verb ) message(" done")
+        }
+
+        if ( i %% freq[2]==0 | i==N ){
+          if (is.null(x_test) & is.null(y_test)){
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
+            if ( verb ) message(" done")
+            rmse <- object$loo$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+            if ( verb ) message(" done")
+            rmse <- object$oos$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          }
+          rmse_records <- rbind(rmse_records, rmse)
+        }
+
+        if( !is.null(target) ) {
+          if ( rmse<=target ) {
+            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            istarget <- TRUE
             N <- i
             break
           }
         }
-      }
 
+        if ( !is.null(check_point) ){
+          if (i %in% check_point ){
+            ans <- readline(prompt="Do you want to continue? (Y/N) ")
+            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
+              message(sprintf("The sequential design is terminated at step %i.", i))
+              N <- i
+              break
+            }
+          }
+        }
+      }
     }
   } else {
     if ( is.null(y_cand) ) stop("'y_cand' must be provided if 'x_cand' is not NULL.", call. = FALSE)
@@ -375,108 +410,146 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     rmse_records <- rmse
 
-    for ( i in 1:N ){
-      if ( n_cand<=length(idx_x_cand) ){
-        idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+    if ( !is.null(target) ){
+      istarget <- rmse<=target
+      if ( istarget ){
+        run <- FALSE
       } else {
-        idx_sub_cand <- idx_x_cand
+        run <- TRUE
       }
-      sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+    } else {
+      run <- TRUE
+    }
 
-      if ( verb ) {
-        message(sprintf("Iteration %i:", i))
-        message(" - Locating ...", appendLF = FALSE)
-      }
-      res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
-      if ( verb ) {
-        message(" done")
-        if ( batch_size[i]==1 ){
-          message(paste(c(" * Next design point:", sprintf("%.06f", res$location)), collapse=" "))
+    if ( run ){
+      for ( i in 1:N ){
+        if ( n_cand<=length(idx_x_cand) ){
+          idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
         } else {
-          for (j in 1:batch_size[i] ){
-            message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", res[['location']][[paste('position',j,sep="")]])), collapse=" "))
+          idx_sub_cand <- idx_x_cand
+        }
+        sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+
+        if ( verb ) {
+          message(sprintf("Iteration %i:", i))
+          message(" - Locating ...", appendLF = FALSE)
+        }
+        res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
+        if ( verb ) {
+          message(" done")
+          if ( batch_size[i]==1 ){
+            message(paste(c(" * Next design point:", sprintf("%.06f", res$location)), collapse=" "))
+          } else {
+            for (j in 1:batch_size[i] ){
+              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", res[['location']][[paste('position',j,sep="")]])), collapse=" "))
+            }
           }
         }
-      }
 
-      if ( batch_size[i]==1 ){
-        new_X <- res$location
-        new_idx <- res$index
-      } else {
-        new_X <- c()
-        new_idx <- c()
-        for (j in 1:batch_size[i] ){
-          new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
-          new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
-        }
-      }
-
-      N_acq <- c(N_acq, nrow(new_X))
-
-      X <- rbind(X, new_X)
-      Y <- rbind(Y, y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE])
-      idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
-      idx_x_cand <- idx_x_cand0[-idx_x_acq]
-
-      if ( i %% freq[1]==0 | i==N ){
-        if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = TRUE, verb = FALSE)
-        if ( verb ) message(" done")
-      } else {
-        if ( verb ) message(" - Updating ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = FALSE, verb = FALSE)
-        if ( verb ) Sys.sleep(0.5)
-        if ( verb ) message(" done")
-      }
-
-      if ( i %% freq[2]==0 | i==N ){
-        if (is.null(x_test) & is.null(y_test)){
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
-          if ( verb ) message(" done")
-          rmse <- object$loo$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+        if ( batch_size[i]==1 ){
+          new_X <- res$location
+          new_idx <- res$index
         } else {
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
-          if ( verb ) message(" done")
-          rmse <- object$oos$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          new_X <- c()
+          new_idx <- c()
+          for (j in 1:batch_size[i] ){
+            new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+            new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
+          }
         }
-        rmse_records <- rbind(rmse_records, rmse)
-      }
-      if ( !is.null(check_point) ){
-        if (i %in% check_point ){
-          ans <- readline(prompt="Do you want to continue? (Y/N) ")
-          if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-            message(sprintf("The sequential design is terminated at step %i.", i))
+
+        N_acq <- c(N_acq, nrow(new_X))
+
+        X <- rbind(X, new_X)
+        Y <- rbind(Y, y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE])
+        idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
+        idx_x_cand <- idx_x_cand0[-idx_x_acq]
+
+        if ( i %% freq[1]==0 | i==N ){
+          if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = TRUE, verb = FALSE)
+          if ( verb ) message(" done")
+        } else {
+          if ( verb ) message(" - Updating ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = FALSE, verb = FALSE)
+          if ( verb ) Sys.sleep(0.5)
+          if ( verb ) message(" done")
+        }
+
+        if ( i %% freq[2]==0 | i==N ){
+          if (is.null(x_test) & is.null(y_test)){
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
+            if ( verb ) message(" done")
+            rmse <- object$loo$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+            if ( verb ) message(" done")
+            rmse <- object$oos$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          }
+          rmse_records <- rbind(rmse_records, rmse)
+        }
+
+        if( !is.null(target) ) {
+          if ( rmse<=target ) {
+            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            istarget <- TRUE
             N <- i
             break
+          }
+        }
+
+        if ( !is.null(check_point) ){
+          if (i %in% check_point ){
+            ans <- readline(prompt="Do you want to continue? (Y/N) ")
+            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
+              message(sprintf("The sequential design is terminated at step %i.", i))
+              N <- i
+              break
+            }
           }
         }
       }
     }
   }
 
-  if ( isTRUE(first_time) ){
-    object$design <- list()
-    object[["design"]][["wave1"]][["N"]] <- N
-    object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
-    object[["design"]][["wave1"]][["freq"]] <- freq[2]
-    object[["design"]][["wave1"]][["batch_size"]] <- batch_size
-    object[["design"]][["wave1"]][["enrichement"]] <- N_acq
-    object[["design"]][["type"]] <- type
-    if ( type == 'oos' ){
-      object[["design"]][["x_test"]] <- x_test
-      object[["design"]][["y_test"]] <- y_test
+  if ( run ){
+    if ( isTRUE(first_time) ){
+      object$design <- list()
+      object[["design"]][["wave1"]][["N"]] <- N
+      object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      object[["design"]][["wave1"]][["freq"]] <- freq[2]
+      object[["design"]][["wave1"]][["batch_size"]] <- batch_size
+      object[["design"]][["wave1"]][["enrichement"]] <- N_acq
+      if( !is.null(target) ) {
+        object[["design"]][["wave1"]][["target"]] <- target
+        object[["design"]][["wave1"]][["reached"]] <- istarget
+      }
+      object[["design"]][["type"]] <- type
+      if ( type == 'oos' ){
+        object[["design"]][["x_test"]] <- x_test
+        object[["design"]][["y_test"]] <- y_test
+      }
+    } else {
+      object$design <- design_info
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["batch_size"]] <- batch_size
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichement"]] <-  N_acq
+      if( !is.null(target) ) {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
+      }
+    }
+    if( !is.null(target) ) {
+      if ( !istarget ) message("The target is not reached at the end of the sequential design.")
     }
   } else {
-    object$design <- design_info
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["batch_size"]] <- batch_size
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichement"]] <-  N_acq
+    message("Target already reached. The sequential design is not performed.")
   }
 
   return(object)
@@ -485,7 +558,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, check_point = NULL, cores = c(1, 1), threading = FALSE, train_N = 100, aggregate = NULL, ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, check_point = NULL, cores = c(1, 1), threading = FALSE, train_N = 100, aggregate = NULL, ...) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
 
   N <- as.integer(N)
@@ -571,6 +644,17 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     X <- object$data$X
     Y <- object$data$Y
 
+    if ( !is.null(target) ){
+      n_dim_Y <- ncol(Y)
+      if ( length(target)==1 ) {
+        target <- rep(target, n_dim_Y)
+      } else {
+        if ( length(target)!=n_dim_Y ) {
+          stop(sprintf("length(target) should equal to %i.", n_dim_Y), call. = FALSE)
+        }
+      }
+    }
+
     if ( verb ) message("Initializing ...", appendLF = FALSE)
     if (is.null(x_test) & is.null(y_test)){
       type <- 'loo'
@@ -585,98 +669,120 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     rmse_records <- rmse
 
-    for ( i in 1:N ){
-      if ( verb ) {
-        message(sprintf("Iteration %i:", i))
-        message(" - Locating ...", appendLF = FALSE)
+    if ( !is.null(target) ){
+      istarget <- all(rmse<=target)
+      if ( istarget ){
+        run <- FALSE
+      } else {
+        run <- TRUE
       }
-      res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
-      if ( verb ) {
-        message(" done")
-        if ( batch_size[i]==1 ){
-          if ( nrow(res$location)==1 ){
-            message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
-          } else {
-            for ( j in 1:nrow(res$location) ){
-              message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
-            }
-          }
-        } else {
-          for ( j in 1:batch_size[i] ){
-            pos_j <- res[['location']][[paste('position',j,sep="")]]
-            n_row <- nrow(pos_j)
-            if ( n_row==1 ){
-              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+    } else {
+      run <- TRUE
+    }
+
+    if ( run ){
+      for ( i in 1:N ){
+        if ( verb ) {
+          message(sprintf("Iteration %i:", i))
+          message(" - Locating ...", appendLF = FALSE)
+        }
+        res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        if ( verb ) {
+          message(" done")
+          if ( batch_size[i]==1 ){
+            if ( nrow(res$location)==1 ){
+              message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
             } else {
-              for ( k in 1:n_row ){
-                message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+              for ( j in 1:nrow(res$location) ){
+                message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
+              }
+            }
+          } else {
+            for ( j in 1:batch_size[i] ){
+              pos_j <- res[['location']][[paste('position',j,sep="")]]
+              n_row <- nrow(pos_j)
+              if ( n_row==1 ){
+                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+              } else {
+                for ( k in 1:n_row ){
+                  message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+                }
               }
             }
           }
         }
-      }
 
-      if ( batch_size[i]==1 ){
-        new_X <- res$location
-      } else {
-        new_X <- c()
-        for (j in 1:batch_size[i] ){
-          new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
-        }
-        new_X <- unique(new_X, MARGIN = 1)
-      }
-
-      N_acq <- c(N_acq, nrow(new_X))
-
-      X <- rbind(X, new_X)
-      new_output <- f(new_X)
-
-      if ( is.list(new_output) ){
-        Y <- rbind(Y, new_output[[1]])
-        coeff <- new_output[[2]]
-        g <- function(x){
-          res <- aggregate(x,coeff)
-          return(res)
-        }
-      } else {
-        Y <- rbind(Y, new_output)
-      }
-
-      if ( i %% freq[1]==0 | i==N){
-        if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
-        if ( verb ) message(" done")
-      } else {
-        if ( verb ) message(" - Updating ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = FALSE, verb = FALSE, B = 10)
-        if ( verb ) Sys.sleep(0.5)
-        if ( verb ) message(" done")
-      }
-
-      if ( i %% freq[2]==0 | i==N){
-        if (is.null(x_test) & is.null(y_test)){
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-          if ( verb ) message(" done")
-          rmse <- object$loo$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+        if ( batch_size[i]==1 ){
+          new_X <- unique(res$location, MARGIN = 1)
         } else {
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-          if ( verb ) message(" done")
-          rmse <- object$oos$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          new_X <- c()
+          for (j in 1:batch_size[i] ){
+            new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+          }
+          new_X <- unique(new_X, MARGIN = 1)
         }
-        rmse_records <- rbind(rmse_records, rmse)
-      }
 
-      if ( !is.null(check_point) ){
-        if (i %in% check_point ){
-          ans <- readline(prompt="Do you want to continue? (Y/N) ")
-          if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-            message(sprintf("The sequential design is terminated at step %i.", i))
+        N_acq <- c(N_acq, nrow(new_X))
+
+        X <- rbind(X, new_X)
+        new_output <- f(new_X)
+
+        if ( is.list(new_output) ){
+          Y <- rbind(Y, new_output[[1]])
+          coeff <- new_output[[2]]
+          g <- function(x){
+            res <- aggregate(x,coeff)
+            return(res)
+          }
+        } else {
+          Y <- rbind(Y, new_output)
+        }
+
+        if ( i %% freq[1]==0 | i==N){
+          if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+          if ( verb ) message(" done")
+        } else {
+          if ( verb ) message(" - Updating ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = FALSE, verb = FALSE, B = 10)
+          if ( verb ) Sys.sleep(0.5)
+          if ( verb ) message(" done")
+        }
+
+        if ( i %% freq[2]==0 | i==N){
+          if (is.null(x_test) & is.null(y_test)){
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+            if ( verb ) message(" done")
+            rmse <- object$loo$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+            if ( verb ) message(" done")
+            rmse <- object$oos$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          }
+          rmse_records <- rbind(rmse_records, rmse)
+        }
+
+        if( !is.null(target) ) {
+          if ( all(rmse<=target) ) {
+            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            istarget <- TRUE
             N <- i
             break
+          }
+        }
+
+        if ( !is.null(check_point) ){
+          if (i %in% check_point ){
+            ans <- readline(prompt="Do you want to continue? (Y/N) ")
+            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
+              message(sprintf("The sequential design is terminated at step %i.", i))
+              N <- i
+              break
+            }
           }
         }
       }
@@ -701,6 +807,17 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
     X <- object$data$X
     Y <- object$data$Y
+
+    if ( !is.null(target) ){
+      n_dim_Y <- ncol(Y)
+      if ( length(target)==1 ) {
+        target <- rep(target, n_dim_Y)
+      } else {
+        if ( length(target)!=n_dim_Y ) {
+          stop(sprintf("length(target) should equal to %i.", n_dim_Y), call. = FALSE)
+        }
+      }
+    }
 
     if ( ncol(y_cand)!=ncol(Y) ) stop("The dimension of 'y_cand' must equal to that of the training output data.", call. = FALSE)
 
@@ -728,134 +845,170 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     rmse_records <- rmse
 
-    for ( i in 1:N ){
-      if ( n_cand<=length(idx_x_cand) ){
-        idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+    if ( !is.null(target) ){
+      istarget <- all(rmse<=target)
+      if ( istarget ){
+        run <- FALSE
       } else {
-        idx_sub_cand <- idx_x_cand
+        run <- TRUE
       }
-      sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
-      if ( verb ) {
-        message(sprintf("Iteration %i:", i))
-        message(" - Locating ...", appendLF = FALSE)
-      }
-      res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
-      if ( verb ) {
-        message(" done")
-        if ( batch_size[i]==1 ){
-          if ( nrow(res$location)==1 ){
-            message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
-          } else {
-            for ( j in 1:nrow(res$location) ){
-              message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
-            }
-          }
+    } else {
+      run <- TRUE
+    }
+
+    if ( run ){
+      for ( i in 1:N ){
+        if ( n_cand<=length(idx_x_cand) ){
+          idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
         } else {
-          for ( j in 1:batch_size[i] ){
-            pos_j <- res[['location']][[paste('position',j,sep="")]]
-            n_row <- nrow(pos_j)
-            if ( n_row==1 ){
-              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+          idx_sub_cand <- idx_x_cand
+        }
+        sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+        if ( verb ) {
+          message(sprintf("Iteration %i:", i))
+          message(" - Locating ...", appendLF = FALSE)
+        }
+        res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        if ( verb ) {
+          message(" done")
+          if ( batch_size[i]==1 ){
+            if ( nrow(res$location)==1 ){
+              message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
             } else {
-              for ( k in 1:n_row ){
-                message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+              for ( j in 1:nrow(res$location) ){
+                message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
+              }
+            }
+          } else {
+            for ( j in 1:batch_size[i] ){
+              pos_j <- res[['location']][[paste('position',j,sep="")]]
+              n_row <- nrow(pos_j)
+              if ( n_row==1 ){
+                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+              } else {
+                for ( k in 1:n_row ){
+                  message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+                }
               }
             }
           }
         }
-      }
 
-      if ( batch_size[i]==1 ){
-        new_X <- res$location
-        new_idx <- res$index
-      } else {
-        new_X <- c()
-        new_idx <- c()
-        for (j in 1:batch_size[i] ){
-          new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
-          new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
-        }
-        new_X <- unique(new_X, MARGIN = 1)
-        new_idx <- unique(new_idx)
-      }
-
-      N_acq <- c(N_acq, nrow(new_X))
-
-      X <- rbind(X, new_X)
-      Y <- rbind(Y, y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE])
-      idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
-      idx_x_cand <- idx_x_cand0[-idx_x_acq]
-
-      if ( i %% freq[1]==0 | i==N ){
-        if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
-        if ( verb ) message(" done")
-      } else {
-        if ( verb ) message(" - Updating ...", appendLF = FALSE)
-        object <- update(object, X, Y, refit = FALSE, verb = FALSE, B = 10)
-        if ( verb ) message(" done")
-      }
-
-      if ( i %% freq[2]==0 | i==N ){
-        if (is.null(x_test) & is.null(y_test)){
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-          if ( verb ) message(" done")
-          rmse <- object$loo$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+        if ( batch_size[i]==1 ){
+          new_X <- unique(res$location, MARGIN = 1)
+          new_idx <- unique(res$index)
         } else {
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-          if ( verb ) message(" done")
-          rmse <- object$oos$rmse
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          new_X <- c()
+          new_idx <- c()
+          for (j in 1:batch_size[i] ){
+            new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+            new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
+          }
+          new_X <- unique(new_X, MARGIN = 1)
+          new_idx <- unique(new_idx)
         }
-        rmse_records <- rbind(rmse_records, rmse)
-      }
 
-      if ( !is.null(check_point) ){
-        if (i %in% check_point ){
-          ans <- readline(prompt="Do you want to continue? (Y/N) ")
-          if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-            message(sprintf("The sequential design is terminated at step %i.", i))
+        N_acq <- c(N_acq, nrow(new_X))
+
+        X <- rbind(X, new_X)
+        Y <- rbind(Y, y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE])
+        idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
+        idx_x_cand <- idx_x_cand0[-idx_x_acq]
+
+        if ( i %% freq[1]==0 | i==N ){
+          if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+          if ( verb ) message(" done")
+        } else {
+          if ( verb ) message(" - Updating ...", appendLF = FALSE)
+          object <- update(object, X, Y, refit = FALSE, verb = FALSE, B = 10)
+          if ( verb ) message(" done")
+        }
+
+        if ( i %% freq[2]==0 | i==N ){
+          if (is.null(x_test) & is.null(y_test)){
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+            if ( verb ) message(" done")
+            rmse <- object$loo$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+            if ( verb ) message(" done")
+            rmse <- object$oos$rmse
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          }
+          rmse_records <- rbind(rmse_records, rmse)
+        }
+
+        if( !is.null(target) ) {
+          if ( all(rmse<=target) ) {
+            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            istarget <- TRUE
             N <- i
             break
           }
         }
-      }
 
+        if ( !is.null(check_point) ){
+          if (i %in% check_point ){
+            ans <- readline(prompt="Do you want to continue? (Y/N) ")
+            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
+              message(sprintf("The sequential design is terminated at step %i.", i))
+              N <- i
+              break
+            }
+          }
+        }
+      }
     }
   }
 
-  if ( isTRUE(first_time) ){
-    object$design <- list()
-    object[["design"]][["wave1"]][["N"]] <- N
-    object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
-    object[["design"]][["wave1"]][["freq"]] <- freq[2]
-    object[["design"]][["wave1"]][["batch_size"]] <- batch_size
-    object[["design"]][["wave1"]][["enrichment"]] <- N_acq
-    if ( is.null(aggregate) ){
-      object[["design"]][["wave1"]][["aggregation"]] <- FALSE
+  if ( run ){
+    if ( isTRUE(first_time) ){
+      object$design <- list()
+      object[["design"]][["wave1"]][["N"]] <- N
+      object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      object[["design"]][["wave1"]][["freq"]] <- freq[2]
+      object[["design"]][["wave1"]][["batch_size"]] <- batch_size
+      object[["design"]][["wave1"]][["enrichment"]] <- N_acq
+      if ( is.null(aggregate) ){
+        object[["design"]][["wave1"]][["aggregation"]] <- FALSE
+      } else {
+        object[["design"]][["wave1"]][["aggregation"]] <- TRUE
+      }
+      if( !is.null(target) ) {
+        object[["design"]][["wave1"]][["target"]] <- target
+        object[["design"]][["wave1"]][["reached"]] <- istarget
+      }
+      object[["design"]][["type"]] <- type
+      if ( type == 'oos' ){
+        object[["design"]][["x_test"]] <- x_test
+        object[["design"]][["y_test"]] <- y_test
+      }
     } else {
-      object[["design"]][["wave1"]][["aggregation"]] <- TRUE
+      object$design <- design_info
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["batch_size"]] <- batch_size
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- N_acq
+      if ( is.null(aggregate) ){
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- FALSE
+      } else {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- TRUE
+      }
+      if( !is.null(target) ) {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
+      }
     }
-    object[["design"]][["type"]] <- type
-    if ( type == 'oos' ){
-      object[["design"]][["x_test"]] <- x_test
-      object[["design"]][["y_test"]] <- y_test
+    if( !is.null(target) ) {
+      if ( !istarget ) message("The target is not reached at the end of the sequential design.")
     }
   } else {
-    object$design <- design_info
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["batch_size"]] <- batch_size
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- N_acq
-    if ( is.null(aggregate) ){
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- FALSE
-    } else {
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- TRUE
-    }
+    message("Target already reached. The sequential design is not performed.")
   }
 
   return(object)
@@ -865,7 +1018,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, check_point = NULL, cores = c(1, 1), threading = FALSE, train_N = 100, aggregate = NULL, ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, batch_size = 1, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = 'ALM', nugget_s = 1., verb = TRUE, check_point = NULL, cores = c(1, 1), threading = FALSE, train_N = 100, aggregate = NULL, ...) {
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
 
   N <- as.integer(N)
@@ -932,10 +1085,21 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     first_time <- TRUE
   }
 
-  N_acq <- c()
+  #N_acq <- c()
+  N_acq_ind <- c()
 
   n_emulators <- length(object) - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
+
+  if ( !is.null(target) ){
+    if ( length(target)==1 ) {
+      target <- rep(target, n_emulators)
+    } else {
+      if ( length(target)!=n_emulators ) {
+        stop(sprintf("length(target) should equal to %i.", n_emulators), call. = FALSE)
+      }
+    }
+  }
 
   #if candidate set is given
   if ( is.null(x_cand) ) {
@@ -976,122 +1140,331 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     rmse_records <- rmse
 
-    for ( i in 1:N ){
-      if ( verb ) {
-        message(sprintf("Iteration %i:", i))
-        message(" - Locating ...", appendLF = FALSE)
+    if ( !is.null(target) ){
+      istarget <- rmse<=target
+      if ( all(istarget) ){
+        run <- FALSE
+      } else {
+        run <- TRUE
       }
-      res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
-      if ( verb ) {
-        message(" done")
-        if ( batch_size[i]==1 ){
-          if ( nrow(res$location)==1 ){
-            message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
-          } else {
-            for ( j in 1:nrow(res$location) ){
-              message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
-            }
-          }
-        } else {
-          for ( j in 1:batch_size[i] ){
-            pos_j <- res[['location']][[paste('position',j,sep="")]]
-            n_row <- nrow(pos_j)
-            if ( n_row==1 ){
-              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+    } else {
+      run <- TRUE
+    }
+
+    if ( run ){
+      for ( i in 1:N ){
+        if ( verb ) {
+          message(sprintf("Iteration %i:", i))
+          message(" - Locating ...", appendLF = FALSE)
+        }
+        res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        if ( verb ) {
+          message(" done")
+          if ( batch_size[i]==1 ){
+            if ( nrow(res$location)==1 ){
+              message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
             } else {
-              for ( k in 1:n_row ){
-                message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+              for ( j in 1:nrow(res$location) ){
+                if ( is.null(target) ){
+                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
+                } else {
+                  if ( !istarget[j] ){
+                    message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
+                  } else {
+                    message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))
+                  }
+                }
+              }
+            }
+          } else {
+            for ( j in 1:batch_size[i] ){
+              pos_j <- res[['location']][[paste('position',j,sep="")]]
+              n_row <- nrow(pos_j)
+              if ( n_row==1 ){
+                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+              } else {
+                for ( k in 1:n_row ){
+                  if ( is.null(target) ){
+                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+                  } else {
+                    if ( !istarget[k] ){
+                      message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+                    } else {
+                      message(sprintf(" * Next design point (Position%i for Emulator%i): None (target reached)", j, k))
+                    }
+                  }
+                }
               }
             }
           }
         }
-      }
 
-      if ( batch_size[i]==1 ){
-        new_X <- res$location
-      } else {
-        new_X <- c()
-        for (j in 1:batch_size[i] ){
-          new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
-        }
-        new_X <- unique(new_X, MARGIN = 1)
-      }
+        if ( batch_size[i]==1 ){
+          new_X <- res$location
+          if ( nrow(new_X)==1 ){
+            #n_run <- 1
+            #N_acq <- c(N_acq, n_run)
+            new_output <- f(new_X)
+            if ( is.list(new_output) ){
+              new_Y <- new_output[[1]]
+              coeff <- new_output[[2]]
+              g <- function(x){
+                res <- aggregate(x,coeff)
+                return(res)
+              }
+            } else {
+              new_Y <- new_output
+            }
 
-      N_acq <- c(N_acq, nrow(new_X))
+            temp <- rep(1, n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
 
-      X <- rbind(X, new_X)
-      new_output <- f(new_X)
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+                }
+              }
+            }
+          } else {
+            if ( !is.null(target) ){
+              new_X <- new_X[!istarget,,drop=FALSE]
+            }
+            rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
+            new_X_unique <- rep_new_X[[1]]
+            rep_idx <- rep_new_X[[2]] + 1
+            #N_acq <- c(N_acq, nrow(new_X_unique))
+            new_output_unique <- f(new_X_unique)
 
-      if ( is.list(new_output) ){
-        Y <- rbind(Y, new_output[[1]])
-        coeff <- new_output[[2]]
-        g <- function(x){
-          res <- aggregate(x,coeff)
-          return(res)
-        }
-      } else {
-        Y <- rbind(Y, new_output)
-      }
+            if ( is.list(new_output_unique) ){
+              new_Y_unique <- new_output_unique[[1]]
+              coeff <- new_output_unique[[2]]
+              g <- function(x){
+                res <- aggregate(x,coeff)
+                return(res)
+              }
+            } else {
+              new_Y_unique <- new_output_unique
+            }
+            new_Y <- new_Y_unique[rep_idx,,drop=F]
 
-      if ( i %% freq[1]==0 | i==N){
-        if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-        for ( k in 1:n_emulators ){
-          obj_k <- object[[paste('emulator',k,sep='')]]
-          if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X, Y[,k], refit = TRUE, verb = FALSE)
-          if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X, Y[,k], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
-          object[[paste('emulator',k,sep='')]] <- obj_k
-        }
-        if ( verb ) message(" done")
-      } else {
-        if ( verb ) message(" - Updating ...", appendLF = FALSE)
-        for ( k in 1:n_emulators ){
-          obj_k <- object[[paste('emulator',k,sep='')]]
-          if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE)
-          if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE, B = 10)
-          object[[paste('emulator',k,sep='')]] <- obj_k
-        }
-        if ( verb ) message(" done")
-      }
+            temp <- rep(1, n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
 
-      if ( i %% freq[2]==0 | i==N){
-        rmse <- c()
-        if (is.null(x_test) & is.null(y_test)){
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          for ( k in 1:n_emulators ){
-            obj_k <- object[[paste('emulator',k,sep='')]]
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-            object[[paste('emulator',k,sep='')]] <- obj_k
-            rmse <- c(rmse, obj_k$loo$rmse)
+            if ( !is.null(target) ) ctr <- 1
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[j,,drop=FALSE])
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[j,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[ctr,,drop=FALSE])
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[ctr,j,drop=FALSE])
+                  ctr <- ctr + 1
+                }
+              }
+            }
           }
-          if ( verb ) message(" done")
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
         } else {
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
+          if ( is.null(aggregate) ){
+            new_X <- c()
+            for (j in 1:batch_size[i] ){
+              if ( is.null(target) ) {
+                new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+              } else {
+                new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]][!istarget,,drop=FALSE])
+              }
+            }
+            rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
+            new_X_unique <- rep_new_X[[1]]
+            rep_idx <- rep_new_X[[2]] + 1
+            #N_acq <- c(N_acq, nrow(new_X_unique))
+            new_output_unique <- f(new_X_unique)
+            if ( is.list(new_output_unique) ){
+              new_Y_unique <- new_output_unique[[1]]
+              coeff <- new_output_unique[[2]]
+              g <- function(x){
+                res <- aggregate(x,coeff)
+                return(res)
+              }
+            } else {
+              new_Y_unique <- new_output_unique
+            }
+            new_Y <- new_Y_unique[rep_idx,,drop=F]
+
+            temp <- rep(batch_size[i], n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
+
+            if ( !is.null(target) ) {
+              ctr <- 1
+              active_emu <- sum(!istarget)
+            }
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                extract <- j + seq(0, by = n_emulators, length = batch_size[i])
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[extract,,drop=FALSE])
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  extract <- ctr + seq(0, by = active_emu, length = batch_size[i])
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[extract,,drop=FALSE])
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
+                  ctr <- ctr + 1
+                }
+              }
+            }
+          } else {
+            new_X <- c()
+            for ( j in 1:batch_size[i] ){
+              new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+            }
+            #N_acq <- c(N_acq, batch_size[i])
+            new_output <- f(new_X)
+            if ( is.list(new_output) ){
+              new_Y <- new_output[[1]]
+              coeff <- new_output[[2]]
+              g <- function(x){
+                res <- aggregate(x,coeff)
+                return(res)
+              }
+            } else {
+              new_Y <- new_output
+            }
+
+            temp <- rep(batch_size[i], n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
+
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+                }
+              }
+            }
+          }
+        }
+
+        if ( i %% freq[1]==0 | i==N){
+          if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           for ( k in 1:n_emulators ){
-            obj_k <- object[[paste('emulator',k,sep='')]]
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-            object[[paste('emulator',k,sep='')]] <- obj_k
-            rmse <- c(rmse, obj_k$oos$rmse)
+            if ( is.null(target) ) {
+              obj_k <- object[[paste('emulator',k,sep='')]]
+              if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+              object[[paste('emulator',k,sep='')]] <- obj_k
+            } else {
+              if ( !istarget[k] ){
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+              }
+            }
           }
           if ( verb ) message(" done")
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+        } else {
+          if ( verb ) message(" - Updating ...", appendLF = FALSE)
+          for ( k in 1:n_emulators ){
+            if ( is.null(target) ) {
+              obj_k <- object[[paste('emulator',k,sep='')]]
+              if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, verb = FALSE)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, verb = FALSE, B = 10)
+              object[[paste('emulator',k,sep='')]] <- obj_k
+            } else {
+              if ( !istarget[k] ){
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, verb = FALSE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, verb = FALSE, B = 10)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+              }
+            }
+          }
+          if ( verb ) message(" done")
         }
-        rmse_records <- rbind(rmse_records, rmse)
-      }
 
-      if ( !is.null(check_point) ){
-        if (i %in% check_point ){
-          ans <- readline(prompt="Do you want to continue? (Y/N) ")
-          if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-            message(sprintf("The sequential design is terminated at step %i.", i))
+        if ( i %% freq[2]==0 | i==N){
+          #rmse <- c()
+          if (is.null(x_test) & is.null(y_test)){
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            for ( k in 1:n_emulators ){
+              if ( is.null(target) ) {
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+                rmse[k] <- obj_k$loo$rmse
+              } else {
+                if ( !istarget[k] ){
+                  obj_k <- object[[paste('emulator',k,sep='')]]
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                  object[[paste('emulator',k,sep='')]] <- obj_k
+                  rmse[k] <- obj_k$loo$rmse
+                }
+              }
+            }
+            if ( verb ) message(" done")
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            for ( k in 1:n_emulators ){
+              if ( is.null(target) ) {
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+                rmse[k] <- obj_k$oos$rmse
+              } else {
+                if ( !istarget[k] ){
+                  obj_k <- object[[paste('emulator',k,sep='')]]
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                  object[[paste('emulator',k,sep='')]] <- obj_k
+                  rmse[k] <- obj_k$oos$rmse
+                }
+              }
+            }
+            if ( verb ) message(" done")
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          }
+          rmse_records <- rbind(rmse_records, rmse)
+        }
+
+        if( !is.null(target) ) {
+          if ( all(rmse<=target) ) {
+            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            istarget <- rep(TRUE, n_emulators)
             N <- i
             break
+          } else {
+            istarget <- rmse<=target
           }
         }
-      }
 
+        if ( !is.null(check_point) ){
+          if (i %in% check_point ){
+            ans <- readline(prompt="Do you want to continue? (Y/N) ")
+            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
+              message(sprintf("The sequential design is terminated at step %i.", i))
+              N <- i
+              break
+            }
+          }
+        }
+
+      }
     }
   } else {
     if ( is.null(y_cand) ) stop("'y_cand' must be provided if 'x_cand' is not NULL.", call. = FALSE)
@@ -1114,13 +1487,15 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     X <- object$data$X
     Y <- object$data$Y
 
-    if ( ncol(y_cand)!=ncol(Y) ) stop("The dimension of 'y_cand' must equal to the number of emulators in 'object'.", call. = FALSE)
+    if ( ncol(y_cand)!=n_emulators ) stop("The dimension of 'y_cand' must equal to the number of emulators in 'object'.", call. = FALSE)
 
-    X_s <- apply(X, 1, paste, collapse = ", ")
-    x_cand_s <- apply(x_cand, 1, paste, collapse = ", ")
-    X_x_cand <- intersect(X_s, x_cand_s)
-    if ( length(X_x_cand)!=0 ){
-      x_cand <- x_cand[!x_cand_s %in% X_x_cand,,drop=FALSE]
+    for (j in 1:n_emulators){
+      X_s <- apply(X[[paste('emulator',j,sep="")]], 1, paste, collapse = ", ")
+      x_cand_s <- apply(x_cand, 1, paste, collapse = ", ")
+      X_x_cand <- intersect(X_s, x_cand_s)
+      if ( length(X_x_cand)!=0 ){
+        x_cand <- x_cand[!x_cand_s %in% X_x_cand,,drop=FALSE]
+      }
     }
     idx_x_cand0 <- c(1:nrow(x_cand))
     idx_x_cand <- idx_x_cand0
@@ -1148,159 +1523,370 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     rmse_records <- rmse
 
-    for ( i in 1:N ){
-      if ( n_cand<=length(idx_x_cand) ){
-        idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+    if ( !is.null(target) ){
+      istarget <- rmse<=target
+      if ( all(istarget) ){
+        run <- FALSE
       } else {
-        idx_sub_cand <- idx_x_cand
+        run <- TRUE
       }
-      sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
-      if ( verb ) {
-        message(sprintf("Iteration %i:", i))
-        message(" - Locating ...", appendLF = FALSE)
-      }
-      res <- locate(object, x_cand = sub_cand, method = method, batch_size = batch_size[i], nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
-      if ( verb ) {
-        message(" done")
-        if ( batch_size[i]==1 ){
-          if ( nrow(res$location)==1 ){
-            message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
-          } else {
-            for ( j in 1:nrow(res$location) ){
-              message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
-            }
-          }
+    } else {
+      run <- TRUE
+    }
+
+    if ( run ){
+      for ( i in 1:N ){
+        if ( n_cand<=length(idx_x_cand) ){
+          idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
         } else {
-          for ( j in 1:batch_size[i] ){
-            pos_j <- res[['location']][[paste('position',j,sep="")]]
-            n_row <- nrow(pos_j)
-            if ( n_row==1 ){
-              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+          idx_sub_cand <- idx_x_cand
+        }
+        sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+        if ( verb ) {
+          message(sprintf("Iteration %i:", i))
+          message(" - Locating ...", appendLF = FALSE)
+        }
+        res <- locate(object, x_cand = sub_cand, method = method, batch_size = batch_size[i], nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        if ( verb ) {
+          message(" done")
+          if ( batch_size[i]==1 ){
+            if ( nrow(res$location)==1 ){
+              message(paste(c(" * Next design point:", sprintf("%.06f", res$location[1,])), collapse=" "))
             } else {
-              for ( k in 1:n_row ){
-                message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+              for ( j in 1:nrow(res$location) ){
+                if ( is.null(target) ){
+                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
+                } else {
+                  if ( !isCtarget[j] ){
+                    message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
+                  } else {
+                    message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))
+                  }
+                }
+              }
+            }
+          } else {
+            for ( j in 1:batch_size[i] ){
+              pos_j <- res[['location']][[paste('position',j,sep="")]]
+              n_row <- nrow(pos_j)
+              if ( n_row==1 ){
+                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", pos_j[1,])), collapse=" "))
+              } else {
+                for ( k in 1:n_row ){
+                  if ( is.null(target) ){
+                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+                  } else {
+                    if ( !istarget[k] ){
+                      message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", pos_j[k,])), collapse=" "))
+                    } else {
+                      message(sprintf(" * Next design point (Position%i for Emulator%i): None (target reached)", j, k))
+                    }
+                  }
+                }
               }
             }
           }
         }
-      }
 
-      if ( batch_size[i]==1 ){
-        new_X <- res$location
-        new_idx <- res$index
-      } else {
-        new_X <- c()
-        new_idx <- c()
-        for (j in 1:batch_size[i] ){
-          new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
-          new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
-        }
-        new_X <- unique(new_X, MARGIN = 1)
-        new_idx <- unique(new_idx)
-      }
+        if ( batch_size[i]==1 ){
+          new_X <- res$location
+          new_idx <- res$index
+          if ( nrow(new_X)==1 ){
+            #N_acq <- c(N_acq, 1)
+            new_Y <- y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE]
 
-      N_acq <- c(N_acq, nrow(new_X))
+            temp <- rep(1, n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
 
-      X <- rbind(X, new_X)
-      Y <- rbind(Y, y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE])
-      idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
-      idx_x_cand <- idx_x_cand0[-idx_x_acq]
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+                }
+              }
+            }
+            idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+          } else {
+            new_Y <- y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE]
+            #if ( !is.null(target) ){
+            #  new_X <- new_X[!istarget,,drop=FALSE]
+            #  new_Y <- new_Y[!istarget,,drop=FALSE]
+            #  new_idx <- new_idx[!istarget]
+            #}
 
-      if ( i %% freq[1]==0 | i==N){
-        if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-        for ( k in 1:n_emulators ){
-          obj_k <- object[[paste('emulator',k,sep='')]]
-          if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X, Y[,k], refit = TRUE, verb = FALSE)
-          if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X, Y[,k], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
-          object[[paste('emulator',k,sep='')]] <- obj_k
-        }
-        if ( verb ) message(" done")
-      } else {
-        if ( verb ) message(" - Updating ...", appendLF = FALSE)
-        for ( k in 1:n_emulators ){
-          obj_k <- object[[paste('emulator',k,sep='')]]
-          if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE)
-          if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE, B = 10)
-          object[[paste('emulator',k,sep='')]] <- obj_k
-        }
-        if ( verb ) message(" done")
-      }
+            temp <- rep(1, n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
 
-      if ( i %% freq[2]==0 | i==N){
-        rmse <- c()
-        if (is.null(x_test) & is.null(y_test)){
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
-          for ( k in 1:n_emulators ){
-            obj_k <- object[[paste('emulator',k,sep='')]]
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-            object[[paste('emulator',k,sep='')]] <- obj_k
-            rmse <- c(rmse, obj_k$loo$rmse)
+            #N_acq <- c( N_acq, length(unique(new_idx)) )
+            #if ( !is.null(target) ) ctr <- 1
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[j,,drop=FALSE])
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[j,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[j,,drop=FALSE])
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[j,j,drop=FALSE])
+                  #X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[ctr,,drop=FALSE])
+                  #Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[ctr,,drop=FALSE])
+                  #ctr <- ctr + 1
+                }
+              }
+            }
+            if ( is.null(target) ){
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx)])
+            } else {
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx[!istarget])])
+            }
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
           }
-          if ( verb ) message(" done")
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
         } else {
-          if ( verb ) message(" - Validating ...", appendLF = FALSE)
+          if ( is.null(aggregate) ){
+            new_X <- c()
+            new_idx <- c()
+            #for (j in 1:batch_size[i] ){
+            #  if ( is.null(target) ) {
+            #    new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+            #    new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
+            #  } else {
+            #    new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]][isContinue,,drop=FALSE])
+            #    new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]][isContinue])
+            #  }
+            #}
+            for (j in 1:batch_size[i] ){
+              new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+              new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
+            }
+            new_Y <- y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE]
+            #N_acq <- c( N_acq, length(unique(new_idx)) )
+
+            temp <- rep(batch_size[i], n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
+
+            #if ( !is.null(target) ) {
+            #  ctr <- 1
+            #  active_emu <- sum(!istarget)
+            #}
+            for ( j in 1:n_emulators ){
+              extract <- j + seq(0, by = n_emulators, length = batch_size[i])
+              if ( is.null(target) ){
+                #extract <- j + seq(0, by = n_emulators, length = batch_size[i])
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[extract,,drop=FALSE])
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  #extract <- ctr + seq(0, by = active_emu, length = batch_size[i])
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[extract,,drop=FALSE])
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
+                  #ctr <- ctr + 1
+                }
+              }
+            }
+            if ( is.null(target) ){
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx)])
+            } else {
+              mask <- rep(!istarget, batch_size[i])
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx[mask])])
+            }
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+          } else {
+            new_X <- c()
+            new_idx <- c()
+            for (j in 1:batch_size[i] ){
+              new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
+              new_idx <- c(new_idx, res[['index']][[paste('position',j,sep="")]])
+            }
+
+            temp <- rep(batch_size[i], n_emulators)
+            if ( !is.null(target) ) temp[istarget] <- 0
+            N_acq_ind <- rbind(N_acq_ind, temp)
+
+            #N_acq <- c(N_acq, batch_size[i])
+            new_Y <- y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE]
+            for ( j in 1:n_emulators ){
+              if ( is.null(target) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+              } else {
+                if ( !istarget[j] ) {
+                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+                }
+              }
+            }
+            idx_x_acq <- c(idx_x_acq, idx_sub_cand[new_idx])
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+          }
+        }
+
+        if ( i %% freq[1]==0 | i==N){
+          if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           for ( k in 1:n_emulators ){
-            obj_k <- object[[paste('emulator',k,sep='')]]
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
-            object[[paste('emulator',k,sep='')]] <- obj_k
-            rmse <- c(rmse, obj_k$oos$rmse)
+            if ( is.null(target) ){
+              obj_k <- object[[paste('emulator',k,sep='')]]
+              if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+              object[[paste('emulator',k,sep='')]] <- obj_k
+            } else {
+              if ( !istarget[k] ){
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+              }
+            }
           }
           if ( verb ) message(" done")
-          message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+        } else {
+          if ( verb ) message(" - Updating ...", appendLF = FALSE)
+          for ( k in 1:n_emulators ){
+            if ( is.null(target) ){
+              obj_k <- object[[paste('emulator',k,sep='')]]
+              if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE, B = 10)
+              object[[paste('emulator',k,sep='')]] <- obj_k
+            } else {
+              if ( !istarget[k] ){
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X, Y[,k], refit = FALSE, verb = FALSE, B = 10)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+              }
+            }
+          }
+          if ( verb ) message(" done")
         }
-        rmse_records <- rbind(rmse_records, rmse)
-      }
 
-      if ( !is.null(check_point) ){
-        if (i %in% check_point ){
-          ans <- readline(prompt="Do you want to continue? (Y/N) ")
-          if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-            message(sprintf("The sequential design is terminated at step %i.", i))
+        if ( i %% freq[2]==0 | i==N){
+          #rmse <- c()
+          if (is.null(x_test) & is.null(y_test)){
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            for ( k in 1:n_emulators ){
+              if ( is.null(target) ) {
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+                rmse[k] <- obj_k$loo$rmse
+              } else {
+                if ( !istarget[k] ){
+                  obj_k <- object[[paste('emulator',k,sep='')]]
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                  object[[paste('emulator',k,sep='')]] <- obj_k
+                  rmse[k] <- obj_k$loo$rmse
+                }
+              }
+            }
+            if ( verb ) message(" done")
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            for ( k in 1:n_emulators ){
+              if ( is.null(target) ) {
+                obj_k <- object[[paste('emulator',k,sep='')]]
+                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                object[[paste('emulator',k,sep='')]] <- obj_k
+                rmse[k] <- obj_k$oos$rmse
+              } else {
+                if ( !istarget[k] ){
+                  obj_k <- object[[paste('emulator',k,sep='')]]
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores[2], threading = threading)
+                  object[[paste('emulator',k,sep='')]] <- obj_k
+                  rmse[k] <- obj_k$oos$rmse
+                }
+              }
+            }
+            if ( verb ) message(" done")
+            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          }
+          rmse_records <- rbind(rmse_records, rmse)
+        }
+
+        if( !is.null(target) ) {
+          if ( all(rmse<=target) ) {
+            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            istarget <- rep(TRUE, n_emulators)
             N <- i
             break
+          } else {
+            istarget <- rmse<=target
           }
         }
-      }
 
+        if ( !is.null(check_point) ){
+          if (i %in% check_point ){
+            ans <- readline(prompt="Do you want to continue? (Y/N) ")
+            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
+              message(sprintf("The sequential design is terminated at step %i.", i))
+              N <- i
+              break
+            }
+          }
+        }
+
+      }
     }
   }
 
-  if ( isTRUE(first_time) ){
-    object$design <- list()
-    object[["design"]][["wave1"]][["N"]] <- N
-    object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
-    object[["design"]][["wave1"]][["freq"]] <- freq[2]
-    object[["design"]][["wave1"]][["batch_size"]] <- batch_size
-    object[["design"]][["wave1"]][["enrichment"]] <- N_acq
-    if ( is.null(aggregate) ){
-      object[["design"]][["wave1"]][["aggregation"]] <- FALSE
+  if ( run ){
+    if ( isTRUE(first_time) ){
+      object$design <- list()
+      object[["design"]][["wave1"]][["N"]] <- N
+      object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      object[["design"]][["wave1"]][["freq"]] <- freq[2]
+      object[["design"]][["wave1"]][["batch_size"]] <- batch_size
+      object[["design"]][["wave1"]][["enrichment"]] <- unname(N_acq_ind)
+      if ( is.null(aggregate) ){
+        object[["design"]][["wave1"]][["aggregation"]] <- FALSE
+      } else {
+        object[["design"]][["wave1"]][["aggregation"]] <- TRUE
+      }
+      if( !is.null(target) ) {
+        object[["design"]][["wave1"]][["target"]] <- target
+        object[["design"]][["wave1"]][["reached"]] <- istarget
+      }
+      object[["design"]][["type"]] <- type
+      if ( type == 'oos' ){
+        object[["design"]][["x_test"]] <- x_test
+        object[["design"]][["y_test"]] <- y_test
+      }
+      object[['data']][['X']] <- X
+      object[['data']][['Y']] <- Y
     } else {
-      object[["design"]][["wave1"]][["aggregation"]] <- TRUE
+      object$design <- design_info
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["batch_size"]] <- batch_size
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- unname(N_acq_ind)
+      if ( is.null(aggregate) ){
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- FALSE
+      } else {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- TRUE
+      }
+      if( !is.null(target) ) {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
+      }
+      object[['data']][['X']] <- X
+      object[['data']][['Y']] <- Y
     }
-    object[["design"]][["type"]] <- type
-    if ( type == 'oos' ){
-      object[["design"]][["x_test"]] <- x_test
-      object[["design"]][["y_test"]] <- y_test
+    if( !is.null(target) ) {
+      if ( !all(istarget) ) message("Targets are not reached for all emulators at the end of the sequential design.")
     }
-    object[['data']][['X']] <- X
-    object[['data']][['Y']] <- Y
   } else {
-    object$design <- design_info
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["batch_size"]] <- batch_size
-    object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- N_acq
-    if ( is.null(aggregate) ){
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- FALSE
-    } else {
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["aggregation"]] <- TRUE
-    }
-    object[['data']][['X']] <- X
-    object[['data']][['Y']] <- Y
+    message("Target already reached. The sequential design is not performed.")
   }
 
   return(object)

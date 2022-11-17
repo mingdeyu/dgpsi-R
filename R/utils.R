@@ -33,8 +33,9 @@ combine <- function(...) {
 #'
 #' @return An S3 class named `bundle` to be used by [design()] for sequential designs. It has:
 #' - *N* slots, each of which contains a GP or DGP emulator, where *N* is the number of emulators that are provided to the function.
-#' - a slot called `data` which is a list that contains two elements `X` and `Y`. `X` is the training input data that is common to all
-#'   emulators, and `Y` is a matrix with each column corresponding to the training output data of an emulator.
+#' - a slot called `data` which contains two elements `X` and `Y`. `X` contains *N* matrices named `emulator1,...,emulatorN` that are
+#'   training input data for different emulators. `Y` contains *N* single-column matrices named `emulator1,...,emulatorN` that are
+#'   training output data for different emulators.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
@@ -92,7 +93,9 @@ combine <- function(...) {
 #' @md
 #' @export
 pack <- function(...) {
-  res = list(...)
+  res <- list(...)
+  X_all <- list()
+  Y_all <- list()
   if ( length(res)==1 ) stop("The function needs at least two emulators to pack.", call. = FALSE)
   training_input <- res[[1]]$data$X
   training_output <- c()
@@ -106,11 +109,12 @@ pack <- function(...) {
     if ( !identical(res[[i]]$data$X, training_input) ) stop("The function can only pack emulators with common training input data.", call. = FALSE)
     Y_dim <- ncol(res[[i]]$data$Y)
     if ( Y_dim!=1 ) stop(sprintf("The function is only applicable to emulators with 1D output. Your emulator %i has %i output dimensions.", i, Y_dim), call. = FALSE)
-    training_output <- cbind(training_output, res[[i]]$data$Y)
+    X_all[[paste('emulator', i ,sep="")]] <- unname(training_input)
+    Y_all[[paste('emulator', i ,sep="")]] <- unname(res[[i]]$data$Y)
     names(res)[i] <- paste('emulator', i, sep="")
   }
-  res[['data']][['X']] <- unname(training_input)
-  res[['data']][['Y']] <- unname(training_output)
+  res[['data']][['X']] <- X_all
+  res[['data']][['Y']] <- Y_all
   class(res) <- "bundle"
   return(res)
 }

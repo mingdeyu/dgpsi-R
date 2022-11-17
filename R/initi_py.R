@@ -65,7 +65,8 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
       if (any(grepl('^dgp_si_R', reticulate::conda_list(conda = conda_path)$name))){
         conda_list <- reticulate::conda_list(conda = conda_path)$name
         dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
-        ans <- readline(prompt="I found Python environment(s) for other versions of the package. Do you want me to remove them? (Y/N) ")
+        cat("I found Python environment(s) for other versions of the package.")
+        ans <- readline(prompt="Do you want me to remove them? (Y/N) ")
         if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
           message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
           for (item in dgpsi_list) {
@@ -88,18 +89,19 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
       }
     } else {
       if (isTRUE(reinstall)) {
-        if (grepl('9000',env_name)) {
-          reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
-        } else {
-          reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
-        }
-        if (Sys.info()[["sysname"]] == 'Linux'){
-          libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
-          libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
-          system(paste("sudo rm",libstdc_sys_path))
-          system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
-        }
-        message("Installation finished. Please restart R.")
+        install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = TRUE)
+        #if (grepl('9000',env_name)) {
+        #  reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+        #} else {
+        #  reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
+        #}
+        #if (Sys.info()[["sysname"]] == 'Linux'){
+        #  libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
+        #  libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+        #  system(paste("sudo rm",libstdc_sys_path))
+        #  system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
+        #}
+        #message("Installation finished. Please restart R.")
         restart <- TRUE
       }
     }
@@ -121,10 +123,14 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
   }
 }
 
-install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
-  message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
-  reticulate::conda_create(envname = env_name, python_version = py_ver, conda = conda_path)
-  message("Installing the required Python packages ...")
+install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = FALSE) {
+  if (!reinsatll) message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
+  if (!reinsatll) reticulate::conda_create(envname = env_name, python_version = py_ver, conda = conda_path)
+  if (reinsatll) {
+    message("Re-installing the required Python packages ...")
+  } else {
+    message("Installing the required Python packages ...")
+  }
   if (Sys.info()[["sysname"]] == "Darwin" & Sys.info()[["machine"]] == "arm64"){
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*accelerate"') , conda = conda_path)
   } else if (grepl("Intel",benchmarkme::get_cpu()$model_name)){
@@ -133,7 +139,11 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver) {
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
   }
   if (grepl('9000',env_name)) {
-    reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE)
+    if (reinsatll) {
+      reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+    } else {
+      reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE)
+    }
   }
   if (Sys.info()[["sysname"]] == 'Linux'){
     libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')

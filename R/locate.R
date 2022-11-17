@@ -162,7 +162,7 @@ locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch_
   #extract input dimensions
   training_input <- object$data$X
   n_dim_X <- ncol(training_input)
-  n_points <- nrow(training_input)
+
   if ( isTRUE(verb) ) message("Locating the next design point(s) ...", appendLF = FALSE)
   #locate next design point
   if ( is.null(x_cand) ){
@@ -269,7 +269,6 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch
   #extract input dimensions
   training_input <- object$data$X
   n_dim_X <- ncol(training_input)
-  n_points <- nrow(training_input)
   #extract output dimensions
   n_dim_Y <- ncol(object$data$Y)
   if ( n_dim_Y==1 & !is.null(aggregate) ){
@@ -433,9 +432,7 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, ba
 
   batch_size <- as.integer(batch_size)
 
-  training_input <- object$data$X
-  n_dim_X <- ncol(training_input)
-  n_points <- nrow(training_input)
+  n_dim_X <- ncol(object$data$X[[1]])
 
   x_cand_null <- is.null(x_cand)
 
@@ -451,11 +448,16 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, ba
         limits <- matrix(limits, ncol=2, byrow=TRUE)
       }
       if ( nrow(limits)!=n_dim_X ) stop("You must provide ranges for all input dimensions through 'limits'.", call. = FALSE)
+    } else {
+      all_training_input <- c()
+      for ( j in 1:length(object$data$X) ){
+        all_training_input <- rbind(all_training_input, object$data$X[[j]])
+      }
     }
     x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
     if ( is.null(limits) ){
       for (i in 1:n_dim_X){
-        x_cand[,i] <- x_cand[,i]*(max(training_input[,i])-min(training_input[,i])) + min(training_input[,i])
+        x_cand[,i] <- x_cand[,i]*(max(all_training_input[,i])-min(all_training_input[,i])) + min(all_training_input[,i])
       }
     } else {
       for (i in 1:n_dim_X){

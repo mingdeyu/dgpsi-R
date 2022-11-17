@@ -13,8 +13,9 @@ pack(...)
 An S3 class named \code{bundle} to be used by \code{\link[=design]{design()}} for sequential designs. It has:
 \itemize{
 \item \emph{N} slots, each of which contains a GP or DGP emulator, where \emph{N} is the number of emulators that are provided to the function.
-\item a slot called \code{data} which is a list that contains two elements \code{X} and \code{Y}. \code{X} is the training input data that is common to all
-emulators, and \code{Y} is a matrix with each column corresponding to the training output data of an emulator.
+\item a slot called \code{data} which contains two elements \code{X} and \code{Y}. \code{X} contains \emph{N} matrices named \verb{emulator1,...,emulatorN} that are
+training input data for different emulators. \code{Y} contains \emph{N} single-column matrices named \verb{emulator1,...,emulatorN} that are
+training output data for different emulators.
 }
 }
 \description{

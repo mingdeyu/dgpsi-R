@@ -19,6 +19,7 @@ design(
   freq,
   x_test,
   y_test,
+  target,
   method,
   nugget_s,
   verb,
@@ -39,6 +40,7 @@ design(
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
+  target = NULL,
   method = "ALM",
   nugget_s = 1,
   verb = TRUE,
@@ -59,6 +61,7 @@ design(
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
+  target = NULL,
   method = "ALM",
   nugget_s = 1,
   verb = TRUE,
@@ -82,6 +85,7 @@ design(
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
+  target = NULL,
   method = "ALM",
   nugget_s = 1,
   verb = TRUE,
@@ -147,6 +151,9 @@ output dimensions.
 
 Set to \code{NULL} for the LOO-based emulator validation. Defaults to \code{NULL}.}
 
+\item{target}{a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to \code{NULL}, in which
+case the sequential design stops after \code{N} steps. See \emph{Note} section below for further information about \code{target}.}
+
 \item{method}{the criterion used to locate the design points: ALM (\code{"ALM"}) or MICE (\code{"MICE"}). See references below.
 Defaults to \code{"ALM"}.}
 
@@ -193,7 +200,16 @@ Each slot contains the following elements:
 \item \code{aggregation}, a bool that indicates if the aggregation is applied (i.e., if \code{aggregate} is supplied) to locate the design points for a DGP
 emulator or a bundle of (D)GP emulators during the corresponding wave.
 \item \code{batch_size}, a vector of size \code{N} that contains the information given by the argument \code{batch_size}.
-\item \code{enrichment}, a vector of size \code{N} that gives the number of new design points added after each step of the sequential design.
+\item \code{enrichment}, a vector of size \code{N} that gives the number of new design points added after each step of the sequential design (if \code{object} is
+an instance of the \code{gp} or \code{dgp} class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
+the sequential design (if \code{object} is an instance of the \code{bundle} class).
+}
+
+If \code{target} is not \code{NULL}, the following additional elements are also included:
+\itemize{
+\item \code{target}, the target RMSE(s) to stop the sequential design.
+\item \code{reached}, a bool (if \code{object} is an instance of the \code{gp} or \code{dgp} class) or a vector of bools (if \code{object} is an instance of the \code{bundle}
+class) that indicate if the target RMSEs are reached at the end of the sequential design.
 }
 \item a slot called \code{type} that gives the type of validations, either LOO (\code{loo}) or OOS (\code{oos}) used to calculate the RMSEs of emulators constructed
 in the sequential design. See \code{\link[=validate]{validate()}} for more information about LOO and OOS.
@@ -221,10 +237,15 @@ those of old waves and be contained in the returned object, unless the following
 \item if the validation type is OOS, \code{x_test} and \code{y_test} in the current wave of the sequential design are identical to those in the previous waves.
 }
 
-When the above conditions are met, the information (\code{N} and \code{rmse}) of the current wave of the sequential design will be added to
+When the above conditions are met, the information of the current wave of the sequential design will be added to
 the \code{design} slot of the returned object under the name \code{waveS}.
 \item If \code{object} is an instance of the \code{gp} class, the matrix in the \code{rmse} slot is single-columned. If \code{object} is an instance of
-the \code{dgp} class, the matrix in the \code{rmse} slot can have multiple columns that correspond to different output dimensions.
+the \code{dgp} or \code{bundle} class, the matrix in the \code{rmse} slot can have multiple columns that correspond to different output dimensions
+or different emulators in the bundle.
+\item If \code{object} is an instance of the \code{gp} class, \code{target} needs to be a single value giving the RMSE threshold. If \code{object} is an instance of the \code{dgp}
+or \code{bundle} class, \code{target} can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
+single value is provided, it will be used as the RMSE threshold for all output dimensions (if \code{object} is an instance of the \code{dgp}) or all emulators
+(if \code{object} is an instance of the \code{bundle}).
 \item \code{aggregate} can be defined as an R function with either one or two arguments.
 \itemize{
 \item if \code{aggregate} has one argument, the argument should be a vector representing values of ALM or MICE criterion across

@@ -6,6 +6,7 @@
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
+#' @param emulator the index of the emulator packed in `object` if `object` is an instance of the `bundle` class.
 #' @param type either `rmse`, for the trace plot of RMSEs of emulators constructed during the sequential designs,
 #'     or `design`, for visualizations of input designs created by the sequential design procedure. Defaults to `rmse`.
 #' @param log a bool that indicates whether to plot RMSEs in log-scale if `type = "rmse"`. Defaults to `FALSE`.
@@ -22,7 +23,7 @@
 #' @md
 #' @name draw
 #' @export
-draw <- function(object, type, log, ...){
+draw <- function(object, ...){
   UseMethod("draw")
 }
 
@@ -37,9 +38,6 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
   if ( type == 'design' ) {
-    c25 <- c("gray50", "dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
-             "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
-             "darkorange4", "brown")
     design_data <- object$data$X
     total_N <- nrow(design_data)
     design_data <- as.data.frame(design_data)
@@ -59,19 +57,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
     wave <- c(rep("Initial", total_N-seq_N), wave)
     design_data$Design <- wave
 
-    p=ggplot2::ggplot(design_data) +
-      ggplot2::geom_point(ggplot2::aes_(x = ~.panel_x, y = ~.panel_y, shape=~Design, color =~Design)) +
-      ggforce::facet_matrix(ggplot2::vars(names(design_data)[1:(length(design_data)-1)])) +
-      ggplot2::scale_shape_manual(values = c(17,rep(16,length(unique(design_data$Design))-1)), breaks=unique(design_data$Design)) +
-      ggplot2::scale_colour_manual(values = ggplot2::alpha(c25,0.7), breaks=unique(design_data$Design)) +
-      ggplot2::theme(
-        plot.title = ggplot2::element_blank(),
-        legend.position = "right",
-        legend.key.width = ggplot2::unit(0.5, "cm"),
-        legend.text = ggplot2::element_text(size = 7),
-        legend.title = ggplot2::element_text(size = 7, face = "bold"),
-        legend.title.align=0.5
-      )
+    p <- pair_design(design_data)
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
@@ -133,9 +119,6 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
   if ( type == 'design' ) {
-    c25 <- c("gray50", "dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
-             "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
-             "darkorange4", "brown")
     design_data <- object$data$X
     total_N <- nrow(design_data)
     design_data <- as.data.frame(design_data)
@@ -155,19 +138,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     wave <- c(rep("Initial", total_N-seq_N), wave)
     design_data$Design <- wave
 
-    p=ggplot2::ggplot(design_data) +
-      ggplot2::geom_point(ggplot2::aes_(x = ~.panel_x, y = ~.panel_y, shape=~Design, color =~Design)) +
-      ggforce::facet_matrix(ggplot2::vars(names(design_data)[1:(length(design_data)-1)])) +
-      ggplot2::scale_shape_manual(values = c(17,rep(16,length(unique(design_data$Design))-1)), breaks=unique(design_data$Design)) +
-      ggplot2::scale_colour_manual(values = ggplot2::alpha(c25,0.7), breaks=unique(design_data$Design)) +
-      ggplot2::theme(
-        plot.title = ggplot2::element_blank(),
-        legend.position = "right",
-        legend.key.width = ggplot2::unit(0.5, "cm"),
-        legend.text = ggplot2::element_text(size = 7),
-        legend.title = ggplot2::element_text(size = 7, face = "bold"),
-        legend.title.align=0.5
-      )
+    p <- pair_design(design_data)
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
@@ -229,7 +200,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
 #' @rdname draw
 #' @method draw bundle
 #' @export
-draw.bundle <- function(object, type = 'rmse', log = FALSE, ...){
+draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
   #check class
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
@@ -237,10 +208,7 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, ...){
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
   if ( type == 'design' ) {
-    c25 <- c("gray50", "dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
-             "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
-             "darkorange4", "brown")
-    design_data <- object$data$X
+    design_data <- object$data$X[[paste('emulator', emulator, sep="")]]
     total_N <- nrow(design_data)
     design_data <- as.data.frame(design_data)
     for (l in 1:length(design_data)) {
@@ -252,26 +220,16 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, ...){
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
       wave <- c(wave, rep(paste("wave",i,sep=""), Ni))
       seq_N <- seq_N + Ni
     }
     wave <- c(rep("Initial", total_N-seq_N), wave)
     design_data$Design <- wave
 
-    p=ggplot2::ggplot(design_data) +
-      ggplot2::geom_point(ggplot2::aes_(x = ~.panel_x, y = ~.panel_y, shape=~Design, color =~Design)) +
-      ggforce::facet_matrix(ggplot2::vars(names(design_data)[1:(length(design_data)-1)])) +
-      ggplot2::scale_shape_manual(values = c(17,rep(16,length(unique(design_data$Design))-1)), breaks=unique(design_data$Design)) +
-      ggplot2::scale_colour_manual(values = ggplot2::alpha(c25,0.7), breaks=unique(design_data$Design)) +
-      ggplot2::theme(
-        plot.title = ggplot2::element_blank(),
-        legend.position = "right",
-        legend.key.width = ggplot2::unit(0.5, "cm"),
-        legend.text = ggplot2::element_text(size = 7),
-        legend.title = ggplot2::element_text(size = 7, face = "bold"),
-        legend.title.align=0.5
-      )
+    p <- pair_design(design_data) +
+      ggplot2::ggtitle(sprintf("Emulator %i", emulator)) +
+      ggplot2::theme(plot.title = ggplot2::element_text(size=10))
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
@@ -280,14 +238,13 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, ...){
           'Xi = Input dimension i'
       )
   } else if ( type == 'rmse' ){
-    total_N <- nrow(object$data$X)
-    output_D <- ncol(object$data$Y)
+    total_N <- nrow(object$data$X[[paste('emulator', emulator, sep="")]])
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
-      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
+      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
       seq_N <- seq_N + Ni
     }
     init_N <- total_N - seq_N
@@ -296,37 +253,54 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, ...){
     wave <- c()
     for ( i in 1:wave_N ){
       Ni <- object$design[[paste('wave',i,sep='')]]$N
-      rmsei <- object$design[[paste('wave',i,sep='')]]$rmse
+      rmsei <- object$design[[paste('wave',i,sep='')]]$rmse[,emulator]
       Fi <- object$design[[paste('wave',i,sep='')]]$freq
-      enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment)
+      enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
       enrichi <- c(init_N, init_N + enrichi)
       step_Ni <- seq(0, Ni, Fi)
       if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
       design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
-      wave <- c(wave, rep(paste("wave",i,sep=""), nrow(rmsei)))
-      rmse <- rbind(rmse, rmsei)
+      wave <- c(wave, rep(paste("wave",i,sep=""), length(rmsei)))
+      rmse <- c(rmse, rmsei)
       init_N <- design_Ni[length(design_Ni)]
     }
-    p_list <- list()
-    for (l in 1:output_D ) {
-      dat <- list()
-      dat[["N"]] <- design_N
-      dat[["rmse"]] <- rmse[,l]
-      dat[["Design"]] <- wave
-      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log) +
-        ggplot2::ggtitle(sprintf("E%i", l)) +
-        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
-    }
-    p_patch <- patchwork::wrap_plots(p_list) +
+
+    dat <- list()
+    dat[["N"]] <- design_N
+    dat[["rmse"]] <- rmse
+    dat[["Design"]] <- wave
+    p <- draw_seq_design(as.data.frame(dat), log = log) +
+       ggplot2::ggtitle(sprintf("Emulator %i", emulator)) +
+       ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+
+    p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
         title = 'Sequential Design Validation',
-        caption = 'Ei = Emulator i
-                   RMSE = Root Mean Squared Error'
-      ) +
-      patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        caption = 'RMSE = Root Mean Squared Error'
+      )
   }
   p_patch
+}
+
+pair_design <- function(dat){
+  c25 <- c("gray50", "dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
+           "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
+           "darkorange4", "brown")
+  p <- ggplot2::ggplot(dat) +
+    ggplot2::geom_point(ggplot2::aes_(x = ~.panel_x, y = ~.panel_y, shape=~Design, color =~Design)) +
+    ggforce::facet_matrix(ggplot2::vars(names(dat)[1:(length(dat)-1)])) +
+    ggplot2::scale_shape_manual(values = c(17,rep(16,length(unique(dat$Design))-1)), breaks=unique(dat$Design)) +
+    ggplot2::scale_colour_manual(values = ggplot2::alpha(c25,0.7), breaks=unique(dat$Design)) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_blank(),
+      legend.position = "right",
+      legend.key.width = ggplot2::unit(0.5, "cm"),
+      legend.text = ggplot2::element_text(size = 7),
+      legend.title = ggplot2::element_text(size = 7, face = "bold"),
+      legend.title.align=0.5
+    )
+  return(p)
 }
 
 draw_seq_design <- function(dat, log) {
@@ -334,8 +308,8 @@ draw_seq_design <- function(dat, log) {
            "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
            "darkorange4", "brown")
   p <- ggplot2::ggplot() +
-    ggplot2::geom_line(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), alpha=0.8) +
-    ggplot2::geom_point(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), size=1.5, alpha=0.8) +
+    ggplot2::geom_line(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), alpha=0.8, stat = "unique") +
+    ggplot2::geom_point(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), size=1.5, alpha=0.8, stat = "unique") +
     ggplot2::scale_colour_manual(values = c24, breaks=unique(dat$Design)) +
     ggplot2::theme(
       plot.title = ggplot2::element_blank(),
