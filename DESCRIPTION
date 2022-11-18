@@ -29,7 +29,8 @@ Imports:
     reshape2,
     patchwork,
     lhs,
-    methods
+    methods,
+    stats
 Suggests:
     knitr,
     rmarkdown,

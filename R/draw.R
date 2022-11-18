@@ -104,7 +104,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
       dat_target <- list()
       dat_target[["val"]] <- target
       dat_target[["Target"]] <- target_wave
-      dat_target <- aggregate(Target~val, dat_target, function(x) paste('wave',paste0(na.omit(x), collapse = ","), sep=" "))
+      dat_target <- stats::aggregate(Target~val, dat_target, function(x) paste('wave',paste0(stats::na.omit(x), collapse = ","), sep=" "))
       dat_target <- dat_target[order(dat_target$val,decreasing = T),]
       dat_target <- as.data.frame(dat_target)
     } else {
@@ -207,7 +207,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
         dat_target <- list()
         dat_target[["val"]] <- target[,l]
         dat_target[["Target"]] <- target_wave
-        dat_target <- aggregate(Target~val, dat_target, function(x) paste('wave',paste0(na.omit(x), collapse = ","), sep=" "))
+        dat_target <- stats::aggregate(Target~val, dat_target, function(x) paste('wave',paste0(stats::na.omit(x), collapse = ","), sep=" "))
         dat_target <- dat_target[order(dat_target$val,decreasing = T),]
         dat_target <- as.data.frame(dat_target)
       } else {
@@ -314,7 +314,7 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
       dat_target <- list()
       dat_target[["val"]] <- target
       dat_target[["Target"]] <- target_wave
-      dat_target <- aggregate(Target~val, dat_target, function(x) paste('wave',paste0(na.omit(x), collapse = ","), sep=" "))
+      dat_target <- stats::aggregate(Target~val, dat_target, function(x) paste('wave',paste0(stats::na.omit(x), collapse = ","), sep=" "))
       dat_target <- dat_target[order(dat_target$val,decreasing = T),]
       dat_target <- as.data.frame(dat_target)
     } else {
