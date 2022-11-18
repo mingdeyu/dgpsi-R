@@ -79,6 +79,8 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
     design_N <- c()
     rmse <- c()
     wave <- c()
+    target <- c()
+    target_wave <- c()
     for ( i in 1:wave_N ){
       Ni <- object$design[[paste('wave',i,sep='')]]$N
       rmsei <- object$design[[paste('wave',i,sep='')]]$rmse
@@ -89,15 +91,31 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
       if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
       design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
-      wave <- c(wave, rep(paste("wave",i,sep=""), nrow(rmsei)))
+      wave <- c(wave, rep(paste("wave",i,sep=" "), nrow(rmsei)))
       rmse <- rbind(rmse, rmsei)
       init_N <- design_Ni[length(design_Ni)]
+      if ( 'target' %in% names(object$design[[paste('wave',i,sep='')]]) ){
+        target <- c(target, object$design[[paste('wave',i,sep='')]]$target)
+        target_wave <- c(target_wave, i)
+      }
     }
+
+    if ( !is.null(target) ){
+      dat_target <- list()
+      dat_target[["val"]] <- target
+      dat_target[["Target"]] <- target_wave
+      dat_target <- aggregate(Target~val, dat_target, function(x) paste('wave',paste0(na.omit(x), collapse = ","), sep=" "))
+      dat_target <- dat_target[order(dat_target$val,decreasing = T),]
+      dat_target <- as.data.frame(dat_target)
+    } else {
+      dat_target <- NULL
+    }
+
     dat <- list()
     dat[["N"]] <- design_N
     dat[["rmse"]] <- rmse[,1]
     dat[["Design"]] <- wave
-    p <- draw_seq_design(as.data.frame(dat),log = log)
+    p <- draw_seq_design(as.data.frame(dat),log = log, target = dat_target)
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
         title = 'Sequential Design Validation',
@@ -161,6 +179,8 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     design_N <- c()
     rmse <- c()
     wave <- c()
+    target <- c()
+    target_wave <- c()
     for ( i in 1:wave_N ){
       Ni <- object$design[[paste('wave',i,sep='')]]$N
       rmsei <- object$design[[paste('wave',i,sep='')]]$rmse
@@ -171,17 +191,34 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
       if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
       design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
-      wave <- c(wave, rep(paste("wave",i,sep=""), nrow(rmsei)))
+      wave <- c(wave, rep(paste("wave",i,sep=" "), nrow(rmsei)))
       rmse <- rbind(rmse, rmsei)
       init_N <- design_Ni[length(design_Ni)]
+      if ( 'target' %in% names(object$design[[paste('wave',i,sep='')]]) ){
+        target <- rbind(target, object$design[[paste('wave',i,sep='')]]$target)
+        target_wave <- c(target_wave, i)
+      }
     }
+
     p_list <- list()
     for (l in 1:output_D ) {
+
+      if ( !is.null(target) ){
+        dat_target <- list()
+        dat_target[["val"]] <- target[,l]
+        dat_target[["Target"]] <- target_wave
+        dat_target <- aggregate(Target~val, dat_target, function(x) paste('wave',paste0(na.omit(x), collapse = ","), sep=" "))
+        dat_target <- dat_target[order(dat_target$val,decreasing = T),]
+        dat_target <- as.data.frame(dat_target)
+      } else {
+        dat_target <- NULL
+      }
+
       dat <- list()
       dat[["N"]] <- design_N
       dat[["rmse"]] <- rmse[,l]
       dat[["Design"]] <- wave
-      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log) +
+      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log, target = dat_target) +
         ggplot2::ggtitle(sprintf("O%i", l)) +
         ggplot2::theme(plot.title = ggplot2::element_text(size=10))
     }
@@ -251,6 +288,9 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
     design_N <- c()
     rmse <- c()
     wave <- c()
+    target <- c()
+    target_wave <- c()
+
     for ( i in 1:wave_N ){
       Ni <- object$design[[paste('wave',i,sep='')]]$N
       rmsei <- object$design[[paste('wave',i,sep='')]]$rmse[,emulator]
@@ -261,16 +301,31 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
       if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
       design_Ni <- enrichi[step_Ni+1]
       design_N <- c(design_N, design_Ni)
-      wave <- c(wave, rep(paste("wave",i,sep=""), length(rmsei)))
+      wave <- c(wave, rep(paste("wave",i,sep=" "), length(rmsei)))
       rmse <- c(rmse, rmsei)
       init_N <- design_Ni[length(design_Ni)]
+      if ( 'target' %in% names(object$design[[paste('wave',i,sep='')]]) ){
+        target <- c(target, object$design[[paste('wave',i,sep='')]]$target[emulator])
+        target_wave <- c(target_wave, i)
+      }
+    }
+
+    if ( !is.null(target) ){
+      dat_target <- list()
+      dat_target[["val"]] <- target
+      dat_target[["Target"]] <- target_wave
+      dat_target <- aggregate(Target~val, dat_target, function(x) paste('wave',paste0(na.omit(x), collapse = ","), sep=" "))
+      dat_target <- dat_target[order(dat_target$val,decreasing = T),]
+      dat_target <- as.data.frame(dat_target)
+    } else {
+      dat_target <- NULL
     }
 
     dat <- list()
     dat[["N"]] <- design_N
     dat[["rmse"]] <- rmse
     dat[["Design"]] <- wave
-    p <- draw_seq_design(as.data.frame(dat), log = log) +
+    p <- draw_seq_design(as.data.frame(dat), log = log, target = dat_target) +
        ggplot2::ggtitle(sprintf("Emulator %i", emulator)) +
        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
 
@@ -303,20 +358,29 @@ pair_design <- function(dat){
   return(p)
 }
 
-draw_seq_design <- function(dat, log) {
+draw_seq_design <- function(dat, log, target) {
   c24 <- c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
            "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
            "darkorange4", "brown")
-  p <- ggplot2::ggplot() +
+  p <- ggplot2::ggplot()
+
+  if ( !is.null(target) ) {
+    p <- p +
+      ggplot2::geom_hline(data = target, mapping = ggplot2::aes_(yintercept=~val, group=~Target, linetype=~Target), alpha=0.8, color="gray20", size = 0.5) +
+      ggplot2::scale_linetype_manual(values=c("dashed", "dotdash", "twodash", "dotted", "solid", "longdash"))
+  }
+
+  p <- p +
     ggplot2::geom_line(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), alpha=0.8, stat = "unique") +
     ggplot2::geom_point(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), size=1.5, alpha=0.8, stat = "unique") +
-    ggplot2::scale_colour_manual(values = c24, breaks=unique(dat$Design)) +
-    ggplot2::theme(
+    ggplot2::scale_colour_manual(values = c24, breaks=unique(dat$Design))
+
+  p <- p + ggplot2::theme(
       plot.title = ggplot2::element_blank(),
       legend.position = "bottom",
       legend.key.width = ggplot2::unit(0.5, "cm"),
       legend.text = ggplot2::element_text(size = 7),
-      legend.title = ggplot2::element_blank()
+      legend.title = ggplot2::element_text(size = 8.5)
     )
 
   if ( log ){
