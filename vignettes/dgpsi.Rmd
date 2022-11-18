@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-`dgpsi` provides a flexible toolbox for Gaussian process (GP), deep Gaussian process (DGP) and linked (D)GP emulations. In this guide, we show how to use the package to emulate a step function with a three-layered DGP structure. There are other examples showing the functionality of the package in [`Articles`](https://mingdeyu.github.io/dgpsi-R/articles/index.html) on the package website, and how to customize a DGP structure. A comprehensive reference of available functions is documented in [`Reference`](https://mingdeyu.github.io/dgpsi-R/reference/index.html) section of the package website. 
+`dgpsi` provides a flexible toolbox for Gaussian process (GP), deep Gaussian process (DGP) and linked (D)GP emulations. In this guide, we show how to use the package to emulate a step function with a three-layered DGP structure. There are other examples showing the functionality of the package in [`Articles`](https://mingdeyu.github.io/dgpsi-R/dev/articles/index.html) on the package website, and how to customize a DGP structure. A comprehensive reference of available functions is documented in [`Reference`](https://mingdeyu.github.io/dgpsi-R/dev/reference/index.html) section of the package website. 
 
 ## Load the package
 

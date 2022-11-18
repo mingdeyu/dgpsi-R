@@ -22,6 +22,7 @@ This vignette shows how to use the package to sequentially enrich the design for
 ## Load the packages
 
 ```{r}
+library(tidyverse)
 library(lhs)
 library(ggplot2)
 library(dgpsi)
@@ -44,7 +45,22 @@ f <- function(x) {
  }
 ```
 
-Note that to provide the simulator for the sequential design below, we have defined the above function such that its input `x` and output are both matrices. We now generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+Note that to provide the simulator for the sequential design below, we have defined the above function such that its input `x` and output are both matrices. The commands below generate the contour of the function:
+
+```{r}
+x1 <- seq(0, 1, length.out = 100)
+x2 <- seq(0, 1, length.out = 100)
+dat <- expand_grid(x1 = x1, x2 = x2)
+dat <- mutate(dat, f = f(cbind(x1, x2)))
+ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() + 
+  scale_fill_continuous(type = "viridis")
+```
+
+![](images/seq_fct.png)
+
+We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space while in the top-right part the simulator shows little variations. 
+
+We now generate an initial design with 5 design points using the maximin Latin hypercube sampler:
 
 ```{r}
 X <- maximinLHS(5,2)
