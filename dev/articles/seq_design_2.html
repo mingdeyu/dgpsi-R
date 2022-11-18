@@ -155,21 +155,21 @@ independently:</p>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 229.49it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 274.42it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, connect <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 310.61it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 262.53it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 395.78it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 276.28it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Note that we have the global connection turned off for the first two
 DGP emulators because we found that this yields better emulation
@@ -198,46 +198,46 @@ different outputs, e.g., by setting
 <code class="sourceCode R"><span><span class="co"># 1st wave of the sequential design with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, target <span class="op">=</span> <span class="va">target</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.361635 0.129256 0.029830</span></span>
+<span><span class="co">##  * RMSE: 0.385266 0.243889 0.067941</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.995697</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.003305</span></span>
-<span><span class="co">##  * Next design point (Emulator3): 0.003305</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.002366</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.002366</span></span>
+<span><span class="co">##  * Next design point (Emulator3): 0.002366</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.361063 0.144323 0.008922</span></span>
+<span><span class="co">##  * RMSE: 0.439944 0.221835 0.071280</span></span>
 <span><span class="co">## Iteration 2:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.002217</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.997442</span></span>
-<span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.628569</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.631532</span></span>
+<span><span class="co">##  * Next design point (Emulator3): 0.995940</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.406302 0.129734 0.008922</span></span>
+<span><span class="co">##  * RMSE: 0.395738 0.129002 0.008318</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.297411</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.597249</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.219642</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.839753</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.121305 0.019911 0.008922</span></span>
+<span><span class="co">##  * RMSE: 0.129432 0.018298 0.008318</span></span>
 <span><span class="co">## Targets are not reached for all emulators at the end of the sequential design.</span></span></code></pre>
-<p>It can be seen that at the first step, the DGP emulator for the third
-output has already reached the target, so for the rest of the steps no
-further refinements (i.e., additions of design points to the third DGP
-emulator) are performed. At the end of the first wave, the DGP emulators
-for both the first and the second outputs have not reached the target
-yet. At this point, we can proceed to a second wave by repeating the
-command above, but we show below an alternative way, in which we define
-an aggregation function that aggregates criterion scores across the
-three outputs such that the same design points are added to the three
-emulators at each step (instead of different design points for each
-emulator). We define the aggregation function <code>g</code> that
+<p>It can be seen that at the second step, the DGP emulator for the
+third output has already reached the target, so for the rest of the
+steps no further refinements (i.e., additions of design points to the
+third DGP emulator) are performed. At the end of the first wave, the DGP
+emulators for both the first and the second outputs have not reached the
+target yet. At this point, we can proceed to a second wave by repeating
+the command above, but we show below an alternative way, in which we
+define an aggregation function that aggregates criterion scores across
+the three outputs such that the same design points are added to the
+three emulators at each step (instead of different design points for
+each emulator). We define the aggregation function <code>g</code> that
 aggregate scores by calculating their weighted average:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">weight</span><span class="op">)</span><span class="op">{</span></span>
@@ -254,54 +254,57 @@ the first emulator:</p>
 <code class="sourceCode R"><span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>We now pass both the aggregate function <code>g()</code> and its
 <code>weight</code> argument to <code><a href="../reference/design.html">design()</a></code> for the second
-wave of the sequential design with a further 10 steps:</p>
+wave of the sequential design with a further 15 steps:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, aggregate <span class="op">=</span> <span class="va">g</span>, target <span class="op">=</span> <span class="fl">0.01</span>, weight <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##  Initializing ... done</span></span>
-<span><span class="co">##   * RMSE: 0.121305 0.019911 0.008922</span></span>
-<span><span class="co">##  Iteration 1:</span></span>
-<span><span class="co">##   - Locating ... done</span></span>
-<span><span class="co">##   * Next design point: 0.385054</span></span>
-<span><span class="co">##   - Updating and re-fitting ... done</span></span>
-<span><span class="co">##   - Validating ... done</span></span>
-<span><span class="co">##   * RMSE: 0.102591 0.018566 0.008922</span></span>
-<span><span class="co">##  Iteration 2:</span></span>
-<span><span class="co">##   - Locating ... done</span></span>
-<span><span class="co">##   * Next design point: 0.155967</span></span>
-<span><span class="co">##   - Updating and re-fitting ... done</span></span>
-<span><span class="co">##   - Validating ... done</span></span>
-<span><span class="co">##   * RMSE: 0.079752 0.015872 0.008922</span></span>
-<span><span class="co">##  Iteration 3:</span></span>
-<span><span class="co">##   - Locating ... done</span></span>
-<span><span class="co">##   * Next design point: 0.024872</span></span>
-<span><span class="co">##   - Updating and re-fitting ... done</span></span>
-<span><span class="co">##   - Validating ... done</span></span>
-<span><span class="co">##   * RMSE: 0.049682 0.009417 0.008922</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">15</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, aggregate <span class="op">=</span> <span class="va">g</span>, target <span class="op">=</span> <span class="fl">0.01</span>, weight <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Initializing ... done</span></span>
+<span><span class="co">##  * RMSE: 0.129432 0.018298 0.008318</span></span>
+<span><span class="co">## Iteration 1:</span></span>
+<span><span class="co">##  - Locating ... done</span></span>
+<span><span class="co">##  * Next design point: 0.352218</span></span>
+<span><span class="co">##  - Updating and re-fitting ... done</span></span>
+<span><span class="co">##  - Validating ... done</span></span>
+<span><span class="co">##  * RMSE: 0.116559 0.012756 0.008318</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Iteration 5:</span></span>
+<span><span class="co">##  - Locating ... done</span></span>
+<span><span class="co">##  * Next design point: 0.123698</span></span>
+<span><span class="co">##  - Updating and re-fitting ... done</span></span>
+<span><span class="co">##  - Validating ... done</span></span>
+<span><span class="co">##  * RMSE: 0.019050 0.010625 0.008318</span></span>
+<span><span class="co">## Iteration 6:</span></span>
+<span><span class="co">##  - Locating ... done</span></span>
+<span><span class="co">##  * Next design point: 0.281299</span></span>
+<span><span class="co">##  - Updating and re-fitting ... done</span></span>
+<span><span class="co">##  - Validating ... done</span></span>
+<span><span class="co">##  * RMSE: 0.013004 0.005781 0.008318</span></span>
 <span><span class="co">##  </span></span>
-<span><span class="co">##  Iteration 10:</span></span>
-<span><span class="co">##   - Locating ... done</span></span>
-<span><span class="co">##   * Next design point: 0.037399</span></span>
-<span><span class="co">##   - Updating and re-fitting ... done</span></span>
-<span><span class="co">##   - Validating ... done</span></span>
-<span><span class="co">##   * RMSE: 0.007271 0.009417 0.008922</span></span>
-<span><span class="co">##  Target reached! The sequential design stops at step 10.</span></span></code></pre>
-<p>The second emulator reached the target at step 3 and then no further
+<span><span class="co">##  ... </span></span>
+<span><span class="co">##  </span></span>
+<span><span class="co">## Iteration 8:</span></span>
+<span><span class="co">##  - Locating ... done</span></span>
+<span><span class="co">##  * Next design point: 0.164019</span></span>
+<span><span class="co">##  - Updating and re-fitting ... done</span></span>
+<span><span class="co">##  - Validating ... done</span></span>
+<span><span class="co">##  * RMSE: 0.007637 0.005781 0.008318</span></span>
+<span><span class="co">## Target reached! The sequential design stops at step 8.</span></span></code></pre>
+<p>The second emulator reached the target at step 6 and then no further
 refinements of it are performed. The first emulator finally reached the
-target at the final step of the second wave. The sequential designs of
-the three emulators can be plotted with <code><a href="../reference/draw.html">draw()</a></code>:</p>
+target after step 8 of the second wave. The sequential designs of the
+three emulators can be plotted with <code><a href="../reference/draw.html">draw()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1</span>, <span class="st">'design'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">2</span>, <span class="st">'design'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">3</span>, <span class="st">'design'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'bottom'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/seq2_design.png"></p>
 <p>The figure above shows that for the first emulator most of the design
-points are added below <code>0.5</code> whilst for the second emulator
-most of the design points concentrate around <code>0.5</code>. For the
-third emulator, the resulting design is space-filling. It can be seen
-that these design point distributions are consistent with the functional
-complexities of the three outputs.</p>
+points are added below 0.5 whilst for the second emulator most of the
+design points concentrate around 0.5. For the third emulator, the
+resulting design is space-filling. It can be seen that these design
+point distributions are consistent with the functional complexities of
+the three outputs.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-to-dgp-emulators-with-space-filling-designs">Comparison to DGP emulators with space-filling designs<a class="anchor" aria-label="anchor" href="#comparison-to-dgp-emulators-with-space-filling-designs"></a>
