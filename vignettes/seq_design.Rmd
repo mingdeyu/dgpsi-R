@@ -254,6 +254,10 @@ draw(m, 'rmse', log = T) +
 
 It can be seen from the plot above that with static space-filling designs, the quality of an emulator may not be improved as the design size increases. This is because increasing the size of a space-filling design may not capture regions where the simulator exhibits more variations, and thus cause DGP emulators with higher RMSEs than those constructed through the sequential design.
 
+### See also
+
+See [`Sequential Design II`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html) for the sequential design of a bundle of DGP emulators with automatic terminations.
+
 ### References
 
 

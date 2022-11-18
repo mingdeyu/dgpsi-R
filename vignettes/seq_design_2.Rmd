@@ -318,3 +318,7 @@ p1 + p2 + p3 + plot_layout(guides = 'collect') & theme(legend.position = 'bottom
 ![](images/seq2_rmse.png)
 
 It can be seen from the plot above that with the sequential design, emulators in the bundle can achieve higher or similar accuracy with smaller number of design points. 
+
+### See also
+
+See [`Sequential Design I`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) for the sequential design of a DGP emulator on a 2D simulator.
