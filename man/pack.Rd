@@ -58,23 +58,30 @@ lim <- c(0, 1)
 # pack emulators to form an emulator bundle
 m <- pack(m1, m2)
 
-# 1st wave of the sequential design with 10 steps
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+# 1st wave of the sequential design with 10 steps with target RMSE 0.01
+m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, target = 0.01)
 
-# 2nd wave of the sequential design with 10 steps
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
-
-# 3rd wave of the sequential design with 10 steps using the aggregation function that
-# takes the average of the criterion values across the two outputs
+# 2rd wave of the sequential design with 10 steps, the same target, and the aggregation
+# function that takes the average of the criterion scores across the two outputs
 g <- function(x){
-  return(mean(x))
+  return(rowMeans(x))
 }
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, aggregate = g)
+m <- design(m, N=10, limits = lim, f = f, x_test = validate_x,
+                    y_test = validate_y, aggregate = g, target = 0.01)
 
-# draw the design created by the sequential design
-draw(m,'design')
+# draw sequential designs of the two packed emulators
+draw(m, emulator = 1, type = 'design')
+draw(m, emulator = 2, type = 'design')
 
-# inspect the trace of RMSEs during the sequential design
-draw(m,'rmse')
+# inspect the traces of RMSEs of the two packed emulators
+draw(m, emulator = 1, type = 'rmse')
+draw(m, emulator = 2, type = 'rmse')
+
+# unpack the bundle into individual emulators
+m_unpacked <- unpack(m)
+
+# plot OOS validations of individual emulators
+plot(m_unpacked[[1]], x_test = validate_x, y_test = validate_y[,1])
+plot(m_unpacked[[2]], x_test = validate_x, y_test = validate_y[,2])
 }
 }

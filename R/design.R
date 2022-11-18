@@ -26,7 +26,14 @@
 #' @param batch_size an integer or a vector of integers that gives the number of design points (for each simulator output dimension if
 #'     `aggregate = NULL`) to be chosen at each step of the sequential design. If an integer is given, it will be applied to all steps
 #'     of the sequential design. If a vector is given, it must have a length of `N`. Defaults to `1`.
-#' @param f an R function that represents the simulator. See *Note* section below for details on specifications of `f`.
+#' @param f an R function that represents the simulator. `f` needs to be specified with the following basic rules:
+#' * the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.
+#' * the output of the function can either
+#'   - a matrix with rows being different outputs (corresponding to the input design points) and columns being output dimensions. If there is
+#'     only one output dimension, the matrix still needs to be returned with a single column.
+#'   - a list with the first element being the output matrix described above and, optionally, additional named elements which will update values
+#'     of any arguments with the same names passed via `...`. The list output can be useful if some additional arguments of `f` and `aggregate`
+#'     need to be updated after each step of the sequential design.
 #' @param freq a vector of two integers with the first element giving the frequency (in number of steps) to re-fit the
 #'     emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to `c(1, 1)`.
 #' @param x_test a matrix (with each row being an input testing data point and each column being an input dimension) that gives the testing
@@ -40,8 +47,15 @@
 #' Set to `NULL` for the LOO-based emulator validation. Defaults to `NULL`.
 #' @param target a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to `NULL`, in which
 #'     case the sequential design stops after `N` steps. See *Note* section below for further information about `target`.
-#' @param method the criterion used to locate the design points: ALM (`"ALM"`) or MICE (`"MICE"`). See references below.
-#'     Defaults to `"ALM"`.
+#' @param method the criterion used to locate design points. There are two built-in criterion: ALM (`"ALM"`) or MICE (`"MICE"`), see
+#'     references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
+#'     be specified in the following basic form:
+#' * the first argument is an emulator object that can be either an instance of the `gp` class (produced by [gp()]) or `dgp` class (produced by [dgp()]).
+#' * the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
+#'   the matrix gives one design point.
+#' * the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.
+#'
+#' Defaults to `"ALM"`.
 #' @param nugget_s the value of the smoothing nugget term used when `method = "MICE"`. Defaults to `1.0`.
 #' @param verb a bool indicating if the trace information will be printed during the sequential design.
 #'     Defaults to `TRUE`.
@@ -60,9 +74,18 @@
 #' * If `train_N` is a vector, then its size must be `N` even the re-fit frequency specified in `freq` is not one.
 #'
 #' Defaults to `100`.
-#' @param aggregate an R function that aggregates the ALM or MICE criterion across different output dimensions of a DGP emulator, or across outputs of different
-#'     emulators contained in an emulator bundle. See *Note* section below for details on specifications of `aggregate`.
-#' @param ... N/A.
+#' @param aggregate an R function that aggregates scores of the criterion specified by `method` across different output dimensions (if `object` is an instance
+#'     of the `dgp` class) or across different emulators (if `object` is an instance of the `bundle` class). The function should be specified in the
+#'     following basic form:
+#' * the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
+#'   of the matrix equals to:
+#'   - the emulator output dimension if `object` is an instance of the `dgp` class; or
+#'   - the number of emulators contained in `object` if `object` is an instance of the `bundle` class.
+#' * the output should be a vector that gives aggregations of scores at different design points.
+#'
+#' Set to `NULL` to disable the aggregation. Defaults to `NULL`.
+#' @param ... any arguments (with names different from those of arguments used in [design()]) that are used by `f`, `aggregate`, and `method` (if a function is supplied)
+#'     can be passed here. [design()] will pass relevant arguments to `f`, `aggregate`, and `method` based on the names of additional arguments provided.
 #'
 #' @return
 #' An updated `object` is returned with a slot called `design` that contains:
@@ -106,30 +129,12 @@
 #'   or `bundle` class, `target` can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
 #'   single value is provided, it will be used as the RMSE threshold for all output dimensions (if `object` is an instance of the `dgp`) or all emulators
 #'   (if `object` is an instance of the `bundle`).
-#' * `aggregate` can be defined as an R function with either one or two arguments.
-#'   - if `aggregate` has one argument, the argument should be a vector representing values of ALM or MICE criterion across
-#'     - different output dimensions of a DGP emulator; or
-#'     - outputs of different emulators contained an emulator bundle,
-#'     at a design point.
-#'   - if `aggregate` has two arguments, the additional argument should also be a vector that contains parameters that are involved in the criterion
-#'     aggregation. The values of the aggregation parameters should be specified by setting them as the default values of the second argument of
-#'     `aggregate`.
-#' * `f` should be defined as a function with only one argument which is a matrix with each row giving values of an input position to the simulator.
-#'   `f` can return a single or two outputs.
-#'   - if `f` has one output, it should return a matrix with each row being the output from the simulator given the corresponding input.
-#'   - if `f` has two outputs, it should return a list with two slots:
-#'     - the first slot is a matrix that gives values of outputs generated from the simulator.
-#'     - the second slot is a vector that gives values of aggregation parameters that will be used to update the criterion aggregation via `aggregate`
-#'       after each step of the sequential design.
-#'
-#'     In the two-output case, `aggregate` must be provided and defined with two arguments.
 #' * When defining `f` and `aggregate`, it is important to ensure that:
-#'   - the positions of input dimensions (i.e, the order of columns of the input matrix) of `f` are consistent with those of the emulator;
-#'   - the positions of output dimensions (i.e, the order of columns of the output matrix) of `f` are consistent with those of the emulator, or the order
-#'     of emulators placed in `object` if `object` is an instance of the `bundle` class;
-#'   - the positions of elements in the first argument of `aggregate` are consistent with the positions of output dimensions of the emulator, or the
-#'     order of emulators placed in `object` if `object` is an instance of the `bundle` class;
-#'   - the positions of elements in the second output (if defined) of `f` are consistent with the positions of elements in the second argument of `aggregate`.
+#'   - the column order of the first argument of `f` is consistent with the training input used for the emulator;
+#'   - the column order of the output matrix of `f` is consistent with the order of emulator output dimensions (if `object` is an instance of the `dgp` class),
+#'     or the order of emulators placed in `object` (if `object` is an instance of the `bundle` class);
+#'   - the column order of the first argument of `aggregate` is consistent with the order of emulator output dimensions (if `object` is an instance of the
+#'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
 #' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix. Thus, if `x_test` or `y_test` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -260,10 +265,12 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   }
 
   N_acq <- c()
+  add_arg <- list(...)
 
   if ( is.null(x_cand) ) {
     #if candidate set is not given
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
+    fnames <- methods::formalArgs(f)
 
     X <- object$data$X
     Y <- object$data$Y
@@ -299,7 +306,10 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
-        res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
+
+        #res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], ... = ...)
+        arg_list <- list(object = object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
+        res <- do.call( locate, c(arg_list, add_arg) )
         if ( verb ) {
           message(" done")
           if ( batch_size[i]==1 ){
@@ -321,8 +331,21 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         }
 
         N_acq <- c(N_acq, nrow(new_X))
+
         X <- rbind(X, new_X)
-        Y <- rbind(Y, f(new_X))
+        fidx <- fnames %in% names(add_arg)
+        fparam <- add_arg[fnames[fidx]]
+        new_output <- do.call(f, c(list(new_X), fparam))
+
+        if ( is.list(new_output) ){
+          Y <- rbind(Y, new_output[[1]])
+          if ( length(new_output)!=1 ){
+            updated_arg <- new_output[-1]
+            add_arg <- utils::modifyList(add_arg, updated_arg)
+          }
+        } else {
+          Y <- rbind(Y, new_output)
+        }
 
         if ( i %% freq[1]==0 | i==N){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
@@ -434,7 +457,9 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
-        res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
+        #res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], ... = ...)
+        arg_list <- list(object = object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1])
+        res <- do.call( locate, c(arg_list, add_arg) )
         if ( verb ) {
           message(" done")
           if ( batch_size[i]==1 ){
@@ -626,20 +651,13 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   }
 
   N_acq <- c()
+  add_arg <- list(...)
 
   #if candidate set is given
   if ( is.null(x_cand) ) {
 
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
-
-    if ( !is.null(aggregate) ) {
-      g <- function(x){
-        res <- aggregate(x)
-        return(res)
-      }
-    } else {
-      g <- NULL
-    }
+    fnames <- methods::formalArgs(f)
 
     X <- object$data$X
     Y <- object$data$Y
@@ -686,7 +704,9 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
-        res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        #res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        arg_list <- list(object = object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = aggregate)
+        res <- do.call( locate, c(arg_list, add_arg) )
         if ( verb ) {
           message(" done")
           if ( batch_size[i]==1 ){
@@ -725,14 +745,15 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         N_acq <- c(N_acq, nrow(new_X))
 
         X <- rbind(X, new_X)
-        new_output <- f(new_X)
+        fidx <- fnames %in% names(add_arg)
+        fparam <- add_arg[fnames[fidx]]
+        new_output <- do.call(f, c(list(new_X), fparam))
 
         if ( is.list(new_output) ){
           Y <- rbind(Y, new_output[[1]])
-          coeff <- new_output[[2]]
-          g <- function(x){
-            res <- aggregate(x,coeff)
-            return(res)
+          if ( length(new_output)!=1 ){
+            updated_coeff <- new_output[-1]
+            add_arg <- utils::modifyList(add_arg, updated_coeff)
           }
         } else {
           Y <- rbind(Y, new_output)
@@ -795,15 +816,6 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     if ( is.vector(y_cand) ) y_cand <- as.matrix(y_cand)
     if ( nrow(x_cand)!=nrow(y_cand) ) stop("'x_cand' and 'y_cand' have different number of data points.", call. = FALSE)
     if ( n_cand>nrow(x_cand) ) stop("'n_cand' must be smaller than or equal to the size of the candidate set 'x_cand'.", call. = FALSE)
-
-    if ( !is.null(aggregate) ) {
-      g <- function(x){
-        res <- aggregate(x)
-        return(res)
-      }
-    } else {
-      g <- NULL
-    }
 
     X <- object$data$X
     Y <- object$data$Y
@@ -868,7 +880,9 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
-        res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        arg_list <- list(object = object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = aggregate)
+        res <- do.call( locate, c(arg_list, add_arg) )
+        #res <- locate(object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
         if ( verb ) {
           message(" done")
           if ( batch_size[i]==1 ){
@@ -1087,6 +1101,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
 
   #N_acq <- c()
   N_acq_ind <- c()
+  add_arg <- list(...)
 
   n_emulators <- length(object) - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
@@ -1105,15 +1120,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   if ( is.null(x_cand) ) {
 
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
-
-    if ( !is.null(aggregate) ) {
-      g <- function(x){
-        res <- aggregate(x)
-        return(res)
-      }
-    } else {
-      g <- NULL
-    }
+    fnames <- methods::formalArgs(f)
 
     X <- object$data$X
     Y <- object$data$Y
@@ -1157,7 +1164,9 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
-        res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        arg_list <- list(object = object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = aggregate)
+        res <- do.call( locate, c(arg_list, add_arg) )
+        #res <- locate(object, n_cand = n_cand, limits = limits, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
         if ( verb ) {
           message(" done")
           if ( batch_size[i]==1 ){
@@ -1204,13 +1213,14 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           if ( nrow(new_X)==1 ){
             #n_run <- 1
             #N_acq <- c(N_acq, n_run)
-            new_output <- f(new_X)
+            fidx <- fnames %in% names(add_arg)
+            fparam <- add_arg[fnames[fidx]]
+            new_output <- do.call(f, c(list(new_X), fparam))
             if ( is.list(new_output) ){
               new_Y <- new_output[[1]]
-              coeff <- new_output[[2]]
-              g <- function(x){
-                res <- aggregate(x,coeff)
-                return(res)
+              if ( length(new_output)!=1 ){
+                updated_coeff <- new_output[-1]
+                add_arg <- utils::modifyList(add_arg, updated_coeff)
               }
             } else {
               new_Y <- new_output
@@ -1239,18 +1249,19 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             new_X_unique <- rep_new_X[[1]]
             rep_idx <- rep_new_X[[2]] + 1
             #N_acq <- c(N_acq, nrow(new_X_unique))
-            new_output_unique <- f(new_X_unique)
-
+            fidx <- fnames %in% names(add_arg)
+            fparam <- add_arg[fnames[fidx]]
+            new_output_unique <- do.call(f, c(list(new_X_unique), fparam))
             if ( is.list(new_output_unique) ){
               new_Y_unique <- new_output_unique[[1]]
-              coeff <- new_output_unique[[2]]
-              g <- function(x){
-                res <- aggregate(x,coeff)
-                return(res)
+              if ( length(new_output_unique)!=1 ){
+                updated_coeff <- new_output_unique[-1]
+                add_arg <- utils::modifyList(add_arg, updated_coeff)
               }
             } else {
               new_Y_unique <- new_output_unique
             }
+
             new_Y <- new_Y_unique[rep_idx,,drop=F]
 
             temp <- rep(1, n_emulators)
@@ -1284,18 +1295,21 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
             new_X_unique <- rep_new_X[[1]]
             rep_idx <- rep_new_X[[2]] + 1
-            #N_acq <- c(N_acq, nrow(new_X_unique))
-            new_output_unique <- f(new_X_unique)
+
+            fidx <- fnames %in% names(add_arg)
+            fparam <- add_arg[fnames[fidx]]
+            new_output_unique <- do.call(f, c(list(new_X_unique), fparam))
             if ( is.list(new_output_unique) ){
               new_Y_unique <- new_output_unique[[1]]
-              coeff <- new_output_unique[[2]]
-              g <- function(x){
-                res <- aggregate(x,coeff)
-                return(res)
+              if ( length(new_output_unique)!=1 ){
+                updated_coeff <- new_output_unique[-1]
+                add_arg <- utils::modifyList(add_arg, updated_coeff)
               }
             } else {
               new_Y_unique <- new_output_unique
             }
+            #N_acq <- c(N_acq, nrow(new_X_unique))
+
             new_Y <- new_Y_unique[rep_idx,,drop=F]
 
             temp <- rep(batch_size[i], n_emulators)
@@ -1326,13 +1340,15 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               new_X <- rbind(new_X, res[['location']][[paste('position',j,sep="")]])
             }
             #N_acq <- c(N_acq, batch_size[i])
-            new_output <- f(new_X)
+
+            fidx <- fnames %in% names(add_arg)
+            fparam <- add_arg[fnames[fidx]]
+            new_output <- do.call(f, c(list(new_X), fparam))
             if ( is.list(new_output) ){
               new_Y <- new_output[[1]]
-              coeff <- new_output[[2]]
-              g <- function(x){
-                res <- aggregate(x,coeff)
-                return(res)
+              if ( length(new_output)!=1 ){
+                updated_coeff <- new_output[-1]
+                add_arg <- utils::modifyList(add_arg, updated_coeff)
               }
             } else {
               new_Y <- new_output
@@ -1475,15 +1491,6 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     if ( nrow(x_cand)!=nrow(y_cand) ) stop("'x_cand' and 'y_cand' have different number of data points.", call. = FALSE)
     if ( n_cand>nrow(x_cand) ) stop("'n_cand' must be smaller than or equal to the size of the candidate set 'x_cand'.", call. = FALSE)
 
-    if ( !is.null(aggregate) ) {
-      g <- function(x){
-        res <- aggregate(x)
-        return(res)
-      }
-    } else {
-      g <- NULL
-    }
-
     X <- object$data$X
     Y <- object$data$Y
 
@@ -1546,7 +1553,9 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
-        res <- locate(object, x_cand = sub_cand, method = method, batch_size = batch_size[i], nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
+        arg_list <- list(object = object, x_cand = sub_cand, batch_size = batch_size[i], method = method, nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = aggregate)
+        res <- do.call( locate, c(arg_list, add_arg) )
+        #res <- locate(object, x_cand = sub_cand, method = method, batch_size = batch_size[i], nugget_s = nugget_s, verb = FALSE, cores = cores[1], threading = threading, aggregate = g)
         if ( verb ) {
           message(" done")
           if ( batch_size[i]==1 ){
@@ -1557,7 +1566,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
                 if ( is.null(target) ){
                   message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
                 } else {
-                  if ( !isCtarget[j] ){
+                  if ( !istarget[j] ){
                     message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", res$location[j,])), collapse=" "))
                   } else {
                     message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))

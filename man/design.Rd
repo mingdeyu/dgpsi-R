@@ -133,7 +133,18 @@ is used when \code{x_cand = NULL} and \code{y_cand = NULL}. Defaults to \code{NU
 \code{aggregate = NULL}) to be chosen at each step of the sequential design. If an integer is given, it will be applied to all steps
 of the sequential design. If a vector is given, it must have a length of \code{N}. Defaults to \code{1}.}
 
-\item{f}{an R function that represents the simulator. See \emph{Note} section below for details on specifications of \code{f}.}
+\item{f}{an R function that represents the simulator. \code{f} needs to be specified with the following basic rules:
+\itemize{
+\item the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.
+\item the output of the function can either
+\itemize{
+\item a matrix with rows being different outputs (corresponding to the input design points) and columns being output dimensions. If there is
+only one output dimension, the matrix still needs to be returned with a single column.
+\item a list with the first element being the output matrix described above and, optionally, additional named elements which will update values
+of any arguments with the same names passed via \code{...}. The list output can be useful if some additional arguments of \code{f} and \code{aggregate}
+need to be updated after each step of the sequential design.
+}
+}}
 
 \item{freq}{a vector of two integers with the first element giving the frequency (in number of steps) to re-fit the
 emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to \code{c(1, 1)}.}
@@ -154,7 +165,16 @@ Set to \code{NULL} for the LOO-based emulator validation. Defaults to \code{NULL
 \item{target}{a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to \code{NULL}, in which
 case the sequential design stops after \code{N} steps. See \emph{Note} section below for further information about \code{target}.}
 
-\item{method}{the criterion used to locate the design points: ALM (\code{"ALM"}) or MICE (\code{"MICE"}). See references below.
+\item{method}{the criterion used to locate design points. There are two built-in criterion: ALM (\code{"ALM"}) or MICE (\code{"MICE"}), see
+references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
+be specified in the following basic form:
+\itemize{
+\item the first argument is an emulator object that can be either an instance of the \code{gp} class (produced by \code{\link[=gp]{gp()}}) or \code{dgp} class (produced by \code{\link[=dgp]{dgp()}}).
+\item the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
+the matrix gives one design point.
+\item the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.
+}
+
 Defaults to \code{"ALM"}.}
 
 \item{nugget_s}{the value of the smoothing nugget term used when \code{method = "MICE"}. Defaults to \code{1.0}.}
@@ -170,7 +190,8 @@ to \code{NULL}.}
 validations, respectively. If either element is set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
 Defaults to \code{c(1, 1)}.}
 
-\item{...}{N/A.}
+\item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f}, \code{aggregate}, and \code{method} (if a function is supplied)
+can be passed here. \code{\link[=design]{design()}} will pass relevant arguments to \code{f}, \code{aggregate}, and \code{method} based on the names of additional arguments provided.}
 
 \item{threading}{a bool indicating whether to use the multi-threading to accelerate criterion calculations and emulator
 validations if \code{object} is an instance of the \code{dgp} class. Turning this option on could improve the speed of validations when the DGP emulator
@@ -185,8 +206,20 @@ of the sequential design:
 
 Defaults to \code{100}.}
 
-\item{aggregate}{an R function that aggregates the ALM or MICE criterion across different output dimensions of a DGP emulator, or across outputs of different
-emulators contained in an emulator bundle. See \emph{Note} section below for details on specifications of \code{aggregate}.}
+\item{aggregate}{an R function that aggregates scores of the criterion specified by \code{method} across different output dimensions (if \code{object} is an instance
+of the \code{dgp} class) or across different emulators (if \code{object} is an instance of the \code{bundle} class). The function should be specified in the
+following basic form:
+\itemize{
+\item the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
+of the matrix equals to:
+\itemize{
+\item the emulator output dimension if \code{object} is an instance of the \code{dgp} class; or
+\item the number of emulators contained in \code{object} if \code{object} is an instance of the \code{bundle} class.
+}
+\item the output should be a vector that gives aggregations of scores at different design points.
+}
+
+Set to \code{NULL} to disable the aggregation. Defaults to \code{NULL}.}
 }
 \value{
 An updated \code{object} is returned with a slot called \code{design} that contains:
@@ -246,39 +279,13 @@ or different emulators in the bundle.
 or \code{bundle} class, \code{target} can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
 single value is provided, it will be used as the RMSE threshold for all output dimensions (if \code{object} is an instance of the \code{dgp}) or all emulators
 (if \code{object} is an instance of the \code{bundle}).
-\item \code{aggregate} can be defined as an R function with either one or two arguments.
-\itemize{
-\item if \code{aggregate} has one argument, the argument should be a vector representing values of ALM or MICE criterion across
-\itemize{
-\item different output dimensions of a DGP emulator; or
-\item outputs of different emulators contained an emulator bundle,
-at a design point.
-}
-\item if \code{aggregate} has two arguments, the additional argument should also be a vector that contains parameters that are involved in the criterion
-aggregation. The values of the aggregation parameters should be specified by setting them as the default values of the second argument of
-\code{aggregate}.
-}
-\item \code{f} should be defined as a function with only one argument which is a matrix with each row giving values of an input position to the simulator.
-\code{f} can return a single or two outputs.
-\itemize{
-\item if \code{f} has one output, it should return a matrix with each row being the output from the simulator given the corresponding input.
-\item if \code{f} has two outputs, it should return a list with two slots:
-\itemize{
-\item the first slot is a matrix that gives values of outputs generated from the simulator.
-\item the second slot is a vector that gives values of aggregation parameters that will be used to update the criterion aggregation via \code{aggregate}
-after each step of the sequential design.
-}
-
-In the two-output case, \code{aggregate} must be provided and defined with two arguments.
-}
 \item When defining \code{f} and \code{aggregate}, it is important to ensure that:
 \itemize{
-\item the positions of input dimensions (i.e, the order of columns of the input matrix) of \code{f} are consistent with those of the emulator;
-\item the positions of output dimensions (i.e, the order of columns of the output matrix) of \code{f} are consistent with those of the emulator, or the order
-of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
-\item the positions of elements in the first argument of \code{aggregate} are consistent with the positions of output dimensions of the emulator, or the
-order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
-\item the positions of elements in the second output (if defined) of \code{f} are consistent with the positions of elements in the second argument of \code{aggregate}.
+\item the column order of the first argument of \code{f} is consistent with the training input used for the emulator;
+\item the column order of the output matrix of \code{f} is consistent with the order of emulator output dimensions (if \code{object} is an instance of the \code{dgp} class),
+or the order of emulators placed in \code{object} (if \code{object} is an instance of the \code{bundle} class);
+\item the column order of the first argument of \code{aggregate} is consistent with the order of emulator output dimensions (if \code{object} is an instance of the
+\code{dgp} class), or the order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
 }
 \item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
 R matrix. Thus, if \code{x_test} or \code{y_test} is a single testing data point with multiple dimensions, it must be given as a matrix.

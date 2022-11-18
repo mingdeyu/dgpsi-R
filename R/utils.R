@@ -71,24 +71,31 @@ combine <- function(...) {
 #' # pack emulators to form an emulator bundle
 #' m <- pack(m1, m2)
 #'
-#' # 1st wave of the sequential design with 10 steps
-#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+#' # 1st wave of the sequential design with 10 steps with target RMSE 0.01
+#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, target = 0.01)
 #'
-#' # 2nd wave of the sequential design with 10 steps
-#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
-#'
-#' # 3rd wave of the sequential design with 10 steps using the aggregation function that
-#' # takes the average of the criterion values across the two outputs
+#' # 2rd wave of the sequential design with 10 steps, the same target, and the aggregation
+#' # function that takes the average of the criterion scores across the two outputs
 #' g <- function(x){
-#'   return(mean(x))
+#'   return(rowMeans(x))
 #' }
-#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, aggregate = g)
+#' m <- design(m, N=10, limits = lim, f = f, x_test = validate_x,
+#'                     y_test = validate_y, aggregate = g, target = 0.01)
 #'
-#' # draw the design created by the sequential design
-#' draw(m,'design')
+#' # draw sequential designs of the two packed emulators
+#' draw(m, emulator = 1, type = 'design')
+#' draw(m, emulator = 2, type = 'design')
 #'
-#' # inspect the trace of RMSEs during the sequential design
-#' draw(m,'rmse')
+#' # inspect the traces of RMSEs of the two packed emulators
+#' draw(m, emulator = 1, type = 'rmse')
+#' draw(m, emulator = 2, type = 'rmse')
+#'
+#' # unpack the bundle into individual emulators
+#' m_unpacked <- unpack(m)
+#'
+#' # plot OOS validations of individual emulators
+#' plot(m_unpacked[[1]], x_test = validate_x, y_test = validate_y[,1])
+#' plot(m_unpacked[[2]], x_test = validate_x, y_test = validate_y[,2])
 #' }
 #' @md
 #' @export
@@ -116,6 +123,41 @@ pack <- function(...) {
   res[['data']][['X']] <- X_all
   res[['data']][['Y']] <- Y_all
   class(res) <- "bundle"
+  return(res)
+}
+
+
+#' @title Unpack a bundle of (D)GP emulators
+#'
+#' @description This function unpacks a bundle of (D)GP emulators safely so any further manipulations of unpacked individual emulators
+#'     will not impact the ones in the bundle.
+#'
+#' @param object an instance of the class `bundle`.
+#'
+#' @return A named list that contains individual emulators (named `emulator1,...,emulatorS`) packed in `object`,
+#'    where `S` is the number of emulators in `object`.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See pack() for an example.
+#' }
+#' @md
+#' @export
+unpack <- function(object) {
+  if ( !inherits(object,"bundle") ){
+    stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
+  }
+  n_emulators <- length(object) - 1
+  if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
+  res <- list()
+  for ( i in 1:n_emulators ){
+    res[[paste('emulator', i, sep="")]] <- object[[paste('emulator', i, sep="")]]
+    res[[paste('emulator', i, sep="")]]$constructor_obj <- pkg.env$copy$deepcopy(res[[paste('emulator', i, sep="")]]$constructor_obj)
+    res[[paste('emulator', i, sep="")]]$container_obj <- pkg.env$copy$deepcopy(res[[paste('emulator', i, sep="")]]$container_obj)
+    res[[paste('emulator', i, sep="")]]$emulator_obj <- pkg.env$copy$deepcopy(res[[paste('emulator', i, sep="")]]$emulator_obj)
+  }
   return(res)
 }
 

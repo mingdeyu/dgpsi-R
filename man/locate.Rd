@@ -87,7 +87,16 @@ argument is used when \code{x_cand = NULL}. Defaults to \code{NULL}.}
 \item{batch_size}{an integer that gives the number of design points (for each simulator output dimension if \code{aggregate = NULL}) to be chosen.
 Defaults to \code{1}.}
 
-\item{method}{the criterion used to locate the next design point: ALM (\code{"ALM"}) or MICE (\code{"MICE"}). See references below.
+\item{method}{the criterion used to locate the next design point. There are two built-in criterion: ALM (\code{"ALM"}) or MICE (\code{"MICE"}), see
+references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
+be specified in the following basic form:
+\itemize{
+\item the first argument is an emulator object that can be either an instance of the \code{gp} class (produced by \code{\link[=gp]{gp()}}) or \code{dgp} class (produced by \code{\link[=dgp]{dgp()}}).
+\item the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
+the matrix gives one design point.
+\item the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.
+}
+
 Defaults to \code{"ALM"}.}
 
 \item{nugget_s}{the value of the smoothing nugget term used when \code{method = "MICE"}. Defaults to \code{1.0}.}
@@ -98,20 +107,26 @@ Defaults to \code{TRUE}.}
 \item{cores}{the number of cores/workers to be used for the criterion calculation. If set to \code{NULL},
 the number of cores is set to \verb{(max physical cores available - 1)}. Defaults to \code{1}.}
 
-\item{...}{N/A.}
+\item{...}{any arguments (with names different from those of arguments used in \code{\link[=locate]{locate()}}) that are used by \code{aggregate} and \code{method} (if a function is supplied)
+can be passed here. \code{\link[=locate]{locate()}} will pass relevant arguments to \code{aggregate} and \code{method} based on the names of additional arguments provided.}
 
 \item{threading}{a bool indicating whether to use the multi-threading to accelerate the criterion calculation.
 Turning this option on could improve the speed of criterion calculations when the emulator is built with a moderately large number of
 training data points and the Matérn-2.5 kernel.}
 
-\item{aggregate}{an R function with only one argument which is a vector with the length equal to:
+\item{aggregate}{an R function that aggregates scores of the criterion specified by \code{method} across different output dimensions (if \code{object} is an instance
+of the \code{dgp} class) or across different emulators (if \code{object} is an instance of the \code{bundle} class). The function should be specified in the
+following basic form:
+\itemize{
+\item the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
+of the matrix equals to:
 \itemize{
 \item the emulator output dimension if \code{object} is an instance of the \code{dgp} class; or
 \item the number of emulators contained in \code{object} if \code{object} is an instance of the \code{bundle} class.
 }
+\item the output should be a vector that gives aggregations of scores at different design points.
+}
 
-The vector represents values of the ALM or MICE criterion across different output dimensions at a design point in the candidate set. The
-output of \code{aggregate} should be a single value that gives an aggregation of the ALM or MICE criterion across different output dimensions.
 Set to \code{NULL} to disable the aggregation. Defaults to \code{NULL}.}
 }
 \value{

@@ -19,8 +19,15 @@
 #'     argument is used when `x_cand = NULL`. Defaults to `NULL`.
 #' @param batch_size an integer that gives the number of design points (for each simulator output dimension if `aggregate = NULL`) to be chosen.
 #'     Defaults to `1`.
-#' @param method the criterion used to locate the next design point: ALM (`"ALM"`) or MICE (`"MICE"`). See references below.
-#'     Defaults to `"ALM"`.
+#' @param method the criterion used to locate the next design point. There are two built-in criterion: ALM (`"ALM"`) or MICE (`"MICE"`), see
+#'     references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
+#'     be specified in the following basic form:
+#' * the first argument is an emulator object that can be either an instance of the `gp` class (produced by [gp()]) or `dgp` class (produced by [dgp()]).
+#' * the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
+#'   the matrix gives one design point.
+#' * the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.
+#'
+#' Defaults to `"ALM"`.
 #' @param nugget_s the value of the smoothing nugget term used when `method = "MICE"`. Defaults to `1.0`.
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
@@ -29,14 +36,18 @@
 #' @param threading a bool indicating whether to use the multi-threading to accelerate the criterion calculation.
 #'     Turning this option on could improve the speed of criterion calculations when the emulator is built with a moderately large number of
 #'     training data points and the Matérn-2.5 kernel.
-#' @param aggregate an R function with only one argument which is a vector with the length equal to:
-#' * the emulator output dimension if `object` is an instance of the `dgp` class; or
-#' * the number of emulators contained in `object` if `object` is an instance of the `bundle` class.
+#' @param aggregate an R function that aggregates scores of the criterion specified by `method` across different output dimensions (if `object` is an instance
+#'     of the `dgp` class) or across different emulators (if `object` is an instance of the `bundle` class). The function should be specified in the
+#'     following basic form:
+#' * the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
+#'   of the matrix equals to:
+#'   - the emulator output dimension if `object` is an instance of the `dgp` class; or
+#'   - the number of emulators contained in `object` if `object` is an instance of the `bundle` class.
+#' * the output should be a vector that gives aggregations of scores at different design points.
 #'
-#' The vector represents values of the ALM or MICE criterion across different output dimensions at a design point in the candidate set. The
-#'     output of `aggregate` should be a single value that gives an aggregation of the ALM or MICE criterion across different output dimensions.
-#'     Set to `NULL` to disable the aggregation. Defaults to `NULL`.
-#' @param ... N/A.
+#' Set to `NULL` to disable the aggregation. Defaults to `NULL`.
+#' @param ... any arguments (with names different from those of arguments used in [locate()]) that are used by `aggregate` and `method` (if a function is supplied)
+#'     can be passed here. [locate()] will pass relevant arguments to `aggregate` and `method` based on the names of additional arguments provided.
 #'
 #' @return
 #' * If `object` is an instance of the `gp` class, a list is returned:
@@ -199,36 +210,75 @@ locate.gp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch_
         x_cand[,i] <- x_cand[,i]*(limits[i,2]-limits[i,1]) + limits[i,1]
       }
     }
-    if ( identical(cores,as.integer(1)) ){
-      res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+
+    if ( is.function(method) ){
+      fnames <- methods::formalArgs(method)
+      add.arg <- list(...)
+      fidx <- fnames %in% names(add.arg)
+      fparam <- add.arg[fnames[fidx]]
+      res <- do.call(method, c(list(object), list(x_cand), fparam))
+      dat <- list()
+      if ( batch_size==1 ){
+        idx <- which.max(res)
+        dat[['location']] <- x_cand[idx,,drop=FALSE]
+      } else {
+        idx <- order(res, decreasing=TRUE)[1:batch_size]
+        for (j in 1:batch_size){
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j],,drop=FALSE]
+        }
+      }
     } else {
-      res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
-    }
-    dat <- list()
-    if ( batch_size==1 ){
-      dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
-    } else {
-      for (j in 1:batch_size){
-        dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j]+1,,drop=FALSE]
+      if ( identical(cores,as.integer(1)) ){
+        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+      } else {
+        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
+      }
+      dat <- list()
+      if ( batch_size==1 ){
+        dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+      } else {
+        for (j in 1:batch_size){
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j]+1,,drop=FALSE]
+        }
       }
     }
   } else {
     if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
     if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
-    if ( identical(cores,as.integer(1)) ){
-      res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+    if ( is.function(method) ){
+      fnames <- methods::formalArgs(method)
+      add.arg <- list(...)
+      fidx <- fnames %in% names(add.arg)
+      fparam <- add.arg[fnames[fidx]]
+      res <- do.call(method, c(list(object), list(x_cand), fparam))
+      dat <- list()
+      if ( batch_size==1 ){
+        idx <- which.max(res)
+        dat[['index']] <- idx
+        dat[['location']] <- x_cand[idx,,drop=FALSE]
+      } else {
+        idx <- order(res, decreasing=TRUE)[1:batch_size]
+        for (j in 1:batch_size){
+          dat[['index']][[paste('position', j, sep="")]] <- idx[j]
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j],,drop=FALSE]
+        }
+      }
     } else {
-      res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
-    }
-    dat <- list()
-    if ( batch_size==1 ){
-      dat[['index']] <- res[[1]]+1
-      dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
-    } else {
-      for (j in 1:batch_size){
-        dat[['index']][[paste('position', j, sep="")]] <- res[[1]][j]+1
-        dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j]+1,,drop=FALSE]
+      if ( identical(cores,as.integer(1)) ){
+        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+      } else {
+        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
+      }
+      dat <- list()
+      if ( batch_size==1 ){
+        dat[['index']] <- res[[1]]+1
+        dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+      } else {
+        for (j in 1:batch_size){
+          dat[['index']][[paste('position', j, sep="")]] <- res[[1]][j]+1
+          dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j]+1,,drop=FALSE]
+        }
       }
     }
   }
@@ -315,26 +365,55 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch
     }
 
     if ( is.null(aggregate) ){
-      if ( identical(cores,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+      if ( is.function(method) ){
+        fnames <- methods::formalArgs(method)
+        add.arg <- list(...)
+        fidx <- fnames %in% names(add.arg)
+        fparam <- add.arg[fnames[idx]]
+        res <- do.call(method, c(list(object), list(x_cand), fparam))
+        dat <- list()
+        if ( batch_size==1 ){
+          idx <- pkg.env$np$argmax(res, axis=0L) + 1
+          dat[['location']] <- x_cand[idx,,drop=FALSE]
+        } else {
+          idx <- pkg.env$np$argsort(-res, axis=0L)[1:batch_size,] + 1
+          for (j in 1:batch_size){
+            dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j,],,drop=FALSE]
+          }
+        }
       } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
-      }
-      dat <- list()
-      if ( batch_size==1 ){
-        dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
-      } else {
-        for (j in 1:batch_size){
-          dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j,]+1,,drop=FALSE]
+        if ( identical(cores,as.integer(1)) ){
+          res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+        } else {
+          res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
+        }
+        dat <- list()
+        if ( batch_size==1 ){
+          dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+        } else {
+          for (j in 1:batch_size){
+            dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j,]+1,,drop=FALSE]
+          }
         }
       }
     } else {
-      if ( identical(cores,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
+      add.arg <- list(...)
+      if ( is.function(method) ){
+        fnames <- methods::formalArgs(method)
+        fidx <- fnames %in% names(add.arg)
+        fparam <- add.arg[fnames[fidx]]
+        res <- do.call(method, c(list(object), list(x_cand), fparam))
       } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
+        if ( identical(cores,as.integer(1)) ){
+          res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
+        } else {
+          res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
+        }
       }
-      agg_scores <- apply(res, 1, aggregate)
+      gnames <- methods::formalArgs(aggregate)
+      gidx <- gnames %in% names(add.arg)
+      gparam <- add.arg[gnames[gidx]]
+      agg_scores <- do.call(aggregate, c(list(res), gparam))
       dat <- list()
       if ( batch_size==1 ){
         idx <- which.max(agg_scores)
@@ -351,28 +430,59 @@ locate.dgp <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, batch
     if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
     if ( is.null(aggregate) ){
-      if ( identical(cores,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+      if ( is.function(method) ){
+        fnames <- methods::formalArgs(method)
+        add.arg <- list(...)
+        fidx <- fnames %in% names(add.arg)
+        fparam <- add.arg[fnames[fidx]]
+        res <- do.call(method, c(list(object), list(x_cand), fparam))
+        dat <- list()
+        if ( batch_size==1 ){
+          idx <- pkg.env$np$argmax(res, axis=0L) + 1
+          dat[['index']] <- idx
+          dat[['location']] <- x_cand[idx,,drop=FALSE]
+        } else {
+          idx <- pkg.env$np$argsort(-res, axis=0L)[1:batch_size,] + 1
+          for (j in 1:batch_size){
+            dat[['index']][[paste('position', j, sep="")]] <- idx[j,]
+            dat[['location']][[paste('position', j, sep="")]] <- x_cand[idx[j,],,drop=FALSE]
+          }
+        }
       } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
-      }
-      dat <- list()
-      if ( batch_size==1 ){
-        dat[['index']] <- res[[1]]+1
-        dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
-      } else {
-        for (j in 1:batch_size){
-          dat[['index']][[paste('position', j, sep="")]] <- res[[1]][j,]+1
-          dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j,]+1,,drop=FALSE]
+        if ( identical(cores,as.integer(1)) ){
+          res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+        } else {
+          res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
+        }
+        dat <- list()
+        if ( batch_size==1 ){
+          dat[['index']] <- res[[1]]+1
+          dat[['location']] <- x_cand[res[[1]]+1,,drop=FALSE]
+        } else {
+          for (j in 1:batch_size){
+            dat[['index']][[paste('position', j, sep="")]] <- res[[1]][j,]+1
+            dat[['location']][[paste('position', j, sep="")]] <- x_cand[res[[1]][j,]+1,,drop=FALSE]
+          }
         }
       }
     } else {
-      if ( identical(cores,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
+      add.arg <- list(...)
+      if ( is.function(method) ){
+        fnames <- methods::formalArgs(method)
+        fidx <- fnames %in% names(add.arg)
+        fparam <- add.arg[fnames[fidx]]
+        res <- do.call(method, c(list(object), list(x_cand), fparam))
       } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
+        if ( identical(cores,as.integer(1)) ){
+          res = object$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
+        } else {
+          res = object$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
+        }
       }
-      agg_scores <- apply(res, 1, aggregate)
+      gnames <- methods::formalArgs(aggregate)
+      gidx <- gnames %in% names(add.arg)
+      gparam <- add.arg[gnames[gidx]]
+      agg_scores <- do.call(aggregate, c(list(res), gparam))
       dat <- list()
       if ( batch_size==1 ){
         idx <- which.max(agg_scores)
@@ -471,12 +581,20 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, ba
   }
 
   if ( is.null(aggregate) ) {
-    if ( batch_size==1 ){
-      location <- c()
-      if ( !x_cand_null ) indice <- c()
+    if ( is.function(method) ){
+      score <- c()
+      if ( batch_size!=1 ) {
+        location <- list()
+        if ( !x_cand_null ) indice <- list()
+      }
     } else {
-      location <- list()
-      if ( !x_cand_null ) indice <- list()
+      if ( batch_size==1 ){
+        location <- c()
+        if ( !x_cand_null ) indice <- c()
+      } else {
+        location <- list()
+        if ( !x_cand_null ) indice <- list()
+      }
     }
   } else {
     score <- c()
@@ -488,53 +606,75 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, ba
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
   for ( i in 1:n_emulators ){
     obj_i <- object[[paste('emulator',i,sep='')]]
-    if ( inherits(obj_i,"gp") ){
-      if ( is.null(aggregate) ){
-        res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
-        if ( batch_size==1 ){
-          location <- rbind(location, x_cand[res[[1]]+1,])
-          if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
-        } else {
-          for ( j in 1:batch_size ){
-            location[[paste('position',j,sep="")]] <- rbind(location[[paste('position',j,sep="")]], x_cand[res[[1]][j]+1,])
-            if ( !x_cand_null ) indice[[paste('position',j,sep="")]] <- c(indice[[paste('position',j,sep="")]], res[[1]][j]+1)
-          }
-        }
-      } else {
-        res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
-        score <- cbind(score, res)
-      }
-    } else if ( inherits(obj_i,"dgp") ){
-      obj_i$emulator_obj$set_nb_parallel(threading)
-      #locate next design point
-      if ( is.null(aggregate) ){
-        if ( identical(cores,as.integer(1)) ){
+    if ( is.function(method) ){
+      fnames <- methods::formalArgs(method)
+      add.arg <- list(...)
+      fidx <- fnames %in% names(add.arg)
+      fparam <- add.arg[fnames[fidx]]
+      res <- do.call(method, c(list(object), list(x_cand), fparam))
+      score <- cbind(score, res)
+    } else {
+      if ( inherits(obj_i,"gp") ){
+        if ( is.null(aggregate) ){
           res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
-        } else {
-          res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
-        }
-        if ( batch_size==1 ){
-          location <- rbind(location, x_cand[res[[1]]+1,,drop=FALSE])
-          if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
-        } else {
-          for ( j in 1:batch_size ){
-            location[[paste('position',j,sep="")]] <- rbind(location[[paste('position',j,sep="")]], x_cand[res[[1]][j]+1,,drop=FALSE])
-            if ( !x_cand_null ) indice[[paste('position',j,sep="")]] <- c(indice[[paste('position',j,sep="")]], res[[1]][j]+1)
+          if ( batch_size==1 ){
+            location <- rbind(location, x_cand[res[[1]]+1,])
+            if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
+          } else {
+            for ( j in 1:batch_size ){
+              location[[paste('position',j,sep="")]] <- rbind(location[[paste('position',j,sep="")]], x_cand[res[[1]][j]+1,])
+              if ( !x_cand_null ) indice[[paste('position',j,sep="")]] <- c(indice[[paste('position',j,sep="")]], res[[1]][j]+1)
+            }
           }
-        }
-      } else {
-        if ( identical(cores,as.integer(1)) ){
-          res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
         } else {
-          res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
+          res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
+          score <- cbind(score, res)
         }
-        score <- cbind(score, res)
+      } else if ( inherits(obj_i,"dgp") ){
+        obj_i$emulator_obj$set_nb_parallel(threading)
+        #locate next design point
+        if ( is.null(aggregate) ){
+          if ( identical(cores,as.integer(1)) ){
+            res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size)
+          } else {
+            res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, batch_size = batch_size, core_num = cores)
+          }
+          if ( batch_size==1 ){
+            location <- rbind(location, x_cand[res[[1]]+1,,drop=FALSE])
+            if ( !x_cand_null ) indice <- c(indice, res[[1]]+1)
+          } else {
+            for ( j in 1:batch_size ){
+              location[[paste('position',j,sep="")]] <- rbind(location[[paste('position',j,sep="")]], x_cand[res[[1]][j]+1,,drop=FALSE])
+              if ( !x_cand_null ) indice[[paste('position',j,sep="")]] <- c(indice[[paste('position',j,sep="")]], res[[1]][j]+1)
+            }
+          }
+        } else {
+          if ( identical(cores,as.integer(1)) ){
+            res = obj_i$emulator_obj$metric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE)
+          } else {
+            res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = method, nugget_s = nugget_s, score_only = TRUE, core_num = cores)
+          }
+          score <- cbind(score, res)
+        }
       }
     }
   }
   if ( isTRUE(verb) ) message(" done")
 
   if ( is.null(aggregate) ) {
+    if ( is.function(method) ){
+      if ( batch_size==1 ){
+        indice <- pkg.env$np$argmax(score, axis=0L) + 1
+        location <- x_cand[indice,,drop=FALSE]
+      } else {
+        idx <- pkg.env$np$argsort(-score, axis=0L)[1:batch_size,] + 1
+        for (j in 1:batch_size){
+          if ( !x_cand_null ) indice[[paste('position', j, sep="")]] <- idx[j,]
+          location[[paste('position', j, sep="")]] <- x_cand[idx[j,],,drop=FALSE]
+        }
+      }
+    }
+
     if ( batch_size==1 ){
       if ( isTRUE(verb) ) {
         message(paste(c("The next design point(s):")))
@@ -554,13 +694,19 @@ locate.bundle <- function(object, x_cand = NULL, n_cand = 200, limits = NULL, ba
         }
       }
     }
+
     if ( x_cand_null ) {
       dat <- list('location' = location)
     } else {
       dat <- list('idx' = indice, 'location' = location)
     }
   } else {
-    agg_scores <- apply(score, 1, aggregate)
+    add.arg <- list(...)
+    gnames <- methods::formalArgs(aggregate)
+    gidx <- gnames %in% names(add.arg)
+    gparam <- add.arg[gnames[gidx]]
+    agg_scores <- do.call(aggregate, c(list(score), gparam))
+
     dat <- list()
     if ( batch_size==1 ){
       idx <- which.max(agg_scores)

@@ -28,7 +28,8 @@ Imports:
     ggforce,
     reshape2,
     patchwork,
-    lhs
+    lhs,
+    methods
 Suggests:
     knitr,
     rmarkdown,

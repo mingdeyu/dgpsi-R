@@ -80,6 +80,7 @@ reference:
   - update
   - draw
   - pack
+  - unpack
 
 - title: "Helpers"
   contents:
