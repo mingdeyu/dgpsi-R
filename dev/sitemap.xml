@@ -19,6 +19,9 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/authors.html</loc>
   </url>
   <url>
@@ -95,6 +98,9 @@
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/trace_plot.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/unpack.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/update.html</loc>

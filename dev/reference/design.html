@@ -30,7 +30,8 @@
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
 </a>
     <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
-    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design</a>
+    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a>
+    <a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a>
   </div>
 </li>
 <li class="nav-item">
@@ -75,6 +76,7 @@
 <span>  <span class="va">freq</span>,</span>
 <span>  <span class="va">x_test</span>,</span>
 <span>  <span class="va">y_test</span>,</span>
+<span>  <span class="va">target</span>,</span>
 <span>  <span class="va">method</span>,</span>
 <span>  <span class="va">nugget_s</span>,</span>
 <span>  <span class="va">verb</span>,</span>
@@ -96,6 +98,7 @@
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ALM"</span>,</span>
 <span>  nugget_s <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -117,6 +120,7 @@
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ALM"</span>,</span>
 <span>  nugget_s <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -141,6 +145,7 @@
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ALM"</span>,</span>
 <span>  nugget_s <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -199,7 +204,14 @@ of the sequential design. If a vector is given, it must have a length of <code>N
 
 
 <dt>f</dt>
-<dd><p>an R function that represents the simulator. See <em>Note</em> section below for details on specifications of <code>f</code>.</p></dd>
+<dd><p>an R function that represents the simulator. <code>f</code> needs to be specified with the following basic rules:</p><ul><li><p>the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.</p></li>
+<li><p>the output of the function can either</p><ul><li><p>a matrix with rows being different outputs (corresponding to the input design points) and columns being output dimensions. If there is
+only one output dimension, the matrix still needs to be returned with a single column.</p></li>
+<li><p>a list with the first element being the output matrix described above and, optionally, additional named elements which will update values
+of any arguments with the same names passed via <code>...</code>. The list output can be useful if some additional arguments of <code>f</code> and <code>aggregate</code>
+need to be updated after each step of the sequential design.</p></li>
+</ul></li>
+</ul></dd>
 
 
 <dt>freq</dt>
@@ -220,9 +232,19 @@ output dimensions.</p></li>
 </ul><p>Set to <code>NULL</code> for the LOO-based emulator validation. Defaults to <code>NULL</code>.</p></dd>
 
 
+<dt>target</dt>
+<dd><p>a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to <code>NULL</code>, in which
+case the sequential design stops after <code>N</code> steps. See <em>Note</em> section below for further information about <code>target</code>.</p></dd>
+
+
 <dt>method</dt>
-<dd><p>the criterion used to locate the design points: ALM (<code>"ALM"</code>) or MICE (<code>"MICE"</code>). See references below.
-Defaults to <code>"ALM"</code>.</p></dd>
+<dd><p>the criterion used to locate design points. There are two built-in criterion: ALM (<code>"ALM"</code>) or MICE (<code>"MICE"</code>), see
+references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
+be specified in the following basic form:</p><ul><li><p>the first argument is an emulator object that can be either an instance of the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>) or <code>dgp</code> class (produced by <code><a href="dgp.html">dgp()</a></code>).</p></li>
+<li><p>the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
+the matrix gives one design point.</p></li>
+<li><p>the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.</p></li>
+</ul><p>Defaults to <code>"ALM"</code>.</p></dd>
 
 
 <dt>nugget_s</dt>
@@ -247,7 +269,8 @@ Defaults to <code>c(1, 1)</code>.</p></dd>
 
 
 <dt>...</dt>
-<dd><p>N/A.</p></dd>
+<dd><p>any arguments (with names different from those of arguments used in <code>design()</code>) that are used by <code>f</code>, <code>aggregate</code>, and <code>method</code> (if a function is supplied)
+can be passed here. <code>design()</code> will pass relevant arguments to <code>f</code>, <code>aggregate</code>, and <code>method</code> based on the names of additional arguments provided.</p></dd>
 
 
 <dt>threading</dt>
@@ -264,8 +287,14 @@ of the sequential design:</p><ul><li><p>If <code>train_N</code> is an integer, t
 
 
 <dt>aggregate</dt>
-<dd><p>an R function that aggregates the ALM or MICE criterion across different output dimensions of a DGP emulator, or across outputs of different
-emulators contained in an emulator bundle. See <em>Note</em> section below for details on specifications of <code>aggregate</code>.</p></dd>
+<dd><p>an R function that aggregates scores of the criterion specified by <code>method</code> across different output dimensions (if <code>object</code> is an instance
+of the <code>dgp</code> class) or across different emulators (if <code>object</code> is an instance of the <code>bundle</code> class). The function should be specified in the
+following basic form:</p><ul><li><p>the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
+of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>object</code> is an instance of the <code>dgp</code> class; or</p></li>
+<li><p>the number of emulators contained in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class.</p></li>
+</ul></li>
+<li><p>the output should be a vector that gives aggregations of scores at different design points.</p></li>
+</ul><p>Set to <code>NULL</code> to disable the aggregation. Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -279,7 +308,12 @@ Each slot contains the following elements:</p><ul><li><p><code>N</code>, an inte
 <li><p><code>aggregation</code>, a bool that indicates if the aggregation is applied (i.e., if <code>aggregate</code> is supplied) to locate the design points for a DGP
 emulator or a bundle of (D)GP emulators during the corresponding wave.</p></li>
 <li><p><code>batch_size</code>, a vector of size <code>N</code> that contains the information given by the argument <code>batch_size</code>.</p></li>
-<li><p><code>enrichment</code>, a vector of size <code>N</code> that gives the number of new design points added after each step of the sequential design.</p></li>
+<li><p><code>enrichment</code>, a vector of size <code>N</code> that gives the number of new design points added after each step of the sequential design (if <code>object</code> is
+an instance of the <code>gp</code> or <code>dgp</code> class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
+the sequential design (if <code>object</code> is an instance of the <code>bundle</code> class).</p></li>
+</ul><p>If <code>target</code> is not <code>NULL</code>, the following additional elements are also included:</p><ul><li><p><code>target</code>, the target RMSE(s) to stop the sequential design.</p></li>
+<li><p><code>reached</code>, a bool (if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class) or a vector of bools (if <code>object</code> is an instance of the <code>bundle</code>
+class) that indicate if the target RMSEs are reached at the end of the sequential design.</p></li>
 </ul></li>
 <li><p>a slot called <code>type</code> that gives the type of validations, either LOO (<code>loo</code>) or OOS (<code>oos</code>) used to calculate the RMSEs of emulators constructed
 in the sequential design. See <code><a href="validate.html">validate()</a></code> for more information about LOO and OOS.</p></li>
@@ -300,31 +334,20 @@ the sequential design. See <code><a href="validate.html">validate()</a></code> f
 <li><p>If <code>object</code> has previously been used by <code>design()</code> for sequential designs, the information of the current wave of the sequential design will replace
 those of old waves and be contained in the returned object, unless the following conditions are met:</p><ul><li><p>the validation type (LOO or OOS) of the current wave of the sequential design is the same as the validation types in previous waves, and</p></li>
 <li><p>if the validation type is OOS, <code>x_test</code> and <code>y_test</code> in the current wave of the sequential design are identical to those in the previous waves.</p></li>
-</ul><p>When the above conditions are met, the information (<code>N</code> and <code>rmse</code>) of the current wave of the sequential design will be added to
+</ul><p>When the above conditions are met, the information of the current wave of the sequential design will be added to
 the <code>design</code> slot of the returned object under the name <code>waveS</code>.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>gp</code> class, the matrix in the <code>rmse</code> slot is single-columned. If <code>object</code> is an instance of
-the <code>dgp</code> class, the matrix in the <code>rmse</code> slot can have multiple columns that correspond to different output dimensions.</p></li>
-<li><p><code>aggregate</code> can be defined as an R function with either one or two arguments.</p><ul><li><p>if <code>aggregate</code> has one argument, the argument should be a vector representing values of ALM or MICE criterion across</p><ul><li><p>different output dimensions of a DGP emulator; or</p></li>
-<li><p>outputs of different emulators contained an emulator bundle,
-at a design point.</p></li>
-</ul></li>
-<li><p>if <code>aggregate</code> has two arguments, the additional argument should also be a vector that contains parameters that are involved in the criterion
-aggregation. The values of the aggregation parameters should be specified by setting them as the default values of the second argument of
-<code>aggregate</code>.</p></li>
-</ul></li>
-<li><p><code>f</code> should be defined as a function with only one argument which is a matrix with each row giving values of an input position to the simulator.
-<code>f</code> can return a single or two outputs.</p><ul><li><p>if <code>f</code> has one output, it should return a matrix with each row being the output from the simulator given the corresponding input.</p></li>
-<li><p>if <code>f</code> has two outputs, it should return a list with two slots:</p><ul><li><p>the first slot is a matrix that gives values of outputs generated from the simulator.</p></li>
-<li><p>the second slot is a vector that gives values of aggregation parameters that will be used to update the criterion aggregation via <code>aggregate</code>
-after each step of the sequential design.</p></li>
-</ul><p>In the two-output case, <code>aggregate</code> must be provided and defined with two arguments.</p></li>
-</ul></li>
-<li><p>When defining <code>f</code> and <code>aggregate</code>, it is important to ensure that:</p><ul><li><p>the positions of input dimensions (i.e, the order of columns of the input matrix) of <code>f</code> are consistent with those of the emulator;</p></li>
-<li><p>the positions of output dimensions (i.e, the order of columns of the output matrix) of <code>f</code> are consistent with those of the emulator, or the order
-of emulators placed in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class;</p></li>
-<li><p>the positions of elements in the first argument of <code>aggregate</code> are consistent with the positions of output dimensions of the emulator, or the
-order of emulators placed in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class;</p></li>
-<li><p>the positions of elements in the second output (if defined) of <code>f</code> are consistent with the positions of elements in the second argument of <code>aggregate</code>.</p></li>
+the <code>dgp</code> or <code>bundle</code> class, the matrix in the <code>rmse</code> slot can have multiple columns that correspond to different output dimensions
+or different emulators in the bundle.</p></li>
+<li><p>If <code>object</code> is an instance of the <code>gp</code> class, <code>target</code> needs to be a single value giving the RMSE threshold. If <code>object</code> is an instance of the <code>dgp</code>
+or <code>bundle</code> class, <code>target</code> can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
+single value is provided, it will be used as the RMSE threshold for all output dimensions (if <code>object</code> is an instance of the <code>dgp</code>) or all emulators
+(if <code>object</code> is an instance of the <code>bundle</code>).</p></li>
+<li><p>When defining <code>f</code> and <code>aggregate</code>, it is important to ensure that:</p><ul><li><p>the column order of the first argument of <code>f</code> is consistent with the training input used for the emulator;</p></li>
+<li><p>the column order of the output matrix of <code>f</code> is consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the <code>dgp</code> class),
+or the order of emulators placed in <code>object</code> (if <code>object</code> is an instance of the <code>bundle</code> class);</p></li>
+<li><p>the column order of the first argument of <code>aggregate</code> is consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the
+<code>dgp</code> class), or the order of emulators placed in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class;</p></li>
 </ul></li>
 <li><p>Any R vector detected in <code>x_test</code> and <code>y_test</code> will be treated as a column vector and automatically converted into a single-column
 R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testing data point with multiple dimensions, it must be given as a matrix.</p></li>

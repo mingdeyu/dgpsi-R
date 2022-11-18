@@ -32,7 +32,8 @@
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
 </a>
     <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
-    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design</a>
+    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a>
+    <a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a>
   </div>
 </li>
 <li class="nav-item">
@@ -160,8 +161,13 @@ Defaults to <code>1</code>.</p></dd>
 
 
 <dt>method</dt>
-<dd><p>the criterion used to locate the next design point: ALM (<code>"ALM"</code>) or MICE (<code>"MICE"</code>). See references below.
-Defaults to <code>"ALM"</code>.</p></dd>
+<dd><p>the criterion used to locate the next design point. There are two built-in criterion: ALM (<code>"ALM"</code>) or MICE (<code>"MICE"</code>), see
+references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
+be specified in the following basic form:</p><ul><li><p>the first argument is an emulator object that can be either an instance of the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>) or <code>dgp</code> class (produced by <code><a href="dgp.html">dgp()</a></code>).</p></li>
+<li><p>the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
+the matrix gives one design point.</p></li>
+<li><p>the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.</p></li>
+</ul><p>Defaults to <code>"ALM"</code>.</p></dd>
 
 
 <dt>nugget_s</dt>
@@ -179,7 +185,8 @@ the number of cores is set to <code>(max physical cores available - 1)</code>. D
 
 
 <dt>...</dt>
-<dd><p>N/A.</p></dd>
+<dd><p>any arguments (with names different from those of arguments used in <code>locate()</code>) that are used by <code>aggregate</code> and <code>method</code> (if a function is supplied)
+can be passed here. <code>locate()</code> will pass relevant arguments to <code>aggregate</code> and <code>method</code> based on the names of additional arguments provided.</p></dd>
 
 
 <dt>threading</dt>
@@ -189,11 +196,14 @@ training data points and the Matérn-2.5 kernel.</p></dd>
 
 
 <dt>aggregate</dt>
-<dd><p>an R function with only one argument which is a vector with the length equal to:</p><ul><li><p>the emulator output dimension if <code>object</code> is an instance of the <code>dgp</code> class; or</p></li>
+<dd><p>an R function that aggregates scores of the criterion specified by <code>method</code> across different output dimensions (if <code>object</code> is an instance
+of the <code>dgp</code> class) or across different emulators (if <code>object</code> is an instance of the <code>bundle</code> class). The function should be specified in the
+following basic form:</p><ul><li><p>the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
+of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>object</code> is an instance of the <code>dgp</code> class; or</p></li>
 <li><p>the number of emulators contained in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class.</p></li>
-</ul><p>The vector represents values of the ALM or MICE criterion across different output dimensions at a design point in the candidate set. The
-output of <code>aggregate</code> should be a single value that gives an aggregation of the ALM or MICE criterion across different output dimensions.
-Set to <code>NULL</code> to disable the aggregation. Defaults to <code>NULL</code>.</p></dd>
+</ul></li>
+<li><p>the output should be a vector that gives aggregations of scores at different design points.</p></li>
+</ul><p>Set to <code>NULL</code> to disable the aggregation. Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

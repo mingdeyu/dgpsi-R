@@ -32,7 +32,8 @@ sequential designs if each emulator emulates one output dimension of the underly
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
 </a>
     <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
-    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design</a>
+    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a>
+    <a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a>
   </div>
 </li>
 <li class="nav-item">
@@ -80,8 +81,9 @@ sequential designs if each emulator emulates one output dimension of the underly
     
 
 <p>An S3 class named <code>bundle</code> to be used by <code><a href="design.html">design()</a></code> for sequential designs. It has:</p><ul><li><p><em>N</em> slots, each of which contains a GP or DGP emulator, where <em>N</em> is the number of emulators that are provided to the function.</p></li>
-<li><p>a slot called <code>data</code> which is a list that contains two elements <code>X</code> and <code>Y</code>. <code>X</code> is the training input data that is common to all
-emulators, and <code>Y</code> is a matrix with each column corresponding to the training output data of an emulator.</p></li>
+<li><p>a slot called <code>data</code> which contains two elements <code>X</code> and <code>Y</code>. <code>X</code> contains <em>N</em> matrices named <code>emulator1,...,emulatorN</code> that are
+training input data for different emulators. <code>Y</code> contains <em>N</em> single-column matrices named <code>emulator1,...,emulatorN</code> that are
+training output data for different emulators.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -122,24 +124,31 @@ emulators, and <code>Y</code> is a matrix with each column corresponding to the 
 <span class="r-in"><span><span class="co"># pack emulators to form an emulator bundle</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">pack</span><span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># 1st wave of the sequential design with 10 steps</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># 1st wave of the sequential design with 10 steps with target RMSE 0.01</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, target <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># 2nd wave of the sequential design with 10 steps</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># 3rd wave of the sequential design with 10 steps using the aggregation function that</span></span></span>
-<span class="r-in"><span><span class="co"># takes the average of the criterion values across the two outputs</span></span></span>
+<span class="r-in"><span><span class="co"># 2rd wave of the sequential design with 10 steps, the same target, and the aggregation</span></span></span>
+<span class="r-in"><span><span class="co"># function that takes the average of the criterion scores across the two outputs</span></span></span>
 <span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, aggregate <span class="op">=</span> <span class="va">g</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>,</span></span>
+<span class="r-in"><span>                    y_test <span class="op">=</span> <span class="va">validate_y</span>, aggregate <span class="op">=</span> <span class="va">g</span>, target <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># draw the design created by the sequential design</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>,<span class="st">'design'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># draw sequential designs of the two packed emulators</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">'design'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">'design'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># inspect the trace of RMSEs during the sequential design</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>,<span class="st">'rmse'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># inspect the traces of RMSEs of the two packed emulators</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">'rmse'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">'rmse'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># unpack the bundle into individual emulators</span></span></span>
+<span class="r-in"><span><span class="va">m_unpacked</span> <span class="op">&lt;-</span> <span class="fu"><a href="unpack.html">unpack</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># plot OOS validations of individual emulators</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span><span class="va">m_unpacked</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span><span class="va">m_unpacked</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
