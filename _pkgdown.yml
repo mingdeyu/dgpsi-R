@@ -40,7 +40,7 @@ articles:
   desc: Sequential design for a bundle of DGP emulators with the stopping rule.
   navbar: ~
   contents:
-  - seq_design2
+  - seq_design_2
 
 reference:
 - title: "Initalization"

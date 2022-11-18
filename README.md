@@ -31,7 +31,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 
 ## Getting started
 * Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
-* Check [Sequential Design](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) to have a taste of this new feature available in our development version.
+* Check [Sequential Design I](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) and [Sequential Design II](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html) to have a taste of this new feature available in our development version.
 
 ## Installation
 You can install the package from CRAN:
