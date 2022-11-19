@@ -63,23 +63,24 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
     no_dgpsi <- inherits(tryCatch(reticulate::conda_python(envname = env_name, conda = conda_path), error = identity), "error")
     if (no_dgpsi){
       if (any(grepl('^dgp_si_R', reticulate::conda_list(conda = conda_path)$name))){
-        conda_list <- reticulate::conda_list(conda = conda_path)$name
-        dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
-        cat("I found Python environment(s) for other versions of the package.")
-        ans <- readline(prompt="Do you want me to remove them? (Y/N) ")
-        if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
-          message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
-          for (item in dgpsi_list) {
-            reticulate::conda_remove(envname = item, conda = conda_path)
-          }
-          message("Done.")
-        }
+        #conda_list <- reticulate::conda_list(conda = conda_path)$name
+        #dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
+        #cat("I found Python environment(s) for other versions of the package.")
+        #ans <- readline(prompt="Do you want me to remove them? (Y/N) ")
+        #if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
+        #  message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
+        #  for (item in dgpsi_list) {
+        #    reticulate::conda_remove(envname = item, conda = conda_path)
+        #  }
+        #  message("Done.")
+        #}
         install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
         restart <- TRUE
       } else {
-        ans <- readline(prompt="Is this your first time installing the package? (Y/N) ")
+        ans <- readline(prompt="Is this your first time using the package? (Y/N) ")
         if ( tolower(ans)=='n'|tolower(ans)=='no' ){
-              message("I am unable to find the required Python environment. It may be because your conda binary has changed. I am re-setting it for you now ...")
+              message("I am unable to find the required Python environment. It may be because your conda binary has changed.")
+              cat("I am re-setting it for you now ...")
               install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
               restart <- TRUE
               } else {
