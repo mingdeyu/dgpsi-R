@@ -105,7 +105,7 @@ design(
 \item the S3 class \code{bundle}.
 }}
 
-\item{N}{the number of steps for the sequential design, i.e., the number of design points to be added to the emulator \code{object}.}
+\item{N}{the number of steps for the sequential design.}
 
 \item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
 in which the next design point is determined. If \code{x_cand = NULL}, the candidate set will be generated using \code{n_cand} and

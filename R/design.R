@@ -6,7 +6,7 @@
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param N the number of steps for the sequential design, i.e., the number of design points to be added to the emulator `object`.
+#' @param N the number of steps for the sequential design.
 #' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
 #'     in which the next design point is determined. If `x_cand = NULL`, the candidate set will be generated using `n_cand` and
 #'     `limits`. Defaults to `NULL`.
