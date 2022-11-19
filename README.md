@@ -65,13 +65,27 @@ to install and activate the required Python environment. That's it, the package 
 > /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found
 > ```
 >
-> during the execution of `init_py()`, please try to reinstall the python environment:
+> during the execution of `init_py()`, please try the following steps to resolve the issue.
 >
-> ```r
-> init_py(reinstall = T)
+> 1. Remove the package (skip this step if you installed the development version):
+> 
+> ```{r}
+> remove.packages('dgpsi')
 > ```
 > 
-> and restart the R.
+> 2. Install the development version (skip this step if you installed the development version):
+> 
+> ```r
+> devtools::install_github('mingdeyu/dgpsi-R')
+> ```
+> 
+> 3. Reinstall the python environment:
+>
+> ```r
+> dgpsi::init_py(reinstall = T)
+> ```
+> 
+> 4. Restart the R.
 
 ## References
 > [Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i>. 0(0), 1-12.](https://doi.org/10.1080/00401706.2022.2124311)
