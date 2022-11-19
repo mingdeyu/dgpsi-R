@@ -199,7 +199,7 @@ weight <- c(0.8, 0.2, 0)
 We now pass both the aggregate function `g()` and its `weight` argument to `design()` for the second wave of the sequential design with a further 15 steps:
 
 ```{r}
-# 2nd wave with 10 steps
+# 2nd wave with 15 steps
 m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = validate_y, aggregate = g, target = 0.01, weight = weight)
 ```
 ```
