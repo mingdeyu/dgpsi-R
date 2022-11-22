@@ -40,6 +40,9 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/Poisson.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/combine.html</loc>
   </url>
   <url>
@@ -70,7 +73,7 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/lgp.html</loc>
   </url>
   <url>
-    <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/locate.html</loc>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/mice.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/nllik.html</loc>

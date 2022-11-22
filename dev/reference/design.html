@@ -71,14 +71,12 @@
 <span>  <span class="va">y_cand</span>,</span>
 <span>  <span class="va">n_cand</span>,</span>
 <span>  <span class="va">limits</span>,</span>
-<span>  <span class="va">batch_size</span>,</span>
 <span>  <span class="va">f</span>,</span>
 <span>  <span class="va">freq</span>,</span>
 <span>  <span class="va">x_test</span>,</span>
 <span>  <span class="va">y_test</span>,</span>
 <span>  <span class="va">target</span>,</span>
 <span>  <span class="va">method</span>,</span>
-<span>  <span class="va">nugget_s</span>,</span>
 <span>  <span class="va">verb</span>,</span>
 <span>  <span class="va">check_point</span>,</span>
 <span>  <span class="va">cores</span>,</span>
@@ -93,17 +91,15 @@
 <span>  y_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cand <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"ALM"</span>,</span>
-<span>  nugget_s <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  method <span class="op">=</span> <span class="va">alm</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -115,20 +111,16 @@
 <span>  y_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cand <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"ALM"</span>,</span>
-<span>  nugget_s <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  method <span class="op">=</span> <span class="va">alm</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  threading <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  aggregate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -140,20 +132,16 @@
 <span>  y_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cand <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"ALM"</span>,</span>
-<span>  nugget_s <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  method <span class="op">=</span> <span class="va">alm</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  threading <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  aggregate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -197,12 +185,6 @@ dimensions, and its first and second columns correspond to the minimum and maxim
 is used when <code>x_cand = NULL</code> and <code>y_cand = NULL</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
-<dt>batch_size</dt>
-<dd><p>an integer or a vector of integers that gives the number of design points (for each simulator output dimension if
-<code>aggregate = NULL</code>) to be chosen at each step of the sequential design. If an integer is given, it will be applied to all steps
-of the sequential design. If a vector is given, it must have a length of <code>N</code>. Defaults to <code>1</code>.</p></dd>
-
-
 <dt>f</dt>
 <dd><p>an R function that represents the simulator. <code>f</code> needs to be specified with the following basic rules:</p><ul><li><p>the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.</p></li>
 <li><p>the output of the function can either</p><ul><li><p>a matrix with rows being different outputs (corresponding to the input design points) and columns being output dimensions. If there is
@@ -238,17 +220,20 @@ case the sequential design stops after <code>N</code> steps. See <em>Note</em> s
 
 
 <dt>method</dt>
-<dd><p>the criterion used to locate design points. There are two built-in criterion: ALM (<code>"ALM"</code>) or MICE (<code>"MICE"</code>), see
-references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
-be specified in the following basic form:</p><ul><li><p>the first argument is an emulator object that can be either an instance of the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>) or <code>dgp</code> class (produced by <code><a href="dgp.html">dgp()</a></code>).</p></li>
-<li><p>the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
-the matrix gives one design point.</p></li>
-<li><p>the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.</p></li>
-</ul><p>Defaults to <code>"ALM"</code>.</p></dd>
-
-
-<dt>nugget_s</dt>
-<dd><p>the value of the smoothing nugget term used when <code>method = "MICE"</code>. Defaults to <code>1.0</code>.</p></dd>
+<dd><p>an R function that give indices of designs points in a candidate set. The function must satisfy in the following basic form:</p><ul><li><p>the first argument is an emulator object that can be either an instance of</p><ul><li><p>the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>);</p></li>
+<li><p>the <code>dgp</code> class (produced by <code><a href="dgp.html">dgp()</a></code>);</p></li>
+<li><p>the <code>bundle</code> class (produced by <code><a href="pack.html">pack()</a></code>).</p></li>
+</ul></li>
+<li><p>the second argument is a matrix with rows representing a set of different design points.</p></li>
+<li><p>the output of the function</p><ul><li><p>is a vector of indices if the first argument is an instance of the <code>gp</code> class;</p></li>
+<li><p>is a matrix of indices if the first argument is an instance of the <code>dgp</code> class. If there are different design points to be added with
+respect to different outputs of the DGP emulator, the column number of the matrix should equal to the number of the outputs. If design
+points are common to all outputs of the DGP emulator, the matrix should be single-columned. If more than one design points are determined
+for a given output or for all outputs, the indices of these design points are placed in the matrix with extra rows.</p></li>
+<li><p>is a matrix of indices if the first argument is an instance of the <code>bundle</code> class. Each row of the matrix gives the indices of the design
+points to be added to individual emulators in the bundle.</p></li>
+</ul></li>
+</ul><p>See <code><a href="alm.html">alm()</a></code> and <code><a href="mice.html">mice()</a></code> for examples on customizing <code>method</code>. Defaults to <code><a href="alm.html">alm()</a></code>.</p></dd>
 
 
 <dt>verb</dt>
@@ -263,20 +248,13 @@ to <code>NULL</code>.</p></dd>
 
 
 <dt>cores</dt>
-<dd><p>a vector of two integers that gives the number of cores/workers to be used for criterion calculations and emulator
-validations, respectively. If either element is set to <code>NULL</code>, the number of cores is set to <code>(max physical cores available - 1)</code>.
-Defaults to <code>c(1, 1)</code>.</p></dd>
+<dd><p>an integers that gives the number of cores to be used for emulator validations. If set to <code>NULL</code>, the number of cores is
+set to <code>(max physical cores available - 1)</code>. Defaults to <code>1</code>.</p></dd>
 
 
 <dt>...</dt>
-<dd><p>any arguments (with names different from those of arguments used in <code>design()</code>) that are used by <code>f</code>, <code>aggregate</code>, and <code>method</code> (if a function is supplied)
-can be passed here. <code>design()</code> will pass relevant arguments to <code>f</code>, <code>aggregate</code>, and <code>method</code> based on the names of additional arguments provided.</p></dd>
-
-
-<dt>threading</dt>
-<dd><p>a bool indicating whether to use the multi-threading to accelerate criterion calculations and emulator
-validations if <code>object</code> is an instance of the <code>dgp</code> class. Turning this option on could improve the speed of validations when the DGP emulator
-is built with a moderately large number of training data points and the Matérn-2.5 kernel.</p></dd>
+<dd><p>any arguments (with names different from those of arguments used in <code>design()</code>) that are used by <code>f</code> and <code>method</code>
+can be passed here. <code>design()</code> will pass relevant arguments to <code>f</code> and <code>method</code> based on the names of additional arguments provided.</p></dd>
 
 
 <dt>train_N</dt>
@@ -284,17 +262,6 @@ is built with a moderately large number of training data points and the Matérn-
 of the sequential design:</p><ul><li><p>If <code>train_N</code> is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in <code>freq</code>) with <code>train_N</code> iterations.</p></li>
 <li><p>If <code>train_N</code> is a vector, then its size must be <code>N</code> even the re-fit frequency specified in <code>freq</code> is not one.</p></li>
 </ul><p>Defaults to <code>100</code>.</p></dd>
-
-
-<dt>aggregate</dt>
-<dd><p>an R function that aggregates scores of the criterion specified by <code>method</code> across different output dimensions (if <code>object</code> is an instance
-of the <code>dgp</code> class) or across different emulators (if <code>object</code> is an instance of the <code>bundle</code> class). The function should be specified in the
-following basic form:</p><ul><li><p>the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
-of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>object</code> is an instance of the <code>dgp</code> class; or</p></li>
-<li><p>the number of emulators contained in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class.</p></li>
-</ul></li>
-<li><p>the output should be a vector that gives aggregations of scores at different design points.</p></li>
-</ul><p>Set to <code>NULL</code> to disable the aggregation. Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -305,9 +272,6 @@ of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>ob
 Each slot contains the following elements:</p><ul><li><p><code>N</code>, an integer that gives the numbers of steps implemented in the corresponding wave;</p></li>
 <li><p><code>rmse</code>, a matrix that gives the RMSEs of emulators constructed during the corresponding wave;</p></li>
 <li><p><code>freq</code>, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.</p></li>
-<li><p><code>aggregation</code>, a bool that indicates if the aggregation is applied (i.e., if <code>aggregate</code> is supplied) to locate the design points for a DGP
-emulator or a bundle of (D)GP emulators during the corresponding wave.</p></li>
-<li><p><code>batch_size</code>, a vector of size <code>N</code> that contains the information given by the argument <code>batch_size</code>.</p></li>
 <li><p><code>enrichment</code>, a vector of size <code>N</code> that gives the number of new design points added after each step of the sequential design (if <code>object</code> is
 an instance of the <code>gp</code> or <code>dgp</code> class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
 the sequential design (if <code>object</code> is an instance of the <code>bundle</code> class).</p></li>
@@ -343,21 +307,13 @@ or different emulators in the bundle.</p></li>
 or <code>bundle</code> class, <code>target</code> can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
 single value is provided, it will be used as the RMSE threshold for all output dimensions (if <code>object</code> is an instance of the <code>dgp</code>) or all emulators
 (if <code>object</code> is an instance of the <code>bundle</code>).</p></li>
-<li><p>When defining <code>f</code> and <code>aggregate</code>, it is important to ensure that:</p><ul><li><p>the column order of the first argument of <code>f</code> is consistent with the training input used for the emulator;</p></li>
+<li><p>When defining <code>f</code>, it is important to ensure that:</p><ul><li><p>the column order of the first argument of <code>f</code> is consistent with the training input used for the emulator;</p></li>
 <li><p>the column order of the output matrix of <code>f</code> is consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the <code>dgp</code> class),
-or the order of emulators placed in <code>object</code> (if <code>object</code> is an instance of the <code>bundle</code> class);</p></li>
-<li><p>the column order of the first argument of <code>aggregate</code> is consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the
-<code>dgp</code> class), or the order of emulators placed in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class;</p></li>
+or the order of emulators placed in <code>object</code> (if <code>object</code> is an instance of the <code>bundle</code> class).</p></li>
 </ul></li>
 <li><p>Any R vector detected in <code>x_test</code> and <code>y_test</code> will be treated as a column vector and automatically converted into a single-column
 R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testing data point with multiple dimensions, it must be given as a matrix.</p></li>
 </ul></div>
-    <div class="section level2">
-    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>MacKay, D. J. (1992). Information-based objective functions for active data selection. <em>Neural Computation</em>, <strong>4(4)</strong>, 590-604.</p>
-<p>Beck, J., &amp; Guillas, S. (2016). Sequential design with mutual information for computer experiments (MICE): emulation of a tsunami model.
-<em>SIAM/ASA Journal on Uncertainty Quantification</em>, <strong>4(1)</strong>, 739-766.</p>
-    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
