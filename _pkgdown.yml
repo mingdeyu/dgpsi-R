@@ -76,7 +76,8 @@ reference:
     Functions to implement sequential designs for (D)GP and bundleS of (D)GP emulators.
   contents:
   - design
-  - locate
+  - alm
+  - mice
   - update
   - draw
   - pack
