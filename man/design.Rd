@@ -14,14 +14,12 @@ design(
   y_cand,
   n_cand,
   limits,
-  batch_size,
   f,
   freq,
   x_test,
   y_test,
   target,
   method,
-  nugget_s,
   verb,
   check_point,
   cores,
@@ -35,17 +33,15 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
-  batch_size = 1,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
   target = NULL,
-  method = "ALM",
-  nugget_s = 1,
+  method = alm,
   verb = TRUE,
   check_point = NULL,
-  cores = c(1, 1),
+  cores = 1,
   ...
 )
 
@@ -56,20 +52,16 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
-  batch_size = 1,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
   target = NULL,
-  method = "ALM",
-  nugget_s = 1,
+  method = alm,
   verb = TRUE,
   check_point = NULL,
-  cores = c(1, 1),
-  threading = FALSE,
+  cores = 1,
   train_N = 100,
-  aggregate = NULL,
   ...
 )
 
@@ -80,20 +72,16 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
-  batch_size = 1,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
   target = NULL,
-  method = "ALM",
-  nugget_s = 1,
+  method = alm,
   verb = TRUE,
   check_point = NULL,
-  cores = c(1, 1),
-  threading = FALSE,
+  cores = 1,
   train_N = 100,
-  aggregate = NULL,
   ...
 )
 }
@@ -129,10 +117,6 @@ dimensions, and its first and second columns correspond to the minimum and maxim
 \code{limits = NULL}, the ranges of input dimensions will be determined from the training data contained in \code{object}. This argument
 is used when \code{x_cand = NULL} and \code{y_cand = NULL}. Defaults to \code{NULL}.}
 
-\item{batch_size}{an integer or a vector of integers that gives the number of design points (for each simulator output dimension if
-\code{aggregate = NULL}) to be chosen at each step of the sequential design. If an integer is given, it will be applied to all steps
-of the sequential design. If a vector is given, it must have a length of \code{N}. Defaults to \code{1}.}
-
 \item{f}{an R function that represents the simulator. \code{f} needs to be specified with the following basic rules:
 \itemize{
 \item the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.
@@ -165,19 +149,28 @@ Set to \code{NULL} for the LOO-based emulator validation. Defaults to \code{NULL
 \item{target}{a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to \code{NULL}, in which
 case the sequential design stops after \code{N} steps. See \emph{Note} section below for further information about \code{target}.}
 
-\item{method}{the criterion used to locate design points. There are two built-in criterion: ALM (\code{"ALM"}) or MICE (\code{"MICE"}), see
-references below. A customized criterion can also be used by supplying an R function to this argument. If a function is provided, it must
-be specified in the following basic form:
+\item{method}{an R function that give indices of designs points in a candidate set. The function must satisfy in the following basic form:
 \itemize{
-\item the first argument is an emulator object that can be either an instance of the \code{gp} class (produced by \code{\link[=gp]{gp()}}) or \code{dgp} class (produced by \code{\link[=dgp]{dgp()}}).
-\item the second argument is a matrix that represents a set of design points at which the scores of the criterion are calculated. Each row of
-the matrix gives one design point.
-\item the output is a matrix with rows corresponding to different design points and columns corresponding to different output dimensions.
+\item the first argument is an emulator object that can be either an instance of
+\itemize{
+\item the \code{gp} class (produced by \code{\link[=gp]{gp()}});
+\item the \code{dgp} class (produced by \code{\link[=dgp]{dgp()}});
+\item the \code{bundle} class (produced by \code{\link[=pack]{pack()}}).
+}
+\item the second argument is a matrix with rows representing a set of different design points.
+\item the output of the function
+\itemize{
+\item is a vector of indices if the first argument is an instance of the \code{gp} class;
+\item is a matrix of indices if the first argument is an instance of the \code{dgp} class. If there are different design points to be added with
+respect to different outputs of the DGP emulator, the column number of the matrix should equal to the number of the outputs. If design
+points are common to all outputs of the DGP emulator, the matrix should be single-columned. If more than one design points are determined
+for a given output or for all outputs, the indices of these design points are placed in the matrix with extra rows.
+\item is a matrix of indices if the first argument is an instance of the \code{bundle} class. Each row of the matrix gives the indices of the design
+points to be added to individual emulators in the bundle.
+}
 }
 
-Defaults to \code{"ALM"}.}
-
-\item{nugget_s}{the value of the smoothing nugget term used when \code{method = "MICE"}. Defaults to \code{1.0}.}
+See \code{\link[=alm]{alm()}} and \code{\link[=mice]{mice()}} for examples on customizing \code{method}. Defaults to \code{\link[=alm]{alm()}}.}
 
 \item{verb}{a bool indicating if the trace information will be printed during the sequential design.
 Defaults to \code{TRUE}.}
@@ -186,16 +179,11 @@ Defaults to \code{TRUE}.}
 from the user if the sequential design should continue or be terminated. Set to \code{NULL} to suspend the manual intervention. Defaults
 to \code{NULL}.}
 
-\item{cores}{a vector of two integers that gives the number of cores/workers to be used for criterion calculations and emulator
-validations, respectively. If either element is set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
-Defaults to \code{c(1, 1)}.}
+\item{cores}{an integers that gives the number of cores to be used for emulator validations. If set to \code{NULL}, the number of cores is
+set to \verb{(max physical cores available - 1)}. Defaults to \code{1}.}
 
-\item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f}, \code{aggregate}, and \code{method} (if a function is supplied)
-can be passed here. \code{\link[=design]{design()}} will pass relevant arguments to \code{f}, \code{aggregate}, and \code{method} based on the names of additional arguments provided.}
-
-\item{threading}{a bool indicating whether to use the multi-threading to accelerate criterion calculations and emulator
-validations if \code{object} is an instance of the \code{dgp} class. Turning this option on could improve the speed of validations when the DGP emulator
-is built with a moderately large number of training data points and the Matérn-2.5 kernel.}
+\item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f} and \code{method}
+can be passed here. \code{\link[=design]{design()}} will pass relevant arguments to \code{f} and \code{method} based on the names of additional arguments provided.}
 
 \item{train_N}{an integer or a vector of integers that gives the number of training iterations to be used to re-fit the DGP emulator at each step
 of the sequential design:
@@ -205,21 +193,6 @@ of the sequential design:
 }
 
 Defaults to \code{100}.}
-
-\item{aggregate}{an R function that aggregates scores of the criterion specified by \code{method} across different output dimensions (if \code{object} is an instance
-of the \code{dgp} class) or across different emulators (if \code{object} is an instance of the \code{bundle} class). The function should be specified in the
-following basic form:
-\itemize{
-\item the first argument is a matrix representing scores. The rows of the matrix correspond to different design points in the candidate set. The number of columns
-of the matrix equals to:
-\itemize{
-\item the emulator output dimension if \code{object} is an instance of the \code{dgp} class; or
-\item the number of emulators contained in \code{object} if \code{object} is an instance of the \code{bundle} class.
-}
-\item the output should be a vector that gives aggregations of scores at different design points.
-}
-
-Set to \code{NULL} to disable the aggregation. Defaults to \code{NULL}.}
 }
 \value{
 An updated \code{object} is returned with a slot called \code{design} that contains:
@@ -230,9 +203,6 @@ Each slot contains the following elements:
 \item \code{N}, an integer that gives the numbers of steps implemented in the corresponding wave;
 \item \code{rmse}, a matrix that gives the RMSEs of emulators constructed during the corresponding wave;
 \item \code{freq}, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.
-\item \code{aggregation}, a bool that indicates if the aggregation is applied (i.e., if \code{aggregate} is supplied) to locate the design points for a DGP
-emulator or a bundle of (D)GP emulators during the corresponding wave.
-\item \code{batch_size}, a vector of size \code{N} that contains the information given by the argument \code{batch_size}.
 \item \code{enrichment}, a vector of size \code{N} that gives the number of new design points added after each step of the sequential design (if \code{object} is
 an instance of the \code{gp} or \code{dgp} class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
 the sequential design (if \code{object} is an instance of the \code{bundle} class).
@@ -279,13 +249,11 @@ or different emulators in the bundle.
 or \code{bundle} class, \code{target} can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
 single value is provided, it will be used as the RMSE threshold for all output dimensions (if \code{object} is an instance of the \code{dgp}) or all emulators
 (if \code{object} is an instance of the \code{bundle}).
-\item When defining \code{f} and \code{aggregate}, it is important to ensure that:
+\item When defining \code{f}, it is important to ensure that:
 \itemize{
 \item the column order of the first argument of \code{f} is consistent with the training input used for the emulator;
 \item the column order of the output matrix of \code{f} is consistent with the order of emulator output dimensions (if \code{object} is an instance of the \code{dgp} class),
-or the order of emulators placed in \code{object} (if \code{object} is an instance of the \code{bundle} class);
-\item the column order of the first argument of \code{aggregate} is consistent with the order of emulator output dimensions (if \code{object} is an instance of the
-\code{dgp} class), or the order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
+or the order of emulators placed in \code{object} (if \code{object} is an instance of the \code{bundle} class).
 }
 \item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
 R matrix. Thus, if \code{x_test} or \code{y_test} is a single testing data point with multiple dimensions, it must be given as a matrix.
@@ -341,10 +309,4 @@ m_faster <- set_imp(m, 10)
 # plot the OOS validation with the faster DGP emulator
 plot(m_faster, x_test = validate_x, y_test = validate_y)
 }
-}
-\references{
-MacKay, D. J. (1992). Information-based objective functions for active data selection. \emph{Neural Computation}, \strong{4(4)}, 590-604.
-
-Beck, J., & Guillas, S. (2016). Sequential design with mutual information for computer experiments (MICE): emulation of a tsunami model.
-\emph{SIAM/ASA Journal on Uncertainty Quantification}, \strong{4(1)}, 739-766.
 }

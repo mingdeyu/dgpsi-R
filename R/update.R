@@ -55,7 +55,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, ess_bu
   N <- as.integer(N)
   ess_burn <- as.integer(ess_burn)
   if ( is.null(B) ){
-    B <- as.integer(length(object$emulator$all_layer_set))
+    B <- as.integer(length(object$emulator_obj$all_layer_set))
   } else {
     B <- as.integer(B)
   }
