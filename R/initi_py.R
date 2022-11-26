@@ -136,6 +136,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*accelerate"') , conda = conda_path)
   } else if (grepl("Intel",benchmarkme::get_cpu()$model_name)){
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"') , conda = conda_path)
+    reticulate::conda_install(envname = env_name, packages = c('icc_rt') , channel = c("numba"), conda = conda_path)
   } else {
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
   }
@@ -151,8 +152,8 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
     system(paste("sudo rm",libstdc_sys_path))
     system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
-    message("Installation finished. Please restart R.")
   }
+  message("Installation finished. Please restart R.")
 }
 
 with_warning_handler <- function(...)

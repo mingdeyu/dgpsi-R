@@ -9,8 +9,9 @@ set_imp(object, B = 10)
 \arguments{
 \item{object}{an instance of the S3 class \code{dgp}.}
 
-\item{B}{the number of imputations to produce predictions from \code{object}.
-Defaults to \code{10} for faster predictions.}
+\item{B}{the number of imputations to produce predictions from \code{object}. Increase the value to account for
+more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
+but faster predictions. Defaults to \code{10}.}
 }
 \value{
 An updated \code{object} with the information of \code{B} incorporated.

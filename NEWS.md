@@ -6,7 +6,8 @@
 - Training data are now contained in the S3 classes `gp` and `dgp`.
 - The RMSEs (without the min-max normalization) of emulators are now contained in the S3 classes `gp`, `dgp`, and `lgp` after the execution of `validate()`.
 - The min-max normalization can now be switched off in `plot()` by setting the value of `min_max`.
-- A new function `set_imp()` is made available to change the number of imputations of a trained DGP emulator so one can make faster predictions by reducing the number of imputations without re-training the emulator.
+- The default number of imputations `B` for `dgp()` is changed from `50` to `30` to better balance the uncertainty and the speed of DGP emulator predictions. A new function `set_imp()` is made available to change the number of imputations of a trained DGP emulator so one can either achieve faster predictions by further reducing the number of imputations, or account for more imputation uncertainties by increasing the number of imputations, without re-training the emulator.
+- The speed of predictions from DGP emulators with squared exponential kernels is significantly improved and is roughly 3x faster than the implementations in version `2.1.5`. 
 - The implementation of sequential designs (with a vignette) is made available.
 
 # dgpsi 2.1.5

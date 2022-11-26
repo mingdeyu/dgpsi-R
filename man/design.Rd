@@ -14,6 +14,7 @@ design(
   y_cand,
   n_cand,
   limits,
+  int,
   f,
   freq,
   x_test,
@@ -33,6 +34,7 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  int = FALSE,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
@@ -52,6 +54,7 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  int = FALSE,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
@@ -72,6 +75,7 @@ design(
   y_cand = NULL,
   n_cand = 200,
   limits = NULL,
+  int = FALSE,
   f = NULL,
   freq = c(1, 1),
   x_test = NULL,
@@ -96,8 +100,8 @@ design(
 \item{N}{the number of steps for the sequential design.}
 
 \item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-in which the next design point is determined. If \code{x_cand = NULL}, the candidate set will be generated using \code{n_cand} and
-\code{limits}. Defaults to \code{NULL}.}
+in which the next design point is determined. If \code{x_cand = NULL}, the candidate set will be generated using \code{n_cand},
+\code{limits}, and \code{int}. Defaults to \code{NULL}.}
 
 \item{y_cand}{a matrix (with each row being a simulator evaluation and column being an output dimension) that gives the realizations
 from the simulator at input positions in \code{x_cand}. Defaults to \code{NULL}.}
@@ -116,6 +120,10 @@ input dimension. If a vector is provided, it will be converted to a two-column r
 dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
 \code{limits = NULL}, the ranges of input dimensions will be determined from the training data contained in \code{object}. This argument
 is used when \code{x_cand = NULL} and \code{y_cand = NULL}. Defaults to \code{NULL}.}
+
+\item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a bool is given, it will be applied to
+all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
+input dimensions. Defaults to \code{FALSE}.}
 
 \item{f}{an R function that represents the simulator. \code{f} needs to be specified with the following basic rules:
 \itemize{

@@ -297,8 +297,9 @@ set_linked_idx <- function(object, idx) {
 #' @description This function resets the number of imputations for predictions from a DGP emulator.
 #'
 #' @param object an instance of the S3 class `dgp`.
-#' @param B the number of imputations to produce predictions from `object`.
-#'     Defaults to `10` for faster predictions.
+#' @param B the number of imputations to produce predictions from `object`. Increase the value to account for
+#'     more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
+#'     but faster predictions. Defaults to `10`.
 #'
 #' @return An updated `object` with the information of `B` incorporated.
 #'
