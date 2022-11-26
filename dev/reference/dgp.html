@@ -86,7 +86,7 @@
 <span>  N <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  burnin <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  B <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  B <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -222,8 +222,8 @@ are used. Defaults to <code>NULL</code>. This argument is only used when <code>t
 
 <dt>B</dt>
 <dd><p>the number of imputations to produce the later predictions. Increase the value to account for
-more imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
-Defaults to <code>50</code>.</p></dd>
+more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties but faster predictions.
+Defaults to <code>30</code>.</p></dd>
 
 
 <dt>internal_input_idx</dt>

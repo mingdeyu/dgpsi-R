@@ -71,6 +71,7 @@
 <span>  <span class="va">y_cand</span>,</span>
 <span>  <span class="va">n_cand</span>,</span>
 <span>  <span class="va">limits</span>,</span>
+<span>  <span class="va">int</span>,</span>
 <span>  <span class="va">f</span>,</span>
 <span>  <span class="va">freq</span>,</span>
 <span>  <span class="va">x_test</span>,</span>
@@ -91,6 +92,7 @@
 <span>  y_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cand <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -111,6 +113,7 @@
 <span>  y_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cand <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -132,6 +135,7 @@
 <span>  y_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cand <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -161,8 +165,8 @@
 
 <dt>x_cand</dt>
 <dd><p>a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-in which the next design point is determined. If <code>x_cand = NULL</code>, the candidate set will be generated using <code>n_cand</code> and
-<code>limits</code>. Defaults to <code>NULL</code>.</p></dd>
+in which the next design point is determined. If <code>x_cand = NULL</code>, the candidate set will be generated using <code>n_cand</code>,
+<code>limits</code>, and <code>int</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>y_cand</dt>
@@ -183,6 +187,12 @@ input dimension. If a vector is provided, it will be converted to a two-column r
 dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
 <code>limits = NULL</code>, the ranges of input dimensions will be determined from the training data contained in <code>object</code>. This argument
 is used when <code>x_cand = NULL</code> and <code>y_cand = NULL</code>. Defaults to <code>NULL</code>.</p></dd>
+
+
+<dt>int</dt>
+<dd><p>a bool or a vector of bools that indicates if an input dimension is an integer type. If a bool is given, it will be applied to
+all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
+input dimensions. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt>f</dt>

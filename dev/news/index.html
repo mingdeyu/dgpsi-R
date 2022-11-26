@@ -66,7 +66,8 @@
 <li>Training data are now contained in the S3 classes <code>gp</code> and <code>dgp</code>.</li>
 <li>The RMSEs (without the min-max normalization) of emulators are now contained in the S3 classes <code>gp</code>, <code>dgp</code>, and <code>lgp</code> after the execution of <code><a href="../reference/validate.html">validate()</a></code>.</li>
 <li>The min-max normalization can now be switched off in <code><a href="../reference/plot.html">plot()</a></code> by setting the value of <code>min_max</code>.</li>
-<li>A new function <code><a href="../reference/set_imp.html">set_imp()</a></code> is made available to change the number of imputations of a trained DGP emulator so one can make faster predictions by reducing the number of imputations without re-training the emulator.</li>
+<li>The default number of imputations <code>B</code> for <code><a href="../reference/dgp.html">dgp()</a></code> is changed from <code>50</code> to <code>30</code> to better balance the uncertainty and the speed of DGP emulator predictions. A new function <code><a href="../reference/set_imp.html">set_imp()</a></code> is made available to change the number of imputations of a trained DGP emulator so one can either achieve faster predictions by further reducing the number of imputations, or account for more imputation uncertainties by increasing the number of imputations, without re-training the emulator.</li>
+<li>The speed of predictions from DGP emulators with squared exponential kernels is significantly improved and is roughly 3x faster than the implementations in version <code>2.1.5</code>.</li>
 <li>The implementation of sequential designs (with a vignette) is made available.</li>
 </ul></div>
     <div class="section level2">
