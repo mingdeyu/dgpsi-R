@@ -83,10 +83,15 @@ bool element in the vector will be applied to the corresponding GP node (if any)
 
 Defaults to \code{FALSE}. This argument is only used when \code{struc = NULL}.}
 
-\item{nugget}{the initial nugget value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
-in the final layer. If it is a vector (which must have a length of \code{ncol(Y)}), each numeric in the vector will be applied to the corresponding GP node
-(if any) in the final layer. Set \code{nugget} to a small value and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
-interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic emulations where
+\item{nugget}{the initial nugget value(s) of GP nodes (if any) in each layer:
+\enumerate{
+\item if it is a single numeric value, the value will be applied as the initial nugget for all GP nodes in the DGP hierarchy.
+\item if it is a vector, each element of the vector specifies the initial nugget that will be applied to all GP nodes in the corresponding layer.
+The vector should have a length of \code{depth} if \code{likelihood = NULL} or a length of \code{depth - 1} if \code{likelihood} is not \code{NULL}.
+}
+
+Set \code{nugget} to a small value and the bools in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
+interpolates the training data points. Set \code{nugget} to a reasonable larger value and the bools in \code{nugget_est} to \code{TRUE} for stochastic emulations where
 the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used when \code{struc = NULL}.}
 
 \item{scale_est}{a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
@@ -115,7 +120,7 @@ the cost of slower training. Defaults to \code{TRUE}. This argument is only used
 \item \code{"NegBin"}: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.
 }
 
-When \code{likelihood} is not \code{NULL}, the values of \code{nugget_est} and \code{nugget} are overridden by \code{FALSE} and \code{1e-6} respectively. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
+When \code{likelihood} is not \code{NULL}, the value of \code{nugget_est} is overridden by \code{FALSE}. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
 
 \item{training}{a bool indicating if the initialized DGP emulator will be trained.
 When set to \code{FALSE}, \code{\link[=dgp]{dgp()}} returns an untrained DGP emulator, to which one can apply \code{\link[=summary]{summary()}} to inspect its specifications

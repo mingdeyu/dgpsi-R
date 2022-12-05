@@ -37,10 +37,13 @@
 #' * `TRUE`: the nugget of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in `nugget` (see below).
 #'
 #' Defaults to `FALSE`. This argument is only used when `struc = NULL`.
-#' @param nugget the initial nugget value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
-#'    in the final layer. If it is a vector (which must have a length of `ncol(Y)`), each numeric in the vector will be applied to the corresponding GP node
-#'    (if any) in the final layer. Set `nugget` to a small value and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
-#'    interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic emulations where
+#' @param nugget the initial nugget value(s) of GP nodes (if any) in each layer:
+#' 1. if it is a single numeric value, the value will be applied as the initial nugget for all GP nodes in the DGP hierarchy.
+#' 2. if it is a vector, each element of the vector specifies the initial nugget that will be applied to all GP nodes in the corresponding layer.
+#'    The vector should have a length of `depth` if `likelihood = NULL` or a length of `depth - 1` if `likelihood` is not `NULL`.
+#'
+#' Set `nugget` to a small value and the bools in `nugget_est` to `FASLE` for deterministic emulations where the emulator
+#'    interpolates the training data points. Set `nugget` to a reasonable larger value and the bools in `nugget_est` to `TRUE` for stochastic emulations where
 #'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used when `struc = NULL`.
 #' @param scale_est a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 #'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
@@ -61,7 +64,7 @@
 #' 3. `"Poisson"`: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.
 #' 4. `"NegBin"`: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.
 #'
-#' When `likelihood` is not `NULL`, the values of `nugget_est` and `nugget` are overridden by `FALSE` and `1e-6` respectively. Defaults to `NULL`. This argument is only used when `struc = NULL`.
+#' When `likelihood` is not `NULL`, the value of `nugget_est` is overridden by `FALSE`. Defaults to `NULL`. This argument is only used when `struc = NULL`.
 #' @param training a bool indicating if the initialized DGP emulator will be trained.
 #'     When set to `FALSE`, [dgp()] returns an untrained DGP emulator, to which one can apply [summary()] to inspect its specifications
 #'     (especially when a customized `struc` is provided) or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
@@ -243,11 +246,19 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
         }
       }
 
+      #if ( length(nugget)==1 ) {
+      #  nugget <- rep(nugget, n_dim_Y)
+      #} else {
+      #  if ( length(nugget)!=n_dim_Y ) {
+      #    stop(sprintf("length(nugget) should equal to %i.", n_dim_Y), call. = FALSE)
+      #  }
+      #}
+
       if ( length(nugget)==1 ) {
-        nugget <- rep(nugget, n_dim_Y)
+        nugget <- rep(nugget, depth)
       } else {
-        if ( length(nugget)!=n_dim_Y ) {
-          stop(sprintf("length(nugget) should equal to %i.", n_dim_Y), call. = FALSE)
+        if ( length(nugget)!=depth ) {
+          stop(sprintf("length(nugget) must equal to %i.", depth), call. = FALSE)
         }
       }
 
@@ -277,6 +288,14 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
         }
       }
 
+      if ( length(nugget)==1 ) {
+        nugget <- rep(nugget, depth-1)
+      } else {
+        if ( length(nugget)!=(depth-1) ) {
+          stop(sprintf("length(nugget) must equal to %i.", depth-1), call. = FALSE)
+        }
+      }
+
       if ( !is.null(bounds) ){
         if ( is.vector(bounds) ) {
           bounds <- matrix(rep(bounds, depth-1), ncol = 2,  byrow = TRUE)
@@ -288,7 +307,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
       }
 
       if ( likelihood == 'Hetero'|likelihood == 'NegBin' ) {
-        nugget <- rep(1e-6, 2)
+        #nugget <- rep(1e-6, 2)
         nugget_est <- rep(FALSE, 2)
         if ( length(scale_est)==1 ) {
           scale_est <- rep(scale_est, 2)
@@ -306,7 +325,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
           }
         }
       } else if ( likelihood == 'Poisson' ) {
-        nugget <- 1e-6
+        #nugget <- 1e-6
         nugget_est <- FALSE
         if ( length(scale_est)!=1 ) stop(sprintf("length(scale_est) should equal to %i.", 1), call. = FALSE)
         if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal to %i.", 1), call. = FALSE)
@@ -339,7 +358,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
       layer_l <- list()
 
       if( l == no_gp_layer ) {
-        no_kerenl <- length(nugget)
+        no_kerenl <- length(nugget_est)
         } else {
           no_kerenl <- n_dim_X
         }
@@ -358,7 +377,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
             } else {
               length_scale <- rep(lengthscale[l], n_dim_X)
             }
-            layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[k], nugget_est = nugget_est[k],
+            layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                  input_dim = internal_input_idx, connect = external_input_idx)
           } else {
             if ( connect ) {
@@ -367,7 +386,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               } else {
                 length_scale <- rep(lengthscale[l], 2*n_dim_X)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[k], nugget_est = nugget_est[k],
+              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                    connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
             } else {
               if ( isTRUE(share) ){
@@ -375,7 +394,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               } else {
                 length_scale <- rep(lengthscale[l], n_dim_X)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[k], nugget_est = nugget_est[k])
+              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k])
             }
           }
         } else {
@@ -385,7 +404,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               } else {
                 length_scale <- rep(lengthscale[l], n_dim_X)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name,
+              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, nugget = nugget[l],
                                                    input_dim = internal_input_idx, connect = external_input_idx)
             } else {
               if ( connect ) {
@@ -394,7 +413,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 } else {
                   length_scale <- rep(lengthscale[l], 2*n_dim_X)
                 }
-                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name,
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, nugget = nugget[l],
                                                      connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
               } else {
                 if ( isTRUE(share) ){
@@ -402,7 +421,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 } else {
                   length_scale <- rep(lengthscale[l], n_dim_X)
                 }
-                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name)
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, nugget = nugget[l])
               }
             }
           }

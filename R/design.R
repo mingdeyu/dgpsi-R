@@ -375,13 +375,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           if ( is.null(eval) ){
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
               message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
               message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
@@ -435,11 +435,11 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     if ( is.null(eval) ){
       if (is.null(x_test) & is.null(y_test)){
         type <- 'loo'
-        object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores[2])
+        object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores)
         rmse <- object$loo$rmse
       } else {
         type <- 'oos'
-        object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores[2])
+        object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores)
         rmse <- object$oos$rmse
       }
     } else {
@@ -532,13 +532,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           if ( is.null(eval) ){
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
               message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
               message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
