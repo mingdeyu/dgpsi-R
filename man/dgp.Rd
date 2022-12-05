@@ -11,6 +11,7 @@ dgp(
   depth = 2,
   name = "sexp",
   lengthscale = 1,
+  bounds = NULL,
   share = TRUE,
   nugget_est = FALSE,
   nugget = 1e-06,
@@ -59,6 +60,16 @@ The vector should have a length of \code{depth} if \code{likelihood = NULL} or a
 }
 
 Defaults to a numeric value of \code{1.0}. This argument is only used when \code{struc = NULL}.}
+
+\item{bounds}{the lower and upper bounds of lengthscales in GP nodes. It can be a vector or a matrix:
+\enumerate{
+\item if it is a vector, the lower bound (the first element of the vector) and upper bound (the second element of the vector) will be applied to
+lengthscales for all GP nodes in the DGP hierarchy.
+\item if it is a matrix, each row of the matrix specifies the lower and upper bounds of lengthscales for all GP nodes in the corresponding layer.
+The matrix should have its row number equal to \code{depth} if \code{likelihood = NULL} or to \code{depth - 1} if \code{likelihood} is not \code{NULL}.
+}
+
+Defaults to \code{NULL} where no bounds are specified for the lengthscales. This argument is only used when \code{struc = NULL}.}
 
 \item{share}{a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to \code{TRUE}. This argument is only used when \code{struc = NULL}.}
 

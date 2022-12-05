@@ -38,16 +38,16 @@
 #'     emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to `c(1, 1)`.
 #' @param x_test a matrix (with each row being an input testing data point and each column being an input dimension) that gives the testing
 #'     input data to evaluate the emulator after each step of the sequential design. Set to `NULL` for the LOO-based emulator validation.
-#'     Defaults to `NULL`.
+#'     Defaults to `NULL`. This argument is only used if `eval = NULL`.
 #' @param y_test the testing output data that correspond to `x_test` for the emulator validation after each step of the sequential design:
 #' * if `object` is an instance of the `gp` class, `y_test` is a matrix with only one column and each row being an testing output data point.
 #' * if `object` is an instance of the `dgp` class, `y_test` is a matrix with its rows being testing output data points and columns being
 #'   output dimensions.
 #'
-#' Set to `NULL` for the LOO-based emulator validation. Defaults to `NULL`.
+#' Set to `NULL` for the LOO-based emulator validation. Defaults to `NULL`. This argument is only used if `eval = NULL`.
 #' @param target a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to `NULL`, in which
 #'     case the sequential design stops after `N` steps. See *Note* section below for further information about `target`.
-#' @param method an R function that give indices of designs points in a candidate set. The function must satisfy in the following basic form:
+#' @param method an R function that give indices of designs points in a candidate set. The function must satisfy the following basic rules:
 #' * the first argument is an emulator object that can be either an instance of
 #'   - the `gp` class (produced by [gp()]);
 #'   - the `dgp` class (produced by [dgp()]);
@@ -63,28 +63,43 @@
 #'     points to be added to individual emulators in the bundle.
 #'
 #' See [alm()] and [mice()] for examples on customizing `method`. Defaults to [alm()].
+#' @param eval an R function that calculates the customized evaluating metric of the emulator.The function must satisfy the following basic rules:
+#' * the first argument is an emulator object that can be either an instance of
+#'   - the `gp` class (produced by [gp()]);
+#'   - the `dgp` class (produced by [dgp()]);
+#'   - the `bundle` class (produced by [pack()]).
+#' * the output of the function can be
+#'   - a single metric value, if the first argument is an instance of the `gp` class;
+#'   - a single metric value or a vector of metric values with the length equal to the number of output dimensions, if the first argument is an
+#'     instance of the `dgp` class;
+#'   - a single metric value metric or a vector of metric values with the length equal to the number of emulators in the bundle, if the first
+#'     argument is an instance of the `bundle` class.
+#'
+#' If no customized function is provided, the built-in evaluation metric, RMSE, will be calculated. Defaults to `NULL`. See *Note* section below for further information.
 #' @param verb a bool indicating if the trace information will be printed during the sequential design.
 #'     Defaults to `TRUE`.
 #' @param check_point a vector of integers that indicates at which steps the sequential design will pause and ask for the confirmation
 #'     from the user if the sequential design should continue or be terminated. Set to `NULL` to suspend the manual intervention. Defaults
 #'     to `NULL`.
 #' @param cores an integers that gives the number of cores to be used for emulator validations. If set to `NULL`, the number of cores is
-#'     set to `(max physical cores available - 1)`. Defaults to `1`.
+#'     set to `(max physical cores available - 1)`. Defaults to `1`. This argument is only used if `eval = NULL`.
 #' @param train_N an integer or a vector of integers that gives the number of training iterations to be used to re-fit the DGP emulator at each step
 #'     of the sequential design:
 #' * If `train_N` is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in `freq`) with `train_N` iterations.
 #' * If `train_N` is a vector, then its size must be `N` even the re-fit frequency specified in `freq` is not one.
 #'
 #' Defaults to `100`.
-#' @param ... any arguments (with names different from those of arguments used in [design()]) that are used by `f` and `method`
-#'     can be passed here. [design()] will pass relevant arguments to `f` and `method` based on the names of additional arguments provided.
+#' @param ... any arguments (with names different from those of arguments used in [design()]) that are used by `f`, `method`, and `eval`
+#'     can be passed here. [design()] will pass relevant arguments to `f`, `method`, and `eval` based on the names of additional arguments provided.
 #'
 #' @return
 #' An updated `object` is returned with a slot called `design` that contains:
 #'   - *S* slots, named `wave1, wave2,..., waveS`, that contain information of *S* waves of sequential designs that have been applied to the emulator.
 #'     Each slot contains the following elements:
 #'     - `N`, an integer that gives the numbers of steps implemented in the corresponding wave;
-#'     - `rmse`, a matrix that gives the RMSEs of emulators constructed during the corresponding wave;
+#'     - `rmse`, a matrix that gives the RMSEs of emulators constructed during the corresponding wave, if `eval = NULL`;
+#'     - `metric`, a matrix that gives the customized evaluating metric values of emulators constructed during the corresponding wave,
+#'        if a customized function is supplied to `eval`;
 #'     - `freq`, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.
 #'     - `enrichment`, a vector of size `N` that gives the number of new design points added after each step of the sequential design (if `object` is
 #'        an instance of the `gp` or `dgp` class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
@@ -94,8 +109,9 @@
 #'     - `target`, the target RMSE(s) to stop the sequential design.
 #'     - `reached`, a bool (if `object` is an instance of the `gp` or `dgp` class) or a vector of bools (if `object` is an instance of the `bundle`
 #'       class) that indicate if the target RMSEs are reached at the end of the sequential design.
-#'   - a slot called `type` that gives the type of validations, either LOO (`loo`) or OOS (`oos`) used to calculate the RMSEs of emulators constructed
-#'     in the sequential design. See [validate()] for more information about LOO and OOS.
+#'   - a slot called `type` that gives the type of validations:
+#'     - either LOO (`loo`) or OOS (`oos`) if `eval = NULL`. See [validate()] for more information about LOO and OOS.
+#'     - the customized R function provided to `eval`.
 #'   - two slots called `x_test` and `y_test` that contain the data points for the OOS validation if the `type` slot is `oos`.
 #'
 #' See *Note* section below for further information.
@@ -106,22 +122,26 @@
 #'   the sequential design. See [validate()] for more information about the slots `loo` and `oos`.
 #' * If `object` has previously been used by [design()] for sequential designs, the information of the current wave of the sequential design will replace
 #'   those of old waves and be contained in the returned object, unless the following conditions are met:
-#'   - the validation type (LOO or OOS) of the current wave of the sequential design is the same as the validation types in previous waves, and
+#'   - the validation type (`loo`, `oos`, or the customized function provided to `eval`) of the current wave of the sequential design is the same as the
+#'     validation types in previous waves, and
 #'   - if the validation type is OOS, `x_test` and `y_test` in the current wave of the sequential design are identical to those in the previous waves.
 #'
 #'   When the above conditions are met, the information of the current wave of the sequential design will be added to
 #'       the `design` slot of the returned object under the name `waveS`.
-#' * If `object` is an instance of the `gp` class, the matrix in the `rmse` slot is single-columned. If `object` is an instance of
-#'   the `dgp` or `bundle` class, the matrix in the `rmse` slot can have multiple columns that correspond to different output dimensions
+#' * If `object` is an instance of the `gp` class and `eval = NULL`, the matrix in the `rmse` slot is single-columned. If `object` is an instance of
+#'   the `dgp` or `bundle` class and `eval = NULL`, the matrix in the `rmse` slot can have multiple columns that correspond to different output dimensions
 #'   or different emulators in the bundle.
-#' * If `object` is an instance of the `gp` class, `target` needs to be a single value giving the RMSE threshold. If `object` is an instance of the `dgp`
-#'   or `bundle` class, `target` can be a vector of values that gives the RMSE thresholds for different output dimensions or different emulators. If a
-#'   single value is provided, it will be used as the RMSE threshold for all output dimensions (if `object` is an instance of the `dgp`) or all emulators
-#'   (if `object` is an instance of the `bundle`).
+#' * If `object` is an instance of the `gp` class and `eval = NULL`, `target` needs to be a single value giving the RMSE threshold. If `object` is an instance
+#'   of the `dgp` or `bundle` class and `eval = NULL`, `target` can be a vector of values that gives the RMSE thresholds for different output dimensions or
+#'   different emulators. If a single value is provided, it will be used as the RMSE threshold for all output dimensions (if `object` is an instance of the `dgp`) or all emulators
+#'   (if `object` is an instance of the `bundle`). If a customized function is supplied to `eval`, the user needs to ensure that the length of `target` is equal
+#'   to that of the output from `eval`.
 #' * When defining `f`, it is important to ensure that:
 #'   - the column order of the first argument of `f` is consistent with the training input used for the emulator;
 #'   - the column order of the output matrix of `f` is consistent with the order of emulator output dimensions (if `object` is an instance of the `dgp` class),
 #'     or the order of emulators placed in `object` (if `object` is an instance of the `bundle` class).
+#' * When defining `eval`, the output metric needs to be positive if [draw()] is used with `log = T`. And one needs to ensure that a lower metric value indicates
+#'   a better emulation performance if `target` is set.
 #' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix. Thus, if `x_test` or `y_test` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -179,14 +199,14 @@
 #' @md
 #' @name design
 #' @export
-design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, freq, x_test, y_test, target, method, verb, check_point, cores, ...){
+design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, freq, x_test, y_test, target, method, eval, verb, check_point, cores, ...){
   UseMethod("design")
 }
 
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, verb = TRUE, check_point = NULL, cores = 1, ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, ...) {
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
 
   N <- check_N(N)
@@ -199,7 +219,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   }
   if ( "design" %in% names(object) ){
     design_info <- object$design
-    time_and_wave <- check_design(object, x_test, y_test)
+    time_and_wave <- check_design(object, x_test, y_test, eval)
     first_time <- time_and_wave[[1]]
     n_wave <- time_and_wave[[2]]
   } else {
@@ -212,11 +232,12 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   n_dim_X <- ncol(X)
   n_dim_Y <- ncol(Y)
 
-  target <- check_target(target, n_dim_Y)
-
   N_acq <- c()
   add_arg <- list(...)
   mnames <- methods::formalArgs(method)
+  if ( !is.null(eval) ){
+    vnames <- methods::formalArgs(eval)
+  }
 
   if ( is.null(x_cand) ) {
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
@@ -226,18 +247,36 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
-    if (is.null(x_test) & is.null(y_test)){
-      type <- 'loo'
-      object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores)
-      rmse <- object$loo$rmse
+    if ( is.null(eval) ){
+      if (is.null(x_test) & is.null(y_test)){
+        type <- 'loo'
+        object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores)
+        rmse <- object$loo$rmse
+      } else {
+        type <- 'oos'
+        object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores)
+        rmse <- object$oos$rmse
+      }
     } else {
-      type <- 'oos'
-      object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores)
-      rmse <- object$oos$rmse
+      type <- eval
+      if ("..." %in% vnames){
+        rmse <- do.call(eval, c(list(object), add_arg))
+      } else {
+        vidx <- vnames %in% names(add_arg)
+        vparam <- add_arg[vnames[vidx]]
+        rmse <- do.call(eval, c(list(object), vparam))
+      }
+      if (length(rmse)!=1) stop("'eval' must return a vector of length one.", call. = FALSE)
     }
     if ( verb ) message(" done")
-    message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    if ( is.null(eval) ){
+      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    } else {
+      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+    }
     rmse_records <- rmse
+
+    target <- check_target(target, length(rmse))
 
     if ( !is.null(target) ){
       istarget <- rmse<=target
@@ -333,18 +372,31 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         }
 
         if ( i %% freq[2]==0 | i==N ){
-          if (is.null(x_test) & is.null(y_test)){
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
-            if ( verb ) message(" done")
-            rmse <- object$loo$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          if ( is.null(eval) ){
+            if (is.null(x_test) & is.null(y_test)){
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
+              if ( verb ) message(" done")
+              rmse <- object$loo$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            } else {
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+              if ( verb ) message(" done")
+              rmse <- object$oos$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+            if ("..." %in% vnames){
+              rmse <- do.call(eval, c(list(object), add_arg))
+            } else {
+              vidx <- vnames %in% names(add_arg)
+              vparam <- add_arg[vnames[vidx]]
+              rmse <- do.call(eval, c(list(object), vparam))
+            }
             if ( verb ) message(" done")
-            rmse <- object$oos$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -380,18 +432,36 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     idx_x_acq <- c()
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
-    if (is.null(x_test) & is.null(y_test)){
-      type <- 'loo'
-      object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores[2])
-      rmse <- object$loo$rmse
+    if ( is.null(eval) ){
+      if (is.null(x_test) & is.null(y_test)){
+        type <- 'loo'
+        object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores[2])
+        rmse <- object$loo$rmse
+      } else {
+        type <- 'oos'
+        object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores[2])
+        rmse <- object$oos$rmse
+      }
     } else {
-      type <- 'oos'
-      object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores[2])
-      rmse <- object$oos$rmse
+      type <- eval
+      if ("..." %in% vnames){
+        rmse <- do.call(eval, c(list(object), add_arg))
+      } else {
+        vidx <- vnames %in% names(add_arg)
+        vparam <- add_arg[vnames[vidx]]
+        rmse <- do.call(eval, c(list(object), vparam))
+      }
+      if (length(rmse)!=1) stop("'eval' must return a vector of length one.", call. = FALSE)
     }
     if ( verb ) message(" done")
-    message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    if ( is.null(eval) ){
+      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    } else {
+      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+    }
     rmse_records <- rmse
+
+    target <- check_target(target, length(rmse))
 
     if ( !is.null(target) ){
       istarget <- rmse<=target
@@ -459,18 +529,31 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         }
 
         if ( i %% freq[2]==0 | i==N ){
-          if (is.null(x_test) & is.null(y_test)){
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
-            if ( verb ) message(" done")
-            rmse <- object$loo$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          if ( is.null(eval) ){
+            if (is.null(x_test) & is.null(y_test)){
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores[2])
+              if ( verb ) message(" done")
+              rmse <- object$loo$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            } else {
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+              if ( verb ) message(" done")
+              rmse <- object$oos$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores[2])
+            if ("..." %in% vnames){
+              rmse <- do.call(eval, c(list(object), add_arg))
+            } else {
+              vidx <- vnames %in% names(add_arg)
+              vparam <- add_arg[vnames[vidx]]
+              rmse <- do.call(eval, c(list(object), vparam))
+            }
             if ( verb ) message(" done")
-            rmse <- object$oos$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -502,7 +585,11 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     if ( isTRUE(first_time) ){
       object$design <- list()
       object[["design"]][["wave1"]][["N"]] <- N
-      object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      if ( is.null(eval) ){
+        object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      } else {
+        object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
+      }
       object[["design"]][["wave1"]][["freq"]] <- freq[2]
       object[["design"]][["wave1"]][["enrichement"]] <- N_acq
       if( !is.null(target) ) {
@@ -510,14 +597,18 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         object[["design"]][["wave1"]][["reached"]] <- istarget
       }
       object[["design"]][["type"]] <- type
-      if ( type == 'oos' ){
+      if ( identical(type, 'oos') ){
         object[["design"]][["x_test"]] <- x_test
         object[["design"]][["y_test"]] <- y_test
       }
     } else {
       object$design <- design_info
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      if ( is.null(eval) ){
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      } else {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
+      }
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichement"]] <-  N_acq
       if( !is.null(target) ) {
@@ -538,7 +629,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
 
   N <- check_N(N)
@@ -553,7 +644,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
   if ( "design" %in% names(object) ){
     design_info <- object$design
-    time_and_wave <- check_design(object, x_test, y_test)
+    time_and_wave <- check_design(object, x_test, y_test, eval)
     first_time <- time_and_wave[[1]]
     n_wave <- time_and_wave[[2]]
   } else {
@@ -566,12 +657,12 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   n_dim_X <- ncol(X)
   n_dim_Y <- ncol(Y)
 
-  target <- check_target(target, n_dim_Y)
-
   N_acq <- c()
   add_arg <- list(...)
   mnames <- methods::formalArgs(method)
-
+  if ( !is.null(eval) ){
+    vnames <- methods::formalArgs(eval)
+  }
   #if candidate set is given
   if ( is.null(x_cand) ) {
 
@@ -582,18 +673,36 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
-    if (is.null(x_test) & is.null(y_test)){
-      type <- 'loo'
-      object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
-      rmse <- object$loo$rmse
+    if ( is.null(eval) ){
+      if (is.null(x_test) & is.null(y_test)){
+        type <- 'loo'
+        object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+        rmse <- object$loo$rmse
+      } else {
+        type <- 'oos'
+        object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores, ...)
+        rmse <- object$oos$rmse
+      }
     } else {
-      type <- 'oos'
-      object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores, ...)
-      rmse <- object$oos$rmse
+      type <- eval
+      if ("..." %in% vnames){
+        rmse <- do.call(eval, c(list(object), add_arg))
+      } else {
+        vidx <- vnames %in% names(add_arg)
+        vparam <- add_arg[vnames[vidx]]
+        rmse <- do.call(eval, c(list(object), vparam))
+      }
+      if (length(rmse)!=1 & length(rmse)!=n_dim_Y) stop(sprintf("'eval' must return a single or %i metric values.", n_dim_Y), call. = FALSE)
     }
     if ( verb ) message(" done")
-    message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    if ( is.null(eval) ){
+      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    } else {
+      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+    }
     rmse_records <- rmse
+
+    target <- check_target(target, length(rmse))
 
     if ( !is.null(target) ){
       istarget <- all(rmse<=target)
@@ -701,18 +810,31 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         }
 
         if ( i %% freq[2]==0 | i==N){
-          if (is.null(x_test) & is.null(y_test)){
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
-            if ( verb ) message(" done")
-            rmse <- object$loo$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          if ( is.null(eval) ){
+            if (is.null(x_test) & is.null(y_test)){
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+              if ( verb ) message(" done")
+              rmse <- object$loo$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            } else {
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
+              if ( verb ) message(" done")
+              rmse <- object$oos$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
+            if ("..." %in% vnames){
+              rmse <- do.call(eval, c(list(object), add_arg))
+            } else {
+              vidx <- vnames %in% names(add_arg)
+              vparam <- add_arg[vnames[vidx]]
+              rmse <- do.call(eval, c(list(object), vparam))
+            }
             if ( verb ) message(" done")
-            rmse <- object$oos$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -748,18 +870,36 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     idx_x_acq <- c()
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
-    if (is.null(x_test) & is.null(y_test)){
-      type <- 'loo'
-      object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
-      rmse <- object$loo$rmse
+    if ( is.null(eval) ){
+      if (is.null(x_test) & is.null(y_test)){
+        type <- 'loo'
+        object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+        rmse <- object$loo$rmse
+      } else {
+        type <- 'oos'
+        object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores, ...)
+        rmse <- object$oos$rmse
+      }
     } else {
-      type <- 'oos'
-      object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores, ...)
-      rmse <- object$oos$rmse
+      type <- eval
+      if ("..." %in% vnames){
+        rmse <- do.call(eval, c(list(object), add_arg))
+      } else {
+        vidx <- vnames %in% names(add_arg)
+        vparam <- add_arg[vnames[vidx]]
+        rmse <- do.call(eval, c(list(object), vparam))
+      }
+      if (length(rmse)!=1 & length(rmse)!=n_dim_Y) stop(sprintf("'eval' must return a single or %i metric values.", n_dim_Y), call. = FALSE)
     }
     if ( verb ) message(" done")
-    message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    if ( is.null(eval) ){
+      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    } else {
+      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+    }
     rmse_records <- rmse
+
+    target <- check_target(target, length(rmse))
 
     if ( !is.null(target) ){
       istarget <- all(rmse<=target)
@@ -838,18 +978,31 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         }
 
         if ( i %% freq[2]==0 | i==N ){
-          if (is.null(x_test) & is.null(y_test)){
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
-            if ( verb ) message(" done")
-            rmse <- object$loo$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+          if ( is.null(eval) ){
+            if (is.null(x_test) & is.null(y_test)){
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+              if ( verb ) message(" done")
+              rmse <- object$loo$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            } else {
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
+              if ( verb ) message(" done")
+              rmse <- object$oos$rmse
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
+            if ("..." %in% vnames){
+              rmse <- do.call(eval, c(list(object), add_arg))
+            } else {
+              vidx <- vnames %in% names(add_arg)
+              vparam <- add_arg[vnames[vidx]]
+              rmse <- do.call(eval, c(list(object), vparam))
+            }
             if ( verb ) message(" done")
-            rmse <- object$oos$rmse
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -881,7 +1034,11 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     if ( isTRUE(first_time) ){
       object$design <- list()
       object[["design"]][["wave1"]][["N"]] <- N
-      object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      if ( is.null(eval) ){
+        object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      } else {
+        object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
+      }
       object[["design"]][["wave1"]][["freq"]] <- freq[2]
       object[["design"]][["wave1"]][["enrichment"]] <- N_acq
       if( !is.null(target) ) {
@@ -889,14 +1046,18 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         object[["design"]][["wave1"]][["reached"]] <- istarget
       }
       object[["design"]][["type"]] <- type
-      if ( type == 'oos' ){
+      if ( identical(type, 'oos') ){
         object[["design"]][["x_test"]] <- x_test
         object[["design"]][["y_test"]] <- y_test
       }
     } else {
       object$design <- design_info
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      if ( is.null(eval) ){
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      } else {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
+      }
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- N_acq
       if( !is.null(target) ) {
@@ -918,7 +1079,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
 
   N <- check_N(N)
@@ -932,7 +1093,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   }
   if ( "design" %in% names(object) ){
     design_info <- object$design
-    time_and_wave <- check_design(object, x_test, y_test)
+    time_and_wave <- check_design(object, x_test, y_test, eval)
     first_time <- time_and_wave[[1]]
     n_wave <- time_and_wave[[2]]
   } else {
@@ -946,11 +1107,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   n_emulators <- length(object) - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
 
-  target <- check_target(target, n_emulators)
-
   N_acq_ind <- c()
   add_arg <- list(...)
   mnames <- methods::formalArgs(method)
+  if ( !is.null(eval) ){
+    vnames <- methods::formalArgs(eval)
+  }
 
   #if candidate set is given
   if ( is.null(x_cand) ) {
@@ -962,29 +1124,48 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
-    rmse <- c()
-    for ( k in 1:n_emulators ){
-      obj_k <- object[[paste('emulator',k,sep='')]]
-      if (is.null(x_test) & is.null(y_test)){
-        type <- 'loo'
-        if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE)
-        if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
-        object[[paste('emulator',k,sep='')]] <- obj_k
-        rmse <- c(rmse, obj_k$loo$rmse)
-      } else {
-        type <- 'oos'
-        if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE)
-        if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, cores = cores, ...)
-        object[[paste('emulator',k,sep='')]] <- obj_k
-        rmse <- c(rmse, obj_k$oos$rmse)
+    if ( is.null(eval) ){
+      rmse <- c()
+      for ( k in 1:n_emulators ){
+        obj_k <- object[[paste('emulator',k,sep='')]]
+        if (is.null(x_test) & is.null(y_test)){
+          type <- 'loo'
+          if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE)
+          if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+          object[[paste('emulator',k,sep='')]] <- obj_k
+          rmse <- c(rmse, obj_k$loo$rmse)
+        } else {
+          type <- 'oos'
+          if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE)
+          if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, cores = cores, ...)
+          object[[paste('emulator',k,sep='')]] <- obj_k
+          rmse <- c(rmse, obj_k$oos$rmse)
+        }
       }
+    } else {
+      type <- eval
+      if ("..." %in% vnames){
+        rmse <- do.call(eval, c(list(object), add_arg))
+      } else {
+        vidx <- vnames %in% names(add_arg)
+        vparam <- add_arg[vnames[vidx]]
+        rmse <- do.call(eval, c(list(object), vparam))
+      }
+      if (length(rmse)!=1 & length(rmse)!=n_emulators) stop(sprintf("'eval' must return a single or %i metric values.", n_emulators), call. = FALSE)
     }
     if ( verb ) message(" done")
-    message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    if ( is.null(eval) ){
+      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    } else {
+      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+    }
     rmse_records <- rmse
+
+    target <- check_target(target, length(rmse))
 
     if ( !is.null(target) ){
       istarget <- rmse<=target
+      if ( length(istarget)==1 ) istarget <- rep(istarget, n_emulators)
       if ( all(istarget) ){
         run <- FALSE
       } else {
@@ -1202,48 +1383,70 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
         }
 
         if ( i %% freq[2]==0 | i==N){
-          if (is.null(x_test) & is.null(y_test)){
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            for ( k in 1:n_emulators ){
-              if ( is.null(target) ) {
-                obj_k <- object[[paste('emulator',k,sep='')]]
-                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
-                object[[paste('emulator',k,sep='')]] <- obj_k
-                rmse[k] <- obj_k$loo$rmse
-              } else {
-                if ( !istarget[k] ){
+          if ( is.null(eval) ){
+            if (is.null(x_test) & is.null(y_test)){
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              for ( k in 1:n_emulators ){
+                if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
                   if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$loo$rmse
+                } else {
+                  if ( !istarget[k] ){
+                    obj_k <- object[[paste('emulator',k,sep='')]]
+                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                    object[[paste('emulator',k,sep='')]] <- obj_k
+                    rmse[k] <- obj_k$loo$rmse
+                  }
                 }
               }
-            }
-            if ( verb ) message(" done")
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
-          } else {
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            for ( k in 1:n_emulators ){
-              if ( is.null(target) ) {
-                obj_k <- object[[paste('emulator',k,sep='')]]
-                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
-                object[[paste('emulator',k,sep='')]] <- obj_k
-                rmse[k] <- obj_k$oos$rmse
-              } else {
-                if ( !istarget[k] ){
+              if ( verb ) message(" done")
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            } else {
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              for ( k in 1:n_emulators ){
+                if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
                   if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$oos$rmse
+                } else {
+                  if ( !istarget[k] ){
+                    obj_k <- object[[paste('emulator',k,sep='')]]
+                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
+                    object[[paste('emulator',k,sep='')]] <- obj_k
+                    rmse[k] <- obj_k$oos$rmse
+                  }
                 }
+              }
+              if ( verb ) message(" done")
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            }
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            if ("..." %in% vnames){
+              rmse_tmp <- do.call(eval, c(list(object), add_arg))
+            } else {
+              vidx <- vnames %in% names(add_arg)
+              vparam <- add_arg[vnames[vidx]]
+              rmse_tmp <- do.call(eval, c(list(object), vparam))
+            }
+            if ( is.null(target) ) {
+              rmse <- rmse_tmp
+            } else {
+              if( length(rmse_tmp)==1 ){
+                rmse <- rmse_tmp
+              } else {
+                rmse[!istarget] <- rmse_tmp[!istarget]
               }
             }
             if ( verb ) message(" done")
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -1256,6 +1459,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             break
           } else {
             istarget <- rmse<=target
+            if ( length(istarget)==1 ) istarget <- rep(istarget, n_emulators)
           }
         }
 
@@ -1285,29 +1489,48 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     idx_x_acq <- c()
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
-    rmse <- c()
-    for ( k in 1:n_emulators ){
-      obj_k <- object[[paste('emulator',k,sep='')]]
-      if (is.null(x_test) & is.null(y_test)){
-        type <- 'loo'
-        if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE)
-        if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
-        object[[paste('emulator',k,sep='')]] <- obj_k
-        rmse <- c(rmse, obj_k$loo$rmse)
-      } else {
-        type <- 'oos'
-        if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE)
-        if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, cores = cores, ...)
-        object[[paste('emulator',k,sep='')]] <- obj_k
-        rmse <- c(rmse, obj_k$oos$rmse)
+    if ( is.null(eval) ){
+      rmse <- c()
+      for ( k in 1:n_emulators ){
+        obj_k <- object[[paste('emulator',k,sep='')]]
+        if (is.null(x_test) & is.null(y_test)){
+          type <- 'loo'
+          if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE)
+          if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+          object[[paste('emulator',k,sep='')]] <- obj_k
+          rmse <- c(rmse, obj_k$loo$rmse)
+        } else {
+          type <- 'oos'
+          if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE)
+          if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, cores = cores, ...)
+          object[[paste('emulator',k,sep='')]] <- obj_k
+          rmse <- c(rmse, obj_k$oos$rmse)
+        }
       }
+    } else {
+      type <- eval
+      if ("..." %in% vnames){
+        rmse <- do.call(eval, c(list(object), add_arg))
+      } else {
+        vidx <- vnames %in% names(add_arg)
+        vparam <- add_arg[vnames[vidx]]
+        rmse <- do.call(eval, c(list(object), vparam))
+      }
+      if (length(rmse)!=1 & length(rmse)!=n_emulators) stop(sprintf("'eval' must return a single or %i metric values.", n_emulators), call. = FALSE)
     }
     if ( verb ) message(" done")
-    message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    if ( is.null(eval) ){
+      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+    } else {
+      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+    }
     rmse_records <- rmse
+
+    target <- check_target(target, length(rmse))
 
     if ( !is.null(target) ){
       istarget <- rmse<=target
+      if ( length(istarget)==1 ) istarget <- rep(istarget, n_emulators)
       if ( all(istarget) ){
         run <- FALSE
       } else {
@@ -1470,48 +1693,70 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
 
         if ( i %% freq[2]==0 | i==N){
           #rmse <- c()
-          if (is.null(x_test) & is.null(y_test)){
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            for ( k in 1:n_emulators ){
-              if ( is.null(target) ) {
-                obj_k <- object[[paste('emulator',k,sep='')]]
-                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
-                object[[paste('emulator',k,sep='')]] <- obj_k
-                rmse[k] <- obj_k$loo$rmse
-              } else {
-                if ( !istarget[k] ){
+          if ( is.null(eval) ){
+            if (is.null(x_test) & is.null(y_test)){
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              for ( k in 1:n_emulators ){
+                if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
                   if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$loo$rmse
+                } else {
+                  if ( !istarget[k] ){
+                    obj_k <- object[[paste('emulator',k,sep='')]]
+                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                    object[[paste('emulator',k,sep='')]] <- obj_k
+                    rmse[k] <- obj_k$loo$rmse
+                  }
                 }
               }
-            }
-            if ( verb ) message(" done")
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
-          } else {
-            if ( verb ) message(" - Validating ...", appendLF = FALSE)
-            for ( k in 1:n_emulators ){
-              if ( is.null(target) ) {
-                obj_k <- object[[paste('emulator',k,sep='')]]
-                if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-                if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
-                object[[paste('emulator',k,sep='')]] <- obj_k
-                rmse[k] <- obj_k$oos$rmse
-              } else {
-                if ( !istarget[k] ){
+              if ( verb ) message(" done")
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            } else {
+              if ( verb ) message(" - Validating ...", appendLF = FALSE)
+              for ( k in 1:n_emulators ){
+                if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
                   if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$oos$rmse
+                } else {
+                  if ( !istarget[k] ){
+                    obj_k <- object[[paste('emulator',k,sep='')]]
+                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
+                    object[[paste('emulator',k,sep='')]] <- obj_k
+                    rmse[k] <- obj_k$oos$rmse
+                  }
                 }
+              }
+              if ( verb ) message(" done")
+              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            }
+          } else {
+            if ( verb ) message(" - Validating ...", appendLF = FALSE)
+            if ("..." %in% vnames){
+              rmse_tmp <- do.call(eval, c(list(object), add_arg))
+            } else {
+              vidx <- vnames %in% names(add_arg)
+              vparam <- add_arg[vnames[vidx]]
+              rmse_tmp <- do.call(eval, c(list(object), vparam))
+            }
+            if ( is.null(target) ) {
+              rmse <- rmse_tmp
+            } else {
+              if( length(rmse_tmp)==1 ){
+                rmse <- rmse_tmp
+              } else {
+                rmse[!istarget] <- rmse_tmp[!istarget]
               }
             }
             if ( verb ) message(" done")
-            message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -1524,6 +1769,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             break
           } else {
             istarget <- rmse<=target
+            if ( length(istarget)==1 ) istarget <- rep(istarget, n_emulators)
           }
         }
 
@@ -1546,15 +1792,19 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     if ( isTRUE(first_time) ){
       object$design <- list()
       object[["design"]][["wave1"]][["N"]] <- N
-      object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      if ( is.null(eval) ){
+        object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+      } else {
+        object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
+      }
       object[["design"]][["wave1"]][["freq"]] <- freq[2]
       object[["design"]][["wave1"]][["enrichment"]] <- unname(N_acq_ind)
       if( !is.null(target) ) {
         object[["design"]][["wave1"]][["target"]] <- target
-        object[["design"]][["wave1"]][["reached"]] <- istarget
+        object[["design"]][["wave1"]][["reached"]] <- ifelse(length(target)==1, all(istarget), istarget)
       }
       object[["design"]][["type"]] <- type
-      if ( type == 'oos' ){
+      if ( identical(type, 'oos') ){
         object[["design"]][["x_test"]] <- x_test
         object[["design"]][["y_test"]] <- y_test
       }
@@ -1563,12 +1813,16 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     } else {
       object$design <- design_info
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      if ( is.null(eval) ){
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
+      } else {
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
+      }
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- unname(N_acq_ind)
       if( !is.null(target) ) {
         object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
+        object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- ifelse(length(target)==1, all(istarget), istarget)
       }
       object[['data']][['X']] <- X
       object[['data']][['Y']] <- Y
@@ -1691,31 +1945,42 @@ check_int <- function(int, n_dim_X){
 }
 
 #check argument object and determine if it is the first time being used by design()
-check_design <- function(object, x_test, y_test){
-  if ( is.null(x_test) & is.null(y_test) ){
-    if ( object$design$type=="oos" ) {
-      first_time <- TRUE
-      n_wave <- 0
-    } else {
-      first_time <- FALSE
-      n_wave <- length(object$design)
-      if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
-      if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) n_wave <- n_wave - 2
-    }
-  } else {
-    if ( object$design$type=="loo" ) {
-      first_time <- TRUE
-      n_wave <- 0
-    } else {
-      if ( identical(object$design$x_test, x_test) & identical(object$design$y_test, y_test) ){
+check_design <- function(object, x_test, y_test, eval){
+  if ( is.null(eval) ){
+    if ( is.null(x_test) & is.null(y_test) ){
+      if ( !identical(object$design$type, "loo") ) {
+        first_time <- TRUE
+        n_wave <- 0
+      } else {
         first_time <- FALSE
         n_wave <- length(object$design)
         if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
         if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) n_wave <- n_wave - 2
-      } else {
+      }
+    } else {
+      if ( !identical(object$design$type, "oos") ) {
         first_time <- TRUE
         n_wave <- 0
+      } else {
+        if ( identical(object$design$x_test, x_test) & identical(object$design$y_test, y_test) ){
+          first_time <- FALSE
+          n_wave <- length(object$design)
+          if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
+          if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) n_wave <- n_wave - 2
+        } else {
+          first_time <- TRUE
+          n_wave <- 0
+        }
       }
+    }
+  } else {
+    if ( identical(object$design$type, eval) ) {
+      first_time <- FALSE
+      n_wave <- length(object$design)
+      if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
+    } else {
+      first_time <- TRUE
+      n_wave <- 0
     }
   }
   return(list(first_time, n_wave))

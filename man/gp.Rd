@@ -10,6 +10,7 @@ gp(
   struc = NULL,
   name = "sexp",
   lengthscale = rep(0.2, ncol(X)),
+  bounds = NULL,
   nugget_est = FALSE,
   nugget = 1e-06,
   scale_est = TRUE,
@@ -39,6 +40,10 @@ the GP specifications are automatically generated using information provided in 
 }
 
 Defaults to a vector of 0.2. This argument is only used when \code{struc = NULL}.}
+
+\item{bounds}{the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
+the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
+to \code{NULL} where no bounds are specified for the lengthscales. This argument is only used when \code{struc = NULL}.}
 
 \item{nugget_est}{a bool indicating if the nugget term is to be estimated:
 \enumerate{

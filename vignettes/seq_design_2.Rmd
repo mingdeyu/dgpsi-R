@@ -16,7 +16,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to use the package to sequentially refine a bundle of DGP emulators, each of which emulates an output of a simulator.
+This vignette shows how to use the package to sequentially refine a bundle of DGP emulators, each of which emulates an output of a simulator. To run this vignette, an installation of the development version of `dgpsi` is required:
+
+```{r}
+devtools::install_github('mingdeyu/dgpsi-R')
+```
+
+which will invoke the installation of the development version of the Python environment after executing `init_py()` the first time.
 
 ## Load the packages
 

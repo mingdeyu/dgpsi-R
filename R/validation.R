@@ -123,6 +123,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
 
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+
   #For LOO
   if (is.null(x_test) & is.null(y_test)){
     #check existing LOO
@@ -269,6 +271,8 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
   object$emulator_obj$set_nb_parallel(threading)
+
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   #For LOO
   if (is.null(x_test) & is.null(y_test)){
@@ -428,6 +432,8 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
   object$emulator_obj$set_nb_parallel(threading)
+
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   #For OOS
   if (!is.null(x_test) & !is.null(y_test)) {

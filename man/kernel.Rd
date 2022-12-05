@@ -11,6 +11,7 @@ kernel(
   name = "sexp",
   prior_name = "ga",
   prior_coef = c(1.6, 0.3),
+  bounds = NULL,
   nugget_est = FALSE,
   scale_est = FALSE,
   input_dim = NULL,
@@ -39,6 +40,9 @@ the lengthscales and nugget term. Set \code{NULL} to disable the prior. Defaults
 
 \item{prior_coef}{a vector that contains two values specifying the shape and rate
 parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to \code{c(1.6,0.3)}.}
+
+\item{bounds}{a vector of length two that gives the lower bound (the first element of the vector) and the upper bound (the second element of the
+vector) of all lengthscales of the GP node. Defaults to \code{NULL} where no bounds are specified for the lengthscales.}
 
 \item{nugget_est}{set to \code{TRUE} to estimate the nugget term or to \code{FALSE} to fix the nugget term as specified
 by the argument \code{nugget}. If set to \code{TRUE}, the value set to the argument \code{nugget} is used as the initial

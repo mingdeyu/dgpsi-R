@@ -14,14 +14,16 @@
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`.
 #' @param prior_name  prior options for the lengthscales and nugget term. Either gamma (`"ga"`) or inverse gamma (`"inv_ga"`) distribution for
-#'      the lengthscales and nugget term. Set `NULL` to disable the prior. Defaults to `"ga"`.
+#'     the lengthscales and nugget term. Set `NULL` to disable the prior. Defaults to `"ga"`.
 #' @param prior_coef a vector that contains two values specifying the shape and rate
-#'      parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to `c(1.6,0.3)`.
+#'     parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to `c(1.6,0.3)`.
+#' @param bounds a vector of length two that gives the lower bound (the first element of the vector) and the upper bound (the second element of the
+#'     vector) of all lengthscales of the GP node. Defaults to `NULL` where no bounds are specified for the lengthscales.
 #' @param nugget_est set to `TRUE` to estimate the nugget term or to `FALSE` to fix the nugget term as specified
-#'      by the argument `nugget`. If set to `TRUE`, the value set to the argument `nugget` is used as the initial
-#'      value. Defaults to `FALSE`.
+#'     by the argument `nugget`. If set to `TRUE`, the value set to the argument `nugget` is used as the initial
+#'     value. Defaults to `FALSE`.
 #' @param scale_est set to `TRUE` to estimate the variance (i.e., scale) or to `FALSE` to fix the variance (i.e., scale) as specified
-#'      by the argument `scale`. Defaults to `FALSE`.
+#'     by the argument `scale`. Defaults to `FALSE`.
 #' @param input_dim a vector that contains either
 #' 1. the indices of GP nodes in the feeding layer whose outputs feed into this GP node; or
 #' 2. the indices of global input dimensions that are linked to the outputs of some feeding emulators,
@@ -49,7 +51,10 @@
 #' }
 #' @md
 #' @export
-kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = c(1.6,0.3), nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {
+kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = c(1.6,0.3), bounds = NULL, nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {
+
+  if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
+  if ( !is.null(prior_name) & prior_name!='ga"' & prior_name!='inv_ga' ) stop("The provided 'prior_name' is not supported.", call. = FALSE)
 
   if(!is.null(input_dim)){
     input_dim <- reticulate::np_array(as.integer(input_dim - 1))
@@ -59,6 +64,10 @@ kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name 
     connect <- reticulate::np_array(as.integer(connect - 1))
   }
 
-  res <- pkg.env$dgpsi$kernel(reticulate::np_array(length), scale, nugget, name, prior_name, reticulate::np_array(prior_coef), nugget_est, scale_est, input_dim, connect)
+  if(!is.null(bounds)){
+    bounds <- reticulate::np_array(bounds)
+  }
+
+  res <- pkg.env$dgpsi$kernel(reticulate::np_array(length), scale, nugget, name, prior_name, reticulate::np_array(prior_coef), bounds, nugget_est, scale_est, input_dim, connect)
   return(res)
 }

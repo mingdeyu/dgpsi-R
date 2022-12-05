@@ -14,6 +14,9 @@
 #' * if it is a vector (which must have a length of `ncol(X)`), it is assumed that kernel functions across input dimensions have different lengthscales.
 #'
 #' Defaults to a vector of 0.2. This argument is only used when `struc = NULL`.
+#' @param bounds the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
+#'    the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
+#'    to `NULL` where no bounds are specified for the lengthscales. This argument is only used when `struc = NULL`.
 #' @param nugget_est a bool indicating if the nugget term is to be estimated:
 #' 1. `FALSE`: the nugget term is fixed to `nugget`.
 #' 2. `TRUE`: the nugget term will be estimated.
@@ -113,7 +116,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), bounds = NULL, nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)
@@ -125,6 +128,8 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
   if ( n_dim_Y != 1 ) {
     stop("'Y' must be a vector or a matrix with only one column for a GP emulator.", call. = FALSE)
   }
+
+  if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
 
   if( !is.null(linked_idx) ) {
     if ( !is.list(linked_idx) ) {
@@ -143,6 +148,17 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
       stop("length(lengthscale) must be 1 or ncol(X).", call. = FALSE)
     }
 
+    if ( !is.null(bounds) ){
+      if ( !is.vector(bounds) ) {
+        bounds <- as.vector(bounds)
+      }
+      if ( length(bounds)!=2 ) {
+        stop(sprintf("length(bounds) must equal to %i.", 2), call. = FALSE)
+      }
+      if ( bounds[1]>bounds[2] ) stop("The second element of 'bounds' must be greater than the first one.", call. = FALSE)
+      bounds <- reticulate::np_array(bounds)
+    }
+
     if( !is.null(internal_input_idx) ) {
       external_input_idx <- setdiff(1:n_dim_X, internal_input_idx)
       if ( length(external_input_idx) == 0) {
@@ -156,7 +172,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
       external_input_idx = NULL
     }
 
-    struc <- pkg.env$dgpsi$kernel(length = reticulate::np_array(lengthscale), name = name, scale = scale, scale_est = scale_est, nugget = nugget, nugget_est = nugget_est,
+    struc <- pkg.env$dgpsi$kernel(length = reticulate::np_array(lengthscale), name = name, bds = bounds, scale = scale, scale_est = scale_est, nugget = nugget, nugget_est = nugget_est,
                                   input_dim = internal_input_idx, connect = external_input_idx)
 
     if ( verb ) {

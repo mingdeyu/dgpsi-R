@@ -25,10 +25,10 @@ draw(object, ...)
 
 \item{...}{N/A.}
 
-\item{type}{either \code{rmse}, for the trace plot of RMSEs of emulators constructed during the sequential designs,
-or \code{design}, for visualizations of input designs created by the sequential design procedure. Defaults to \code{rmse}.}
+\item{type}{either \code{"rmse"}, for the trace plot of RMSEs or customized evaluating metrics of emulators constructed during the sequential designs,
+or \code{"design"}, for visualizations of input designs created by the sequential design procedure. Defaults to \code{"rmse"}.}
 
-\item{log}{a bool that indicates whether to plot RMSEs in log-scale if \code{type = "rmse"}. Defaults to \code{FALSE}.}
+\item{log}{a bool that indicates whether to plot RMSEs or customized evaluating metrics in log-scale if \code{type = "rmse"}. Defaults to \code{FALSE}.}
 
 \item{emulator}{the index of the emulator packed in \code{object} if \code{object} is an instance of the \code{bundle} class.}
 }
@@ -40,6 +40,10 @@ This function draws validation plots of the sequential design of a (D)GP emulato
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+}
+\note{
+If a customized evaluating function is provided to \code{\link[=design]{design()}} and the function returns a single evaluating metric value when \code{object} is
+an instance of the \code{bundle} class, the value of \code{emulator} has no effects on the plot when \code{type = "rmse"}.
 }
 \examples{
 \dontrun{

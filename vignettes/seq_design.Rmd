@@ -17,7 +17,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to use the package to sequentially enrich the design for adaptive improvements of a DGP emulator.
+This vignette shows how to use the package to sequentially enrich the design for adaptive improvements of a DGP emulator, and requires an installation of the development version:
+
+```{r}
+devtools::install_github('mingdeyu/dgpsi-R')
+```
+
+which will invoke the installation of the development version of the Python environment after executing `init_py()` the first time.
 
 ## Load the packages
 
