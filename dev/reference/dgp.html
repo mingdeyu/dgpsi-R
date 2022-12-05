@@ -71,6 +71,7 @@
 <span>  depth <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">"sexp"</span>,</span>
 <span>  lengthscale <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  bounds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  share <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nugget_est <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nugget <span class="op">=</span> <span class="fl">1e-06</span>,</span>
@@ -128,6 +129,14 @@ Defaults to <code>2</code>. This argument is only used when <code>struc = NULL</
 <li><p>if it is a vector, each element of the vector specifies the initial lengthscales that will be applied to all GP nodes in the corresponding layer.
 The vector should have a length of <code>depth</code> if <code>likelihood = NULL</code> or a length of <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
 </ol><p>Defaults to a numeric value of <code>1.0</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+
+
+<dt>bounds</dt>
+<dd><p>the lower and upper bounds of lengthscales in GP nodes. It can be a vector or a matrix:</p><ol><li><p>if it is a vector, the lower bound (the first element of the vector) and upper bound (the second element of the vector) will be applied to
+lengthscales for all GP nodes in the DGP hierarchy.</p></li>
+<li><p>if it is a matrix, each row of the matrix specifies the lower and upper bounds of lengthscales for all GP nodes in the corresponding layer.
+The matrix should have its row number equal to <code>depth</code> if <code>likelihood = NULL</code> or to <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
+</ol><p>Defaults to <code>NULL</code> where no bounds are specified for the lengthscales. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>share</dt>

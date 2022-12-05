@@ -90,12 +90,12 @@
 
 
 <dt>type</dt>
-<dd><p>either <code>rmse</code>, for the trace plot of RMSEs of emulators constructed during the sequential designs,
-or <code>design</code>, for visualizations of input designs created by the sequential design procedure. Defaults to <code>rmse</code>.</p></dd>
+<dd><p>either <code>"rmse"</code>, for the trace plot of RMSEs or customized evaluating metrics of emulators constructed during the sequential designs,
+or <code>"design"</code>, for visualizations of input designs created by the sequential design procedure. Defaults to <code>"rmse"</code>.</p></dd>
 
 
 <dt>log</dt>
-<dd><p>a bool that indicates whether to plot RMSEs in log-scale if <code>type = "rmse"</code>. Defaults to <code>FALSE</code>.</p></dd>
+<dd><p>a bool that indicates whether to plot RMSEs or customized evaluating metrics in log-scale if <code>type = "rmse"</code>. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt>emulator</dt>
@@ -111,6 +111,11 @@ or <code>design</code>, for visualizations of input designs created by the seque
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>If a customized evaluating function is provided to <code><a href="design.html">design()</a></code> and the function returns a single evaluating metric value when <code>object</code> is
+an instance of the <code>bundle</code> class, the value of <code>emulator</code> has no effects on the plot when <code>type = "rmse"</code>.</p>
     </div>
 
     <div class="section level2">
