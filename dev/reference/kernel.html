@@ -73,7 +73,7 @@ Gaussian process node.</p>
 <span>  nugget <span class="op">=</span> <span class="fl">1e-06</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">"sexp"</span>,</span>
 <span>  prior_name <span class="op">=</span> <span class="st">"ga"</span>,</span>
-<span>  prior_coef <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.6</span>, <span class="fl">0.3</span><span class="op">)</span>,</span>
+<span>  prior_coef <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bounds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nugget_est <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  scale_est <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -107,13 +107,18 @@ are assumed different across input dimensions.</p></li>
 
 
 <dt>prior_name</dt>
-<dd><p>prior options for the lengthscales and nugget term. Either gamma (<code>"ga"</code>) or inverse gamma (<code>"inv_ga"</code>) distribution for
-the lengthscales and nugget term. Set <code>NULL</code> to disable the prior. Defaults to <code>"ga"</code>.</p></dd>
+<dd><p>prior options for the lengthscales and nugget term: gamma prior (<code>"ga"</code>), inverse gamma prior (<code>"inv_ga"</code>),
+or jointly robust prior (<code>"ref"</code>) for the lengthscales and nugget term. Set <code>NULL</code> to disable the prior. Defaults to <code>"ga"</code>.</p></dd>
 
 
 <dt>prior_coef</dt>
-<dd><p>a vector that contains two values specifying the shape and rate
-parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to <code>c(1.6,0.3)</code>.</p></dd>
+<dd><p>a vector that contains the coefficients for different priors:</p><ul><li><p>for the gamma prior, it is a vector of two values specifying the shape and rate parameters of the gamma distribution. Set to <code>NULL</code> for the
+default value <code>c(1.6,0.3)</code>.</p></li>
+<li><p>for the inverse gamma prior, it is a vector of two values specifying the shape and scale parameters of the inverse gamma distribution. Set
+to <code>NULL</code> for the default value <code>c(1.6,0.3)</code>.</p></li>
+<li><p>for the jointly robust prior, it is a vector of a single value specifying the <code>a</code> parameter in the prior. Set to <code>NULL</code> for the
+default value <code>c(0.2)</code>. See the reference below for the jointly robust prior.</p></li>
+</ul><p>Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>bounds</dt>
@@ -159,6 +164,10 @@ the remaining input dimensions that are connected to the feeding emulators.</p><
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. <em>Bayesian Analysis</em>, <strong>14(3)</strong>, 857-885.</p>
     </div>
 
     <div class="section level2">

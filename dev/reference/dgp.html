@@ -72,6 +72,7 @@
 <span>  name <span class="op">=</span> <span class="st">"sexp"</span>,</span>
 <span>  lengthscale <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  bounds <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior <span class="op">=</span> <span class="st">"ga"</span>,</span>
 <span>  share <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nugget_est <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nugget <span class="op">=</span> <span class="fl">1e-06</span>,</span>
@@ -137,6 +138,13 @@ lengthscales for all GP nodes in the DGP hierarchy.</p></li>
 <li><p>if it is a matrix, each row of the matrix specifies the lower and upper bounds of lengthscales for all GP nodes in the corresponding layer.
 The matrix should have its row number equal to <code>depth</code> if <code>likelihood = NULL</code> or to <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
 </ol><p>Defaults to <code>NULL</code> where no bounds are specified for the lengthscales. This argument is only used when <code>struc = NULL</code>.</p></dd>
+
+
+<dt>prior</dt>
+<dd><p>prior to be used for Maximum a Posterior for lengthscales and nuggets of all GP nodes in the DGP hierarchy:</p><ul><li><p>gamma prior (<code>"ga"</code>),</p></li>
+<li><p>inverse gamma prior (<code>"inv_ga"</code>), or</p></li>
+<li><p>jointly robust prior (<code>"ref"</code>).</p></li>
+</ul><p>Defaults to <code>"ga"</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>share</dt>

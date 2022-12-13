@@ -71,6 +71,7 @@
 <span>  name <span class="op">=</span> <span class="st">"sexp"</span>,</span>
 <span>  lengthscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  bounds <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior <span class="op">=</span> <span class="st">"ref"</span>,</span>
 <span>  nugget_est <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nugget <span class="op">=</span> <span class="fl">1e-06</span>,</span>
 <span>  scale_est <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -113,6 +114,12 @@ the GP specifications are automatically generated using information provided in 
 <dd><p>the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
 to <code>NULL</code> where no bounds are specified for the lengthscales. This argument is only used when <code>struc = NULL</code>.</p></dd>
+
+
+<dt>prior</dt>
+<dd><p>prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (<code>"ga"</code>), inverse gamma prior (<code>"inv_ga"</code>),
+or jointly robust prior (<code>"ref"</code>). Defaults to <code>"ref"</code>. This argument is only used when <code>struc = NULL</code>. See the reference below for the jointly
+robust prior.</p></dd>
 
 
 <dt>nugget_est</dt>
@@ -195,6 +202,10 @@ to add linking information to the GP emulator. Defaults to <code>NULL</code>.</p
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Any R vector detected in <code>X</code> and <code>Y</code> will be treated as a column vector and automatically converted into a single-column
 R matrix. Thus, if <code>X</code> is a single data point with multiple dimensions, it must be given as a matrix.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. <em>Bayesian Analysis</em>, <strong>14(3)</strong>, 857-885.</p>
     </div>
 
     <div class="section level2">
