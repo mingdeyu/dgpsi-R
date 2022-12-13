@@ -10,7 +10,7 @@ kernel(
   nugget = 1e-06,
   name = "sexp",
   prior_name = "ga",
-  prior_coef = c(1.6, 0.3),
+  prior_coef = NULL,
   bounds = NULL,
   nugget_est = FALSE,
   scale_est = FALSE,
@@ -35,11 +35,20 @@ are assumed different across input dimensions.
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}.}
 
-\item{prior_name}{prior options for the lengthscales and nugget term. Either gamma (\code{"ga"}) or inverse gamma (\code{"inv_ga"}) distribution for
-the lengthscales and nugget term. Set \code{NULL} to disable the prior. Defaults to \code{"ga"}.}
+\item{prior_name}{prior options for the lengthscales and nugget term: gamma prior (\code{"ga"}), inverse gamma prior (\code{"inv_ga"}),
+or jointly robust prior (\code{"ref"}) for the lengthscales and nugget term. Set \code{NULL} to disable the prior. Defaults to \code{"ga"}.}
 
-\item{prior_coef}{a vector that contains two values specifying the shape and rate
-parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to \code{c(1.6,0.3)}.}
+\item{prior_coef}{a vector that contains the coefficients for different priors:
+\itemize{
+\item for the gamma prior, it is a vector of two values specifying the shape and rate parameters of the gamma distribution. Set to \code{NULL} for the
+default value \code{c(1.6,0.3)}.
+\item for the inverse gamma prior, it is a vector of two values specifying the shape and scale parameters of the inverse gamma distribution. Set
+to \code{NULL} for the default value \code{c(1.6,0.3)}.
+\item for the jointly robust prior, it is a vector of a single value specifying the \code{a} parameter in the prior. Set to \code{NULL} for the
+default value \code{c(0.2)}. See the reference below for the jointly robust prior.
+}
+
+Defaults to \code{NULL}.}
 
 \item{bounds}{a vector of length two that gives the lower bound (the first element of the vector) and the upper bound (the second element of the
 vector) of all lengthscales of the GP node. Defaults to \code{NULL} where no bounds are specified for the lengthscales.}
@@ -89,4 +98,7 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 # Check https://mingdeyu.github.io/dgpsi-R/ for examples
 # on how to customize DGP structures using kernel().
 }
+}
+\references{
+Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. \emph{Bayesian Analysis}, \strong{14(3)}, 857-885.
 }

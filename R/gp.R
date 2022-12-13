@@ -17,6 +17,9 @@
 #' @param bounds the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 #'    the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
 #'    to `NULL` where no bounds are specified for the lengthscales. This argument is only used when `struc = NULL`.
+#' @param prior prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (`"ga"`), inverse gamma prior (`"inv_ga"`),
+#'     or jointly robust prior (`"ref"`). Defaults to `"ref"`. This argument is only used when `struc = NULL`. See the reference below for the jointly
+#'     robust prior.
 #' @param nugget_est a bool indicating if the nugget term is to be estimated:
 #' 1. `FALSE`: the nugget term is fixed to `nugget`.
 #' 2. `TRUE`: the nugget term will be estimated.
@@ -71,6 +74,8 @@
 #' * [lgp()] for linked (D)GP emulator constructions.
 #' * [design()] for sequential designs.
 #'
+#' @references
+#' Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. *Bayesian Analysis*, **14(3)**, 857-885.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
 #'     R matrix. Thus, if `X` is a single data point with multiple dimensions, it must be given as a matrix.
@@ -116,7 +121,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), bounds = NULL, nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)
@@ -130,6 +135,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
   }
 
   if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
+  if ( prior!='ga' & prior!='inv_ga' & prior!='ref') stop("'prior' can only be 'ga', 'inv_ga', or 'ref'.", call. = FALSE)
 
   if( !is.null(linked_idx) ) {
     if ( !is.list(linked_idx) ) {
@@ -172,7 +178,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)
       external_input_idx = NULL
     }
 
-    struc <- pkg.env$dgpsi$kernel(length = reticulate::np_array(lengthscale), name = name, bds = bounds, scale = scale, scale_est = scale_est, nugget = nugget, nugget_est = nugget_est,
+    struc <- pkg.env$dgpsi$kernel(length = reticulate::np_array(lengthscale), name = name, prior_name = prior, bds = bounds, scale = scale, scale_est = scale_est, nugget = nugget, nugget_est = nugget_est,
                                   input_dim = internal_input_idx, connect = external_input_idx)
 
     if ( verb ) {

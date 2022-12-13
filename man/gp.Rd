@@ -11,6 +11,7 @@ gp(
   name = "sexp",
   lengthscale = rep(0.2, ncol(X)),
   bounds = NULL,
+  prior = "ref",
   nugget_est = FALSE,
   nugget = 1e-06,
   scale_est = TRUE,
@@ -44,6 +45,10 @@ Defaults to a vector of 0.2. This argument is only used when \code{struc = NULL}
 \item{bounds}{the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
 to \code{NULL} where no bounds are specified for the lengthscales. This argument is only used when \code{struc = NULL}.}
+
+\item{prior}{prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (\code{"ga"}), inverse gamma prior (\code{"inv_ga"}),
+or jointly robust prior (\code{"ref"}). Defaults to \code{"ref"}. This argument is only used when \code{struc = NULL}. See the reference below for the jointly
+robust prior.}
 
 \item{nugget_est}{a bool indicating if the nugget term is to be estimated:
 \enumerate{
@@ -167,4 +172,7 @@ write(m, 'step_gp')
 m <- read('step_gp')
 }
 
+}
+\references{
+Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. \emph{Bayesian Analysis}, \strong{14(3)}, 857-885.
 }

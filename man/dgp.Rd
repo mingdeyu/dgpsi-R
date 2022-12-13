@@ -12,6 +12,7 @@ dgp(
   name = "sexp",
   lengthscale = 1,
   bounds = NULL,
+  prior = "ga",
   share = TRUE,
   nugget_est = FALSE,
   nugget = 1e-06,
@@ -70,6 +71,15 @@ The matrix should have its row number equal to \code{depth} if \code{likelihood 
 }
 
 Defaults to \code{NULL} where no bounds are specified for the lengthscales. This argument is only used when \code{struc = NULL}.}
+
+\item{prior}{prior to be used for Maximum a Posterior for lengthscales and nuggets of all GP nodes in the DGP hierarchy:
+\itemize{
+\item gamma prior (\code{"ga"}),
+\item inverse gamma prior (\code{"inv_ga"}), or
+\item jointly robust prior (\code{"ref"}).
+}
+
+Defaults to \code{"ga"}. This argument is only used when \code{struc = NULL}.}
 
 \item{share}{a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to \code{TRUE}. This argument is only used when \code{struc = NULL}.}
 

@@ -29,6 +29,12 @@
 #'    The matrix should have its row number equal to `depth` if `likelihood = NULL` or to `depth - 1` if `likelihood` is not `NULL`.
 #'
 #' Defaults to `NULL` where no bounds are specified for the lengthscales. This argument is only used when `struc = NULL`.
+#' @param prior prior to be used for Maximum a Posterior for lengthscales and nuggets of all GP nodes in the DGP hierarchy:
+#' * gamma prior (`"ga"`),
+#' * inverse gamma prior (`"inv_ga"`), or
+#' * jointly robust prior (`"ref"`).
+#'
+#' Defaults to `"ga"`. This argument is only used when `struc = NULL`.
 #' @param share a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to `TRUE`. This argument is only used when `struc = NULL`.
 #' @param nugget_est a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 #'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
@@ -172,7 +178,7 @@
 #' }
 #' @md
 #' @export
-dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0, bounds = NULL, share = TRUE,
+dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., connect = TRUE,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
                 burnin = NULL, B = 30, internal_input_idx = NULL, linked_idx = NULL) {
@@ -377,7 +383,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
             } else {
               length_scale <- rep(lengthscale[l], n_dim_X)
             }
-            layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
+            layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                  input_dim = internal_input_idx, connect = external_input_idx)
           } else {
             if ( connect ) {
@@ -386,7 +392,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               } else {
                 length_scale <- rep(lengthscale[l], 2*n_dim_X)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
+              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                    connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
             } else {
               if ( isTRUE(share) ){
@@ -394,7 +400,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               } else {
                 length_scale <- rep(lengthscale[l], n_dim_X)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k])
+              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k])
             }
           }
         } else {
@@ -404,7 +410,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               } else {
                 length_scale <- rep(lengthscale[l], n_dim_X)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, nugget = nugget[l],
+              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, nugget = nugget[l],
                                                    input_dim = internal_input_idx, connect = external_input_idx)
             } else {
               if ( connect ) {
@@ -413,7 +419,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 } else {
                   length_scale <- rep(lengthscale[l], 2*n_dim_X)
                 }
-                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, nugget = nugget[l],
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, nugget = nugget[l],
                                                      connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
               } else {
                 if ( isTRUE(share) ){
@@ -421,7 +427,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 } else {
                   length_scale <- rep(lengthscale[l], n_dim_X)
                 }
-                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, nugget = nugget[l])
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, nugget = nugget[l])
               }
             }
           }

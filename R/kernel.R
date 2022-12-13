@@ -13,10 +13,17 @@
 #' @param nugget the nugget term of a GP node. Defaults to `1e-6`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`.
-#' @param prior_name  prior options for the lengthscales and nugget term. Either gamma (`"ga"`) or inverse gamma (`"inv_ga"`) distribution for
-#'     the lengthscales and nugget term. Set `NULL` to disable the prior. Defaults to `"ga"`.
-#' @param prior_coef a vector that contains two values specifying the shape and rate
-#'     parameters of the gamma prior, or shape and scale parameters of the inverse gamma prior. Defaults to `c(1.6,0.3)`.
+#' @param prior_name  prior options for the lengthscales and nugget term: gamma prior (`"ga"`), inverse gamma prior (`"inv_ga"`),
+#'     or jointly robust prior (`"ref"`) for the lengthscales and nugget term. Set `NULL` to disable the prior. Defaults to `"ga"`.
+#' @param prior_coef a vector that contains the coefficients for different priors:
+#' * for the gamma prior, it is a vector of two values specifying the shape and rate parameters of the gamma distribution. Set to `NULL` for the
+#'   default value `c(1.6,0.3)`.
+#' * for the inverse gamma prior, it is a vector of two values specifying the shape and scale parameters of the inverse gamma distribution. Set
+#'   to `NULL` for the default value `c(1.6,0.3)`.
+#' * for the jointly robust prior, it is a vector of a single value specifying the `a` parameter in the prior. Set to `NULL` for the
+#'   default value `c(0.2)`. See the reference below for the jointly robust prior.
+#'
+#' Defaults to `NULL`.
 #' @param bounds a vector of length two that gives the lower bound (the first element of the vector) and the upper bound (the second element of the
 #'     vector) of all lengthscales of the GP node. Defaults to `NULL` where no bounds are specified for the lengthscales.
 #' @param nugget_est set to `TRUE` to estimate the nugget term or to `FALSE` to fix the nugget term as specified
@@ -42,6 +49,8 @@
 #'      the remaining input dimensions that are connected to the feeding emulators.
 #'
 #' @return A 'python' object to represent a GP node.
+#' @references
+#' Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. *Bayesian Analysis*, **14(3)**, 857-885.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
 #' \dontrun{
@@ -51,7 +60,7 @@
 #' }
 #' @md
 #' @export
-kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = c(1.6,0.3), bounds = NULL, nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {
+kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = NULL, bounds = NULL, nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {
 
   if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
   if ( !is.null(prior_name) & prior_name!='ga"' & prior_name!='inv_ga' ) stop("The provided 'prior_name' is not supported.", call. = FALSE)
@@ -68,6 +77,10 @@ kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name 
     bounds <- reticulate::np_array(bounds)
   }
 
-  res <- pkg.env$dgpsi$kernel(reticulate::np_array(length), scale, nugget, name, prior_name, reticulate::np_array(prior_coef), bounds, nugget_est, scale_est, input_dim, connect)
+  if(!is.null(prior_coef)){
+    prior_coef <- reticulate::np_array(prior_coef)
+  }
+
+  res <- pkg.env$dgpsi$kernel(reticulate::np_array(length), scale, nugget, name, prior_name, prior_coef, bounds, nugget_est, scale_est, input_dim, connect)
   return(res)
 }

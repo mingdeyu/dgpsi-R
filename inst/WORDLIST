@@ -3,6 +3,7 @@ ASA
 CMD
 DGP
 ESS
+Gu
 Guillas
 LHD
 MacKay
@@ -15,12 +16,10 @@ adaptively
 bool
 bools
 burnin
-conda
 doi
 ggplots
 heteroskedastic
 lengthscale
 lengthscales
 maximin
-symlink
 th
