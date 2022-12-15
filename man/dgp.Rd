@@ -9,6 +9,7 @@ dgp(
   Y,
   struc = NULL,
   depth = 2,
+  node = ncol(X),
   name = "sexp",
   lengthscale = 1,
   bounds = NULL,
@@ -44,11 +45,14 @@ each of which represents a layer and contains a number of GP nodes (defined by \
 The final layer of the DGP structure (i.e., the final sub-list in \code{struc}) can be a likelihood
 layer that contains a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}). When \code{struc = NULL},
 the DGP structure is automatically generated and can be checked by applying \code{\link[=summary]{summary()}} to the output from \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
-If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{name}, \code{lengthscale}, \code{nugget_est}, \code{nugget},
-\code{scale_est}, \code{scale}, \code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
+If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{node}, \code{name}, \code{lengthscale}, \code{bounds}, \code{prior},
+\code{share}, \code{nugget_est}, \code{nugget}, \code{scale_est}, \code{scale}, \code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
 
 \item{depth}{number of layers (including the likelihood layer) for a DGP structure. \code{depth} must be at least \code{2}.
 Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}
+
+\item{node}{number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
+\code{ncol(X)}.}
 
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}

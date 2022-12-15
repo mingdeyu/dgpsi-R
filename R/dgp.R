@@ -10,10 +10,12 @@
 #'     The final layer of the DGP structure (i.e., the final sub-list in `struc`) can be a likelihood
 #'     layer that contains a likelihood function (e.g., [Poisson()]). When `struc = NULL`,
 #'     the DGP structure is automatically generated and can be checked by applying [summary()] to the output from [dgp()] with `training = FALSE`.
-#'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `name`, `lengthscale`, `nugget_est`, `nugget`,
-#'     `scale_est`, `scale`, `connect`, `likelihood`, and `internal_input_idx` will NOT be used. Defaults to `NULL`.
+#'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `node`, `name`, `lengthscale`, `bounds`, `prior`,
+#'     `share`, `nugget_est`, `nugget`, `scale_est`, `scale`, `connect`, `likelihood`, and `internal_input_idx` will NOT be used. Defaults to `NULL`.
 #' @param depth number of layers (including the likelihood layer) for a DGP structure. `depth` must be at least `2`.
 #'     Defaults to `2`. This argument is only used when `struc = NULL`.
+#' @param node number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
+#'    `ncol(X)`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
 #' @param lengthscale initial lengthscales for GP nodes in the DGP emulator. It can be a single numeric value or a vector:
@@ -178,7 +180,7 @@
 #' }
 #' @md
 #' @export
-dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
+dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., connect = TRUE,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
                 burnin = NULL, B = 30, internal_input_idx = NULL, linked_idx = NULL) {
@@ -366,7 +368,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
       if( l == no_gp_layer ) {
         no_kerenl <- length(nugget_est)
         } else {
-          no_kerenl <- n_dim_X
+          no_kerenl <- node
         }
 
       if ( is.null(bounds) ){
@@ -390,7 +392,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               if ( isTRUE(share) ){
                 length_scale <- lengthscale[l]
               } else {
-                length_scale <- rep(lengthscale[l], 2*n_dim_X)
+                length_scale <- rep(lengthscale[l], n_dim_X+node)
               }
               layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                    connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
@@ -398,7 +400,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
               if ( isTRUE(share) ){
                 length_scale <- lengthscale[l]
               } else {
-                length_scale <- rep(lengthscale[l], n_dim_X)
+                length_scale <- rep(lengthscale[l], node)
               }
               layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k])
             }
@@ -417,7 +419,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 if ( isTRUE(share) ){
                   length_scale <- lengthscale[l]
                 } else {
-                  length_scale <- rep(lengthscale[l], 2*n_dim_X)
+                  length_scale <- rep(lengthscale[l], n_dim_X+node)
                 }
                 layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, nugget = nugget[l],
                                                      connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
@@ -425,7 +427,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, name = 'sexp', lengthscale = 1.0,
                 if ( isTRUE(share) ){
                   length_scale <- lengthscale[l]
                 } else {
-                  length_scale <- rep(lengthscale[l], n_dim_X)
+                  length_scale <- rep(lengthscale[l], node)
                 }
                 layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, nugget = nugget[l])
               }
