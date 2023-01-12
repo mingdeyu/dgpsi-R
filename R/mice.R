@@ -11,7 +11,7 @@
 #'     from which the next design point(s) are determined.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
-#' @param nugget_s the value of the smoothing nugget term used by MICE. Defaults to `1.0`.
+#' @param nugget_s the value of the smoothing nugget term used by MICE. Defaults to `1e-6`.
 #' @param workers the number of workers/cores to be used for the criterion calculation. If set to `NULL`,
 #'     the number of workers is set to `(max physical cores available - 1)`. Defaults to `1`.
 #' @param threading a bool indicating whether to use the multi-threading to accelerate the criterion calculation for a DGP emulator.
@@ -100,7 +100,7 @@ mice <- function(object, x_cand, ...){
 #' @rdname mice
 #' @method mice gp
 #' @export
-mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1., workers = 1, ...) {
+mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, ...) {
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   training_input <- object$data$X
@@ -153,7 +153,7 @@ mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1., workers = 1, 
 #' @rdname mice
 #' @method mice dgp
 #' @export
-mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1., workers = 1, threading = FALSE, aggregate = NULL, ...) {
+mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, threading = FALSE, aggregate = NULL, ...) {
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
@@ -258,7 +258,7 @@ mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1., workers = 1,
 #' @rdname mice
 #' @method mice bundle
 #' @export
-mice.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+mice.bundle <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, threading = FALSE, aggregate = NULL, ...) {
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   #check no of emulators
@@ -292,14 +292,14 @@ mice.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading =
     for ( i in 1:n_emulators ){
       obj_i <- object[[paste('emulator',i,sep='')]]
       if ( inherits(obj_i,"gp") ){
-        res = obj_i$emulator_obj$metric(x_cand = x_cand, method = 'MICE', score_only = TRUE)
+        res = obj_i$emulator_obj$metric(x_cand = x_cand, method = 'MICE', nugget_s = nugget_s, score_only = TRUE)
         scores <- cbind(scores, res)
       } else {
         obj_i$emulator_obj$set_nb_parallel(threading)
         if ( identical(workers,as.integer(1)) ){
-          res = obj_i$emulator_obj$metric(x_cand = x_cand, method = 'MICE', score_only = TRUE)
+          res = obj_i$emulator_obj$metric(x_cand = x_cand, method = 'MICE', nugget_s = nugget_s, score_only = TRUE)
         } else {
-          res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = 'MICE', score_only = TRUE, core_num = workers)
+          res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = 'MICE', nugget_s = nugget_s, score_only = TRUE, core_num = workers)
         }
         scores <- cbind(scores, res)
       }
@@ -338,14 +338,14 @@ mice.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading =
       for ( j in 1:n_emulators ){
         obj_j <- object[[paste('emulator',j,sep='')]]
         if ( inherits(obj_j,"gp") ){
-          res = emulator_obj_list[[j]]$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', score_only = TRUE)
+          res = emulator_obj_list[[j]]$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', nugget_s = nugget_s, score_only = TRUE)
           scores <- cbind(scores, res)
         } else {
           emulator_obj_list[[j]]$set_nb_parallel(threading)
           if ( identical(workers,as.integer(1)) ){
-            res = emulator_obj_list[[j]]$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', score_only = TRUE)
+            res = emulator_obj_list[[j]]$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', nugget_s = nugget_s, score_only = TRUE)
           } else {
-            res = emulator_obj_list[[j]]$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', score_only = TRUE, core_num = workers)
+            res = emulator_obj_list[[j]]$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', nugget_s = nugget_s, score_only = TRUE, core_num = workers)
           }
           emulator_obj_list[[j]]$set_nb_parallel(FALSE)
           scores <- cbind(scores, res)

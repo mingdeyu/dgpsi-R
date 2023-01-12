@@ -52,7 +52,8 @@
 #'
 #' Set `nugget` to a small value and the bools in `nugget_est` to `FASLE` for deterministic emulations where the emulator
 #'    interpolates the training data points. Set `nugget` to a reasonable larger value and the bools in `nugget_est` to `TRUE` for stochastic emulations where
-#'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used when `struc = NULL`.
+#'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6` if `nugget_est = FALSE` and
+#'    `0.01` if `nugget_est = TRUE`. This argument is only used when `struc = NULL`.
 #' @param scale_est a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 #'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
 #'     bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
@@ -181,7 +182,7 @@
 #' @md
 #' @export
 dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
-                nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., connect = TRUE,
+                nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
                 burnin = NULL, B = 30, internal_input_idx = NULL, linked_idx = NULL) {
 

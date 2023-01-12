@@ -16,7 +16,7 @@ dgp(
   prior = "ga",
   share = TRUE,
   nugget_est = FALSE,
-  nugget = 1e-06,
+  nugget = ifelse(all(nugget_est), 0.01, 1e-06),
   scale_est = TRUE,
   scale = 1,
   connect = TRUE,
@@ -106,7 +106,8 @@ The vector should have a length of \code{depth} if \code{likelihood = NULL} or a
 
 Set \code{nugget} to a small value and the bools in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the bools in \code{nugget_est} to \code{TRUE} for stochastic emulations where
-the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used when \code{struc = NULL}.}
+the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6} if \code{nugget_est = FALSE} and
+\code{0.01} if \code{nugget_est = TRUE}. This argument is only used when \code{struc = NULL}.}
 
 \item{scale_est}{a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each

@@ -17,7 +17,7 @@
 #' * the size of a sub-set to be sampled from the candidate set `x_cand` at each step of the sequential design to determine the next
 #'   design point, if `x_cand` is not `NULL`.
 #'
-#' Defaults to `200`
+#' Defaults to `200`.
 #' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 #'     input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
 #'     dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
@@ -62,7 +62,7 @@
 #'   - is a matrix of indices if the first argument is an instance of the `bundle` class. Each row of the matrix gives the indices of the design
 #'     points to be added to individual emulators in the bundle.
 #'
-#' See [alm()] and [mice()] for examples on customizing `method`. Defaults to [alm()].
+#' See [alm()], [mice()], and [pei()] for examples on customizing `method`. Defaults to [mice()].
 #' @param eval an R function that calculates the customized evaluating metric of the emulator.The function must satisfy the following basic rules:
 #' * the first argument is an emulator object that can be either an instance of
 #'   - the `gp` class (produced by [gp()]);
@@ -206,7 +206,7 @@ design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, freq, x_te
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, ...) {
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
 
   N <- check_N(N)
@@ -233,7 +233,6 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   n_dim_Y <- ncol(Y)
 
   N_acq <- c()
-  add_arg <- list(...)
   mnames <- methods::formalArgs(method)
   if ( !is.null(eval) ){
     vnames <- methods::formalArgs(eval)
@@ -244,6 +243,18 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     fnames <- methods::formalArgs(f)
 
     limits <- check_limits(limits, n_dim_X)
+    if ( is.null(limits) ){
+      limits <- matrix(0, n_dim_X, 2)
+      limits[,1] <- pkg.env$np$amin(X, axis=0L)
+      limits[,2] <- pkg.env$np$amax(X, axis=0L)
+    }
+    if (identical(method, pei)) {
+      add_arg <- list(pseudo_points = pp(X, limits))
+      add_arg <- utils::modifyList(add_arg, list(...))
+    } else {
+      add_arg <- list(...)
+    }
+
     int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
@@ -297,23 +308,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         }
 
         x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
-        if ( is.null(limits) ){
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(max(X[,j]))|!is.integer(min(X[,j])) ) stop(sprintf("The input dimension %i does not seems to be of the integer type.", j), call. = FALSE)
-              x_cand[,j] <- floor( x_cand[,j]*(max(X[,j])-min(X[,j])+1) ) + min(X[,j])
-            } else {
-              x_cand[,j] <- x_cand[,j]*(max(X[,j])-min(X[,j])) + min(X[,j])
-            }
-          }
-        } else {
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-              x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-            } else {
-              x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
-            }
+
+        for (j in 1:n_dim_X){
+          if ( int[j] ){
+            #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+            x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+          } else {
+            x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
           }
         }
 
@@ -423,6 +424,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
       }
     }
   } else {
+    add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
     x_cand <- xy_cand_list[[1]]
     y_cand <- xy_cand_list[[2]]
@@ -591,7 +593,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
       }
       object[["design"]][["wave1"]][["freq"]] <- freq[2]
-      object[["design"]][["wave1"]][["enrichement"]] <- N_acq
+      object[["design"]][["wave1"]][["enrichment"]] <- N_acq
       if( !is.null(target) ) {
         object[["design"]][["wave1"]][["target"]] <- target
         object[["design"]][["wave1"]][["reached"]] <- istarget
@@ -610,7 +612,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
       }
       object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-      object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichement"]] <-  N_acq
+      object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <-  N_acq
       if( !is.null(target) ) {
         object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
         object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
@@ -629,7 +631,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
 
   N <- check_N(N)
@@ -658,7 +660,6 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   n_dim_Y <- ncol(Y)
 
   N_acq <- c()
-  add_arg <- list(...)
   mnames <- methods::formalArgs(method)
   if ( !is.null(eval) ){
     vnames <- methods::formalArgs(eval)
@@ -670,6 +671,17 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     fnames <- methods::formalArgs(f)
 
     limits <- check_limits(limits, n_dim_X)
+    if ( is.null(limits) ){
+      limits <- matrix(0, n_dim_X, 2)
+      limits[,1] <- pkg.env$np$amin(X, axis=0L)
+      limits[,2] <- pkg.env$np$amax(X, axis=0L)
+    }
+    if (identical(method, pei)) {
+      add_arg <- list(pseudo_points = pp(X, limits))
+      add_arg <- utils::modifyList(add_arg, list(...))
+    } else {
+      add_arg <- list(...)
+    }
     int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
@@ -723,23 +735,13 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         }
 
         x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
-        if ( is.null(limits) ){
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(max(X[,j]))|!is.integer(min(X[,j])) ) stop(sprintf("The input dimension %i does not seems to be of the integer type.", j), call. = FALSE)
-              x_cand[,j] <- floor( x_cand[,j]*(max(X[,j])-min(X[,j])+1) ) + min(X[,j])
-            } else {
-              x_cand[,j] <- x_cand[,j]*(max(X[,j])-min(X[,j])) + min(X[,j])
-            }
-          }
-        } else {
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-              x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-            } else {
-              x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
-            }
+
+        for (j in 1:n_dim_X){
+          if ( int[j] ){
+            #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+            x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+          } else {
+            x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
           }
         }
 
@@ -861,6 +863,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
       }
     }
   } else {
+    add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
     x_cand <- xy_cand_list[[1]]
     y_cand <- xy_cand_list[[2]]
@@ -1079,7 +1082,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = alm, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
 
   N <- check_N(N)
@@ -1108,7 +1111,6 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
 
   N_acq_ind <- c()
-  add_arg <- list(...)
   mnames <- methods::formalArgs(method)
   if ( !is.null(eval) ){
     vnames <- methods::formalArgs(eval)
@@ -1121,6 +1123,25 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     fnames <- methods::formalArgs(f)
 
     limits <- check_limits(limits, n_dim_X)
+    if ( is.null(limits) ){
+      all_training_input <- c()
+      for ( k in 1:n_emulators ){
+        all_training_input <- rbind(all_training_input, X[[k]])
+      }
+      limits <- matrix(0, n_dim_X, 2)
+      limits[,1] <- pkg.env$np$amin(all_training_input, axis=0L)
+      limits[,2] <- pkg.env$np$amax(all_training_input, axis=0L)
+    }
+    if (identical(method, pei)) {
+      ppoints <- list()
+      for ( k in 1:n_emulators ){
+        ppoints[[k]] <- pp(X[[k]], limits)
+      }
+      add_arg <- list(pseudo_points = ppoints)
+      add_arg <- utils::modifyList(add_arg, list(...))
+    } else {
+      add_arg <- list(...)
+    }
     int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
@@ -1183,27 +1204,13 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
         }
 
         x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
-        if ( is.null(limits) ){
-          all_training_input <- c()
-          for ( k in 1:n_emulators ){
-            all_training_input <- rbind(all_training_input, X[[k]])
-          }
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(max(all_training_input[,j]))|!is.integer(min(all_training_input[,j])) ) stop(sprintf("The input dimension %i does not seems to be of the integer type.", j), call. = FALSE)
-              x_cand[,j] <- floor( x_cand[,j]*(max(all_training_input[,j])-min(all_training_input[,j])+1) ) + min(all_training_input[,j])
-            } else {
-              x_cand[,j] <- x_cand[,j]*(max(all_training_input[,j])-min(all_training_input[,j])) + min(all_training_input[,j])
-            }
-          }
-        } else {
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-              x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-            } else {
-              x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
-            }
+
+        for (j in 1:n_dim_X){
+          if ( int[j] ){
+            #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+            x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+          } else {
+            x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
           }
         }
 
@@ -1477,6 +1484,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
       }
     }
   } else {
+    add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
     x_cand <- xy_cand_list[[1]]
     y_cand <- xy_cand_list[[2]]

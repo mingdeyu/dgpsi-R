@@ -41,7 +41,7 @@ design(
   x_test = NULL,
   y_test = NULL,
   target = NULL,
-  method = alm,
+  method = mice,
   eval = NULL,
   verb = TRUE,
   check_point = NULL,
@@ -62,7 +62,7 @@ design(
   x_test = NULL,
   y_test = NULL,
   target = NULL,
-  method = alm,
+  method = mice,
   eval = NULL,
   verb = TRUE,
   check_point = NULL,
@@ -84,7 +84,7 @@ design(
   x_test = NULL,
   y_test = NULL,
   target = NULL,
-  method = alm,
+  method = mice,
   eval = NULL,
   verb = TRUE,
   check_point = NULL,
@@ -117,7 +117,7 @@ from the simulator at input positions in \code{x_cand}. Defaults to \code{NULL}.
 design point, if \code{x_cand} is not \code{NULL}.
 }
 
-Defaults to \code{200}}
+Defaults to \code{200}.}
 
 \item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
@@ -182,7 +182,7 @@ points to be added to individual emulators in the bundle.
 }
 }
 
-See \code{\link[=alm]{alm()}} and \code{\link[=mice]{mice()}} for examples on customizing \code{method}. Defaults to \code{\link[=alm]{alm()}}.}
+See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=pei]{pei()}} for examples on customizing \code{method}. Defaults to \code{\link[=mice]{mice()}}.}
 
 \item{eval}{an R function that calculates the customized evaluating metric of the emulator.The function must satisfy the following basic rules:
 \itemize{

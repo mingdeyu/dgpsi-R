@@ -13,7 +13,7 @@
 #' * if it is a single numeric value, it is assumed that kernel functions across input dimensions share the same lengthscale;
 #' * if it is a vector (which must have a length of `ncol(X)`), it is assumed that kernel functions across input dimensions have different lengthscales.
 #'
-#' Defaults to a vector of 0.2. This argument is only used when `struc = NULL`.
+#' Defaults to a vector of `0.1`. This argument is only used when `struc = NULL`.
 #' @param bounds the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 #'    the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
 #'    to `NULL` where no bounds are specified for the lengthscales. This argument is only used when `struc = NULL`.
@@ -28,8 +28,8 @@
 #' @param nugget the initial nugget value. If `nugget_est = FALSE`, the assigned value is fixed during the training.
 #'     Set `nugget` to a small value (e.g., `1e-6`) and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
 #'     interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic
-#'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6`. This argument is only used
-#'     when `struc = NULL`.
+#'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6` if `nugget_est = FALSE` and
+#'     `0.01` if `nugget_est = TRUE`. This argument is only used when `struc = NULL`.
 #' @param scale_est a bool indicating if the variance is to be estimated:
 #' 1. `FALSE`: the variance is fixed to `scale`.
 #' 2. `TRUE`: the variance term will be estimated.
@@ -121,7 +121,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.2, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = 1e-6, scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-6), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)

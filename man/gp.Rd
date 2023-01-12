@@ -9,11 +9,11 @@ gp(
   Y,
   struc = NULL,
   name = "sexp",
-  lengthscale = rep(0.2, ncol(X)),
+  lengthscale = rep(0.1, ncol(X)),
   bounds = NULL,
   prior = "ref",
   nugget_est = FALSE,
-  nugget = 1e-06,
+  nugget = ifelse(nugget_est, 0.01, 1e-06),
   scale_est = TRUE,
   scale = 1,
   training = TRUE,
@@ -40,7 +40,7 @@ the GP specifications are automatically generated using information provided in 
 \item if it is a vector (which must have a length of \code{ncol(X)}), it is assumed that kernel functions across input dimensions have different lengthscales.
 }
 
-Defaults to a vector of 0.2. This argument is only used when \code{struc = NULL}.}
+Defaults to a vector of \code{0.1}. This argument is only used when \code{struc = NULL}.}
 
 \item{bounds}{the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
@@ -61,8 +61,8 @@ Defaults to \code{FALSE}. This argument is only used when \code{struc = NULL}.}
 \item{nugget}{the initial nugget value. If \code{nugget_est = FALSE}, the assigned value is fixed during the training.
 Set \code{nugget} to a small value (e.g., \code{1e-6}) and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic
-emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6}. This argument is only used
-when \code{struc = NULL}.}
+emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6} if \code{nugget_est = FALSE} and
+\code{0.01} if \code{nugget_est = TRUE}. This argument is only used when \code{struc = NULL}.}
 
 \item{scale_est}{a bool indicating if the variance is to be estimated:
 \enumerate{

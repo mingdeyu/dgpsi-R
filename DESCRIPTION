@@ -30,7 +30,8 @@ Imports:
     patchwork,
     lhs,
     methods,
-    stats
+    stats,
+    bitops
 Suggests:
     knitr,
     rmarkdown,
