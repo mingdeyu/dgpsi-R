@@ -281,9 +281,9 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     }
     if ( verb ) message(" done")
     if ( is.null(eval) ){
-      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     } else {
-      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
     }
     rmse_records <- rmse
 
@@ -379,13 +379,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
               object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
@@ -397,7 +397,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
               rmse <- do.call(eval, c(list(object), vparam))
             }
             if ( verb ) message(" done")
-            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+            if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -457,9 +457,9 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     }
     if ( verb ) message(" done")
     if ( is.null(eval) ){
-      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     } else {
-      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
     }
     rmse_records <- rmse
 
@@ -537,13 +537,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
               object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
@@ -555,7 +555,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
               rmse <- do.call(eval, c(list(object), vparam))
             }
             if ( verb ) message(" done")
-            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+            if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -708,9 +708,9 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     }
     if ( verb ) message(" done")
     if ( is.null(eval) ){
-      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     } else {
-      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
     }
     rmse_records <- rmse
 
@@ -818,13 +818,13 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
               object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
@@ -836,7 +836,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
               rmse <- do.call(eval, c(list(object), vparam))
             }
             if ( verb ) message(" done")
-            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+            if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -896,9 +896,9 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     }
     if ( verb ) message(" done")
     if ( is.null(eval) ){
-      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     } else {
-      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
     }
     rmse_records <- rmse
 
@@ -987,13 +987,13 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
               object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
@@ -1005,7 +1005,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
               rmse <- do.call(eval, c(list(object), vparam))
             }
             if ( verb ) message(" done")
-            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+            if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -1176,9 +1176,9 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     }
     if ( verb ) message(" done")
     if ( is.null(eval) ){
-      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     } else {
-      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
     }
     rmse_records <- rmse
 
@@ -1411,7 +1411,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
                 }
               }
               if ( verb ) message(" done")
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               for ( k in 1:n_emulators ){
@@ -1432,7 +1432,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
                 }
               }
               if ( verb ) message(" done")
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
@@ -1453,7 +1453,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               }
             }
             if ( verb ) message(" done")
-            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+            if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }
@@ -1528,9 +1528,9 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     }
     if ( verb ) message(" done")
     if ( is.null(eval) ){
-      message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
     } else {
-      message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+      if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
     }
     rmse_records <- rmse
 
@@ -1722,7 +1722,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
                 }
               }
               if ( verb ) message(" done")
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               for ( k in 1:n_emulators ){
@@ -1743,7 +1743,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
                 }
               }
               if ( verb ) message(" done")
-              message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
+              if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             }
           } else {
             if ( verb ) message(" - Validating ...", appendLF = FALSE)
@@ -1764,7 +1764,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               }
             }
             if ( verb ) message(" done")
-            message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
+            if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
           }
           rmse_records <- rbind(rmse_records, rmse)
         }

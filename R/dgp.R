@@ -395,8 +395,13 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
               } else {
                 length_scale <- rep(lengthscale[l], n_dim_X+node)
               }
+              connect_info <- as.integer(1:n_dim_X - 1)
+              if (!is.null(internal_input_idx)){
+                idx <- reticulate::py_to_r(internal_input_idx)+1
+                connect_info <- c(connect_info[idx],connect_info[-idx])
+              }
               layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
-                                                   connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
+                                                   connect = reticulate::np_array(connect_info) )
             } else {
               if ( isTRUE(share) ){
                 length_scale <- lengthscale[l]
@@ -422,8 +427,13 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
                 } else {
                   length_scale <- rep(lengthscale[l], n_dim_X+node)
                 }
+                connect_info <- as.integer(1:n_dim_X - 1)
+                if (!is.null(internal_input_idx)){
+                  idx <- reticulate::py_to_r(internal_input_idx)+1
+                  connect_info <- c(connect_info[idx],connect_info[-idx])
+                }
                 layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name, prior_name = prior, nugget = nugget[l],
-                                                     connect = reticulate::np_array(as.integer(1:n_dim_X - 1)))
+                                                     connect = reticulate::np_array(connect_info))
               } else {
                 if ( isTRUE(share) ){
                   length_scale <- lengthscale[l]
