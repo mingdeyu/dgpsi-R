@@ -26,9 +26,9 @@
 #'
 #' Defaults to `FALSE`. This argument is only used when `struc = NULL`.
 #' @param nugget the initial nugget value. If `nugget_est = FALSE`, the assigned value is fixed during the training.
-#'     Set `nugget` to a small value (e.g., `1e-6`) and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
+#'     Set `nugget` to a small value (e.g., `1e-10`) and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
 #'     interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic
-#'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6` if `nugget_est = FALSE` and
+#'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-10` if `nugget_est = FALSE` and
 #'     `0.01` if `nugget_est = TRUE`. This argument is only used when `struc = NULL`.
 #' @param scale_est a bool indicating if the variance is to be estimated:
 #' 1. `FALSE`: the variance is fixed to `scale`.
@@ -121,7 +121,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-6), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-10), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)
