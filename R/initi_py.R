@@ -17,6 +17,9 @@ pkg.env$copy <- NULL
 #'    in `dgpsi_ver` if it has already been installed. This argument is useful when the development version
 #'    of the R package is installed and one may want to regularly update the development 'python' version
 #'    of 'dgpsi'. Defaults to `FALSE`.
+#' @param uninstall a bool that indicates whether to uninstall the 'python' version of 'dgpsi' specified
+#'    in `dgpsi_ver` if it has already been installed. This argument is useful when the 'python' environment
+#'    is corrupted and one wants to completely uninstall and reinstall it. Defaults to `FALSE`.
 #'
 #' @return No return value, called to install required 'python' environment.
 #'
@@ -29,7 +32,7 @@ pkg.env$copy <- NULL
 #'
 #' @md
 #' @export
-init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
+init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstall = FALSE) {
   if ( is.null(py_ver) ) py_ver <- '3.9.13'
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
@@ -89,21 +92,27 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE) {
               }
       }
     } else {
-      if (isTRUE(reinstall)) {
-        install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = TRUE)
-        #if (grepl('9000',env_name)) {
-        #  reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
-        #} else {
-        #  reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
-        #}
-        #if (Sys.info()[["sysname"]] == 'Linux'){
-        #  libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
-        #  libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
-        #  system(paste("sudo rm",libstdc_sys_path))
-        #  system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
-        #}
-        #message("Installation finished. Please restart R.")
+      if ( uninstall ){
+        reticulate::conda_remove(envname = env_name, conda = conda_path)
         restart <- TRUE
+        message("Uninstallation finished. Please restart R and run 'init_py()' to reinstall the Python environment.")
+      } else {
+        if (isTRUE(reinstall)) {
+          install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = TRUE)
+          #if (grepl('9000',env_name)) {
+          #  reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+          #} else {
+          #  reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path)
+          #}
+          #if (Sys.info()[["sysname"]] == 'Linux'){
+          #  libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
+          #  libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+          #  system(paste("sudo rm",libstdc_sys_path))
+          #  system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
+          #}
+          #message("Installation finished. Please restart R.")
+          restart <- TRUE
+        }
       }
     }
   }
