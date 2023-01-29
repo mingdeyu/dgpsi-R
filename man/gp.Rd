@@ -13,7 +13,7 @@ gp(
   bounds = NULL,
   prior = "ref",
   nugget_est = FALSE,
-  nugget = ifelse(nugget_est, 0.01, 1e-10),
+  nugget = ifelse(nugget_est, 0.01, 1e-08),
   scale_est = TRUE,
   scale = 1,
   training = TRUE,
@@ -59,9 +59,9 @@ robust prior.}
 Defaults to \code{FALSE}. This argument is only used when \code{struc = NULL}.}
 
 \item{nugget}{the initial nugget value. If \code{nugget_est = FALSE}, the assigned value is fixed during the training.
-Set \code{nugget} to a small value (e.g., \code{1e-10}) and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
+Set \code{nugget} to a small value (e.g., \code{1e-8}) and the corresponding bool in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the corresponding bool in \code{nugget_est} to \code{TRUE} for stochastic
-emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-10} if \code{nugget_est = FALSE} and
+emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-8} if \code{nugget_est = FALSE} and
 \code{0.01} if \code{nugget_est = TRUE}. This argument is only used when \code{struc = NULL}.}
 
 \item{scale_est}{a bool indicating if the variance is to be estimated:
