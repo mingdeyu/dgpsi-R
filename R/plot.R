@@ -82,8 +82,9 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         isdup <- TRUE
       } else {
         if ( is.null(dim) ) {
-          rep <- pkg.env$np$unique(loo_res$x_train,return_inverse=TRUE, axis=0L)
-          idx <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          rep1 <- pkg.env$np$unique(loo_res$x_train, return_index=TRUE, axis=0L)
+          rep2 <- pkg.env$np$unique(loo_res$x_train, return_inverse=TRUE, axis=0L)
+          idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
           isdup <- TRUE
         } else {
           idx <- loo_res$x_train[,dim]
@@ -263,8 +264,9 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         # If input is at least 2d
       } else {
         if ( is.null(dim) ){
-          rep <- pkg.env$np$unique(oos_res$x_test,return_inverse=TRUE, axis=0L)
-          idx <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
+          rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
+          idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
           isdup <- TRUE
         } else {
           idx <- oos_res$x_test[,dim]
@@ -670,8 +672,10 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         isdup <- TRUE
       } else {
         if ( is.null(dim) ){
-          rep <- pkg.env$np$unique(loo_res$x_train,return_inverse=TRUE, axis=0L)
-          dat[["idx"]] <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          rep1 <- pkg.env$np$unique(loo_res$x_train, return_index=TRUE, axis=0L)
+          rep2 <- pkg.env$np$unique(loo_res$x_train, return_inverse=TRUE, axis=0L)
+          idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+          dat[["idx"]] <- idx
           isdup <- TRUE
         } else {
           dat[["idx"]] <- loo_res$x_train[,dim]
@@ -822,8 +826,10 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         # If input is at least 2d
       } else {
         if ( is.null(dim) ){
-          rep <- pkg.env$np$unique(oos_res$x_test,return_inverse=TRUE, axis=0L)
-          dat[["idx"]] <- seq(1,length(rep[[1]]))[rep[[2]]+1]
+          rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
+          rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
+          idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+          dat[["idx"]] <- idx
           isdup <- TRUE
         } else {
           dat[["idx"]] <- oos_res$x_test[,dim]
