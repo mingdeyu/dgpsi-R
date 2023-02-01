@@ -32,7 +32,8 @@ combine <- function(...) {
 #' @param ... a sequence of emulators produced by [gp()] or [dgp()].
 #'
 #' @return An S3 class named `bundle` to be used by [design()] for sequential designs. It has:
-#' - *N* slots, each of which contains a GP or DGP emulator, where *N* is the number of emulators that are provided to the function.
+#' - *N* slots named `emulator1,...,emulatorN`, each of which contains a GP or DGP emulator, where *N* is the number of emulators
+#'   that are provided to the function.
 #' - a slot called `data` which contains two elements `X` and `Y`. `X` contains *N* matrices named `emulator1,...,emulatorN` that are
 #'   training input data for different emulators. `Y` contains *N* single-column matrices named `emulator1,...,emulatorN` that are
 #'   training output data for different emulators.
@@ -89,6 +90,10 @@ combine <- function(...) {
 #' # inspect the traces of RMSEs of the two packed emulators
 #' draw(m, emulator = 1, type = 'rmse')
 #' draw(m, emulator = 2, type = 'rmse')
+#'
+#' # write and read the constructed emulator bundle
+#' write(m, 'bundle_dgp')
+#' m <- read('bundle_dgp')
 #'
 #' # unpack the bundle into individual emulators
 #' m_unpacked <- unpack(m)
@@ -166,7 +171,7 @@ unpack <- function(object) {
 #'
 #' @description This function saves the constructed emulator to a `.pkl` file.
 #'
-#' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
+#' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
 #'
@@ -177,7 +182,7 @@ unpack <- function(object) {
 #' @examples
 #' \dontrun{
 #'
-#' # See gp(), dgp(), or lgp() for an example.
+#' # See gp(), dgp(), lgp(), or pack() for an example.
 #' }
 #' @md
 #' @export
@@ -194,26 +199,40 @@ write <- function(object, pkl_file) {
 #'
 #' @param pkl_file the path to and the name of the `.pkl` file where the emulator is stored.
 #'
-#' @return A GP, DGP or linked (D)GP emulator S3 class.
+#' @return The S3 class of a GP emulator, a DGP emulator, a linked (D)GP emulator, or a bundle of (D)GP emulators.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
 #' \dontrun{
 #'
-#' # See gp(), dgp(), or lgp() for an example.
+#' # See gp(), dgp(), lgp(), or pack() for an example.
 #' }
 #' @md
 #' @export
 read <- function(pkl_file) {
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   res <- pkg.env$dgpsi$read(pkl_file)
-  type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
-  if ( type=='emulator' ) {
-    class(res) <- "dgp"
-  } else if ( type=='gp' ) {
-    class(res) <- "gp"
-  } else if ( type=='lgp' ) {
-    class(res) <- "lgp"
+  if ('emulator_obj' %in% names(res)){
+    type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
+    if ( type=='emulator' ) {
+      class(res) <- "dgp"
+    } else if ( type=='gp' ) {
+      class(res) <- "gp"
+    } else if ( type=='lgp' ) {
+      class(res) <- "lgp"
+    }
+  } else {
+    N <- length(res) - 1
+    if ( "design" %in% names(res) ) N <- N - 1
+    class(res) <- "bundle"
+    for ( i in 1:N ){
+      type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
+      if ( type=='emulator' ) {
+        class(res[[paste('emulator',i, sep='')]]) <- "dgp"
+      } else if ( type=='gp' ) {
+        class(res[[paste('emulator',i, sep='')]]) <- "gp"
+      }
+    }
   }
   return(res)
 }

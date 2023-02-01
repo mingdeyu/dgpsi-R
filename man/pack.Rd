@@ -12,7 +12,8 @@ pack(...)
 \value{
 An S3 class named \code{bundle} to be used by \code{\link[=design]{design()}} for sequential designs. It has:
 \itemize{
-\item \emph{N} slots, each of which contains a GP or DGP emulator, where \emph{N} is the number of emulators that are provided to the function.
+\item \emph{N} slots named \verb{emulator1,...,emulatorN}, each of which contains a GP or DGP emulator, where \emph{N} is the number of emulators
+that are provided to the function.
 \item a slot called \code{data} which contains two elements \code{X} and \code{Y}. \code{X} contains \emph{N} matrices named \verb{emulator1,...,emulatorN} that are
 training input data for different emulators. \code{Y} contains \emph{N} single-column matrices named \verb{emulator1,...,emulatorN} that are
 training output data for different emulators.
@@ -76,6 +77,10 @@ draw(m, emulator = 2, type = 'design')
 # inspect the traces of RMSEs of the two packed emulators
 draw(m, emulator = 1, type = 'rmse')
 draw(m, emulator = 2, type = 'rmse')
+
+# write and read the constructed emulator bundle
+write(m, 'bundle_dgp')
+m <- read('bundle_dgp')
 
 # unpack the bundle into individual emulators
 m_unpacked <- unpack(m)

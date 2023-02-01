@@ -10,7 +10,7 @@ read(pkl_file)
 \item{pkl_file}{the path to and the name of the \code{.pkl} file where the emulator is stored.}
 }
 \value{
-A GP, DGP or linked (D)GP emulator S3 class.
+The S3 class of a GP emulator, a DGP emulator, a linked (D)GP emulator, or a bundle of (D)GP emulators.
 }
 \description{
 This function loads the \code{.pkl} file that stores the emulator.
@@ -21,6 +21,6 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \examples{
 \dontrun{
 
-# See gp(), dgp(), or lgp() for an example.
+# See gp(), dgp(), lgp(), or pack() for an example.
 }
 }

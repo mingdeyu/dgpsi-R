@@ -7,7 +7,7 @@
 write(object, pkl_file)
 }
 \arguments{
-\item{object}{an instance of the S3 class \code{gp}, \code{dgp}, or \code{lgp}.}
+\item{object}{an instance of the S3 class \code{gp}, \code{dgp}, \code{lgp}, or \code{bundle}.}
 
 \item{pkl_file}{the path to and the name of the \code{.pkl} file to which
 the emulator \code{object} is saved.}
@@ -27,6 +27,6 @@ Since the constructed emulators are 'python' objects, \code{\link[=save]{save()}
 \examples{
 \dontrun{
 
-# See gp(), dgp(), or lgp() for an example.
+# See gp(), dgp(), lgp(), or pack() for an example.
 }
 }
