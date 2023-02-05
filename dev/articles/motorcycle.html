@@ -187,7 +187,7 @@ generated GP structure before training:</p>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
-<span><span class="co">## | Squared-Exp |     [0.200]     |  1.000   | 0.010  |    [1]     |</span></span>
+<span><span class="co">## | Squared-Exp |     [0.100]     |  1.000   | 0.010  |    [1]     |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.</span></span></code></pre>
 <p>We now train the GP emulator by re-running the above function with
@@ -204,9 +204,9 @@ trained DGP emulator:</p>
 <pre><code><span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
 <span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.683]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.905]     |     0.833     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.962]     |    26.665     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.953]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.712]     |     1.003     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.274]     |    32.747     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
 <span><span class="co">## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |</span></span>
 <span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.</span></span>
@@ -217,7 +217,7 @@ trained DGP emulator:</p>
 <pre><code><span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
-<span><span class="co">## | Squared-Exp |     [0.127]     |  0.728   | 0.321  |    [1]     |</span></span>
+<span><span class="co">## | Squared-Exp |     [0.129]     |  0.856   | 0.274  |    [1]     |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.</span></span></code></pre>
 </div>

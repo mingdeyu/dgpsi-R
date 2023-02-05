@@ -139,7 +139,8 @@ in the top-right part the simulator shows little variations.</p>
 <p>We now generate an initial design with 5 design points using the
 maximin Latin hypercube sampler:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">2</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">99</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></code></pre></div>
 <p>To track the qualities of constructed emulators during the sequential
 design, we generate a validation dataset:</p>
@@ -157,7 +158,7 @@ emulator using the generated initial design:</p>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 257.04it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 274.03it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>We then specify the boundaries of input parameters of <code>f</code>
 for the sequential design to locate design points to be added:</p>
@@ -181,62 +182,62 @@ designs on <code>m</code>:</p>
 <code class="sourceCode R"><span><span class="co"># 1st wave with 15 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">15</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.713616</span></span>
+<span><span class="co">##  * RMSE: 0.536642</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.583678 0.010377</span></span>
+<span><span class="co">##  * Next design point: 0.911159 0.061740</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.698092</span></span>
+<span><span class="co">##  * RMSE: 0.544043</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 15:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.338114 0.062508</span></span>
+<span><span class="co">##  * Next design point: 0.310854 0.450063</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.093493</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.159995</span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.093493</span></span>
+<span><span class="co">##  * RMSE: 0.159995</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.616983 0.144902</span></span>
+<span><span class="co">##  * Next design point: 0.724869 0.984804</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.073895</span></span>
+<span><span class="co">##  * RMSE: 0.133405</span></span>
 <span><span class="co">##   </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.002427 0.388461</span></span>
+<span><span class="co">##  * Next design point: 0.021569 0.389862</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.015002</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.082311</span></span></code></pre>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 3rd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.015002</span></span>
+<span><span class="co">##  * RMSE: 0.082311</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.405092 0.593121</span></span>
+<span><span class="co">##  * Next design point: 0.045685 0.039926</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.008219</span></span>
+<span><span class="co">##  * RMSE: 0.055801</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.061111 0.002298</span></span>
+<span><span class="co">##  * Next design point: 0.585808 0.068268</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.009890</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.007048</span></span></code></pre>
 <p>After the sequential design is done, we can inspect the enriched
 design by applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
