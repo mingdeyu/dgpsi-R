@@ -69,6 +69,7 @@ We can see from the figure above that the synthetic simulator exhibits more fluc
 We now generate an initial design with 5 design points using the maximin Latin hypercube sampler:
 
 ```{r}
+set.seed(99)
 X <- maximinLHS(5,2)
 Y <- f(X)
 ```
@@ -92,7 +93,7 @@ m <- dgp(X, Y)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 257.04it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 274.03it/s]
 ## Imputing ... done
 ```
 
@@ -115,22 +116,22 @@ m <- design(m, N=15, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.713616
+##  * RMSE: 0.536642
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.583678 0.010377
+##  * Next design point: 0.911159 0.061740
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.698092
+##  * RMSE: 0.544043
 ## 
 ## ...
 ## 
 ## Iteration 15:
 ##  - Locating ... done
-##  * Next design point: 0.338114 0.062508
+##  * Next design point: 0.310854 0.450063
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.093493
+##  * RMSE: 0.159995
 ```
 
 ```{r}
@@ -139,22 +140,22 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.093493
+##  * RMSE: 0.159995
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.616983 0.144902
+##  * Next design point: 0.724869 0.984804
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.073895
+##  * RMSE: 0.133405
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.002427 0.388461
+##  * Next design point: 0.021569 0.389862
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.015002
+##  * RMSE: 0.082311
 ```
 
 ```{r}
@@ -164,22 +165,22 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.015002
+##  * RMSE: 0.082311
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.405092 0.593121
+##  * Next design point: 0.045685 0.039926
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.008219
+##  * RMSE: 0.055801
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.061111 0.002298
+##  * Next design point: 0.585808 0.068268
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.009890
+##  * RMSE: 0.007048
 ```
 
 After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:

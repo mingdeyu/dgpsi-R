@@ -128,7 +128,7 @@ summary(m_gp)
 ## +-------------+-----------------+----------+--------+------------+
 ## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
 ## +-------------+-----------------+----------+--------+------------+
-## | Squared-Exp |     [0.200]     |  1.000   | 0.010  |    [1]     |
+## | Squared-Exp |     [0.100]     |  1.000   | 0.010  |    [1]     |
 ## +-------------+-----------------+----------+--------+------------+
 ## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.
 ```
@@ -155,9 +155,9 @@ summary(m_dgp)
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.683]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.905]     |     0.833     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.962]     |    26.665     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.953]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.712]     |     1.003     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.274]     |    32.747     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
@@ -174,7 +174,7 @@ summary(m_gp)
 ## +-------------+-----------------+----------+--------+------------+
 ## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
 ## +-------------+-----------------+----------+--------+------------+
-## | Squared-Exp |     [0.127]     |  0.728   | 0.321  |    [1]     |
+## | Squared-Exp |     [0.129]     |  0.856   | 0.274  |    [1]     |
 ## +-------------+-----------------+----------+--------+------------+
 ## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.
 ```
