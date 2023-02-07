@@ -64,7 +64,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">continue</span><span class="op">(</span><span class="va">object</span>, N <span class="op">=</span> <span class="fl">500</span>, ess_burn <span class="op">=</span> <span class="fl">10</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, burnin <span class="op">=</span> <span class="cn">NULL</span>, B <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">continue</span><span class="op">(</span><span class="va">object</span>, N <span class="op">=</span> <span class="fl">500</span>, ess_burn <span class="op">=</span> <span class="fl">10</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, burnin <span class="op">=</span> <span class="cn">NULL</span>, B <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -97,7 +97,8 @@ are used. This overrides the value of <code>burnin</code> set in <code><a href="
 
 <dt>B</dt>
 <dd><p>the number of imputations to produce the predictions. Increase the value to account for
-more imputation uncertainties. This overrides the value of <code>B</code> set in <code><a href="dgp.html">dgp()</a></code>. Defaults to <code>30</code>.</p></dd>
+more imputation uncertainties. This overrides the value of <code>B</code> set in <code><a href="dgp.html">dgp()</a></code> if <code>B</code> is not
+<code>NULL</code>. Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

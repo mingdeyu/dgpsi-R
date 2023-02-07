@@ -123,7 +123,7 @@ Defaults to <code>2</code>. This argument is only used when <code>struc = NULL</
 
 <dt>node</dt>
 <dd><p>number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
-<code>ncol(X)</code>.</p></dd>
+<code>ncol(X)</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>name</dt>
@@ -329,6 +329,9 @@ R matrix. Thus, if <code>X</code> is a single data point with multiple dimension
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># trace plot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="trace_plot.html">trace_plot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># trim the traces of model parameters</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="window.html">window</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">800</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># LOO cross validation</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="validate.html">validate</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
