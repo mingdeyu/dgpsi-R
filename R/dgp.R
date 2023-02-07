@@ -15,7 +15,7 @@
 #' @param depth number of layers (including the likelihood layer) for a DGP structure. `depth` must be at least `2`.
 #'     Defaults to `2`. This argument is only used when `struc = NULL`.
 #' @param node number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
-#'    `ncol(X)`.
+#'    `ncol(X)`. This argument is only used when `struc = NULL`.
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
 #' @param lengthscale initial lengthscales for GP nodes in the DGP emulator. It can be a single numeric value or a vector:
@@ -161,6 +161,9 @@
 #'
 #' # trace plot
 #' trace_plot(m)
+#'
+#' # trim the traces of model parameters
+#' m <- window(m, 800)
 #'
 #' # LOO cross validation
 #' m <- validate(m)
@@ -518,7 +521,8 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #'     so-far implemented. If this is not specified, only the last 25% of iterations
 #'     are used. This overrides the value of `burnin` set in [dgp()]. Defaults to `NULL`.
 #' @param B the number of imputations to produce the predictions. Increase the value to account for
-#'     more imputation uncertainties. This overrides the value of `B` set in [dgp()]. Defaults to `30`.
+#'     more imputation uncertainties. This overrides the value of `B` set in [dgp()] if `B` is not
+#'     `NULL`. Defaults to `NULL`.
 #'
 #' @return An updated `object`.
 #'
@@ -537,12 +541,16 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #' @md
 #' @export
 
-continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 30) {
+continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
   N <- as.integer(N)
-  B <- as.integer(B)
+  if ( is.null(B) ){
+    B <- as.integer(length(object$emulator_obj$all_layer_set))
+  } else {
+    B <- as.integer(B)
+  }
   ess_burn <- as.integer(ess_burn)
 
   if( !is.null(burnin) ) {

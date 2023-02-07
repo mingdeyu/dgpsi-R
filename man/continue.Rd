@@ -4,7 +4,7 @@
 \alias{continue}
 \title{Continue the training of a DGP emulator}
 \usage{
-continue(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = 30)
+continue(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL)
 }
 \arguments{
 \item{object}{an instance of the \code{dgp} class.}
@@ -28,7 +28,8 @@ so-far implemented. If this is not specified, only the last 25\% of iterations
 are used. This overrides the value of \code{burnin} set in \code{\link[=dgp]{dgp()}}. Defaults to \code{NULL}.}
 
 \item{B}{the number of imputations to produce the predictions. Increase the value to account for
-more imputation uncertainties. This overrides the value of \code{B} set in \code{\link[=dgp]{dgp()}}. Defaults to \code{30}.}
+more imputation uncertainties. This overrides the value of \code{B} set in \code{\link[=dgp]{dgp()}} if \code{B} is not
+\code{NULL}. Defaults to \code{NULL}.}
 }
 \value{
 An updated \code{object}.

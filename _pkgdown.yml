@@ -73,7 +73,7 @@ reference:
 
 - title: "Sequential Design"
   desc: >
-    Functions to implement sequential designs for (D)GP and bundleS of (D)GP emulators.
+    Functions to implement sequential designs for (D)GP and bundles of (D)GP emulators.
   contents:
   - design
   - alm
@@ -91,6 +91,7 @@ reference:
   - read
   - set_linked_idx
   - set_imp
+  - window
   - trace_plot
   - nllik
 

@@ -52,7 +52,7 @@ If this argument is used (i.e., user provides a customized DGP structure), argum
 Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}
 
 \item{node}{number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
-\code{ncol(X)}.}
+\code{ncol(X)}. This argument is only used when \code{struc = NULL}.}
 
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}
@@ -248,6 +248,9 @@ summary(m)
 
 # trace plot
 trace_plot(m)
+
+# trim the traces of model parameters
+m <- window(m, 800)
 
 # LOO cross validation
 m <- validate(m)

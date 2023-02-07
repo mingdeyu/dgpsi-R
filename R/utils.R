@@ -360,6 +360,86 @@ set_imp <- function(object, B = 10) {
 }
 
 
+#' @title Trim the sequences of model parameters of a DGP emulator
+#'
+#' @description This function trim the sequences of model parameters of a DGP emulator
+#'     that are generated during the training.
+#'
+#' @param object an instance of the S3 class `dgp`.
+#' @param start the first iteration before which all iterations are trimmed from the sequences.
+#' @param end the last iteration after which all iterations are trimmed from the sequences.
+#'     Set to `NULL` to keep all iterations after (including) `start`. Defaults to `NULL`.
+#' @param thin the interval between the `start` and `end` iterations to thin out the sequences.
+#'     Defaults to 1.
+#'
+#' @return An updated `object` with trimmed sequences of model parameters.
+#'
+#' @note
+#' * This function is useful when a DGP emulator has been trained and one wants to trim
+#'   the sequences of model parameters and use the trimmed sequences to generate the point estimates
+#'   of DGP model parameters for predictions.
+#' * The following slots:
+#'   - `loo` and `oos` created by [validate()]; and
+#'   - `results` created by [predict()]
+#'   in `object` will be removed and not contained in the returned object.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See dgp() for an example.
+#' }
+#' @md
+#' @export
+window <- function(object, start, end = NULL, thin = 1) {
+  if ( !inherits(object,"dgp") ){
+    stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  }
+  if (length(start) != 1) stop("'start' must be an integer.", call. = FALSE)
+  if ( !is.null(end) ){
+    if (length(end) != 1) stop("'end' must be an integer.", call. = FALSE)
+  }
+  if (length(thin) != 1) stop("'thin' must be an integer.", call. = FALSE)
+  if ( !is.null(end) ){
+    if (start > end) stop("'start' must be before 'end'", call. = FALSE)
+  }
+
+  linked_idx <- object$container_obj$local_input_idx
+  constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
+  niter <- constructor_obj_cp$N + 1
+  if ( is.null(end) ) end <- niter
+  if (end > niter) end <- niter
+  idx <- start:end
+  idx <- idx[idx %% thin == 0]
+  constructor_obj_cp$N <- length(idx) - 1
+  for ( l in 1:constructor_obj_cp$n_layer ){
+    n_kernel <- length(constructor_obj_cp$all_layer[[l]])
+    for (k in 1:n_kernel){
+      if (constructor_obj_cp$all_layer[[l]][[k]]$type == 'gp'){
+        final_est <- constructor_obj_cp$all_layer[[l]][[k]]$para_path[idx[length(idx)],]
+        constructor_obj_cp$all_layer[[l]][[k]]$scale <- reticulate::np_array(final_est[1])
+        constructor_obj_cp$all_layer[[l]][[k]]$length <- reticulate::np_array(final_est[2:(length(final_est)-1)])
+        constructor_obj_cp$all_layer[[l]][[k]]$nugget <- reticulate::np_array(final_est[length(final_est)])
+        constructor_obj_cp$all_layer[[l]][[k]]$para_path <- constructor_obj_cp$all_layer[[l]][[k]]$para_path[idx,,drop=FALSE]
+      }
+    }
+  }
+
+  burnin <- 0L
+  est_obj <- constructor_obj_cp$estimate(burnin)
+  B <- length(object$emulator_obj$all_layer_set)
+
+  new_object <- list()
+  new_object[['data']][['X']] <- object$data$X
+  new_object[['data']][['Y']] <- object$data$Y
+  new_object[['constructor_obj']] <- constructor_obj_cp
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  if ( "design" %in% names(object) ) new_object[['design']] <- object$design
+  class(new_object) <- "dgp"
+  return(new_object)
+}
+
+
 #' @title Calculate negative predicted log-likelihood
 #'
 #' @description This function computes the negative predicted log-likelihood from a
