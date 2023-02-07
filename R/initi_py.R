@@ -36,13 +36,13 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   if ( is.null(py_ver) ) py_ver <- '3.9.13'
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
-    dgpsi_ver <- c('cython>=0.29.30', 'dill>=0.3.2', 'jupyter>=1.0.0', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
-                   'numpy >=1.18.2', 'pathos >=0.2.9', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
-                   'scikit-build >=0.15.0', 'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7')
-    env_name <- 'dgp_si_R_2_1_5_9000'
+    #dgpsi_ver <- c('cython>=0.29.30', 'dill>=0.3.2', 'jupyter>=1.0.0', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
+    #               'numpy >=1.18.2', 'pathos >=0.2.9', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
+    #               'scikit-build >=0.15.0', 'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7')
+    #env_name <- 'dgp_si_R_2_1_5_9000'
     ##For release version
-    #dgpsi_ver <- 'dgpsi==2.1.5'
-    #env_name <- 'dgp_si_R_2_1_5'
+    dgpsi_ver <- 'dgpsi==2.1.6'
+    env_name <- 'dgp_si_R_2_1_6'
   } else {
     env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
     dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
