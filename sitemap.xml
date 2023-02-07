@@ -19,6 +19,12 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/articles/motorcycle.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/articles/seq_design.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/articles/seq_design_2.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/authors.html</loc>
   </url>
   <url>
@@ -37,13 +43,22 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/Poisson.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/alm.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/combine.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/continue.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/design.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/dgp.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/draw.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/gp.html</loc>
@@ -61,7 +76,16 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/lgp.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/mice.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/nllik.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/pack.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/pei.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/plot.html</loc>
@@ -73,6 +97,9 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/read.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/set_imp.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/set_linked_idx.html</loc>
   </url>
   <url>
@@ -82,7 +109,16 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/trace_plot.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/unpack.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/update.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/validate.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/reference/window.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/reference/write.html</loc>

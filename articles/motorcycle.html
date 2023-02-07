@@ -10,10 +10,10 @@
 <title>DGP Emulation with the Heteroskedastic Gaussian Likelihood
  • dgpsi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DGP Emulation with the Heteroskedastic Gaussian Likelihood
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DGP Emulation with the Heteroskedastic Gaussian Likelihood
 ">
 <meta property="og:description" content="DGP emulation of the motorcycle accident data.
 ">
@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.5-9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,8 @@
     <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
 </a>
     <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
+    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a>
+    <a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a>
   </div>
 </li>
 <li class="nav-item">
@@ -138,7 +140,8 @@ kernels:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">train_X</span>, <span class="va">train_Y</span>, depth <span class="op">=</span> <span class="fl">3</span>, lengthscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.2</span><span class="op">)</span>, likelihood <span class="op">=</span> <span class="st">"Hetero"</span>, training <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
-<span><span class="co">## Initializing the DGP emulator ... done</span></span></code></pre>
+<span><span class="co">## Initializing the DGP emulator ... done</span></span>
+<span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>We choose a heteroskedastic Gaussian likelihood by setting
 <code>likelihood = "Hetero"</code> since the data drawn in the plot show
 varying noises. <code>lengthscale</code> is set to
@@ -168,7 +171,8 @@ everything from scratch by re-running <code><a href="../reference/dgp.html">dgp(
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_dgp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/continue.html">continue</a></span><span class="op">(</span><span class="va">m_dgp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Continue the training:</span></span>
-<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:18&lt;00:00, 27.49it/s]</span></span></code></pre>
+<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:18&lt;00:00, 27.49it/s]</span></span>
+<span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>For comparison, we also build a GP emulator (by <code><a href="../reference/gp.html">gp()</a></code>)
 that incorporates homogeneous noises by setting
 <code>nugget_est = T</code> and the initial nugget value to <span class="math inline">\(0.01\)</span>. We set <code>training</code> to
@@ -182,7 +186,7 @@ generated GP structure before training:</p>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
-<span><span class="co">## | Squared-Exp |     [0.200]     |  1.000   | 0.010  |    [1]     |</span></span>
+<span><span class="co">## | Squared-Exp |     [0.100]     |  1.000   | 0.010  |    [1]     |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.</span></span></code></pre>
 <p>We now train the GP emulator by re-running the above function with
@@ -199,9 +203,9 @@ trained DGP emulator:</p>
 <pre><code><span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
 <span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.683]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.905]     |     0.833     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.962]     |    26.665     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.953]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.712]     |     1.003     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.274]     |    32.747     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
 <span><span class="co">## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |</span></span>
 <span><span class="co">## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.</span></span>
@@ -212,7 +216,7 @@ trained DGP emulator:</p>
 <pre><code><span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
-<span><span class="co">## | Squared-Exp |     [0.127]     |  0.728   | 0.321  |    [1]     |</span></span>
+<span><span class="co">## | Squared-Exp |     [0.129]     |  0.856   | 0.274  |    [1]     |</span></span>
 <span><span class="co">## +-------------+-----------------+----------+--------+------------+</span></span>
 <span><span class="co">## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.</span></span></code></pre>
 </div>
@@ -282,7 +286,7 @@ of the Royal Statistical Society: Series B (Methodological)</em> 47 (1):
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer>
