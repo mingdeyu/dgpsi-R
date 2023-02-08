@@ -16,13 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to use the package to sequentially refine a bundle of DGP emulators, each of which emulates an output of a simulator. To run this vignette, an installation of the development version of `dgpsi` is required:
-
-```{r}
-devtools::install_github('mingdeyu/dgpsi-R')
-```
-
-which will invoke the installation of the development version of the Python environment after executing `init_py()` the first time.
+This vignette shows how to use the package to sequentially refine a bundle of DGP emulators, each of which emulates an output of a simulator.
 
 ## Load the packages
 
@@ -317,4 +311,4 @@ It can be seen from the plot above that with the sequential design, emulators in
 
 ### See also
 
-See [`Sequential Design I`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) for the sequential design of a DGP emulator on a 2D simulator.
+See [`Sequential Design I`](https://mingdeyu.github.io/dgpsi-R/articles/seq_design.html) for the sequential design of a DGP emulator on a 2D simulator.
