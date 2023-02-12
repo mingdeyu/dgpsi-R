@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.1.5-9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.1.6-9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,17 +58,36 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.1.5-9000" id="dgpsi-215-9000-development-version">dgpsi 2.1.5-9000 (development version)<a class="anchor" aria-label="anchor" href="#dgpsi-215-9000-development-version"></a></h2>
-<ul><li>A bug is found in multi-core predictions in <code><a href="../reference/predict.html">predict()</a></code> when <code>object</code> is an instance of <code>lgp</code> class and <code>x</code> is a list. This bug has been fixed in the development version <code>2.1.5-9000</code> and will be fixed in the next <code>dgpsi</code> release version <code>2.1.6</code>. The single-core predictions in the current release version <code>2.1.5</code> are not affected by the bug.<br></li>
-<li>An issue (<code>/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found</code>) encountered in Linux machines is fixed automatically during the execution of <code><a href="../reference/init_py.html">init_py()</a></code>.</li>
+<h2 class="pkg-version" data-toc-text="2.1.6-9000" id="dgpsi-216-9000-development-version">dgpsi 2.1.6-9000 (development version)<a class="anchor" aria-label="anchor" href="#dgpsi-216-9000-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.1.6" id="dgpsi-216">dgpsi 2.1.6<a class="anchor" aria-label="anchor" href="#dgpsi-216"></a></h2><p class="text-muted">CRAN release: 2023-02-08</p>
+<ul><li>A bug is found in multi-core predictions in <code><a href="../reference/predict.html">predict()</a></code> when <code>object</code> is an instance of <code>lgp</code> class and <code>x</code> is a list. This bug has been fixed in this version.<br></li>
+<li>Thanks to <a href="https://github.com/tjmckinley" class="external-link">@tjmckinley</a>, an issue (<code>/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found</code>) encountered in Linux machines is fixed automatically during the execution of <code><a href="../reference/init_py.html">init_py()</a></code>.</li>
 <li>
 <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> allow users to specify the value of scale parameters and whether to estimate the parameters.</li>
+<li>
+<code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> allow users to specify the bounds of lengthscales.</li>
+<li>The jointly robust prior (Gu, 2019) is implemented as the default inference approach for GP emulators in <code><a href="../reference/gp.html">gp()</a></code>.</li>
+<li>The default value of <code>lengthscale</code> in <code><a href="../reference/gp.html">gp()</a></code> is changed from <code>0.2</code> to <code>0.1</code>, and the default value for <code>nugget</code> in <code><a href="../reference/gp.html">gp()</a></code> is changed from <code>1e-6</code> to <code>1e-8</code> if <code>nugget_est = FALSE</code>.</li>
+<li>One can now specify the number of GP nodes in each layer (except for the final layer) of a DGP emulator via the <code>node</code> argument in <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
 <li>Training data are now contained in the S3 classes <code>gp</code> and <code>dgp</code>.</li>
 <li>The RMSEs (without the min-max normalization) of emulators are now contained in the S3 classes <code>gp</code>, <code>dgp</code>, and <code>lgp</code> after the execution of <code><a href="../reference/validate.html">validate()</a></code>.</li>
+<li>
+<code><a href="../reference/window.html">window()</a></code> function is added to trim the traces and obtain new point estimates of DGP model parameters for predictions.</li>
 <li>The min-max normalization can now be switched off in <code><a href="../reference/plot.html">plot()</a></code> by setting the value of <code>min_max</code>.</li>
 <li>The default number of imputations <code>B</code> for <code><a href="../reference/dgp.html">dgp()</a></code> is changed from <code>50</code> to <code>30</code> to better balance the uncertainty and the speed of DGP emulator predictions. A new function <code><a href="../reference/set_imp.html">set_imp()</a></code> is made available to change the number of imputations of a trained DGP emulator so one can either achieve faster predictions by further reducing the number of imputations, or account for more imputation uncertainties by increasing the number of imputations, without re-training the emulator.</li>
+<li>The default number of imputations <code>B</code> for <code><a href="../reference/continue.html">continue()</a></code> is set to <code>NULL</code>, in which case the same number of imputations used in <code>object</code> will be applied.</li>
+<li>
+<code>nugget</code> argument of <code><a href="../reference/dgp.html">dgp()</a></code> now specifies the nugget values for GP nodes in different layers rather than GP nodes in the final layer.</li>
 <li>The speed of predictions from DGP emulators with squared exponential kernels is significantly improved and is roughly 3x faster than the implementations in version <code>2.1.5</code>.</li>
-<li>The implementation of sequential designs (with a vignette) is made available.</li>
+<li>The implementation of sequential designs (with two vignettes) of (D)GP emulators using different criterion is made available.</li>
+<li>Thanks to <a href="https://github.com/tjmckinley" class="external-link">@tjmckinley</a>, an internal reordering issue in <code><a href="../reference/plot.html">plot()</a></code> is fixed.</li>
+<li>
+<code><a href="../reference/init_py.html">init_py()</a></code> now allows users to reinstall and uninstall the underlying Python environment.</li>
+<li>A bug that occurs when a linked DGP emulator involves a DGP emulator with external inputs is fixed.</li>
+<li>
+<code>Intel SVML</code> will now be installed with the Python environment automatically for Intel users for faster implementations.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.1.5" id="dgpsi-215">dgpsi 2.1.5<a class="anchor" aria-label="anchor" href="#dgpsi-215"></a></h2><p class="text-muted">CRAN release: 2022-09-29</p>
