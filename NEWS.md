@@ -1,3 +1,5 @@
+# dgpsi 2.1.6-9000 (development version)
+
 # dgpsi 2.1.6
 
 - A bug is found in multi-core predictions in `predict()` when `object` is an instance of `lgp` class and `x` is a list. This bug has been fixed in this version.  
