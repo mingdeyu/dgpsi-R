@@ -17,7 +17,7 @@
 - The speed of predictions from DGP emulators with squared exponential kernels is significantly improved and is roughly 3x faster than the implementations in version `2.1.5`. 
 - The implementation of sequential designs (with two vignettes) of (D)GP emulators using different criterion is made available.
 - Thanks to @tjmckinley, an internal reordering issue in `plot()` is fixed.
-- `init_py()` now allow users to reinstall and uninstall the underlying Python environment.
+- `init_py()` now allows users to reinstall and uninstall the underlying Python environment.
 - A bug that occurs when a linked DGP emulator involves a DGP emulator with external inputs is fixed.
 - `Intel SVML` will now be installed with the Python environment automatically for Intel users for faster implementations.
 

@@ -59,7 +59,7 @@ to install and activate the required Python environment. That's it, the package 
 > 
 > If you experience issues while running `init_py()`, please try to reinstall the Python environment:    
 > 
-> ```{r}
+> ```r
 > dgpsi::init_py(reinstall = T)
 > ```
 > 
