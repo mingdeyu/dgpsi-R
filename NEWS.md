@@ -1,4 +1,5 @@
 # dgpsi 2.1.6-9000 (development version)
+- Thanks to @tjmckinley, a bug in `update()` when the `object` is an instance of the `dgp` class that has been trimmed by `window()` is fixed.
 
 # dgpsi 2.1.6
 

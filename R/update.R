@@ -86,7 +86,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, ess_bu
     }
     N0 <- constructor_obj_cp$N
     constructor_obj_cp$train(N, ess_burn, disable)
-    burnin <- as.integer(N0 + as.integer(0.75*N))
+    burnin <- as.integer(N0 + 0.75*N)
   } else {
     burnin <- constructor_obj_cp$burnin
   }
