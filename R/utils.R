@@ -410,7 +410,7 @@ window <- function(object, start, end = NULL, thin = 1) {
   if (end > niter) end <- niter
   idx <- start:end
   idx <- idx[idx %% thin == 0]
-  constructor_obj_cp$N <- length(idx) - 1
+  constructor_obj_cp$N <- as.integer(length(idx) - 1)
   for ( l in 1:constructor_obj_cp$n_layer ){
     n_kernel <- length(constructor_obj_cp$all_layer[[l]])
     for (k in 1:n_kernel){
