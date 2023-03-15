@@ -147,6 +147,8 @@ mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1
       idx_x_cand <- idx_x_cand0[-idx]
     }
   }
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(idx)
 }
 
@@ -251,6 +253,8 @@ mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 
     }
     idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(idx)
 }
 
@@ -386,6 +390,8 @@ mice.bundle <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers
     }
     idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(idx)
 }
 

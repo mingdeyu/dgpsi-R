@@ -3,6 +3,7 @@ pkg.env$dgpsi <- NULL
 pkg.env$py_buildin <- NULL
 pkg.env$np <- NULL
 pkg.env$copy <- NULL
+pkg.env$py_gc <- NULL
 
 #' @title 'python' environment initialization
 #'
@@ -127,6 +128,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     assign('py_buildin', reticulate::import_builtins(), pkg.env)
     assign('np', reticulate::import("numpy"), pkg.env)
     assign('copy', reticulate::import("copy"), pkg.env)
+    assign('py_gc', reticulate::import("gc"), pkg.env)
     message(" done")
     Sys.sleep(0.5)
     message("The Python environment for 'dgpsi' is successfully loaded.")

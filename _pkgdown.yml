@@ -89,6 +89,7 @@ reference:
   - summary
   - write
   - read
+  - set_seed
   - set_linked_idx
   - set_imp
   - window

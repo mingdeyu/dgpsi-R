@@ -102,7 +102,8 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, ess_bu
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
   class(new_object) <- "dgp"
   if ( isTRUE(verb) ) message(" done")
-
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(new_object)
 }
 
@@ -149,6 +150,8 @@ update.gp <- function(object, X, Y, refit = FALSE, verb = TRUE, ...) {
   new_object[['emulator_obj']] <- constructor_obj_cp
   class(new_object) <- "gp"
 
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(new_object)
 }
 

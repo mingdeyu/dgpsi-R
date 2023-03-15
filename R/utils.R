@@ -128,6 +128,8 @@ pack <- function(...) {
   res[['data']][['X']] <- X_all
   res[['data']][['Y']] <- Y_all
   class(res) <- "bundle"
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(res)
 }
 
@@ -163,6 +165,8 @@ unpack <- function(object) {
     res[[paste('emulator', i, sep="")]]$container_obj <- pkg.env$copy$deepcopy(res[[paste('emulator', i, sep="")]]$container_obj)
     res[[paste('emulator', i, sep="")]]$emulator_obj <- pkg.env$copy$deepcopy(res[[paste('emulator', i, sep="")]]$emulator_obj)
   }
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(res)
 }
 
@@ -192,6 +196,28 @@ write <- function(object, pkl_file) {
   pkg.env$dgpsi$write(lst, pkl_file)
 }
 
+#' @title Random seed generator
+#'
+#' @description This function initializes a random number generator that sets the random seed in both R and Python
+#'    to ensure reproducible results from the package.
+#'
+#' @param seed a single integer value.
+#'
+#' @return No return value.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # See dgp() for an example.
+#' }
+#' @md
+#' @export
+set_seed <- function(seed) {
+  set.seed(seed)
+  reticulate::py_set_seed(seed, disable_hash_randomization = TRUE)
+  pkg.env$dgpsi$nb_seed(seed)
+}
 
 #' @title Load the stored emulator
 #'
@@ -356,6 +382,8 @@ set_imp <- function(object, B = 10) {
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(new_object)
 }
 
@@ -436,6 +464,8 @@ window <- function(object, start, end = NULL, thin = 1) {
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(new_object)
 }
 

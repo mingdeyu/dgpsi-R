@@ -150,6 +150,9 @@
 #' X <- seq(0, 1, length = 10)
 #' Y <- sapply(X, f)
 #'
+#' # set a random seed
+#' set_seed(999)
+#'
 #' # training a 3-layered DGP emulator
 #' m <- dgp(X, Y, depth = 3)
 #'
@@ -579,5 +582,7 @@ continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL,
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
   if ( isTRUE(verb) ) message(" done")
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(new_object)
 }

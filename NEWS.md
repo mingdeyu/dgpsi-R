@@ -1,5 +1,8 @@
 # dgpsi 2.1.6-9000 (development version)
+
 - Thanks to @tjmckinley, a bug in `update()` when the `object` is an instance of the `dgp` class that has been trimmed by `window()` is fixed.
+- Thanks to @tjmckinley, some improvements on R memory issues due to the underlying Python implementations are rectified.
+- `set_seed()` function is added to ensure reproducible results from the package.
 
 # dgpsi 2.1.6
 

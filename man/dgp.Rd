@@ -237,6 +237,9 @@ f <- function(x) {
 X <- seq(0, 1, length = 10)
 Y <- sapply(X, f)
 
+# set a random seed
+set_seed(999)
+
 # training a 3-layered DGP emulator
 m <- dgp(X, Y, depth = 3)
 
