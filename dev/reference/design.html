@@ -127,6 +127,7 @@
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  refit_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -150,6 +151,7 @@
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  refit_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -290,6 +292,13 @@ can be passed here. <code>design()</code> will pass relevant arguments to <code>
 of the sequential design:</p><ul><li><p>If <code>train_N</code> is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in <code>freq</code>) with <code>train_N</code> iterations.</p></li>
 <li><p>If <code>train_N</code> is a vector, then its size must be <code>N</code> even the re-fit frequency specified in <code>freq</code> is not one.</p></li>
 </ul><p>Defaults to <code>100</code>.</p></dd>
+
+
+<dt>refit_cores</dt>
+<dd><p>the number of cores/workers to be used to re-fit GP components (in the same layer of a DGP emulator)
+at each M-step during the re-fitting. If set to <code>NULL</code>, the number of cores is set to <code>(max physical cores available - 1)</code>.
+Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+is computationally expensive. Defaults to <code>1</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
