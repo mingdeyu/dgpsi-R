@@ -15,6 +15,7 @@ update(object, X, Y, refit, verb, ...)
   refit = FALSE,
   verb = TRUE,
   N = 100,
+  cores = 1,
   ess_burn = 10,
   B = NULL,
   ...
@@ -46,6 +47,11 @@ Defaults to \code{TRUE}.}
 \item{...}{N/A.}
 
 \item{N}{number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. Defaults to \code{100}.}
+
+\item{cores}{the number of cores/workers to be used to re-fit GP components (in the same layer)
+at each M-step during the re-fitting. If set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
+Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+is computationally expensive. Defaults to \code{1}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs at each I-step in training the emulator \code{object} if it is an
 instance of the \code{dgp} class. Defaults to \code{10}.}

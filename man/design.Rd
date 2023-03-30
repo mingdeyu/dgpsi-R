@@ -68,6 +68,7 @@ design(
   check_point = NULL,
   cores = 1,
   train_N = 100,
+  refit_cores = 1,
   ...
 )
 
@@ -90,6 +91,7 @@ design(
   check_point = NULL,
   cores = 1,
   train_N = 100,
+  refit_cores = 1,
   ...
 )
 }
@@ -225,6 +227,11 @@ of the sequential design:
 }
 
 Defaults to \code{100}.}
+
+\item{refit_cores}{the number of cores/workers to be used to re-fit GP components (in the same layer of a DGP emulator)
+at each M-step during the re-fitting. If set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
+Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+is computationally expensive. Defaults to \code{1}.}
 }
 \value{
 An updated \code{object} is returned with a slot called \code{design} that contains:

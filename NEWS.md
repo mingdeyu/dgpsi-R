@@ -1,7 +1,9 @@
 # dgpsi 2.1.6-9000 (development version)
 
-- Thanks to @tjmckinley, a bug in `update()` when the `object` is an instance of the `dgp` class that has been trimmed by `window()` is fixed.
-- Thanks to @tjmckinley, some improvements on R memory issues due to the underlying Python implementations are rectified.
+- The efficiency and speed of imputations involved in the training and predictions of DGP emulators are significantly improved (achieving roughly 3x faster training and imputations) by utilizing blocked Gibbs sampling that imputes latent variables layer-wise rather than node-wise. The blocked Gibbs sampling is now the default method for DGP emulator inference and can be changed back to the old node-wise approach by setting `blocked_gibbs = FALSE` in `dgp()`.
+- One can now optimize GP components that are contained in the same layer of a DGP emulator in parallel during the DGP emulator training, using multiple cores by setting the new argument `cores` in `dgp()`. This option is useful and can accelerate the training speed when the input dimension is moderately large (in which case there is a large number of GP components to be optimized) and the optimization of GP components is computationally expensive, e.g., when `share = FALSE` in which case input dimensions to individual GP components have different lengthscales.
+- Thanks to @tjmckinley, a bug in `update()` when the `object` is an instance of the `dgp` class (that has been trimmed by `window()`) is fixed.
+- Thanks to @tjmckinley, some R memory issues due to the underlying Python implementations are rectified.
 - `set_seed()` function is added to ensure reproducible results from the package.
 
 # dgpsi 2.1.6

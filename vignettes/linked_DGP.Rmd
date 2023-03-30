@@ -58,7 +58,13 @@ f123 <- function(x) {
 }
 ```
 
-We then generate 10 training data points for Model 1 and 15 training data points for Model 2 and 3:
+We then specify a seed with `set_seed()` from the package for reproducibility
+
+```{r}
+set_seed(200)
+```
+
+and generate 10 training data points for Model 1 and 15 training data points for Model 2 and 3:
 
 ```{r}
 # Training data for Model 1
@@ -118,7 +124,7 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 232.30it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 251.89it/s]
 ## Imputing ... done
 ```
 
@@ -150,7 +156,7 @@ m3 <- dgp( X3, Y3, depth = 3, name = "matern2.5", linked_idx = list( c(1), c(1) 
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:06<00:00, 72.56it/s]
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04<00:00, 106.36it/s]
 ## Imputing ... done
 ```
 

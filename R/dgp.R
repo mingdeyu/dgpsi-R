@@ -87,6 +87,12 @@
 #'     when `rff` is set to `TRUE`. Defaults to `NULL`. If it is `NULL`, `M` is automatically set to
 #'     `max(100, ceiling(sqrt(nrow(X))*log(nrow(X))))`.
 #' @param N number of iterations for the training. Defaults to `500`. This argument is only used when `training = TRUE`.
+#' @param cores the number of cores/workers to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
+#'     the number of cores is set to `(max physical cores available - 1)`. Only use multiple cores when there is a large number of GP components in
+#'     different layers and optimization of GP components is computationally expensive. Defaults to `1`.
+#' @param blocked_gibbs a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
+#'     more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during the Gibbs,
+#'     especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to `TRUE`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`. This argument is only used when `training = TRUE`.
 #' @param burnin the number of training iterations to be discarded for
@@ -189,8 +195,8 @@
 #' @export
 dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
-                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, ess_burn = 10,
-                burnin = NULL, B = 30, internal_input_idx = NULL, linked_idx = NULL) {
+                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, cores = 1, blocked_gibbs = TRUE,
+                ess_burn = 10, burnin = NULL, B = 30, internal_input_idx = NULL, linked_idx = NULL) {
 
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
@@ -208,6 +214,10 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   }
 
   N <- as.integer(N)
+  if( !is.null(cores) ) {
+    cores <- as.integer(cores)
+    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+  }
   B <- as.integer(B)
   ess_burn <- as.integer(ess_burn)
 
@@ -470,7 +480,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 
   if ( isTRUE(verb) ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
-  obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, rff, M)
+  obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, blocked_gibbs, rff, M)
 
   if ( isTRUE(verb) ) {
     message(" done")
@@ -484,20 +494,24 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
     } else {
       disable <- TRUE
     }
-    obj$train(N, ess_burn, disable)
+    if ( identical(cores,as.integer(1)) ){
+      obj$train(N, ess_burn, disable)
+    } else {
+      obj$ptrain(N, ess_burn, disable, cores)
+    }
     est_obj <- obj$estimate(burnin)
   } else {
     est_obj <- obj$estimate(NULL)
   }
 
   if ( isTRUE(verb) ) message("Imputing ...", appendLF = FALSE)
-  emu_obj <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
+  emu_obj <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
 
   res <- list()
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
   res[['constructor_obj']] <- obj
-  res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, block = blocked_gibbs)
   res[['emulator_obj']] <- emu_obj
 
   class(res) <- "dgp"
@@ -512,6 +526,10 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #'
 #' @param object an instance of the `dgp` class.
 #' @param N additional number of iterations for the DGP emulator training. Defaults to `500`.
+#' @param cores the number of cores/workers to be used to optimize GP components (in the same layer)
+#'     at each M-step of the training. If set to `NULL`, the number of cores is set to `(max physical cores available - 1)`.
+#'     Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+#'     is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`.
 #' @param verb a bool indicating if the progress bar will be printed during the training:
@@ -544,11 +562,17 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #' @md
 #' @export
 
-continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
+continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
   N <- as.integer(N)
+
+  if( !is.null(cores) ) {
+    cores <- as.integer(cores)
+    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+  }
+
   if ( is.null(B) ){
     B <- as.integer(length(object$emulator_obj$all_layer_set))
   } else {
@@ -569,7 +593,12 @@ continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL,
 
   linked_idx <- object$container_obj$local_input_idx
   constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
-  constructor_obj_cp$train(N, ess_burn, disable)
+  isblock <- constructor_obj_cp$block
+  if ( identical(cores,as.integer(1)) ){
+    constructor_obj_cp$train(N, ess_burn, disable)
+  } else {
+    constructor_obj_cp$ptrain(N, ess_burn, disable, cores)
+  }
   est_obj <- constructor_obj_cp$estimate(burnin)
 
   if ( isTRUE(verb) ) message("Imputing ...", appendLF = FALSE)
@@ -577,8 +606,8 @@ continue <- function(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL,
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['constructor_obj']] <- constructor_obj_cp
-  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
-  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
   if ( isTRUE(verb) ) message(" done")

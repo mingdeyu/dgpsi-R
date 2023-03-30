@@ -372,14 +372,15 @@ set_imp <- function(object, B = 10) {
   linked_idx <- object$container_obj$local_input_idx
   constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
   burnin <- constructor_obj_cp$burnin
+  isblock <- constructor_obj_cp$block
   est_obj <- constructor_obj_cp$estimate(burnin)
 
   new_object <- list()
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['constructor_obj']] <- constructor_obj_cp
-  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
-  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
   pkg.env$py_gc$collect()
@@ -433,6 +434,7 @@ window <- function(object, start, end = NULL, thin = 1) {
 
   linked_idx <- object$container_obj$local_input_idx
   constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
+  isblock <- constructor_obj_cp$block
   niter <- constructor_obj_cp$N + 1
   if ( is.null(end) ) end <- niter
   if (end > niter) end <- niter
@@ -460,8 +462,8 @@ window <- function(object, start, end = NULL, thin = 1) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['constructor_obj']] <- constructor_obj_cp
-  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
-  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
   pkg.env$py_gc$collect()

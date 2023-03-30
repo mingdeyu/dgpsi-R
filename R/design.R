@@ -89,6 +89,10 @@
 #' * If `train_N` is a vector, then its size must be `N` even the re-fit frequency specified in `freq` is not one.
 #'
 #' Defaults to `100`.
+#' @param refit_cores the number of cores/workers to be used to re-fit GP components (in the same layer of a DGP emulator)
+#'     at each M-step during the re-fitting. If set to `NULL`, the number of cores is set to `(max physical cores available - 1)`.
+#'     Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+#'     is computationally expensive. Defaults to `1`.
 #' @param ... any arguments (with names different from those of arguments used in [design()]) that are used by `f`, `method`, and `eval`
 #'     can be passed here. [design()] will pass relevant arguments to `f`, `method`, and `eval` based on the names of additional arguments provided.
 #'
@@ -631,12 +635,16 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, refit_cores = 1, ...) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
 
   N <- check_N(N)
   freq <- check_freq(freq)
   train_N <- check_train_N(train_N, N)
+  if( !is.null(refit_cores) ) {
+    refit_cores <- as.integer(refit_cores)
+    if ( refit_cores < 1 ) stop("'refit_cores' must be >= 1.", call. = FALSE)
+  }
   n_cand <- check_n_cand(n_cand)
   if (!is.null(x_test) & !is.null(y_test)) {
     xy_test <- check_xy_test(x_test, y_test)
@@ -802,7 +810,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
         if ( i %% freq[1]==0 | i==N){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-          object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+          object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
@@ -972,7 +980,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
         if ( i %% freq[1]==0 | i==N ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-          object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+          object <- update(object, X, Y, refit = TRUE, verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
@@ -1082,12 +1090,16 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, freq = c(1, 1), x_test = NULL, y_test = NULL, target = NULL, method = mice, eval = NULL, verb = TRUE, check_point = NULL, cores = 1, train_N = 100, refit_cores = 1, ...) {
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
 
   N <- check_N(N)
   freq <- check_freq(freq)
   train_N <- check_train_N(train_N, N)
+  if( !is.null(refit_cores) ) {
+    refit_cores <- as.integer(refit_cores)
+    if ( refit_cores < 1 ) stop("'refit_cores' must be >= 1.", call. = FALSE)
+  }
   n_cand <- check_n_cand(n_cand)
   if (!is.null(x_test) & !is.null(y_test)) {
     xy_test <- check_xy_test(x_test, y_test)
@@ -1357,13 +1369,13 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             if ( is.null(target) ) {
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
-              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
               object[[paste('emulator',k,sep='')]] <- obj_k
             } else {
               if ( !istarget[k] ){
                 obj_k <- object[[paste('emulator',k,sep='')]]
                 if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
-                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
                 object[[paste('emulator',k,sep='')]] <- obj_k
               }
             }
@@ -1667,13 +1679,13 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             if ( is.null(target) ){
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
-              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
               object[[paste('emulator',k,sep='')]] <- obj_k
             } else {
               if ( !istarget[k] ){
                 obj_k <- object[[paste('emulator',k,sep='')]]
                 if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE)
-                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], B = 10)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
                 object[[paste('emulator',k,sep='')]] <- obj_k
               }
             }

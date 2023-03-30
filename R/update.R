@@ -14,6 +14,10 @@
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. Defaults to `100`.
+#' @param cores the number of cores/workers to be used to re-fit GP components (in the same layer)
+#'     at each M-step during the re-fitting. If set to `NULL`, the number of cores is set to `(max physical cores available - 1)`.
+#'     Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+#'     is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs at each I-step in training the emulator `object` if it is an
 #'     instance of the `dgp` class. Defaults to `10`.
 #' @param B the number of imputations for predictions from the updated emulator `object` if it is an instance of the `dgp` class.
@@ -47,12 +51,16 @@ update <- function(object, X, Y, refit, verb, ...){
 #' @rdname update
 #' @method update dgp
 #' @export
-update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, ess_burn = 10, B = NULL, ...) {
+update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, cores = 1, ess_burn = 10, B = NULL, ...) {
   #check class
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
   N <- as.integer(N)
+  if( !is.null(cores) ) {
+    cores <- as.integer(cores)
+    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+  }
   ess_burn <- as.integer(ess_burn)
   if ( is.null(B) ){
     B <- as.integer(length(object$emulator_obj$all_layer_set))
@@ -85,12 +93,16 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, ess_bu
       disable <- TRUE
     }
     N0 <- constructor_obj_cp$N
-    constructor_obj_cp$train(N, ess_burn, disable)
+    if ( identical(cores,as.integer(1)) ){
+      constructor_obj_cp$train(N, ess_burn, disable)
+    } else {
+      constructor_obj_cp$ptrain(N, ess_burn, disable, cores)
+    }
     burnin <- as.integer(N0 + 0.75*N)
   } else {
     burnin <- constructor_obj_cp$burnin
   }
-
+  isblock <- constructor_obj_cp$block
   if ( isTRUE(verb) ) message("Imputing ...", appendLF = FALSE)
   est_obj <- constructor_obj_cp$estimate(burnin)
 
@@ -98,8 +110,8 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, ess_bu
   new_object[['data']][['X']] <- unname(X)
   new_object[['data']][['Y']] <- unname(Y)
   new_object[['constructor_obj']] <- constructor_obj_cp
-  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
-  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx)
+  new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+  new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
   class(new_object) <- "dgp"
   if ( isTRUE(verb) ) message(" done")
   pkg.env$py_gc$collect()

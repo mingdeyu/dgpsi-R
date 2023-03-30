@@ -214,6 +214,7 @@ alm.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FAL
     emulator_obj_cp <- pkg.env$copy$deepcopy(object$emulator_obj)
     B <- as.integer(length(emulator_obj_cp$all_layer_set))
     burnin <- constructor_obj_cp$burnin
+    isblock <- constructor_obj_cp$block
     for (i in 1:batch_size){
       if ( identical(workers,as.integer(1)) ){
         res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', score_only = TRUE)
@@ -245,7 +246,7 @@ alm.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FAL
       constructor_obj_cp$update_xy(training_input, training_output)
 
       est_obj <- constructor_obj_cp$estimate(burnin)
-      emulator_obj_cp <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
+      emulator_obj_cp <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
 
       idx <- c(idx,  idx_x_cand[idx_i])
       idx_x_cand <- idx_x_cand0[-unique(idx)]
@@ -379,9 +380,10 @@ alm.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading = 
         } else {
           B <- as.integer(length(obj_j$emulator_obj$all_layer_set))
           burnin <- obj_j$constructor_obj$burnin
+          isblock <- obj_j$constructor_obj$block
           constructor_obj_list[[j]]$update_xy(rbind(training_input[[j]], X_new[j,]), rbind(training_output[[j]], Y_new_j))
           est_obj <- constructor_obj_list[[j]]$estimate(burnin)
-          emulator_obj_list[[j]] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B)
+          emulator_obj_list[[j]] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
         }
       }
       idx <- c(idx,  idx_x_cand[idx_i])

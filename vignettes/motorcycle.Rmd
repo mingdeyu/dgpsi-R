@@ -59,7 +59,13 @@ plot(X, Y, pch = 16, cex = 1, xlab = 'Time', ylab = 'Acceleration', cex.axis = 1
 
 ![](images/motorcycle_data.png)
 
-Before constructing an emulator, we first split a training data set and a testing data set:
+Before constructing an emulator, we first specify a seed with `set_seed()` from the package for reproducibility
+
+```{r}
+set_seed(99)
+```
+
+and split a training data set and a testing data set:
 
 ```{r}
 test_idx <- sample(seq_len(length(X)), size = 20)
@@ -111,7 +117,7 @@ m_dgp <- continue(m_dgp)
 
 ```
 ## Continue the training:
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:18<00:00, 27.49it/s]
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:15<00:00, 31.52it/s]
 ## Imputing ... done
 ```
 
@@ -155,9 +161,9 @@ summary(m_dgp)
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |        Type         | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.953]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.712]     |     1.003     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.274]     |    32.747     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  |  GP (Squared-Exp)   |     [0.731]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  |  GP (Squared-Exp)   |     [0.636]     |     1.273     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 2  |  Node 2  |  GP (Squared-Exp)   |     [1.431]     |    12.183     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## |  Layer 3  |  Node 1  | Likelihood (Hetero) |       NA        |      NA       |        NA         |   [1, 2]   |        NA         |
 ## +-----------+----------+---------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
@@ -174,7 +180,7 @@ summary(m_gp)
 ## +-------------+-----------------+----------+--------+------------+
 ## | Kernel Fun  | Length-scale(s) | Variance | Nugget | Input Dims |
 ## +-------------+-----------------+----------+--------+------------+
-## | Squared-Exp |     [0.129]     |  0.856   | 0.274  |    [1]     |
+## | Squared-Exp |     [0.131]     |  0.791   | 0.246  |    [1]     |
 ## +-------------+-----------------+----------+--------+------------+
 ## 'Input Dims' indicates the dimensions (i.e., column indices) of your input data that are used for GP emulator training.
 ```

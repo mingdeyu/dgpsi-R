@@ -27,6 +27,8 @@ dgp(
   rff = FALSE,
   M = NULL,
   N = 500,
+  cores = 1,
+  blocked_gibbs = TRUE,
   ess_burn = 10,
   burnin = NULL,
   B = 30,
@@ -155,6 +157,14 @@ when \code{rff} is set to \code{TRUE}. Defaults to \code{NULL}. If it is \code{N
 \code{max(100, ceiling(sqrt(nrow(X))*log(nrow(X))))}.}
 
 \item{N}{number of iterations for the training. Defaults to \code{500}. This argument is only used when \code{training = TRUE}.}
+
+\item{cores}{the number of cores/workers to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
+the number of cores is set to \verb{(max physical cores available - 1)}. Only use multiple cores when there is a large number of GP components in
+different layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
+
+\item{blocked_gibbs}{a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
+more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during the Gibbs,
+especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to \code{TRUE}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
 at each I-step of the training. Defaults to \code{10}. This argument is only used when \code{training = TRUE}.}

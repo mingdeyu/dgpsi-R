@@ -63,10 +63,15 @@ wrap_plots(list(p1, p2, p3)) + plot_annotation(title = 'Synthetic Simulator')
 
 ![](images/seq2_fct.png)
 
-We now generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+We now specify a seed with `set_seed()` from the package for reproducibility
 
 ```{r}
-set.seed(99)
+set_seed(99)
+```
+
+and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+
+```{r}
 X <- maximinLHS(5, 1)
 Y <- f(X)
 ```
@@ -90,7 +95,7 @@ m1 <- dgp(X, Y[,1], connect = F)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 231.40it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 224.64it/s]
 ## Imputing ... done
 ```
 
@@ -102,7 +107,7 @@ m2 <- dgp(X, Y[,2], connect = F)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 234.37it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 248.10it/s]
 ## Imputing ... done
 ```
 
@@ -114,7 +119,7 @@ m3 <- dgp(X, Y[,3])
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 412.00it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 421.89it/s]
 ## Imputing ... done
 ```
 
@@ -149,38 +154,38 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.515805 0.159555 0.011499
+##  * RMSE: 0.521768 0.162249 0.010418
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.007783
-##  * Next design point (Emulator2): 0.395145
+##  * Next design point (Emulator1): 0.003421
+##  * Next design point (Emulator2): 0.003421
 ##  * Next design point (Emulator3): 0.007783
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.469099 0.144266 0.004533
+##  * RMSE: 0.476133 0.169318 0.005171
 ## Iteration 2:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.350863
-##  * Next design point (Emulator2): 0.813725
+##  * Next design point (Emulator1): 0.362879
+##  * Next design point (Emulator2): 0.995688
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.463723 0.077879 0.004533
+##  * RMSE: 0.472015 0.201739 0.005171
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.159441
-##  * Next design point (Emulator2): 0.286661
+##  * Next design point (Emulator1): 0.090828
+##  * Next design point (Emulator2): 0.485472
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.160675 0.009480 0.004533
+##  * RMSE: 0.091950 0.017712 0.005171
 ## Targets are not reached for all emulators at the end of the sequential design.
 ```
 
-It can be seen that at the second step, the DGP emulator for the third output has already reached the target, so for the rest of the steps no further refinements (i.e., additions of design points to the third DGP emulator) are performed. At the end of the first wave, the DGP emulators for both the first output has not reached the target yet. At this point, we can proceed to a second wave by repeating the command above, but we show below an alternative way, in which we define an aggregation function that aggregates criterion scores across the three outputs such that the same design points are added to the three emulators at each step (instead of different design points for each emulator). We define the aggregation function `g` that aggregate scores by calculating their weighted average: 
+It can be seen that at the second step, the DGP emulator for the third output has already reached the target, so for the rest of the steps no further refinements (i.e., additions of design points to the third DGP emulator) are performed. At the end of the first wave, the DGP emulators for both the first and second outputs have not reached the target yet. At this point, we can proceed to a second wave by repeating the command above, but we show below an alternative way, in which we define an aggregation function that aggregates criterion scores across the three outputs such that the same design points are added to the three emulators at each step (instead of different design points for each emulator). We define the aggregation function `g` that aggregate scores by calculating their weighted average: 
 
 ```{r}
 g <- function(x, weight){
@@ -191,10 +196,10 @@ g <- function(x, weight){
 }
 ```
 
-Since the second and third emulator have already reached the target, we assign zero weights to them and the weight of one to the first emulator:
+Since the third emulator has already reached the target, we assign zero weights to it and weights of 0.8 and 0.2 to the first and second emulators respectively:
 
 ```{r}
-weight <- c(1, 0, 0)
+weight <- c(0.8, 0.2, 0)
 ```
 
 We now pass both the aggregate function `g()` and its `weight` argument to `design()` for the second wave of the sequential design with a further 15 steps:
@@ -205,30 +210,38 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.160675 0.009480 0.004533
+##  * RMSE: 0.091950 0.017712 0.005171
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.623264
+##  * Next design point (Emulator1): 0.403398
+##  * Next design point (Emulator2): 0.403398
+##  * Next design point (Emulator3): None (target reached)
+##  - Updating and re-fitting ... done
+##  - Validating ... done
+##  * RMSE: 0.125244 0.006897 0.005171
+## Iteration 2:
+##  - Locating ... done
+##  * Next design point (Emulator1): 0.028182
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.123479 0.009480 0.004533
+##  * RMSE: 0.040983 0.006897 0.005171
 ##  
 ##  ...
 ## 
-## Iteration 10:
+## Iteration 9:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.109250
+##  * Next design point (Emulator1): 0.012557
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.007681 0.009480 0.004533
-## Target reached! The sequential design stops at step 10.
+##  * RMSE: 0.009377 0.006897 0.005171
+## Target reached! The sequential design stops at step 9.
 ```
 
-The first emulator reached the target after step 10 of the second wave. The sequential designs of the three emulators can be plotted with `draw()`:
+The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
 
 ```{r}
 draw(m, 1, 'design') + draw(m, 2, 'design') + draw(m, 3, 'design') +

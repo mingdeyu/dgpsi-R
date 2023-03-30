@@ -4,12 +4,25 @@
 \alias{continue}
 \title{Continue the training of a DGP emulator}
 \usage{
-continue(object, N = 500, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL)
+continue(
+  object,
+  N = 500,
+  cores = 1,
+  ess_burn = 10,
+  verb = TRUE,
+  burnin = NULL,
+  B = NULL
+)
 }
 \arguments{
 \item{object}{an instance of the \code{dgp} class.}
 
 \item{N}{additional number of iterations for the DGP emulator training. Defaults to \code{500}.}
+
+\item{cores}{the number of cores/workers to be used to optimize GP components (in the same layer)
+at each M-step of the training. If set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
+Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+is computationally expensive. Defaults to \code{1}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
 at each I-step of the training. Defaults to \code{10}.}

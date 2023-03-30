@@ -60,10 +60,15 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
 
 We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space while in the top-right part the simulator shows little variations. 
 
-We now generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+We now specify a seed with `set_seed()` from the package for reproducibility
 
 ```{r}
-set.seed(99)
+set_seed(99)
+```
+
+and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+
+```{r}
 X <- maximinLHS(5,2)
 Y <- f(X)
 ```
@@ -87,7 +92,7 @@ m <- dgp(X, Y)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 274.03it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 344.20it/s]
 ## Imputing ... done
 ```
 
@@ -110,22 +115,22 @@ m <- design(m, N=15, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.536642
+##  * RMSE: 0.529337
 ## Iteration 1:
 ##  - Locating ... done
 ##  * Next design point: 0.911159 0.061740
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.544043
+##  * RMSE: 0.543560
 ## 
 ## ...
 ## 
 ## Iteration 15:
 ##  - Locating ... done
-##  * Next design point: 0.310854 0.450063
+##  * Next design point: 0.263890 0.740092
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.159995
+##  * RMSE: 0.136769
 ```
 
 ```{r}
@@ -134,22 +139,22 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.159995
+##  * RMSE: 0.136769
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.724869 0.984804
+##  * Next design point: 0.025673 0.660664
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.133405
+##  * RMSE: 0.122388
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.021569 0.389862
+##  * Next design point: 0.090893 0.101532
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.082311
+##  * RMSE: 0.052554
 ```
 
 ```{r}
@@ -159,22 +164,22 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.082311
+##  * RMSE: 0.052554
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.045685 0.039926
+##  * Next design point: 0.411124 0.012697
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.055801
+##  * RMSE: 0.034771
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.585808 0.068268
+##  * Next design point: 0.033692 0.199115
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.007048
+##  * RMSE: 0.004280
 ```
 
 After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
@@ -240,14 +245,14 @@ rmse3 <- m3$oos$rmse
 m4 <- validate(m4, x_test = validate_x, y_test = validate_y, verb = F)
 rmse4 <- m4$oos$rmse
 # create a dataframe that stores the RMSEs of the four DGP emulators
-rmse_static <- data.frame('N' = c(10, 20, 30, 40), 'rmse' = c(rmse1, rmse2, rmse3, rmse4), 'design' = c('lhd-10', 'lhd-20', 'lhd-30', 'lhd-40'))
+rmse_static <- data.frame('N' = c(10, 20, 30, 40), 'rmse' = c(rmse1, rmse2, rmse3, rmse4), 'LHD' = c('lhd-10', 'lhd-20', 'lhd-30', 'lhd-40'))
 ```
 
 and add them to the sequential design validation plot (in log-scale) for comparisons:
 
 ```{r}
 draw(m, 'rmse', log = T) + 
-  geom_point(data = rmse_static, mapping = aes(x = N, y = rmse, group = design, shape = design), color = '#E69F00', size = 1.5) +
+  geom_point(data = rmse_static, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(2, 3, 4, 8))
 ```
 
