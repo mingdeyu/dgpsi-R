@@ -430,9 +430,9 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   } else {
     add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+    xy_cand_list <- remove_dup(xy_cand_list, X)
     x_cand <- xy_cand_list[[1]]
     y_cand <- xy_cand_list[[2]]
-    x_cand <- remove_dup(x_cand, X)
     idx_x_cand0 <- c(1:nrow(x_cand))
     idx_x_cand <- idx_x_cand0
     idx_x_acq <- c()
@@ -873,9 +873,9 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   } else {
     add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+    xy_cand_list <- remove_dup(xy_cand_list, X)
     x_cand <- xy_cand_list[[1]]
     y_cand <- xy_cand_list[[2]]
-    x_cand <- remove_dup(x_cand, X)
     idx_x_cand0 <- c(1:nrow(x_cand))
     idx_x_cand <- idx_x_cand0
     idx_x_acq <- c()
@@ -1498,12 +1498,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   } else {
     add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
-    x_cand <- xy_cand_list[[1]]
-    y_cand <- xy_cand_list[[2]]
 
     for (j in 1:n_emulators){
-      x_cand <- remove_dup(x_cand, X[[paste('emulator',j,sep="")]])
+      xy_cand_list <- remove_dup(xy_cand_list, X[[paste('emulator',j,sep="")]])
     }
+    x_cand <- xy_cand_list[[1]]
+    y_cand <- xy_cand_list[[2]]
     idx_x_cand0 <- c(1:nrow(x_cand))
     idx_x_cand <- idx_x_cand0
     idx_x_acq <- c()
@@ -1891,14 +1891,18 @@ check_xy_cand <- function(x_cand, y_cand, n_dim_Y){
 }
 
 #remove duplicates between x_cand and X
-remove_dup <- function(x_cand, X){
+remove_dup <- function(xy_cand_list, X){
+  x_cand <- xy_cand_list[[1]]
+  y_cand <- xy_cand_list[[2]]
   X_s <- apply(X, 1, paste, collapse = ", ")
   x_cand_s <- apply(x_cand, 1, paste, collapse = ", ")
   X_x_cand <- intersect(X_s, x_cand_s)
   if ( length(X_x_cand)!=0 ){
-    x_cand <- x_cand[!x_cand_s %in% X_x_cand,,drop=FALSE]
+    idx <- !x_cand_s %in% X_x_cand
+    x_cand <- x_cand[idx,,drop=FALSE]
+    y_cand <- y_cand[idx,,drop=FALSE]
   }
-  return(x_cand)
+  return(list(x_cand, y_cand))
 }
 
 #check argument x_test and y_test
