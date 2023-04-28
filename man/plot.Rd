@@ -15,6 +15,7 @@
   method = "mean_var",
   style = 1,
   min_max = TRUE,
+  color = "turbo",
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -30,6 +31,7 @@
   method = "mean_var",
   style = 1,
   min_max = TRUE,
+  color = "turbo",
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -45,6 +47,7 @@
   method = "mean_var",
   style = 1,
   min_max = TRUE,
+  color = "turbo",
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -84,6 +87,20 @@ This argument is only used when \code{style = 1} and the emulator input is at le
 
 \item{min_max}{a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
 emulator. Defaults to \code{TRUE}.}
+
+\item{color}{a character string indicating the color map to use when \code{style = 2}:
+\itemize{
+\item \code{'magma'} (or \code{'A'})
+\item \code{'inferno'} (or \code{'B'})
+\item \code{'plasma'} (or '\code{C}')
+\item \code{'viridis'} (or \code{'D'})
+\item \code{'cividis'} (or \code{'E'})
+\item \code{'rocket'} (or \code{'F'})
+\item \code{'mako'} (or \code{'G'})
+\item \code{'turbo'} (or \code{'H'})
+}
+
+Defaults to \code{'turbo'} (or \code{'H'}).}
 
 \item{verb}{a bool indicating if the trace information on plotting will be printed during the function execution.
 Defaults to \code{TRUE}.}

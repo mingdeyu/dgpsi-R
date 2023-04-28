@@ -22,6 +22,17 @@
 #' @param style either `1` or `2`, indicating two different types of validation plots.
 #' @param min_max a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
 #'     emulator. Defaults to `TRUE`.
+#' @param color a character string indicating the color map to use when `style = 2`:
+#' * `'magma'` (or `'A'`)
+#' * `'inferno'` (or `'B'`)
+#' * `'plasma'` (or '`C`')
+#' * `'viridis'` (or `'D'`)
+#' * `'cividis'` (or `'E'`)
+#' * `'rocket'` (or `'F'`)
+#' * `'mako'` (or `'G'`)
+#' * `'turbo'` (or `'H'`)
+#'
+#' Defaults to `'turbo'` (or `'H'`).
 #' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param force same as that of [validate()].
@@ -59,7 +70,7 @@ NULL
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -131,11 +142,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         dat[["y_validate"]] <- loo_res$y_train[,l]
         dat[["std"]] <- loo_res$std[,l]
         if ( min_max ){
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
             ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
             ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -313,11 +324,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         dat[["y_validate"]] <- oos_res$y_test[,l]
         dat[["std"]] <- oos_res$std[,l]
         if ( min_max ) {
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
             ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
             ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -387,7 +398,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -574,11 +585,11 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         dat[["y_validate"]] <- y_test_list[[k]][,l]
         dat[["std"]] <- oos_res$std[[k]][,l]
         if ( min_max ) {
-          p_list[[counter]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+          p_list[[counter]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
             ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p_list[[counter]] <- plot_style_2(as.data.frame(dat), method, min_max) +
+          p_list[[counter]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
             ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -649,7 +660,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -716,11 +727,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
       dat[["y_validate"]] <- loo_res$y_train[,1]
       dat[["std"]] <- loo_res$std[,1]
       if ( min_max ) {
-        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+        p <- plot_style_2(as.data.frame(dat), method, min_max, color) +
           ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
-        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+        p <- plot_style_2(as.data.frame(dat), method, min_max, color) +
           ggplot2::ggtitle(sprintf('RMSE = %.6f', loo_res$rmse)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
@@ -870,11 +881,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
       dat[["y_validate"]] <- oos_res$y_test[,1]
       dat[["std"]] <- oos_res$std[,1]
       if ( min_max ) {
-        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+        p <- plot_style_2(as.data.frame(dat), method, min_max, color) +
           ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
-        p <- plot_style_2(as.data.frame(dat), method, min_max) +
+        p <- plot_style_2(as.data.frame(dat), method, min_max, color) +
           ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
@@ -1025,7 +1036,7 @@ plot_style_1 <- function(dat, method, dim, isdup) {
   return(p)
 }
 
-plot_style_2 <- function(dat, method, min_max) {
+plot_style_2 <- function(dat, method, min_max, color) {
   y_min <- min(dat$y_validate)
   y_max <- max(dat$y_validate)
   std_min <- min(dat$std)
@@ -1053,9 +1064,9 @@ plot_style_2 <- function(dat, method, min_max) {
     ggplot2::geom_point(alpha=0.8, size=1.5)
 
   if (isTRUE(min_max)){
-    p <- p + ggplot2::scale_colour_viridis_c("Normalized Predictive SD", option = 'turbo', breaks=seq(0,1,0.2), labels=c('0.0','0.2','0.4','0.6','0.8','1.0'))
+    p <- p + ggplot2::scale_colour_viridis_c("Normalized Predictive SD", option = color, breaks=seq(0,1,0.2), labels=c('0.0','0.2','0.4','0.6','0.8','1.0'))
   } else {
-    p <- p + ggplot2::scale_colour_viridis_c("Predictive SD", option = 'turbo')
+    p <- p + ggplot2::scale_colour_viridis_c("Predictive SD", option = color)
   }
 
   p <- p +

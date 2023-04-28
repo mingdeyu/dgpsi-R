@@ -6,6 +6,8 @@
 - Thanks to @tjmckinley, some R memory issues due to the underlying Python implementations are rectified.
 - `set_seed()` function is added to ensure reproducible results from the package.
 - A bug is fixed when candidate sets `x_cand` and `y_cand` are provided to `design()`.
+- One can choose different color palettes using the new argument `color` in `plot()` when `style = 2`.
+- `set_linked_idx()` allows constructions of different (D)GP emulators (in terms of different connections to the feeding layers) from a same (D)GP emulator. 
 
 # dgpsi 2.1.6
 

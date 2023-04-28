@@ -333,7 +333,12 @@ summary.lgp <- function(object, ...) {
 #' @export
 set_linked_idx <- function(object, idx) {
   idx <- reticulate::np_array(as.integer(idx - 1))
+  object[['constructor_obj']] <- pkg.env$copy$deepcopy(object[['constructor_obj']])
+  object[['emulator_obj']] <- pkg.env$copy$deepcopy(object[['emulator_obj']])
+  object[['container_obj']] <- pkg.env$copy$deepcopy(object[['container_obj']])
   object$container_obj$set_local_input(idx)
+  pkg.env$py_gc$collect()
+  gc(full=T)
   return(object)
 }
 
