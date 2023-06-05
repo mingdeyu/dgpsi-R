@@ -1,6 +1,6 @@
-This is the submission of 'dgpsi' 2.1.6.
+This is the submission of 'dgpsi' 2.2.0.
 
-Various updates have been made in this version. A detailed list of changes that have been made since the last version 2.1.5 is contained in NEWS.md.  
+Various updates have been made in this version. A detailed list of changes that have been made since the last version 2.1.6 is contained in NEWS.md.  
 
 ## Test environments
 
@@ -17,34 +17,18 @@ Various updates have been made in this version. A detailed list of changes that 
 
 ## R CMD check results
 
-- There were no ERRORs, WARNINGs and NOTEs on Local Test and GitHub Actions.
+- There were no ERRORs, WARNINGs and NOTEs on Local Test, GitHub Actions, and win-builder.
 
-- There were no ERRORs, WARNINGs and 1 NOTE on win-builder:
-
-  * On windows-x86_64-w64-mingw32 (r-release)
-  
-    ```
-    * checking CRAN incoming feasibility ... NOTE
-    Maintainer: 'Deyu Ming <deyu.ming.16@ucl.ac.uk>'
-
-    Found the following (possibly) invalid URLs:
-      URL: https://doi.org/10.1137/20M1323771
-        From: README.md
-        Status: 403
-        Message: Forbidden
-
-    Found the following (possibly) invalid DOIs:
-      DOI: 10.1137/20M1323771
-        From: DESCRIPTION
-        Status: Forbidden
-        Message: 403
-    ```
-    
-    **Maintainer's Comment**: Both the URL and DOI in the note are valid and can be accessed correctly. This note did not appear in any other R CMD checks. Thus, this note can be safely ignored.
-
-- There were no ERRORs, WARNINGs and 2 NOTEs on R-Hub:
+- There were no ERRORs, WARNINGs and 3 NOTEs on R-Hub:
 
   * On windows-x86_64-devel (r-devel)
+    ```
+    checking for non-standard things in the check directory ... NOTE
+    Found the following files/directories:
+    ''NULL''
+    ```
+    
+    **Maintainer's Comment**: This note only appeared in this build. It did not appear in any other builds. In addition, As noted in [R-hub issue #560](https://github.com/r-hub/rhub/issues/560), this could be a R-hub issue. Thus, this note can be ignored.
     
     ```
     checking for detritus in the temp directory ... NOTE
