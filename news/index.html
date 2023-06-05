@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,6 +57,19 @@
       <small>Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.2.0" id="dgpsi-220">dgpsi 2.2.0<a class="anchor" aria-label="anchor" href="#dgpsi-220"></a></h2>
+<ul><li>The efficiency and speed of imputations involved in the training and predictions of DGP emulators are significantly improved (achieving roughly 3x faster training and imputations) by utilizing blocked Gibbs sampling that imputes latent variables layer-wise rather than node-wise. The blocked Gibbs sampling is now the default method for DGP emulator inference and can be changed back to the old node-wise approach by setting <code>blocked_gibbs = FALSE</code> in <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
+<li>One can now optimize GP components that are contained in the same layer of a DGP emulator in parallel during the DGP emulator training, using multiple cores by setting the new argument <code>cores</code> in <code><a href="../reference/dgp.html">dgp()</a></code>. This option is useful and can accelerate the training speed when the input dimension is moderately large (in which case there is a large number of GP components to be optimized) and the optimization of GP components is computationally expensive, e.g., when <code>share = FALSE</code> in which case input dimensions to individual GP components have different lengthscales.</li>
+<li>Thanks to <a href="https://github.com/tjmckinley" class="external-link">@tjmckinley</a>, a bug in <code><a href="../reference/update.html">update()</a></code> when the <code>object</code> is an instance of the <code>dgp</code> class (that has been trimmed by <code><a href="../reference/window.html">window()</a></code>) is fixed.</li>
+<li>Thanks to <a href="https://github.com/tjmckinley" class="external-link">@tjmckinley</a>, some R memory issues due to the underlying Python implementations are rectified.</li>
+<li>
+<code><a href="../reference/set_seed.html">set_seed()</a></code> function is added to ensure reproducible results from the package.</li>
+<li>A bug is fixed when candidate sets <code>x_cand</code> and <code>y_cand</code> are provided to <code><a href="../reference/design.html">design()</a></code>.</li>
+<li>One can choose different color palettes using the new argument <code>color</code> in <code><a href="../reference/plot.html">plot()</a></code> when <code>style = 2</code>.</li>
+<li>
+<code><a href="../reference/set_linked_idx.html">set_linked_idx()</a></code> allows constructions of different (D)GP emulators (in terms of different connections to the feeding layers) from a same (D)GP emulator.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.1.6" id="dgpsi-216">dgpsi 2.1.6<a class="anchor" aria-label="anchor" href="#dgpsi-216"></a></h2><p class="text-muted">CRAN release: 2023-02-08</p>
 <ul><li>A bug is found in multi-core predictions in <code><a href="../reference/predict.html">predict()</a></code> when <code>object</code> is an instance of <code>lgp</code> class and <code>x</code> is a list. This bug has been fixed in this version.<br></li>

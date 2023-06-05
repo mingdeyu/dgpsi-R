@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,15 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">continue</span><span class="op">(</span><span class="va">object</span>, N <span class="op">=</span> <span class="fl">500</span>, ess_burn <span class="op">=</span> <span class="fl">10</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, burnin <span class="op">=</span> <span class="cn">NULL</span>, B <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">continue</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  N <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  burnin <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  B <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,6 +83,13 @@
 
 <dt>N</dt>
 <dd><p>additional number of iterations for the DGP emulator training. Defaults to <code>500</code>.</p></dd>
+
+
+<dt>cores</dt>
+<dd><p>the number of cores/workers to be used to optimize GP components (in the same layer)
+at each M-step of the training. If set to <code>NULL</code>, the number of cores is set to <code>(max physical cores available - 1)</code>.
+Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+is computationally expensive. Defaults to <code>1</code>.</p></dd>
 
 
 <dt>ess_burn</dt>

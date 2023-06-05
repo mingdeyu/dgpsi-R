@@ -28,7 +28,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -124,9 +124,13 @@ system of three synthetic computer models.</p>
 <span><span class="va">f123</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">f3</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">f1</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,<span class="fu">f2</span><span class="op">(</span><span class="fu">f1</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>We then generate 10 training data points for Model 1 and 15 training
-data points for Model 2 and 3:</p>
+<p>We then specify a seed with <code><a href="../reference/set_seed.html">set_seed()</a></code> from the package
+for reproducibility</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span></span></code></pre></div>
+<p>and generate 10 training data points for Model 1 and 15 training data
+points for Model 2 and 3:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Training data for Model 1</span></span>
 <span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">Y1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X1</span>, <span class="va">f1</span><span class="op">)</span></span>
@@ -141,7 +145,7 @@ data points for Model 2 and 3:</p>
 <h2 id="emulation-of-model-1">Emulation of Model 1<a class="anchor" aria-label="anchor" href="#emulation-of-model-1"></a>
 </h2>
 <p>We construct and train a GP emulator with Matérn-2.5 kernel:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">X1</span>, <span class="va">Y1</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a GP structure ... done</span></span>
 <span><span class="co">## Initializing the GP emulator ... done</span></span>
@@ -149,7 +153,7 @@ data points for Model 2 and 3:</p>
 <p>We now validate the trained GP emulator by <code><a href="../reference/plot.html">plot()</a></code> by LOO
 (alternatively, one can first use <code><a href="../reference/validate.html">validate()</a></code> to store the
 LOO results before plotting with <code><a href="../reference/plot.html">plot()</a></code>):</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
 <span><span class="co">## Post-processing LOO results ... done</span></span>
@@ -165,7 +169,7 @@ column indices of the global input <code>X</code> that will feed into
 constructed the emulator. Instead of re-training the emulator to provide
 this information, we can simply use <code><a href="../reference/set_linked_idx.html">set_linked_idx()</a></code> to add
 this information to <code>m1</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_linked_idx.html">set_linked_idx</a></span><span class="op">(</span><span class="va">m1</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -173,12 +177,12 @@ this information to <code>m1</code>:</p>
 </h2>
 <p>We construct a two-layered DGP emulator with Matérn-2.5 kernels to
 emulate the Model 2:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X2</span>, <span class="va">Y2</span>, depth <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span>, linked_idx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator:</span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 232.30it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 251.89it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Since all outputs of emulators in the first layer is from
 <code>m1</code> and <code>m2</code> uses the output from <code>m1</code>
@@ -186,7 +190,7 @@ as its input, we set <code>linked_idx = c(1)</code> in
 <code><a href="../reference/dgp.html">dgp()</a></code> above.</p>
 <p>The following plot visualizes the LOO of the trained DGP emulator
 <code>m2</code>:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Initializing ... done
 Post-processing LOO results ... done
@@ -198,12 +202,12 @@ Plotting ... done</code></pre>
 </h2>
 <p>We now construct a three-layered DGP emulator with Matérn-2.5 kernels
 to emulate the Model 3:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span> <span class="va">X3</span>, <span class="va">Y3</span>, depth <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span>, linked_idx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator:</span></span>
-<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:06&lt;00:00, 72.56it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04&lt;00:00, 106.36it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Since <code>m3</code> takes both outputs from <code>m1</code> in
 layer 1 and <code>m2</code> in layer 2, we set
@@ -218,7 +222,7 @@ columns of <code>X3</code> correspond to the output of <code>m1</code>
 and <code>m2</code> respectively.</p>
 <p>The following plot visualizes the LOO of the trained DGP emulator
 <code>m3</code>:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Initializing ... done
 Post-processing LOO results ... done
@@ -234,7 +238,7 @@ Model 3) at hand, we are now ready to build the linked emulator by first
 using <code><a href="../reference/combine.html">combine()</a></code> to construct the system hierarchy
 <code>struc</code> and then applying <code><a href="../reference/lgp.html">lgp()</a></code> for the linked
 emulator.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">struc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine.html">combine</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span><span class="op">)</span></span></code></pre></div>
 <p>Note that each layer of an emulator system is represented by a list.
@@ -243,7 +247,7 @@ to put the corresponding emulator in a list using
 <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
 <p>We can check the relations between emulators in different layers by
 applying <code><a href="../reference/summary.html">summary()</a></code> to <code>m_link</code>:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_link</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## +-----------+--------------+------+----------------------------+-----------------+</span></span>
 <span><span class="co">## | Layer No. | Emulator No. | Type |         Connection         | External Inputs |</span></span>
@@ -257,7 +261,7 @@ applying <code><a href="../reference/summary.html">summary()</a></code> to <code
 <span><span class="co">## 2. 'External Inputs' indicates if the emulator (referred by 'Layer No.' and 'Emulator No.') has external inputs that are not provided by the feeding emulators.</span></span></code></pre>
 <p>For comparison, we construct a GP emulator for the whole system by
 generating 15 training data points from Model 1 and Model 2:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
 <span><span class="va">Y_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X_gp</span>, <span class="va">f123</span><span class="op">)</span></span>
 <span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gp.html">gp</a></span><span class="op">(</span><span class="va">X_gp</span>, <span class="va">Y_gp</span>, name <span class="op">=</span> <span class="st">'matern2.5'</span><span class="op">)</span></span></code></pre></div>
@@ -266,18 +270,18 @@ generating 15 training data points from Model 1 and Model 2:</p>
 <span><span class="co">## Training the GP emulator ... done</span></span></code></pre>
 <p>Finally, we make predictions from both the GP emulator and the linked
 emulator at 300 testing data points over <span class="math inline">\([0,1]\)</span>:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Testing input</span></span>
 <span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
 <span><span class="co"># Testing output</span></span>
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f123</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># linked emulator</span></span>
 <span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m_link</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span>
 <span><span class="co"># GP emulator</span></span>
 <span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m_gp</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
 <p>and plot the predictions to compare their emulation performances:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract predictive means and variances from the linked emulator</span></span>
 <span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m_link</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span><span class="op">$</span><span class="va">emulator1</span></span>
 <span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m_link</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="va">emulator1</span><span class="op">)</span></span>
@@ -312,20 +316,20 @@ the emulators over the whole input space. However, we are still able to
 retain some available realizations from the computer simulators for the
 linked emulator validation. Say we were able to afford 20 runs of the
 above linked computer system:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># OOS testing input</span></span>
 <span><span class="va">test_x_oos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">300</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="co"># OOS testing output</span></span>
 <span><span class="va">test_y_oos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x_oos</span>, <span class="va">f123</span><span class="op">)</span></span></code></pre></div>
 <p>Then, we can conduct OOS validations for the GP emulator:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_gp</span>, <span class="va">test_x_oos</span>, <span class="va">test_y_oos</span>, style <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
 <span><span class="co">## Post-processing OOS results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
 <p><img src="images/gp_oos.png"></p>
 <p>and the linked emulator:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_link</span>, <span class="va">test_x_oos</span>, <span class="va">test_y_oos</span>, style <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
 <span><span class="co">## Post-processing OOS results ... done</span></span>

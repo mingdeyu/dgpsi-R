@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,6 +87,8 @@
 <span>  rff <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  M <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  N <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  blocked_gibbs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  burnin <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  B <span class="op">=</span> <span class="fl">30</span>,</span>
@@ -234,6 +236,18 @@ when <code>rff</code> is set to <code>TRUE</code>. Defaults to <code>NULL</code>
 <dd><p>number of iterations for the training. Defaults to <code>500</code>. This argument is only used when <code>training = TRUE</code>.</p></dd>
 
 
+<dt>cores</dt>
+<dd><p>the number of cores/workers to be used to optimize GP components (in the same layer) at each M-step of the training. If set to <code>NULL</code>,
+the number of cores is set to <code>(max physical cores available - 1)</code>. Only use multiple cores when there is a large number of GP components in
+different layers and optimization of GP components is computationally expensive. Defaults to <code>1</code>.</p></dd>
+
+
+<dt>blocked_gibbs</dt>
+<dd><p>a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
+more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during the Gibbs,
+especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to <code>TRUE</code>.</p></dd>
+
+
 <dt>ess_burn</dt>
 <dd><p>number of burnin steps for the ESS-within-Gibbs
 at each I-step of the training. Defaults to <code>10</code>. This argument is only used when <code>training = TRUE</code>.</p></dd>
@@ -317,6 +331,9 @@ R matrix. Thus, if <code>X</code> is a single data point with multiple dimension
 <span class="r-in"><span><span class="co"># generate training data</span></span></span>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># set a random seed</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">999</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># training a 3-layered DGP emulator</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">dgp</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, depth <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
