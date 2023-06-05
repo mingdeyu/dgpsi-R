@@ -214,6 +214,7 @@ write <- function(object, pkl_file) {
 #' @md
 #' @export
 set_seed <- function(seed) {
+  seed <- as.integer(seed)
   set.seed(seed)
   reticulate::py_set_seed(seed, disable_hash_randomization = TRUE)
   pkg.env$dgpsi$nb_seed(seed)

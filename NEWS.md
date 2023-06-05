@@ -1,4 +1,4 @@
-# dgpsi 2.1.6-9000 (development version)
+# dgpsi 2.2.0
 
 - The efficiency and speed of imputations involved in the training and predictions of DGP emulators are significantly improved (achieving roughly 3x faster training and imputations) by utilizing blocked Gibbs sampling that imputes latent variables layer-wise rather than node-wise. The blocked Gibbs sampling is now the default method for DGP emulator inference and can be changed back to the old node-wise approach by setting `blocked_gibbs = FALSE` in `dgp()`.
 - One can now optimize GP components that are contained in the same layer of a DGP emulator in parallel during the DGP emulator training, using multiple cores by setting the new argument `cores` in `dgp()`. This option is useful and can accelerate the training speed when the input dimension is moderately large (in which case there is a large number of GP components to be optimized) and the optimization of GP components is computationally expensive, e.g., when `share = FALSE` in which case input dimensions to individual GP components have different lengthscales.

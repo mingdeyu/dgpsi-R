@@ -22,13 +22,26 @@ bibentry(bibtype = "Article",
                    as.person("Daniel Williamson"),
                    as.person("Serge Guillas")),
   journal      = "Technometrics",
-  year         = "2022",
-  volume       = "0",
-  number       = "0",
-  pages        = "1--12",
+  year         = "2023",
+  volume       = "65",
+  number       = "2",
+  pages        = "150--161",
 
   textVersion  =
-  paste("Ming, D., Williamson, D., and Guillas, S. (2022)",
+  paste("Ming, D., Williamson, D., and Guillas, S. (2023)",
         "Deep Gaussian process emulation using stochastic imputation,",
-        "Technometrics. (0)0, 1-12.")
+        "Technometrics. (65)2, 150-161.")
+)
+
+bibentry(bibtype = "Unpublished",
+  title        = "Linked deep Gaussian process emulation for model networks",
+  author       = c(as.person("Deyu Ming"),
+                   as.person("Daniel Williamson")),
+  note         = "arXiv:2306.01212",
+  year         = "2023",
+
+  textVersion  =
+  paste("Ming, D. and Williamson, D. (2023)",
+        "Linked deep Gaussian process emulation for model networks,",
+        "arXiv:2306.01212")
 )

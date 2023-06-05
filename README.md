@@ -5,6 +5,7 @@
   [![DOC](https://img.shields.io/badge/DOC-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
   [![REF](https://img.shields.io/badge/REF-Linked%20GP-informational)](https://doi.org/10.1137/20M1323771)
   [![REF](https://img.shields.io/badge/REF-Deep%20GP-informational)](https://doi.org/10.1080/00401706.2022.2124311)
+  [![REF](https://img.shields.io/badge/REF-Linked%20DGP-informational)](http://arxiv.org/abs/2306.01212)
   [![python](https://img.shields.io/badge/Python-dgpsi%20v2.1.6-informational)](https://github.com/mingdeyu/DGP)
   ![CRAN_License](https://img.shields.io/cran/l/dgpsi?color=green)
   
@@ -77,6 +78,8 @@ to install and activate the required Python environment. That's it, the package 
 > ```
 
 ## References
-> [Ming, D., Williamson, D., and Guillas, S. (2022) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i>. 0(0), 1-12.](https://doi.org/10.1080/00401706.2022.2124311)
+> [Ming, D. and Williamson, D. (2023) Linked deep Gaussian process emulation for model networks. arXiv:2306.01212](http://arxiv.org/abs/2306.01212)
+
+> [Ming, D., Williamson, D., and Guillas, S. (2023) Deep Gaussian process emulation using stochastic imputation. <i>Technometrics</i>. 65(2), 150-161.](https://doi.org/10.1080/00401706.2022.2124311)
 
 > [Ming, D. and Guillas, S. (2021) Linked Gaussian process emulation for systems of computer models using Mat&eacute;rn kernels and adaptive design, <i>SIAM/ASA Journal on Uncertainty Quantification</i>. 9(4), 1615-1642.](https://doi.org/10.1137/20M1323771)
