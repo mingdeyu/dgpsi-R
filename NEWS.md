@@ -1,4 +1,5 @@
 # dgpsi 2.2.0-9000 (development version)
+- A bug from the underlying Python implementations is fixed when `name = matern2.5` in `gp()` and `dgp()`.
 
 # dgpsi 2.2.0
 
