@@ -59,7 +59,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.0-9000" id="dgpsi-220-9000-development-version">dgpsi 2.2.0-9000 (development version)<a class="anchor" aria-label="anchor" href="#dgpsi-220-9000-development-version"></a></h2>
-</div>
+<ul><li>A bug from the underlying Python implementations is fixed when <code>name = matern2.5</code> in <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.0" id="dgpsi-220">dgpsi 2.2.0<a class="anchor" aria-label="anchor" href="#dgpsi-220"></a></h2><p class="text-muted">CRAN release: 2023-06-05</p>
 <ul><li>The efficiency and speed of imputations involved in the training and predictions of DGP emulators are significantly improved (achieving roughly 3x faster training and imputations) by utilizing blocked Gibbs sampling that imputes latent variables layer-wise rather than node-wise. The blocked Gibbs sampling is now the default method for DGP emulator inference and can be changed back to the old node-wise approach by setting <code>blocked_gibbs = FALSE</code> in <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
