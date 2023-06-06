@@ -1,3 +1,5 @@
+# dgpsi 2.2.0-9000 (development version)
+
 # dgpsi 2.2.0
 
 - The efficiency and speed of imputations involved in the training and predictions of DGP emulators are significantly improved (achieving roughly 3x faster training and imputations) by utilizing blocked Gibbs sampling that imputes latent variables layer-wise rather than node-wise. The blocked Gibbs sampling is now the default method for DGP emulator inference and can be changed back to the old node-wise approach by setting `blocked_gibbs = FALSE` in `dgp()`.
