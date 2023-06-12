@@ -159,21 +159,21 @@ independently:</p>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 224.64it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 220.72it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, connect <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 248.10it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02&lt;00:00, 240.45it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 421.89it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 413.38it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Note that we have the global connection turned off for the first two
 DGP emulators because we found that this yields better emulation
@@ -224,12 +224,12 @@ different outputs, e.g., by setting
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.090828</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.485472</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.033959</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.281797</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.091950 0.017712 0.005171</span></span>
+<span><span class="co">##  * RMSE: 0.067343 0.011225 0.005171</span></span>
 <span><span class="co">## Targets are not reached for all emulators at the end of the sequential design.</span></span></code></pre>
 <p>It can be seen that at the second step, the DGP emulator for the
 third output has already reached the target, so for the rest of the
@@ -262,7 +262,7 @@ wave of the sequential design with a further 15 steps:</p>
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 15 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">15</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, aggregate <span class="op">=</span> <span class="va">g</span>, target <span class="op">=</span> <span class="fl">0.01</span>, weight <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.091950 0.017712 0.005171</span></span>
+<span><span class="co">##  * RMSE: 0.067343 0.011225 0.005171</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
 <span><span class="co">##  * Next design point (Emulator1): 0.403398</span></span>
@@ -270,26 +270,26 @@ wave of the sequential design with a further 15 steps:</p>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.125244 0.006897 0.005171</span></span>
+<span><span class="co">##  * RMSE: 0.114102 0.007900 0.005171</span></span>
 <span><span class="co">## Iteration 2:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.028182</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.472785</span></span>
 <span><span class="co">##  * Next design point (Emulator2): None (target reached)</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.040983 0.006897 0.005171</span></span>
+<span><span class="co">##  * RMSE: 0.057033 0.007900 0.005171</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 9:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.012557</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.049099</span></span>
 <span><span class="co">##  * Next design point (Emulator2): None (target reached)</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.009377 0.006897 0.005171</span></span>
+<span><span class="co">##  * RMSE: 0.007011 0.007900 0.005171</span></span>
 <span><span class="co">## Target reached! The sequential design stops at step 9.</span></span></code></pre>
 <p>The first and the second emulators reached the target after iteration
 9 and 1 of the second wave, respectively. The sequential designs of the
@@ -369,7 +369,7 @@ smaller number of design points.</p>
 <div class="section level3">
 <h3 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h3>
-<p>See <a href="https://mingdeyu.github.io/dgpsi-R/articles/seq_design.html" class="external-link"><code>Sequential Design I</code></a>
+<p>See <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html" class="external-link"><code>Sequential Design I</code></a>
 for the sequential design of a DGP emulator on a 2D simulator.</p>
 </div>
 </div>

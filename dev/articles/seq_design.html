@@ -182,59 +182,59 @@ designs on <code>m</code>:</p>
 <span><span class="co">##  * RMSE: 0.529337</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.911159 0.061740</span></span>
+<span><span class="co">##  * Next design point: 0.093332 0.075594</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.543560</span></span>
+<span><span class="co">##  * RMSE: 0.521201</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 15:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.263890 0.740092</span></span>
+<span><span class="co">##  * Next design point: 0.996120 0.904685</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.136769</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.170959</span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.136769</span></span>
+<span><span class="co">##  * RMSE: 0.170959</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.025673 0.660664</span></span>
+<span><span class="co">##  * Next design point: 0.862600 0.722212</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.122388</span></span>
+<span><span class="co">##  * RMSE: 0.150731</span></span>
 <span><span class="co">##   </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.090893 0.101532</span></span>
+<span><span class="co">##  * Next design point: 0.519293 0.463623</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.052554</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.112657</span></span></code></pre>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 3rd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N<span class="op">=</span><span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.052554</span></span>
+<span><span class="co">##  * RMSE: 0.112657</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.411124 0.012697</span></span>
+<span><span class="co">##  * Next design point: 0.045685 0.039926</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.034771</span></span>
+<span><span class="co">##  * RMSE: 0.033327</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.033692 0.199115</span></span>
+<span><span class="co">##  * Next design point: 0.776195 0.364631</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.004280</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.004254</span></span></code></pre>
 <p>After the sequential design is done, we can inspect the enriched
 design by applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -307,7 +307,7 @@ constructed through the sequential design.</p>
 <div class="section level3">
 <h3 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h3>
-<p>See <a href="https://mingdeyu.github.io/dgpsi-R/articles/seq_design_2.html" class="external-link"><code>Sequential Design II</code></a>
+<p>See <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html" class="external-link"><code>Sequential Design II</code></a>
 for the sequential design of a bundle of DGP emulators with automatic
 terminations.</p>
 </div>
