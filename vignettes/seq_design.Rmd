@@ -118,19 +118,19 @@ m <- design(m, N=15, limits = lim, f = f, x_test = validate_x, y_test = validate
 ##  * RMSE: 0.529337
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.911159 0.061740
+##  * Next design point: 0.093332 0.075594
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.543560
+##  * RMSE: 0.521201
 ## 
 ## ...
 ## 
 ## Iteration 15:
 ##  - Locating ... done
-##  * Next design point: 0.263890 0.740092
+##  * Next design point: 0.996120 0.904685
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.136769
+##  * RMSE: 0.170959
 ```
 
 ```{r}
@@ -139,22 +139,22 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.136769
+##  * RMSE: 0.170959
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.025673 0.660664
+##  * Next design point: 0.862600 0.722212
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.122388
+##  * RMSE: 0.150731
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.090893 0.101532
+##  * Next design point: 0.519293 0.463623
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.052554
+##  * RMSE: 0.112657
 ```
 
 ```{r}
@@ -164,22 +164,22 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.052554
+##  * RMSE: 0.112657
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.411124 0.012697
+##  * Next design point: 0.045685 0.039926
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.034771
+##  * RMSE: 0.033327
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.033692 0.199115
+##  * Next design point: 0.776195 0.364631
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.004280
+##  * RMSE: 0.004254
 ```
 
 After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
@@ -262,7 +262,7 @@ It can be seen from the plot above that with static space-filling designs, the q
 
 ### See also
 
-See [`Sequential Design II`](https://mingdeyu.github.io/dgpsi-R/articles/seq_design_2.html) for the sequential design of a bundle of DGP emulators with automatic terminations.
+See [`Sequential Design II`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html) for the sequential design of a bundle of DGP emulators with automatic terminations.
 
 ### References
 
