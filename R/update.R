@@ -41,7 +41,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' # See locate() for an example.
+#' # See alm(), mice() or pei() for an example.
 #' }
 #' @md
 #' @name update

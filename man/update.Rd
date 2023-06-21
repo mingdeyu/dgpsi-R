@@ -89,6 +89,6 @@ R matrix. Thus, if \code{X} is a single data point with multiple dimensions, it 
 \examples{
 \dontrun{
 
-# See locate() for an example.
+# See alm(), mice() or pei() for an example.
 }
 }
