@@ -6,13 +6,14 @@
 \alias{update.gp}
 \title{Update a GP or DGP emulator}
 \usage{
-update(object, X, Y, refit, verb, ...)
+update(object, X, Y, refit, reset, verb, ...)
 
 \method{update}{dgp}(
   object,
   X,
   Y,
   refit = FALSE,
+  reset = FALSE,
   verb = TRUE,
   N = 100,
   cores = 1,
@@ -21,7 +22,7 @@ update(object, X, Y, refit, verb, ...)
   ...
 )
 
-\method{update}{gp}(object, X, Y, refit = FALSE, verb = TRUE, ...)
+\method{update}{gp}(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, ...)
 }
 \arguments{
 \item{object}{can be one of the following:
@@ -40,6 +41,9 @@ output dimensions. When \code{likelihood} (see below) is not \code{NULL}, \code{
 }}
 
 \item{refit}{a bool indicating whether to re-fit the emulator \code{object} after the training input and output are updated. Defaults to \code{FALSE}.}
+
+\item{reset}{a bool indicating whether to reset hyperparameters of the emulator \code{object} to their initial values when the emulator was
+constructed, after the training input and output are updated. Defaults to \code{FALSE}.}
 
 \item{verb}{a bool indicating if the trace information will be printed during the function execution.
 Defaults to \code{TRUE}.}

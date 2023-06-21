@@ -19,6 +19,7 @@ design(
   freq,
   x_test,
   y_test,
+  reset,
   target,
   method,
   eval,
@@ -40,6 +41,7 @@ design(
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
+  reset = FALSE,
   target = NULL,
   method = mice,
   eval = NULL,
@@ -61,6 +63,7 @@ design(
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
+  reset = FALSE,
   target = NULL,
   method = mice,
   eval = NULL,
@@ -84,6 +87,7 @@ design(
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
+  reset = FALSE,
   target = NULL,
   method = mice,
   eval = NULL,
@@ -159,6 +163,11 @@ output dimensions.
 }
 
 Set to \code{NULL} for the LOO-based emulator validation. Defaults to \code{NULL}. This argument is only used if \code{eval = NULL}.}
+
+\item{reset}{a bool or a vector of bools indicating whether to reset hyperparameters of the emulator to their initial values when it was initially
+constructed after the input-output update and before the re-fit. If a bool is given, it will be applied to
+every step of the sequential design. If a vector is provided, its length should be equal to \code{N} and will be applied to individual
+steps of the sequential design. Defaults to \code{FALSE}.}
 
 \item{target}{a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to \code{NULL}, in which
 case the sequential design stops after \code{N} steps. See \emph{Note} section below for further information about \code{target}.}

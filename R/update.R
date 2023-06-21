@@ -11,6 +11,8 @@
 #' * If `object` is an instance of the `dgp` class, `Y` is a matrix with its rows being output data points and columns being
 #'     output dimensions. When `likelihood` (see below) is not `NULL`, `Y` must be a matrix with only one column.
 #' @param refit a bool indicating whether to re-fit the emulator `object` after the training input and output are updated. Defaults to `FALSE`.
+#' @param reset a bool indicating whether to reset hyperparameters of the emulator `object` to their initial values when the emulator was
+#'     constructed, after the training input and output are updated. Defaults to `FALSE`.
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. Defaults to `100`.
@@ -44,14 +46,14 @@
 #' @md
 #' @name update
 #' @export
-update <- function(object, X, Y, refit, verb, ...){
+update <- function(object, X, Y, refit, reset, verb, ...){
   UseMethod("update")
 }
 
 #' @rdname update
 #' @method update dgp
 #' @export
-update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, cores = 1, ess_burn = 10, B = NULL, ...) {
+update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, N = 100, cores = 1, ess_burn = 10, B = NULL, ...) {
   #check class
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -79,7 +81,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, cores 
 
   if ( verb ) message("Updating ...", appendLF = FALSE)
   constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
-  constructor_obj_cp$update_xy(X,Y)
+  constructor_obj_cp$update_xy(X, Y, reset)
   if ( verb ) {
     Sys.sleep(0.2)
     message(" done")
@@ -122,7 +124,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, verb = TRUE, N = 100, cores 
 #' @rdname update
 #' @method update gp
 #' @export
-update.gp <- function(object, X, Y, refit = FALSE, verb = TRUE, ...) {
+update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, ...) {
   #check class
   if ( !inherits(object,"gp") ){
     stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
@@ -142,7 +144,7 @@ update.gp <- function(object, X, Y, refit = FALSE, verb = TRUE, ...) {
 
   if ( verb ) message("Updating ...", appendLF = FALSE)
   constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
-  constructor_obj_cp$update_xy(X,Y)
+  constructor_obj_cp$update_xy(X, Y, reset)
   if ( verb ) {
     Sys.sleep(0.5)
     message(" done")
