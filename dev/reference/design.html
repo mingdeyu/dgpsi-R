@@ -76,6 +76,7 @@
 <span>  <span class="va">freq</span>,</span>
 <span>  <span class="va">x_test</span>,</span>
 <span>  <span class="va">y_test</span>,</span>
+<span>  <span class="va">reset</span>,</span>
 <span>  <span class="va">target</span>,</span>
 <span>  <span class="va">method</span>,</span>
 <span>  <span class="va">eval</span>,</span>
@@ -98,6 +99,7 @@
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -120,6 +122,7 @@
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -144,6 +147,7 @@
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -228,6 +232,13 @@ Defaults to <code>NULL</code>. This argument is only used if <code>eval = NULL</
 <li><p>if <code>object</code> is an instance of the <code>dgp</code> class, <code>y_test</code> is a matrix with its rows being testing output data points and columns being
 output dimensions.</p></li>
 </ul><p>Set to <code>NULL</code> for the LOO-based emulator validation. Defaults to <code>NULL</code>. This argument is only used if <code>eval = NULL</code>.</p></dd>
+
+
+<dt>reset</dt>
+<dd><p>a bool or a vector of bools indicating whether to reset hyperparameters of the emulator to their initial values when it was initially
+constructed after the input-output update and before the re-fit. If a bool is given, it will be applied to
+every step of the sequential design. If a vector is provided, its length should be equal to <code>N</code> and will be applied to individual
+steps of the sequential design. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt>target</dt>
