@@ -342,7 +342,7 @@ class) that indicate if the target RMSEs are reached at the end of the sequentia
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     
-<ul><li><p>The re-fitting and validation of an emulator are forced after the final step of a sequential design even <code>N</code> is not multiples of elements in <code>freq</code>.</p></li>
+<ul><li><p>The validation of an emulator is forced after the final step of a sequential design even <code>N</code> is not multiples of the second element in <code>freq</code>.</p></li>
 <li><p>Any <code>loo</code> or <code>oos</code> slot that already exists in <code>object</code> will be cleaned, and a new slot called <code>loo</code> or <code>oos</code> will be created in the returned object
 depending on whether <code>x_test</code> and <code>y_test</code> are provided. The new slot gives the validation information of the emulator constructed in the final step of
 the sequential design. See <code><a href="validate.html">validate()</a></code> for more information about the slots <code>loo</code> and <code>oos</code>.</p></li>
