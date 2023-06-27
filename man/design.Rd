@@ -282,7 +282,7 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{
-\item The re-fitting and validation of an emulator are forced after the final step of a sequential design even \code{N} is not multiples of elements in \code{freq}.
+\item The validation of an emulator is forced after the final step of a sequential design even \code{N} is not multiples of the second element in \code{freq}.
 \item Any \code{loo} or \code{oos} slot that already exists in \code{object} will be cleaned, and a new slot called \code{loo} or \code{oos} will be created in the returned object
 depending on whether \code{x_test} and \code{y_test} are provided. The new slot gives the validation information of the emulator constructed in the final step of
 the sequential design. See \code{\link[=validate]{validate()}} for more information about the slots \code{loo} and \code{oos}.

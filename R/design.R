@@ -124,7 +124,7 @@
 #'
 #' See *Note* section below for further information.
 #' @note
-#' * The re-fitting and validation of an emulator are forced after the final step of a sequential design even `N` is not multiples of elements in `freq`.
+#' * The validation of an emulator is forced after the final step of a sequential design even `N` is not multiples of the second element in `freq`.
 #' * Any `loo` or `oos` slot that already exists in `object` will be cleaned, and a new slot called `loo` or `oos` will be created in the returned object
 #'   depending on whether `x_test` and `y_test` are provided. The new slot gives the validation information of the emulator constructed in the final step of
 #'   the sequential design. See [validate()] for more information about the slots `loo` and `oos`.
@@ -370,7 +370,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           Y <- rbind(Y, new_output)
         }
 
-        if ( i %% freq[1]==0 | i==N){
+        if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = TRUE, reset = reset[i], verb = FALSE)
           if ( verb ) message(" done")
@@ -528,7 +528,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         idx_x_acq <- c(idx_x_acq, idx_sub_cand[res])
         idx_x_cand <- idx_x_cand0[-idx_x_acq]
 
-        if ( i %% freq[1]==0 | i==N ){
+        if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = TRUE, reset = reset[i], verb = FALSE)
           if ( verb ) message(" done")
@@ -814,7 +814,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           Y <- rbind(Y, new_output)
         }
 
-        if ( i %% freq[1]==0 | i==N){
+        if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = TRUE, reset = reset[i], verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
           if ( verb ) message(" done")
@@ -984,7 +984,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
         idx_x_cand <- idx_x_cand0[-idx_x_acq]
 
-        if ( i %% freq[1]==0 | i==N ){
+        if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = TRUE, reset = reset[i], verb = FALSE, N = train_N[i], cores = refit_cores, B = 10)
           if ( verb ) message(" done")
@@ -1370,7 +1370,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           }
         }
 
-        if ( i %% freq[1]==0 | i==N){
+        if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           for ( k in 1:n_emulators ){
             if ( is.null(target) ) {
@@ -1680,7 +1680,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             idx_x_cand <- idx_x_cand0[-idx_x_acq]
         }
 
-        if ( i %% freq[1]==0 | i==N){
+        if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           for ( k in 1:n_emulators ){
             if ( is.null(target) ){
