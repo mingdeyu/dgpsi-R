@@ -3,6 +3,7 @@
 - Thanks to @yyimingucl, a bug from the underlying Python implementations for the MICE sequential design criterion `mice()` is fixed.
 - An argument `reset` is added to `update()` and `design()` to reset hyperparameters of a (D)GP emulator to their initial values (that were specified when the emulator is initialized) after the input and output of the emulator are updated and before the emulator is refitted. This argument can be useful for sequential designs in cases where the hyperparameters of a (D)GP emulator get caught in suboptimal estimates. In such circumstances, one can set `reset = TRUE` to reinitialize the (D)GP emulator in some steps of the sequential designs as a strategy to escape the poor estimates.
 - The refitting of an emulator in the final step of a sequential design is no longer forced in `design()`. 
+- An argument `type` is added to `plot()` to allow users to draw OOS validation plots with testing data shown as a line instead of individual points when the emulator's input is one-dimensional and `style = 1`.
 
 # dgpsi 2.2.0
 

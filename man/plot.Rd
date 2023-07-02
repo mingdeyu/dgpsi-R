@@ -16,6 +16,7 @@
   style = 1,
   min_max = TRUE,
   color = "turbo",
+  type = "points",
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -32,6 +33,7 @@
   style = 1,
   min_max = TRUE,
   color = "turbo",
+  type = "points",
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -48,6 +50,7 @@
   style = 1,
   min_max = TRUE,
   color = "turbo",
+  type = "points",
   verb = TRUE,
   force = FALSE,
   cores = 1,
@@ -101,6 +104,9 @@ emulator. Defaults to \code{TRUE}.}
 }
 
 Defaults to \code{'turbo'} (or \code{'H'}).}
+
+\item{type}{either \code{'line'} or \verb{'points}, indicating whether to draw testing data in the OOS validation plot as a line or
+individual points when the input of the emulator is one-dimensional and \code{style = 1}. Defaults to \code{'points'}}
 
 \item{verb}{a bool indicating if the trace information on plotting will be printed during the function execution.
 Defaults to \code{TRUE}.}

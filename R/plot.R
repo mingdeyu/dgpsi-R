@@ -33,6 +33,8 @@
 #' * `'turbo'` (or `'H'`)
 #'
 #' Defaults to `'turbo'` (or `'H'`).
+#' @param type either `'line'` or `'points`, indicating whether to draw testing data in the OOS validation plot as a line or
+#'     individual points when the input of the emulator is one-dimensional and `style = 1`. Defaults to `'points'`
 #' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param force same as that of [validate()].
@@ -70,8 +72,9 @@ NULL
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
+  if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
@@ -263,11 +266,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
             dat_range[["upper"]] <- quant[3,,l]
           }
           if ( min_max ) {
-            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
               ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
               ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -398,8 +401,9 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
+  if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
@@ -498,11 +502,11 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
             dat_range[["upper"]] <- quant[3,,l]
           }
           if ( min_max ) {
-            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method) +
+            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method, type) +
               ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method) +
+            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method, type) +
               ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -660,8 +664,9 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
+  if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
@@ -826,11 +831,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
           dat_range[["upper"]] <- quant[,3]
         }
         if ( min_max ) {
-          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
             ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method) +
+          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
             ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -1082,46 +1087,85 @@ plot_style_2 <- function(dat, method, min_max, color) {
   return(p)
 }
 
-plot_style_1_1d <- function(dat1, dat2, dat3, method) {
+plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
   p <- ggplot2::ggplot(data=dat2, ggplot2::aes_(x=~range))
 
   if ( method=="sampling" ){
     p <- p +
-      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes_(ymin=~lower, ymax=~upper, fill="95% CI")) +
-      ggplot2::geom_line(data=dat2, ggplot2::aes_(y=~median, color="Pred. Median"),linetype="dashed", size=0.5, alpha=0.9)
+      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes_(ymin=~lower, ymax=~upper, fill="95% CI"))
+
+    if (type == 'line') {
+      p <- p +
+        ggplot2::geom_line(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
+    }
+
+    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes_(y=~median, color="Pred. Median"), linetype="dashed", size=0.5, alpha=0.9)
 
     if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes_(x=~x_train, y=~y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
 
-    p <- p +
-      ggplot2::geom_point(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
-
-    if ( is.null(dat3) ){
+    if ( type == 'points' ){
       p <- p +
-        ggplot2::scale_color_manual(name = "", values = c("Pred. Median"="#000000", "Testing Point"="#D55E00")) +
-        ggplot2::scale_fill_manual(name = "", values=c("95% CI"="#999999"))
-    } else {
-      p <- p +
-        ggplot2::scale_color_manual(name = "", values = c("Pred. Median"="#000000", "Training Point"="#0072B2", "Testing Point"="#D55E00")) +
-        ggplot2::scale_fill_manual(name = "", values=c("95% CI"="#999999"))
+        ggplot2::geom_point(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
+    }
+    if (type == 'points') {
+      if ( is.null(dat3) ){
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Median"="#000000", "Testing Point"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("95% CI"="#999999"))
+      } else {
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Median"="#000000", "Training Point"="#0072B2", "Testing Point"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("95% CI"="#999999"))
+      }
+    } else if (type == 'line') {
+      if ( is.null(dat3) ){
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Median"="#000000", "Testing Function"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("95% CI"="#999999"))
+      } else {
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Median"="#000000", "Training Point"="#0072B2", "Testing Function"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("95% CI"="#999999"))
+      }
     }
   } else if ( method=="mean_var" ) {
     p <- p +
-      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes_(ymin=~lower, ymax=~upper, fill="CI (+/-2SD)")) +
-      ggplot2::geom_line(data=dat2, ggplot2::aes_(y=~mean, color="Pred. Mean"),linetype="dashed", size=0.5, alpha=0.9)
+      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes_(ymin=~lower, ymax=~upper, fill="CI (+/-2SD)"))
+
+    if (type == 'line') {
+      p <- p +
+        ggplot2::geom_line(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
+    }
+
+    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes_(y=~mean, color="Pred. Mean"),linetype="dashed", size=0.5, alpha=0.9)
 
     if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes_(x=~x_train, y=~y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
 
-    p <- p +
-      ggplot2::geom_point(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
+    if (type == 'points') {
+      p <- p +
+        ggplot2::geom_point(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
+    }
 
-    if ( is.null(dat3) ){
-      p <- p +
-        ggplot2::scale_color_manual(name = "", values = c("Pred. Mean"="#000000", "Testing Point"="#D55E00")) +
-        ggplot2::scale_fill_manual(name = "", values=c("CI (+/-2SD)"="#999999"))
-    } else {
-      p <- p +
-        ggplot2::scale_color_manual(name = "", values = c("Pred. Mean"="#000000", "Training Point"="#0072B2", "Testing Point"="#D55E00")) +
-        ggplot2::scale_fill_manual(name = "", values=c("CI (+/-2SD)"="#999999"))
+    if (type == 'points') {
+      if ( is.null(dat3) ){
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Mean"="#000000", "Testing Point"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("CI (+/-2SD)"="#999999"))
+      } else {
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Mean"="#000000", "Training Point"="#0072B2", "Testing Point"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("CI (+/-2SD)"="#999999"))
+      }
+    } else if (type == 'line') {
+      if ( is.null(dat3) ){
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Mean"="#000000", "Testing Function"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("CI (+/-2SD)"="#999999"))
+      } else {
+        p <- p +
+          ggplot2::scale_color_manual(name = "xx", values = c("Pred. Mean"="#000000", "Training Point"="#0072B2", "Testing Function"="#D55E00")) +
+          ggplot2::scale_fill_manual(name = "xx", values=c("CI (+/-2SD)"="#999999"))
+      }
     }
   }
 
@@ -1135,11 +1179,21 @@ plot_style_1_1d <- function(dat1, dat2, dat3, method) {
     ggplot2::labs(x ="Input position", y = "Model output")
 
   if ( is.null(dat3) ){
-    p <- p +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank"), shape = c(NA, 17), size = c(0.5, 2), alpha = c(0.9, 0.9))))
+    if (type == 'points') {
+      p <- p +
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank"), shape = c(NA, 17), size = c(0.5, 2), alpha = c(0.9, 0.9))))
+    } else if (type == 'line') {
+      p <- p +
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "dashed"), shape = c(NA, NA), size = c(0.5, 0.5), alpha = c(0.9, 0.9))))
+    }
   } else {
-    p <- p +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank", "blank"), shape = c(NA, 19, 17), size = c(0.5, 2, 2), alpha = c(0.9, 0.9, 0.9))))
+    if (type == 'points') {
+      p <- p +
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank", "blank"), shape = c(NA, 19, 17), size = c(0.5, 2, 2), alpha = c(0.9, 0.9, 0.9))))
+    } else if (type == 'line') {
+      p <- p +
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "dashed", "blank"), shape = c(NA, NA, 19), size = c(0.5, 0.5, 2), alpha = c(0.9, 0.9, 0.9))))
+    }
   }
   return(p)
 }
