@@ -1184,15 +1184,15 @@ plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
         ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank"), shape = c(NA, 17), size = c(0.5, 2), alpha = c(0.9, 0.9))))
     } else if (type == 'line') {
       p <- p +
-        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "dashed"), shape = c(NA, NA), size = c(0.5, 0.5), alpha = c(0.9, 0.9))))
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "solid"), shape = c(NA, NA), size = c(0.5, 0.5), alpha = c(0.9, 0.9))))
     }
   } else {
     if (type == 'points') {
       p <- p +
-        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank", "blank"), shape = c(NA, 19, 17), size = c(0.5, 2, 2), alpha = c(0.9, 0.9, 0.9))))
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "blank", "blank"), shape = c(NA, 17, 19), size = c(0.5, 2, 2), alpha = c(0.9, 0.9, 0.9))))
     } else if (type == 'line') {
       p <- p +
-        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "dashed", "blank"), shape = c(NA, NA, 19), size = c(0.5, 0.5, 2), alpha = c(0.9, 0.9, 0.9))))
+        ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("dashed", "solid", "blank"), shape = c(NA, NA, 19), size = c(0.5, 0.5, 2), alpha = c(0.9, 0.9, 0.9))))
     }
   }
   return(p)
