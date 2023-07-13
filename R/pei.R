@@ -168,7 +168,7 @@ pei.dgp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, worker
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
-    stop("The function is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
+    stop("pei() is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
   }
   object$emulator_obj$set_nb_parallel(threading)
   training_input <- object$data$X
@@ -341,6 +341,9 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
     if ( inherits(obj_i,"gp") ){
       score <- log(obj_i$emulator_obj$esloo())
     } else {
+      if ( obj_i$constructor_obj$all_layer[[obj_i$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
+        stop("pei() is only applicable to bundles that contain DGP emulators without likelihood layers.", call. = FALSE)
+      }
       obj_i$emulator_obj$set_nb_parallel(threading)
       if ( identical(workers,as.integer(1)) ){
         score <- log(obj_i$emulator_obj$esloo(training_input[[i]], training_output[[i]]))

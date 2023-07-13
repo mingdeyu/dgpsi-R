@@ -69,7 +69,6 @@ and split a training data set and a testing data set:
 
 ```{r}
 test_idx <- sample(seq_len(length(X)), size = 20)
-
 train_X <- X[-test_idx]
 train_Y <- Y[-test_idx,]
 test_x <- X[test_idx]

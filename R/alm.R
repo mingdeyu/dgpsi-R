@@ -41,7 +41,6 @@
 #' @note
 #' * The column order of the first argument of `aggregate` must be consistent with the order of emulator output dimensions (if `object` is an instance of the
 #'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
-#' * The function is only applicable to DGP emulators without likelihood layers.
 #' * Any R vector detected in `x_cand` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix.
 #' @references
@@ -157,9 +156,9 @@ alm.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
 alm.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
-  if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
-    stop("The function is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
-  }
+  #if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
+  #  stop("The function is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
+  #}
   object$emulator_obj$set_nb_parallel(threading)
   training_input <- object$data$X
   training_output <- object$data$Y
@@ -352,7 +351,7 @@ alm.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading = 
             res = emulator_obj_list[[j]]$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', score_only = TRUE, core_num = workers)
           }
           emulator_obj_list[[j]]$set_nb_parallel(FALSE)
-          scores <- cbind(scores, res)
+          scores <- cbind(scores, if(ncol(res) == 1) res else rowMeans(res))
         }
       }
 

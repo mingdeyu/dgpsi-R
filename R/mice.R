@@ -42,7 +42,6 @@
 #' @note
 #' * The column order of the first argument of `aggregate` must be consistent with the order of emulator output dimensions (if `object` is an instance of the
 #'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
-#' * The function is only applicable to DGP emulators without likelihood layers.
 #' * Any R vector detected in `x_cand` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix.
 #' @references
@@ -158,9 +157,9 @@ mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1
 mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, threading = FALSE, aggregate = NULL, ...) {
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
-  if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
-    stop("The function is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
-  }
+  #if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
+  #  stop("The function is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
+  #}
   object$emulator_obj$set_nb_parallel(threading)
   training_input <- object$data$X
   training_output <- object$data$Y
@@ -306,7 +305,7 @@ mice.bundle <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers
         } else {
           res = obj_i$emulator_obj$pmetric(x_cand = x_cand, method = 'MICE', nugget_s = nugget_s, score_only = TRUE, core_num = workers)
         }
-        scores <- cbind(scores, res)
+        scores <- cbind(scores, if(ncol(res) == 1) res else rowMeans(res))
       }
     }
 

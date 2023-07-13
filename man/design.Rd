@@ -16,6 +16,7 @@ design(
   limits,
   int,
   f,
+  reps,
   freq,
   x_test,
   y_test,
@@ -38,6 +39,7 @@ design(
   limits = NULL,
   int = FALSE,
   f = NULL,
+  reps = 1,
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
@@ -60,6 +62,7 @@ design(
   limits = NULL,
   int = FALSE,
   f = NULL,
+  reps = 1,
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
@@ -84,6 +87,7 @@ design(
   limits = NULL,
   int = FALSE,
   f = NULL,
+  reps = 1,
   freq = c(1, 1),
   x_test = NULL,
   y_test = NULL,
@@ -147,6 +151,11 @@ of any arguments with the same names passed via \code{...}. The list output can 
 need to be updated after each step of the sequential design.
 }
 }}
+
+\item{reps}{an integer that gives the number of repetitions of the located design points to be created and used for evaluations of \code{f}. Set the
+argument to an integer greater than \code{1} if \code{f} is a stochastic function that can generate different responses given a same input and the
+supplied emulator \code{object} can deal with stochastic responses, e.g., a (D)GP emulator with \code{nugget_est = TRUE} or a DGP emulator with a
+likelihood layer. The argument is only used when \code{f} is supplied. Defaults to \code{1}.}
 
 \item{freq}{a vector of two integers with the first element giving the frequency (in number of steps) to re-fit the
 emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to \code{c(1, 1)}.}
@@ -222,7 +231,7 @@ Defaults to \code{TRUE}.}
 from the user if the sequential design should continue or be terminated. Set to \code{NULL} to suspend the manual intervention. Defaults
 to \code{NULL}.}
 
-\item{cores}{an integers that gives the number of cores to be used for emulator validations. If set to \code{NULL}, the number of cores is
+\item{cores}{an integer that gives the number of cores to be used for emulator validations. If set to \code{NULL}, the number of cores is
 set to \verb{(max physical cores available - 1)}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
 
 \item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f}, \code{method}, and \code{eval}

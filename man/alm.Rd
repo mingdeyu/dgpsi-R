@@ -92,7 +92,6 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \itemize{
 \item The column order of the first argument of \code{aggregate} must be consistent with the order of emulator output dimensions (if \code{object} is an instance of the
 \code{dgp} class), or the order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
-\item The function is only applicable to DGP emulators without likelihood layers.
 \item Any R vector detected in \code{x_cand} will be treated as a column vector and automatically converted into a single-column
 R matrix.
 }

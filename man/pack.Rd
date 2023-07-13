@@ -20,7 +20,7 @@ training output data for different emulators.
 }
 }
 \description{
-This function packs GP emulators and DGP emulators (without likelihood layers) into a \code{bundle} class for
+This function packs GP emulators and DGP emulators into a \code{bundle} class for
 sequential designs if each emulator emulates one output dimension of the underlying simulator.
 }
 \details{

@@ -26,7 +26,7 @@ combine <- function(...) {
 
 #' @title Pack GP and DGP emulators into a bundle
 #'
-#' @description This function packs GP emulators and DGP emulators (without likelihood layers) into a `bundle` class for
+#' @description This function packs GP emulators and DGP emulators into a `bundle` class for
 #'     sequential designs if each emulator emulates one output dimension of the underlying simulator.
 #'
 #' @param ... a sequence of emulators produced by [gp()] or [dgp()].
@@ -113,11 +113,11 @@ pack <- function(...) {
   training_output <- c()
   for ( i in 1:length(res) ){
     if ( !inherits(res[[i]],"gp") & !inherits(res[[i]],"dgp") ) stop("The function only accepts GP or DGP emulators as inputs.", call. = FALSE)
-    if ( inherits(res[[i]],"dgp") ){
-      if ( res[[i]]$constructor_obj$all_layer[[res[[i]]$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
-        stop("The function can only pack DGP emulators without likelihood layers.", call. = FALSE)
-      }
-    }
+    #if ( inherits(res[[i]],"dgp") ){
+    #  if ( res[[i]]$constructor_obj$all_layer[[res[[i]]$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
+    #    stop("The function can only pack DGP emulators without likelihood layers.", call. = FALSE)
+    #  }
+    #}
     if ( !identical(res[[i]]$data$X, training_input) ) stop("The function can only pack emulators with common training input data.", call. = FALSE)
     Y_dim <- ncol(res[[i]]$data$Y)
     if ( Y_dim!=1 ) stop(sprintf("The function is only applicable to emulators with 1D output. Your emulator %i has %i output dimensions.", i, Y_dim), call. = FALSE)

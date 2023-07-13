@@ -159,7 +159,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     }
   }
   if (Sys.info()[["sysname"]] == 'Linux'){
-    libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.30', sep='')
+    libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.*', sep='')
     libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
     system(paste("sudo rm",libstdc_sys_path))
     system(paste("sudo ln -s", libstdc_path, libstdc_sys_path))
