@@ -130,7 +130,6 @@ is loaded. We now load the training data points,</p>
 <p>and split a training data set and a testing data set:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">train_X</span> <span class="op">&lt;-</span> <span class="va">X</span><span class="op">[</span><span class="op">-</span><span class="va">test_idx</span><span class="op">]</span></span>
 <span><span class="va">train_Y</span> <span class="op">&lt;-</span> <span class="va">Y</span><span class="op">[</span><span class="op">-</span><span class="va">test_idx</span>,<span class="op">]</span></span>
 <span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="va">X</span><span class="op">[</span><span class="va">test_idx</span><span class="op">]</span></span>

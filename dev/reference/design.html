@@ -73,6 +73,7 @@
 <span>  <span class="va">limits</span>,</span>
 <span>  <span class="va">int</span>,</span>
 <span>  <span class="va">f</span>,</span>
+<span>  <span class="va">reps</span>,</span>
 <span>  <span class="va">freq</span>,</span>
 <span>  <span class="va">x_test</span>,</span>
 <span>  <span class="va">y_test</span>,</span>
@@ -96,6 +97,7 @@
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -119,6 +121,7 @@
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -144,6 +147,7 @@
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -214,6 +218,13 @@ of any arguments with the same names passed via <code>...</code>. The list outpu
 need to be updated after each step of the sequential design.</p></li>
 </ul></li>
 </ul></dd>
+
+
+<dt>reps</dt>
+<dd><p>an integer that gives the number of repetitions of the located design points to be created and used for evaluations of <code>f</code>. Set the
+argument to an integer greater than <code>1</code> if <code>f</code> is a stochastic function that can generate different responses given a same input and the
+supplied emulator <code>object</code> can deal with stochastic responses, e.g., a (D)GP emulator with <code>nugget_est = TRUE</code> or a DGP emulator with a
+likelihood layer. The argument is only used when <code>f</code> is supplied. Defaults to <code>1</code>.</p></dd>
 
 
 <dt>freq</dt>
@@ -289,7 +300,7 @@ to <code>NULL</code>.</p></dd>
 
 
 <dt>cores</dt>
-<dd><p>an integers that gives the number of cores to be used for emulator validations. If set to <code>NULL</code>, the number of cores is
+<dd><p>an integer that gives the number of cores to be used for emulator validations. If set to <code>NULL</code>, the number of cores is
 set to <code>(max physical cores available - 1)</code>. Defaults to <code>1</code>. This argument is only used if <code>eval = NULL</code>.</p></dd>
 
 

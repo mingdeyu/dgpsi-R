@@ -64,6 +64,11 @@
 <li>An argument <code>reset</code> is added to <code><a href="../reference/update.html">update()</a></code> and <code><a href="../reference/design.html">design()</a></code> to reset hyperparameters of a (D)GP emulator to their initial values (that were specified when the emulator is initialized) after the input and output of the emulator are updated and before the emulator is refitted. This argument can be useful for sequential designs in cases where the hyperparameters of a (D)GP emulator get caught in suboptimal estimates. In such circumstances, one can set <code>reset = TRUE</code> to reinitialize the (D)GP emulator in some steps of the sequential designs as a strategy to escape the poor estimates.</li>
 <li>The refitting of an emulator in the final step of a sequential design is no longer forced in <code><a href="../reference/design.html">design()</a></code>.</li>
 <li>An argument <code>type</code> is added to <code><a href="../reference/plot.html">plot()</a></code> to allow users to draw OOS validation plots with testing data shown as a line instead of individual points when the emulator’s input is one-dimensional and <code>style = 1</code>.</li>
+<li>Thanks to <a href="https://github.com/tjmckinley" class="external-link">@tjmckinley</a>, an issue relating to <code>libstdc++.so.6</code> on Linux machines when R is restarting after the installation of the package is fixed.</li>
+<li>
+<code><a href="../reference/alm.html">alm()</a></code> and <code><a href="../reference/mice.html">mice()</a></code> can locate new design points for stochastic simulators with (D)GP or bundle emulators that can deal with stochastic outputs.</li>
+<li>
+<code><a href="../reference/design.html">design()</a></code> can be used to construct (D)GP or bundle emulators adaptively by utilizing multiple realizations from a stochastic simulator at the same design positions through the new argument <code>reps</code> when <code>method = alm</code> or <code>method = mice</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.0" id="dgpsi-220">dgpsi 2.2.0<a class="anchor" aria-label="anchor" href="#dgpsi-220"></a></h2><p class="text-muted">CRAN release: 2023-06-05</p>
