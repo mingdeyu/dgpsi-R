@@ -155,7 +155,10 @@ of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>ob
 of next design points from <code>x_cand</code>.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>dgp</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to one (if <code>aggregate</code>
 is not <code>NULL</code>) or the output dimension (if <code>aggregate</code> is <code>NULL</code>), giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added
-to the DGP emulator across different outputs.</p></li>
+to the DGP emulator across different outputs. If <code>object</code> is a DGP emulator with either <code>Hetero</code> or <code>NegBin</code> likelihood layer, the returned matrix has
+two columns with the first column giving positions of next design points from <code>x_cand</code> that correspond to the mean parameter of the normal or negative Binomial
+distribution, and the second column giving positions of next design points from <code>x_cand</code> that correspond to the variance parameter of the normal distribution or
+the dispersion parameter of the negative Binomial distribution.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>bundle</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to the number of
 emulators in the bundle, giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added to individual emulators.</p></li>
 </ul></div>

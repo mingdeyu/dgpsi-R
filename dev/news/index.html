@@ -69,6 +69,7 @@
 <code><a href="../reference/alm.html">alm()</a></code> and <code><a href="../reference/mice.html">mice()</a></code> can locate new design points for stochastic simulators with (D)GP or bundle emulators that can deal with stochastic outputs.</li>
 <li>
 <code><a href="../reference/design.html">design()</a></code> can be used to construct (D)GP or bundle emulators adaptively by utilizing multiple realizations from a stochastic simulator at the same design positions through the new argument <code>reps</code> when <code>method = alm</code> or <code>method = mice</code>.</li>
+<li>A new slot called <code>specs</code> is added to the objects returned by <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> that contains the key information of the kernel functions used in the constructions of GP and DGP emulators.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.0" id="dgpsi-220">dgpsi 2.2.0<a class="anchor" aria-label="anchor" href="#dgpsi-220"></a></h2><p class="text-muted">CRAN release: 2023-06-05</p>

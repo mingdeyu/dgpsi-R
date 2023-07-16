@@ -184,7 +184,14 @@ to add linking information to the GP emulator. Defaults to <code>NULL</code>.</p
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An S3 class named <code>gp</code> that contains four slots:</p><ul><li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
+<p>An S3 class named <code>gp</code> that contains five slots:</p><ul><li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
+<li><p><code>specs</code>: a list that contains six elements:</p><ol><li><p><code>kernel</code>: the type of the kernel function used. Either <code>"sexp"</code> for squared exponential kernel or <code>"matern2.5"</code> for Matérn-2.5 kernel.</p></li>
+<li><p><code>lengthscales</code>: a vector of lengthscales in the kernel function.</p></li>
+<li><p><code>scale</code>: the variance value in the kernel function.</p></li>
+<li><p><code>nugget</code>: the nugget value in the kernel function.</p></li>
+<li><p><code>internal_dims</code>: the column indices of <code>X</code> that correspond to the linked emulators in the preceding layers of a linked system.</p></li>
+<li><p><code>external_dims</code>: the column indices of <code>X</code> that correspond to global inputs to the linked system of emulators.</p></li>
+</ol><p><code>internal_dims</code> and <code>external_dims</code> are generated only when <code>struc = NULL</code>.</p></li>
 <li><p><code>constructor_obj</code>: a 'python' object that stores the information of the constructed GP emulator.</p></li>
 <li><p><code>container_obj</code>: a 'python' object that stores the information for the linked emulation.</p></li>
 <li><p><code>emulator_obj</code>: a 'python' object that stores the information for the predictions from the GP emulator.</p></li>
