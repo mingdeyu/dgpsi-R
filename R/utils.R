@@ -384,6 +384,11 @@ set_imp <- function(object, B = 10) {
   new_object <- list()
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
+  new_object[['specs']] <- extract_specs(est_obj, "dgp")
+  if ("internal_dims" %in% names(object[['specs']])){
+    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
+  }
   new_object[['constructor_obj']] <- constructor_obj_cp
   new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
@@ -467,6 +472,11 @@ window <- function(object, start, end = NULL, thin = 1) {
   new_object <- list()
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
+  new_object[['specs']] <- extract_specs(est_obj, "dgp")
+  if ("internal_dims" %in% names(object[['specs']])){
+    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
+  }
   new_object[['constructor_obj']] <- constructor_obj_cp
   new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
@@ -586,4 +596,29 @@ trace_plot <- function(object, layer = NULL, node = 1) {
     message('There is nothing to plot for a likelihood node, please choose a GP node instead.')
   }
 
+}
+
+extract_specs <- function(obj, type) {
+  res <- list()
+  if ( type=='gp' ){
+    res[['kernel']] = obj$kernel$name
+    res[['lengthscales']] = as.vector(obj$kernel$length)
+    res[['scale']] = as.numeric(obj$kernel$scale)
+    res[['nugget']] = as.numeric(obj$kernel$nugget)
+  } else if ( type=='dgp' ){
+    no_layer <- length(obj)
+    for (l in 1:no_layer){
+      no_node <- length(obj[[l]])
+      for (k in 1:no_node)
+        if ( obj[[l]][[k]]$type == 'likelihood' ){
+          res[[paste('layer', l, sep="")]][[paste('node', k, sep="")]][['type']] <- obj[[l]][[k]]$name
+        } else {
+          res[[paste('layer', l, sep="")]][[paste('node', k, sep="")]][['kernel']] <- obj[[l]][[k]]$name
+          res[[paste('layer', l, sep="")]][[paste('node', k, sep="")]][['lengthscales']] <- as.vector(obj[[l]][[k]]$length)
+          res[[paste('layer', l, sep="")]][[paste('node', k, sep="")]][['scale']] <- as.numeric(obj[[l]][[k]]$scale)
+          res[[paste('layer', l, sep="")]][[paste('node', k, sep="")]][['nugget']] <- as.numeric(obj[[l]][[k]]$nugget)
+        }
+    }
+  }
+  return(res)
 }

@@ -61,8 +61,17 @@
 #' Set `linked_idx = NULL` if the GP emulator will not be used for linked emulations. However, if this is no longer the case, one can use [set_linked_idx()]
 #' to add linking information to the GP emulator. Defaults to `NULL`.
 #'
-#' @return An S3 class named `gp` that contains four slots:
+#' @return An S3 class named `gp` that contains five slots:
 #' * `data`: a list that contains two elements: `X` and `Y` which are the training input and output data respectively.
+#' * `specs`: a list that contains six elements:
+#'    1. `kernel`: the type of the kernel function used. Either `"sexp"` for squared exponential kernel or `"matern2.5"` for Matérn-2.5 kernel.
+#'    2. `lengthscales`: a vector of lengthscales in the kernel function.
+#'    3. `scale`: the variance value in the kernel function.
+#'    4. `nugget`: the nugget value in the kernel function.
+#'    5. `internal_dims`: the column indices of `X` that correspond to the linked emulators in the preceding layers of a linked system.
+#'    6. `external_dims`: the column indices of `X` that correspond to global inputs to the linked system of emulators.
+#'
+#'    `internal_dims` and `external_dims` are generated only when `struc = NULL`.
 #' * `constructor_obj`: a 'python' object that stores the information of the constructed GP emulator.
 #' * `container_obj`: a 'python' object that stores the information for the linked emulation.
 #' * `emulator_obj`: a 'python' object that stores the information for the predictions from the GP emulator.
@@ -208,6 +217,11 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   res <- list()
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
+  res[['specs']] <- extract_specs(obj, "gp")
+  if ( !is.null(struc) ) {
+    res[['specs']][['internal_dims']] <- if( is.null(internal_input_idx) ) 1:n_dim_X else as.integer(reticulate::py_to_r(internal_input_idx)+1)
+    res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) NA else as.integer(reticulate::py_to_r(external_input_idx)+1)
+  }
   res[['constructor_obj']] <- obj
   res[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
   res[['emulator_obj']] <- obj

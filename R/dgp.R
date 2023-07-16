@@ -122,8 +122,21 @@
 #' Set `linked_idx = NULL` if the DGP emulator will not be used for linked emulations. However, if this is no longer the case, one can use [set_linked_idx()]
 #' to add linking information to the DGP emulator. Defaults to `NULL`.
 #'
-#' @return An S3 class named `dgp` that contains four slots:
+#' @return An S3 class named `dgp` that contains five slots:
 #' * `data`: a list that contains two elements: `X` and `Y` which are the training input and output data respectively.
+#' * `specs`: a list that contains
+#'   1. *L* (i.e., the number of layers in the DGP hierarchy) sub-lists named `layer1, layer2,..., layerL`. Each sub-list contains *D*
+#'      (i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named `node1, node2,..., nodeD`. If a sub-list
+#'      corresponds to a likelihood node, it contains one element called `type` that gives the name (`Hetero`, `Poisson`, or `NegBin`) of the likelihood node.
+#'      If a sub-list corresponds to a GP node, it contains four elements:
+#'      - `kernel`: the type of the kernel function used for the GP node.
+#'      - `lengthscales`: a vector of lengthscales in the kernel function.
+#'      - `scale`: the variance value in the kernel function.
+#'      - `nugget`: the nugget value in the kernel function.
+#'   2. `internal_dims`: the column indices of `X` that correspond to the linked emulators in the preceding layers of a linked system.
+#'   3. `external_dims`: the column indices of `X` that correspond to global inputs to the linked system of emulators.
+#'
+#'   `internal_dims` and `external_dims` are generated only when `struc = NULL`.
 #' * `constructor_obj`: a 'python' object that stores the information of the constructed DGP emulator.
 #' * `container_obj`: a 'python' object that stores the information for the linked emulation.
 #' * `emulator_obj`: a 'python' object that stores the information for the predictions from the DGP emulator.
@@ -510,6 +523,11 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   res <- list()
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
+  res[['specs']] <- extract_specs(est_obj, "dgp")
+  if ( !is.null(struc) ) {
+    res[['specs']][['internal_dims']] <- if( is.null(internal_input_idx) ) 1:n_dim_X else as.integer(reticulate::py_to_r(internal_input_idx)+1)
+    res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) NA else as.integer(reticulate::py_to_r(external_input_idx)+1)
+  }
   res[['constructor_obj']] <- obj
   res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, block = blocked_gibbs)
   res[['emulator_obj']] <- emu_obj
@@ -605,6 +623,11 @@ continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, bur
   new_object <- list()
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
+  new_object[['specs']] <- extract_specs(est_obj, "dgp")
+  if ("internal_dims" %in% names(object[['specs']])){
+    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
+  }
   new_object[['constructor_obj']] <- constructor_obj_cp
   new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)

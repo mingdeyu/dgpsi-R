@@ -105,9 +105,20 @@ Set \code{linked_idx = NULL} if the GP emulator will not be used for linked emul
 to add linking information to the GP emulator. Defaults to \code{NULL}.}
 }
 \value{
-An S3 class named \code{gp} that contains four slots:
+An S3 class named \code{gp} that contains five slots:
 \itemize{
 \item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
+\item \code{specs}: a list that contains six elements:
+\enumerate{
+\item \code{kernel}: the type of the kernel function used. Either \code{"sexp"} for squared exponential kernel or \code{"matern2.5"} for Matérn-2.5 kernel.
+\item \code{lengthscales}: a vector of lengthscales in the kernel function.
+\item \code{scale}: the variance value in the kernel function.
+\item \code{nugget}: the nugget value in the kernel function.
+\item \code{internal_dims}: the column indices of \code{X} that correspond to the linked emulators in the preceding layers of a linked system.
+\item \code{external_dims}: the column indices of \code{X} that correspond to global inputs to the linked system of emulators.
+}
+
+\code{internal_dims} and \code{external_dims} are generated only when \code{struc = NULL}.
 \item \code{constructor_obj}: a 'python' object that stores the information of the constructed GP emulator.
 \item \code{container_obj}: a 'python' object that stores the information for the linked emulation.
 \item \code{emulator_obj}: a 'python' object that stores the information for the predictions from the GP emulator.

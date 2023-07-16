@@ -202,9 +202,26 @@ Set \code{linked_idx = NULL} if the DGP emulator will not be used for linked emu
 to add linking information to the DGP emulator. Defaults to \code{NULL}.}
 }
 \value{
-An S3 class named \code{dgp} that contains four slots:
+An S3 class named \code{dgp} that contains five slots:
 \itemize{
 \item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
+\item \code{specs}: a list that contains
+\enumerate{
+\item \emph{L} (i.e., the number of layers in the DGP hierarchy) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list contains \emph{D}
+(i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named \verb{node1, node2,..., nodeD}. If a sub-list
+corresponds to a likelihood node, it contains one element called \code{type} that gives the name (\code{Hetero}, \code{Poisson}, or \code{NegBin}) of the likelihood node.
+If a sub-list corresponds to a GP node, it contains four elements:
+\itemize{
+\item \code{kernel}: the type of the kernel function used for the GP node.
+\item \code{lengthscales}: a vector of lengthscales in the kernel function.
+\item \code{scale}: the variance value in the kernel function.
+\item \code{nugget}: the nugget value in the kernel function.
+}
+\item \code{internal_dims}: the column indices of \code{X} that correspond to the linked emulators in the preceding layers of a linked system.
+\item \code{external_dims}: the column indices of \code{X} that correspond to global inputs to the linked system of emulators.
+}
+
+\code{internal_dims} and \code{external_dims} are generated only when \code{struc = NULL}.
 \item \code{constructor_obj}: a 'python' object that stores the information of the constructed DGP emulator.
 \item \code{container_obj}: a 'python' object that stores the information for the linked emulation.
 \item \code{emulator_obj}: a 'python' object that stores the information for the predictions from the DGP emulator.
