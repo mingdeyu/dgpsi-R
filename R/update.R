@@ -76,6 +76,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
   if ( is.vector(Y) ) Y <- as.matrix(Y)
 
   if ( nrow(X)!=nrow(Y) ) stop("'X' and 'Y' have different number of data points.", call. = FALSE)
+  if ( isFALSE(reset)&ncol(X)!=ncol(object$data$X) ) stop("'X' and the training input of the DGP emulator must have same number of dimensions when 'reset = FALSE'.", call. = FALSE)
 
   linked_idx <- object$container_obj$local_input_idx
 
