@@ -158,7 +158,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
       reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE)
     }
   }
-  if (Sys.info()[["sysname"]] == 'Linux'){
+  if (Sys.info()[["sysname"]] == 'Linux' & !any(grepl("libstdc++.so.6.0.3",list.files("/usr/lib/x86_64-linux-gnu/"), fixed = TRUE))){
     libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.3*', sep='')
     system(paste("sudo cp", libstdc_path, "/usr/lib/x86_64-linux-gnu/"))
     libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
