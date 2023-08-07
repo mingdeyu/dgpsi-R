@@ -9,6 +9,7 @@
 - `design()` can be used to construct (D)GP or bundle emulators adaptively by utilizing multiple realizations from a stochastic simulator at the same design positions through the new argument `reps` when `method = alm` or `method = mice`.
 - A new slot called `specs` is added to the objects returned by `gp()` and `dgp()` that contains the key information of the kernel functions used in the constructions of GP and DGP emulators.
 - Due to a bug in the latest version of an underlying Python package, the emulators saved by `write()` in version `2.1.6` and `2.2.0` may not work properly with `update()` and `design()` when they are loaded back by `read()` in this version. This bug has been addressed in this version so emulators saved in this version would not have the compatibility issue in future version.
+- A new sequential design criterion, called the Variance of Improvement for Global Fit (VIGF), is added to the package with the function `vigf()`.
 
 # dgpsi 2.2.0
 
