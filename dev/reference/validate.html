@@ -191,8 +191,8 @@ and below the predictive mean. If <code>method = "sampling"</code>, the upper an
 <li><p>a numeric value called <code>rmse</code> that contains the root mean/median squared error of the GP emulator.</p></li>
 <li><p>a numeric value called <code>nrmse</code> that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in <code>y_train</code> (or <code>y_test</code>).</p></li>
-</ul></li>
-</ul><p>The rows of matrices (<code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, and <code>upper</code>) correspond to the validation positions.</p><ul><li><p>If <code>object</code> is an instance of the <code>dgp</code> class, an updated <code>object</code> is returned with an additional slot called <code>loo</code> (for LOO cross validation) or
+</ul><p>The rows of matrices (<code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, and <code>upper</code>) correspond to the validation positions.</p></li>
+<li><p>If <code>object</code> is an instance of the <code>dgp</code> class, an updated <code>object</code> is returned with an additional slot called <code>loo</code> (for LOO cross validation) or
 <code>oos</code> (for OOS validation) that contains:</p><ul><li><p>two slots called <code>x_train</code> (or <code>x_test</code>) and <code>y_train</code> (or <code>y_test</code>) that contain the validation data points for LOO (or OOS).</p></li>
 <li><p>a matrix called <code>mean</code>, if <code>method = "mean_var"</code>, or <code>median</code>, if <code>method = "sampling"</code>, that contains the predictive means or medians of the
 DGP emulator at validation positions.</p></li>
@@ -203,9 +203,9 @@ and below the predictive mean. If <code>method = "sampling"</code>, the upper an
 dimensions.</p></li>
 <li><p>a vector called <code>nrmse</code> that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in <code>y_train</code> (or <code>y_test</code>).</p></li>
-</ul></li>
 </ul><p>The rows and columns of matrices (<code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, and <code>upper</code>) correspond to the validation positions and DGP emulator output
-dimensions, respectively.</p><ul><li><p>If <code>object</code> is an instance of the <code>lgp</code> class, an updated <code>object</code> is returned with an additional slot called <code>oos</code> (for OOS validation) that contains:</p><ul><li><p>two slots called <code>x_test</code> and <code>y_test</code> that contain the validation data points for OOS.</p></li>
+dimensions, respectively.</p></li>
+<li><p>If <code>object</code> is an instance of the <code>lgp</code> class, an updated <code>object</code> is returned with an additional slot called <code>oos</code> (for OOS validation) that contains:</p><ul><li><p>two slots called <code>x_test</code> and <code>y_test</code> that contain the validation data points for OOS.</p></li>
 <li><p>a list called <code>mean</code>, if <code>method = "mean_var"</code>, or <code>median</code>, if <code>method = "sampling"</code>, that contains the predictive means or medians of
 the linked (D)GP emulator at validation positions.</p></li>
 <li><p>three lists called <code>std</code>, <code>lower</code>, and <code>upper</code> that contain the predictive standard deviations and credible intervals of
@@ -214,10 +214,9 @@ deviations above and below the predictive mean. If <code>method = "sampling"</co
 <li><p>a list called <code>rmse</code> that contains the root mean/median squared errors of the linked (D)GP emulator.</p></li>
 <li><p>a list called <code>nrmse</code> that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in <code>y_test</code>.</p></li>
-</ul></li>
 </ul><p>Each element in <code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, <code>upper</code>, <code>rmse</code>, and <code>nrmse</code> corresponds to a (D)GP emulator in the final layer of the linked (D)GP
-emulator.</p>
-    </div>
+emulator.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>

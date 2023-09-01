@@ -275,7 +275,7 @@ points to be added to individual emulators in the bundle.</p></li>
 
 
 <dt>eval</dt>
-<dd><p>an R function that calculates the customized evaluating metric of the emulator.The function must satisfy the following basic rules:</p><ul><li><p>the first argument is an emulator object that can be either an instance of</p><ul><li><p>the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>);</p></li>
+<dd><p>an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:</p><ul><li><p>the first argument is an emulator object that can be either an instance of</p><ul><li><p>the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>);</p></li>
 <li><p>the <code>dgp</code> class (produced by <code><a href="dgp.html">dgp()</a></code>);</p></li>
 <li><p>the <code>bundle</code> class (produced by <code><a href="pack.html">pack()</a></code>).</p></li>
 </ul></li>
@@ -388,7 +388,6 @@ R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testin
 <span class="r-in"><span><span class="co"># load packages and the Python env</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bertcarnell/lhs" class="external-link">lhs</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># construct a 2D non-stationary function that takes a matrix as the input</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
