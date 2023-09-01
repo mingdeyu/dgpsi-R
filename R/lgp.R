@@ -22,7 +22,6 @@
 #'
 #' # load the package and the Python env
 #' library(dgpsi)
-#' init_py()
 #'
 #' # model 1
 #' f1 <- function(x) {
@@ -74,6 +73,10 @@
 #' @md
 #' @export
 lgp <- function(struc, B = 50) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   B <- as.integer(B)
   L <- length(struc)
   extracted_struc <- list()

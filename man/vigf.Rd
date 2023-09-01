@@ -86,7 +86,7 @@ emulators in the bundle, giving positions (i.e., row numbers) of next design poi
 }
 \description{
 This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
-or a bundle of (D)GP emulators using the Variance of Improvement for Global Fit (VIGF).
+or a bundle of (D)GP emulators using the Variance of Improvement for Global Fit (VIGF). For VIGF on GP emulators, see the reference below.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
@@ -105,7 +105,6 @@ R matrix.
 # load packages and the Python env
 library(lhs)
 library(dgpsi)
-init_py()
 
 # construct a 1D non-stationary function
 f <- function(x) {
@@ -139,4 +138,7 @@ m <- update(m, X, Y, refit = TRUE, N = 500)
 # plot the LOO validation
 plot(m)
 }
+}
+\references{
+Mohammadi, H., & Challenor, P. (2022). Sequential adaptive design for emulating costly computer codes. \emph{arXiv:2206.12113}.
 }

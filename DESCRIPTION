@@ -32,7 +32,8 @@ Imports:
     lhs,
     methods,
     stats,
-    bitops
+    bitops,
+    clhs
 Suggests:
     knitr,
     rmarkdown,

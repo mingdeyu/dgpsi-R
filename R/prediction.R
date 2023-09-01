@@ -93,6 +93,10 @@ NULL
 #' @method predict dgp
 #' @export
 predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x) ) x <- as.matrix(x)
@@ -149,6 +153,10 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @method predict lgp
 #' @export
 predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   if ( !is.list(x) ) {
     if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
@@ -248,6 +256,10 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @method predict gp
 #' @export
 predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores = 1, chunks = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x) ) x <- as.matrix(x)

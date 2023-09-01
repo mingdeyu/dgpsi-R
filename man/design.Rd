@@ -204,7 +204,7 @@ points to be added to individual emulators in the bundle.
 
 See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=pei]{pei()}} for examples on customizing \code{method}. Defaults to \code{\link[=mice]{mice()}}.}
 
-\item{eval}{an R function that calculates the customized evaluating metric of the emulator.The function must satisfy the following basic rules:
+\item{eval}{an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:
 \itemize{
 \item the first argument is an emulator object that can be either an instance of
 \itemize{
@@ -331,7 +331,6 @@ R matrix. Thus, if \code{x_test} or \code{y_test} is a single testing data point
 # load packages and the Python env
 library(lhs)
 library(dgpsi)
-init_py()
 
 # construct a 2D non-stationary function that takes a matrix as the input
 f <- function(x) {

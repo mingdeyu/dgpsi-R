@@ -92,7 +92,6 @@
 #' \dontrun{
 #' # load the package and the Python env
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a step function
 #' f <- function(x) {
@@ -131,6 +130,10 @@
 #' @md
 #' @export
 gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-8), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)

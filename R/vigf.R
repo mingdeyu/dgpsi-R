@@ -1,7 +1,7 @@
 #' @title Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using VIGF
 #'
 #' @description This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
-#'     or a bundle of (D)GP emulators using the Variance of Improvement for Global Fit (VIGF).
+#'     or a bundle of (D)GP emulators using the Variance of Improvement for Global Fit (VIGF). For VIGF on GP emulators, see the reference below.
 #'
 #' @param object can be one of the following:
 #' * the S3 class `gp`.
@@ -46,6 +46,8 @@
 #'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
 #' * Any R vector detected in `x_cand` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix.
+#' @references
+#' Mohammadi, H., & Challenor, P. (2022). Sequential adaptive design for emulating costly computer codes. *arXiv:2206.12113*.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
@@ -54,7 +56,6 @@
 #' # load packages and the Python env
 #' library(lhs)
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a 1D non-stationary function
 #' f <- function(x) {
@@ -99,6 +100,10 @@ vigf <- function(object, x_cand, ...){
 #' @method vigf gp
 #' @export
 vigf.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   training_input <- object$data$X
@@ -156,6 +161,10 @@ vigf.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
 #' @method vigf dgp
 #' @export
 vigf.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type != 'likelihood' & !is.null(object$constructor_obj$indices) ){
@@ -264,6 +273,10 @@ vigf.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FA
 #' @method vigf bundle
 #' @export
 vigf.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   #check no of emulators

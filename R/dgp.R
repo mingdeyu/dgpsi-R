@@ -157,7 +157,6 @@
 #'
 #' # load the package and the Python env
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a step function
 #' f <- function(x) {
@@ -210,7 +209,10 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
                 nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, cores = 1, blocked_gibbs = TRUE,
                 ess_burn = 10, burnin = NULL, B = 30, internal_input_idx = NULL, linked_idx = NULL) {
-
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(X) ) X <- as.matrix(X)
@@ -581,6 +583,10 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #' @export
 
 continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }

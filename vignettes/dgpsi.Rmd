@@ -20,28 +20,19 @@ knitr::opts_chunk$set(
 
 ## Load the package
 
-`dgpsi` in R provides an initialization function `init_py()` that helps us set up and initialize the required Python environment automatically. We just need to run `init_py()` every time after the package is loaded to initiate the underlying Python environment.
-
 ```{r}
 library(dgpsi)
-init_py()
-```
-
-```
-## Connecting to Python ... done
-## Importing required Python modules ... done
-## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 ## Set up the step function
 
-We first specify a seed with `set_seed()` from the package for reproducibility
+`dgpsi` provides a function `init_py()` that helps us set up, initialize, re-install, or uninstall the underlying Python environment. We could run `init_py()` every time after `dgpsi` is loaded to manually initiate the Python environment. Alternatively, we could activate the Python environment by simply executing a function from `dgpsi`. For example, the Python environment will be automatically loaded after we run `set_seed()` from the package to specify a seed for the reproducibility:
 
 ```{r}
 set_seed(999)
 ```
 
-and define the step function:
+We then define the step function:
 
 ```{r}
 f <- function(x) {
@@ -50,7 +41,7 @@ f <- function(x) {
 }
 ```
 
-Then we generate ten training data points:
+and generate ten training data points:
 
 ```{r}
 X <- seq(0, 1, length = 10)

@@ -61,7 +61,7 @@
 #'   - a numeric value called `nrmse` that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
 #'
-#' The rows of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions.
+#'   The rows of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions.
 #' * If `object` is an instance of the `dgp` class, an updated `object` is returned with an additional slot called `loo` (for LOO cross validation) or
 #'   `oos` (for OOS validation) that contains:
 #'   - two slots called `x_train` (or `x_test`) and `y_train` (or `y_test`) that contain the validation data points for LOO (or OOS).
@@ -75,7 +75,7 @@
 #'   - a vector called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 #'     dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
 #'
-#' The rows and columns of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions and DGP emulator output
+#'   The rows and columns of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions and DGP emulator output
 #' dimensions, respectively.
 #' * If `object` is an instance of the `lgp` class, an updated `object` is returned with an additional slot called `oos` (for OOS validation) that contains:
 #'   - two slots called `x_test` and `y_test` that contain the validation data points for OOS.
@@ -88,7 +88,7 @@
 #'   - a list called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_test`.
 #'
-#' Each element in `mean`, `median`, `std`, `lower`, `upper`, `rmse`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
+#'   Each element in `mean`, `median`, `std`, `lower`, `upper`, `rmse`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 #' emulator.
 #'
 #' @note
@@ -115,6 +115,10 @@ validate <- function(object, x_test, y_test, method, verb, force, cores, ...){
 #' @method validate gp
 #' @export
 validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   #check core number
@@ -263,6 +267,10 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
 #' @method validate dgp
 #' @export
 validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   #check core number
@@ -424,6 +432,10 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 #' @method validate lgp
 #' @export
 validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   #check core number

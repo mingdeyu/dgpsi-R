@@ -73,6 +73,10 @@ NULL
 #' @method plot dgp
 #' @export
 plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
@@ -402,6 +406,10 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @method plot lgp
 #' @export
 plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
@@ -665,6 +673,10 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @method plot gp
 #' @export
 plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {

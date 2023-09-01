@@ -26,13 +26,6 @@ library(tidyverse)
 library(lhs)
 library(ggplot2)
 library(dgpsi)
-init_py()
-```
-
-```
-## Connecting to Python ... done
-## Importing required Python modules ... done
-## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 ## Construct a synthetic simulator
@@ -110,7 +103,7 @@ For illustrative purpose, we implement three waves of sequential designs on `m`:
 
 ```{r}
 # 1st wave with 15 steps
-m <- design(m, N=15, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 
 ```
@@ -135,7 +128,7 @@ m <- design(m, N=15, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```{r}
 # 2nd wave with 10 steps
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 ```
 ## Initializing ... done
@@ -159,7 +152,7 @@ m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate
 
 ```{r}
 # 3rd wave with 10 steps
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 
 ```

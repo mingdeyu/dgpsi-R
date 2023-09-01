@@ -252,7 +252,6 @@ R matrix. Thus, if \code{X} is a single data point with multiple dimensions, it 
 
 # load the package and the Python env
 library(dgpsi)
-init_py()
 
 # construct a step function
 f <- function(x) {

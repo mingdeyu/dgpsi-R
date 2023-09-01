@@ -22,22 +22,15 @@ This vignette gives a demonstration of the package on emulating the popular moto
 
 ## Load packages and data
 
-We start by first loading packages and setting up the required Python environment via `init_py()` 
+We start by loading packages:
 
 ```{r}
 library(dgpsi)
 library(MASS)
 library(patchwork)
-init_py()
 ```
 
-```
-## Connecting to Python ... done
-## Importing required Python modules ... done
-## The Python environment for 'dgpsi' is successfully loaded.
-```
-
-`init_py()` provides an automatic Python environment setup and initialization routine and must be run every time after the package is loaded. We now load the training data points,
+We now load the training data points,
 
 ```{r}
 X <- mcycle$times

@@ -20,6 +20,10 @@
 #' @md
 #' @export
 Poisson <- function(input_dim = NULL) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if(!is.null(input_dim)){
     input_dim <- reticulate::np_array(as.integer(input_dim - 1))
   }
@@ -50,6 +54,10 @@ Poisson <- function(input_dim = NULL) {
 #' @md
 #' @export
 Hetero <- function(input_dim = NULL) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if(!is.null(input_dim)){
     input_dim <- reticulate::np_array(as.integer(input_dim - 1))
   }
@@ -79,6 +87,10 @@ Hetero <- function(input_dim = NULL) {
 #' @md
 #' @export
 NegBin <- function(input_dim = NULL) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if(!is.null(input_dim)){
     input_dim <- reticulate::np_array(as.integer(input_dim - 1))
   }

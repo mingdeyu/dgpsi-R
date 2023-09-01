@@ -56,7 +56,6 @@
 #' # load packages and the Python env
 #' library(lhs)
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a 1D non-stationary function
 #' f <- function(x) {
@@ -101,6 +100,10 @@ alm <- function(object, x_cand, ...){
 #' @method alm gp
 #' @export
 alm.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   training_input <- object$data$X
@@ -157,6 +160,10 @@ alm.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
 #' @method alm dgp
 #' @export
 alm.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   #if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
@@ -265,6 +272,10 @@ alm.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FAL
 #' @method alm bundle
 #' @export
 alm.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   #check no of emulators

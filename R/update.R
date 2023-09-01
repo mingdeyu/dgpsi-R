@@ -54,6 +54,10 @@ update <- function(object, X, Y, refit, reset, verb, ...){
 #' @method update dgp
 #' @export
 update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, N = 100, cores = 1, ess_burn = 10, B = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -131,6 +135,10 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
 #' @method update gp
 #' @export
 update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"gp") ){
     stop("'object' must be an instance of the 'gp' class.", call. = FALSE)

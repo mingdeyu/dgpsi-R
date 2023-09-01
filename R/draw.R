@@ -33,6 +33,10 @@ draw <- function(object, ...){
 #' @method draw gp
 #' @export
 draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"gp") ){
     stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
@@ -148,6 +152,10 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
 #' @method draw dgp
 #' @export
 draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -283,6 +291,10 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
 #' @method draw bundle
 #' @export
 draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)

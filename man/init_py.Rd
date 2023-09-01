@@ -4,7 +4,13 @@
 \alias{init_py}
 \title{'python' environment initialization}
 \usage{
-init_py(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstall = FALSE)
+init_py(
+  py_ver = NULL,
+  dgpsi_ver = NULL,
+  reinstall = FALSE,
+  uninstall = FALSE,
+  verb = TRUE
+)
 }
 \arguments{
 \item{py_ver}{a string that gives the 'python' version to be installed. If \code{py_ver = NULL}, the default 'python'
@@ -24,6 +30,9 @@ of 'dgpsi'. Defaults to \code{FALSE}.}
 \item{uninstall}{a bool that indicates whether to uninstall the 'python' version of 'dgpsi' specified
 in \code{dgpsi_ver} if it has already been installed. This argument is useful when the 'python' environment
 is corrupted and one wants to completely uninstall and reinstall it. Defaults to \code{FALSE}.}
+
+\item{verb}{a bool indicating if the trace information will be printed during the function execution.
+Defaults to \code{TRUE}.}
 }
 \value{
 No return value, called to install required 'python' environment.

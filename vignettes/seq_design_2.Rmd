@@ -25,13 +25,6 @@ library(lhs)
 library(ggplot2)
 library(patchwork)
 library(dgpsi)
-init_py()
-```
-
-```
-## Connecting to Python ... done
-## Importing required Python modules ... done
-## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 ## Construct a synthetic simulator

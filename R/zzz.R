@@ -13,7 +13,7 @@
   packageStartupMessage("                       Copyright (C) 2022-", this.year, sep="")
   packageStartupMessage("             Maintainer: Deyu Ming (deyu.ming.16@ucl.ac.uk)")
   packageStartupMessage("============================================================================")
-  packageStartupMessage("----------------------------------------------------------------------------")
-  packageStartupMessage("        Please run init_py() everytime after the package is loaded.")
-  packageStartupMessage("----------------------------------------------------------------------------")
+  #packageStartupMessage("----------------------------------------------------------------------------")
+  #packageStartupMessage("        Please run init_py() everytime after the package is loaded.")
+  #packageStartupMessage("----------------------------------------------------------------------------")
 }

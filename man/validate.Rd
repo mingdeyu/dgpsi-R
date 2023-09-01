@@ -123,10 +123,8 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 \item a numeric value called \code{nrmse} that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
 }
-}
 
 The rows of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions.
-\itemize{
 \item If \code{object} is an instance of the \code{dgp} class, an updated \code{object} is returned with an additional slot called \code{loo} (for LOO cross validation) or
 \code{oos} (for OOS validation) that contains:
 \itemize{
@@ -141,11 +139,9 @@ dimensions.
 \item a vector called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
 }
-}
 
 The rows and columns of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions and DGP emulator output
 dimensions, respectively.
-\itemize{
 \item If \code{object} is an instance of the \code{lgp} class, an updated \code{object} is returned with an additional slot called \code{oos} (for OOS validation) that contains:
 \itemize{
 \item two slots called \code{x_test} and \code{y_test} that contain the validation data points for OOS.
@@ -158,10 +154,10 @@ deviations above and below the predictive mean. If \code{method = "sampling"}, t
 \item a list called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_test}.
 }
-}
 
 Each element in \code{mean}, \code{median}, \code{std}, \code{lower}, \code{upper}, \code{rmse}, and \code{nrmse} corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 emulator.
+}
 }
 \description{
 This function validate a constructed GP, DGP, or linked (D)GP emulator via the Leave-One-Out (LOO)

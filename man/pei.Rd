@@ -110,7 +110,6 @@ R matrix.
 # load packages and the Python env
 library(lhs)
 library(dgpsi)
-init_py()
 
 # construct a 1D non-stationary function
 f <- function(x) {

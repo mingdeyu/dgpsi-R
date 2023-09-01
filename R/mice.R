@@ -58,7 +58,6 @@
 #' # load packages and the Python env
 #' library(lhs)
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a 1D non-stationary function
 #' f <- function(x) {
@@ -103,6 +102,10 @@ mice <- function(object, x_cand, ...){
 #' @method mice gp
 #' @export
 mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   training_input <- object$data$X
@@ -158,6 +161,10 @@ mice.gp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1
 #' @method mice dgp
 #' @export
 mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   #if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
@@ -266,6 +273,10 @@ mice.dgp <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 
 #' @method mice bundle
 #' @export
 mice.bundle <- function(object, x_cand, batch_size = 1, nugget_s = 1e-6, workers = 1, threading = FALSE, aggregate = NULL, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   #check no of emulators

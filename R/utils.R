@@ -45,7 +45,6 @@ combine <- function(...) {
 #' # load packages and the Python env
 #' library(lhs)
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a function with a two-dimensional output
 #' f <- function(x) {
@@ -105,6 +104,10 @@ combine <- function(...) {
 #' @md
 #' @export
 pack <- function(...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   res <- list(...)
   X_all <- list()
   Y_all <- list()
@@ -153,6 +156,10 @@ pack <- function(...) {
 #' @md
 #' @export
 unpack <- function(object) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   }
@@ -191,6 +198,10 @@ unpack <- function(object) {
 #' @md
 #' @export
 write <- function(object, pkl_file) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   lst <- unclass(object)
   pkg.env$dgpsi$write(lst, pkl_file)
@@ -214,6 +225,10 @@ write <- function(object, pkl_file) {
 #' @md
 #' @export
 set_seed <- function(seed) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   seed <- as.integer(seed)
   set.seed(seed)
   reticulate::py_set_seed(seed, disable_hash_randomization = TRUE)
@@ -237,6 +252,10 @@ set_seed <- function(seed) {
 #' @md
 #' @export
 read <- function(pkl_file) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   res <- pkg.env$dgpsi$read(pkl_file)
   if ('emulator_obj' %in% names(res)){
@@ -291,6 +310,10 @@ NULL
 #' @method summary gp
 #' @export
 summary.gp <- function(object, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
 
@@ -298,6 +321,10 @@ summary.gp <- function(object, ...) {
 #' @method summary dgp
 #' @export
 summary.dgp <- function(object, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
 
@@ -305,6 +332,10 @@ summary.dgp <- function(object, ...) {
 #' @method summary lgp
 #' @export
 summary.lgp <- function(object, ...) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
 
@@ -333,6 +364,10 @@ summary.lgp <- function(object, ...) {
 #' @md
 #' @export
 set_linked_idx <- function(object, idx) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   idx <- reticulate::np_array(as.integer(idx - 1))
   object[['constructor_obj']] <- pkg.env$copy$deepcopy(object[['constructor_obj']])
   object[['emulator_obj']] <- pkg.env$copy$deepcopy(object[['emulator_obj']])
@@ -370,6 +405,10 @@ set_linked_idx <- function(object, idx) {
 #' @md
 #' @export
 set_imp <- function(object, B = 10) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
@@ -431,6 +470,10 @@ set_imp <- function(object, B = 10) {
 #' @md
 #' @export
 window <- function(object, start, end = NULL, thin = 1) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
@@ -518,6 +561,10 @@ window <- function(object, start, end = NULL, thin = 1) {
 #' @md
 #' @export
 nllik <- function(object, x, y) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(y)&!is.vector(y) ) stop("'y' must be a vector or a matrix.", call. = FALSE)
@@ -558,6 +605,10 @@ nllik <- function(object, x, y) {
 #' @export
 
 trace_plot <- function(object, layer = NULL, node = 1) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return()
+  }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
 
   all_layer <- object$constructor_obj$all_layer

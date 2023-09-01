@@ -36,7 +36,6 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 
 # load the package and the Python env
 library(dgpsi)
-init_py()
 
 # model 1
 f1 <- function(x) {

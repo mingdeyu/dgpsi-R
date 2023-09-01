@@ -32,7 +32,6 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 # load packages and the Python env
 library(lhs)
 library(dgpsi)
-init_py()
 
 # construct a function with a two-dimensional output
 f <- function(x) {

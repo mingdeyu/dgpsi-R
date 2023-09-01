@@ -24,13 +24,6 @@ This vignette shows how to use the package to emulate a feed-forward system of t
 library(ggplot2)
 library(patchwork)
 library(dgpsi)
-init_py()
-```
-
-```
-## Connecting to Python ... done
-## Importing required Python modules ... done
-## The Python environment for 'dgpsi' is successfully loaded.
 ```
 
 ## Construct a synthetic system
