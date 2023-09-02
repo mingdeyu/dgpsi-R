@@ -41,7 +41,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
     dgpsi_ver <- c('cython>=0.29.30', 'dill>=0.3.2, <=0.3.5.1', 'jupyter>=1.0.0', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
-                   'numpy >=1.18.2', 'pathos >=0.2.9', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
+                   'numpy >=1.18.2', 'pathos ==0.2.9', 'multiprocess ==0.70.13', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
                    'scikit-build >=0.15.0', 'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7')
     env_name <- 'dgp_si_R_2_2_0_9000'
     ##For release version
@@ -160,7 +160,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     if (reinsatll) {
       reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
     } else {
-      reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE)
+      reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps'))
     }
   }
   if (Sys.info()[["sysname"]] == 'Linux' & !any(grepl("libstdc++.so.6.0.3",list.files("/usr/lib/x86_64-linux-gnu/"), fixed = TRUE))){
