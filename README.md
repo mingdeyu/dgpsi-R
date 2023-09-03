@@ -56,8 +56,8 @@ to load the package. To install or activate the required Python environment auto
 
 > **Note**  
 > After loading `dgpsi`, the package may take some time to compile and initiate the underlying Python environment the first
-> time a function from `dgpsi` is executed. Any subsequent function calls won't require re-compiling and re-activation and 
-> will be faster.
+> time a function from `dgpsi` is executed. Any subsequent function calls won't require re-compiling or re-activation of the 
+> Python environment, and will be faster.
 >
 > If you experience Python related issues while using the package, please try to reinstall the Python environment:    
 > 
@@ -65,13 +65,13 @@ to load the package. To install or activate the required Python environment auto
 > dgpsi::init_py(reinstall = T)
 > ```
 > 
-> or uninstall completely the Python environment:
+> Or uninstall completely the Python environment:
 > 
 > ```r
 > dgpsi::init_py(uninstall = T)
 > ```
 > 
-> And then reinstall:
+> and then reinstall:
 >
 > ```r
 > dgpsi::init_py()
