@@ -35,7 +35,7 @@ draw <- function(object, ...){
 draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"gp") ){
@@ -154,7 +154,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
 draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"dgp") ){
@@ -293,7 +293,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
 draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"bundle") ){

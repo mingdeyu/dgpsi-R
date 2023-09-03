@@ -75,7 +75,7 @@
 lgp <- function(struc, B = 50) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   B <- as.integer(B)
   L <- length(struc)

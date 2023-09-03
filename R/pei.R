@@ -104,7 +104,7 @@ pei <- function(object, x_cand, ...){
 pei.gp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
@@ -170,7 +170,7 @@ pei.gp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, ...) {
 pei.dgp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -289,7 +289,7 @@ pei.dgp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, worker
 pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, workers = 1, threading = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)

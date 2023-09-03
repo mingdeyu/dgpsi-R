@@ -63,7 +63,7 @@
 kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = NULL, bounds = NULL, nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
   if ( !is.null(prior_name) & prior_name!='ga' & prior_name!='inv_ga' ) stop("The provided 'prior_name' is not supported.", call. = FALSE)

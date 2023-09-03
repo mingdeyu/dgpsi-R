@@ -106,7 +106,7 @@ combine <- function(...) {
 pack <- function(...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   res <- list(...)
   X_all <- list()
@@ -158,7 +158,7 @@ pack <- function(...) {
 unpack <- function(object) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
@@ -200,7 +200,7 @@ unpack <- function(object) {
 write <- function(object, pkl_file) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   lst <- unclass(object)
@@ -227,7 +227,7 @@ write <- function(object, pkl_file) {
 set_seed <- function(seed) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   seed <- as.integer(seed)
   set.seed(seed)
@@ -254,7 +254,7 @@ set_seed <- function(seed) {
 read <- function(pkl_file) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   res <- pkg.env$dgpsi$read(pkl_file)
@@ -312,7 +312,7 @@ NULL
 summary.gp <- function(object, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
@@ -323,7 +323,7 @@ summary.gp <- function(object, ...) {
 summary.dgp <- function(object, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
@@ -334,7 +334,7 @@ summary.dgp <- function(object, ...) {
 summary.lgp <- function(object, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
 }
@@ -366,7 +366,7 @@ summary.lgp <- function(object, ...) {
 set_linked_idx <- function(object, idx) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   idx <- reticulate::np_array(as.integer(idx - 1))
   object[['constructor_obj']] <- pkg.env$copy$deepcopy(object[['constructor_obj']])
@@ -407,7 +407,7 @@ set_linked_idx <- function(object, idx) {
 set_imp <- function(object, B = 10) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -472,7 +472,7 @@ set_imp <- function(object, B = 10) {
 window <- function(object, start, end = NULL, thin = 1) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -563,7 +563,7 @@ window <- function(object, start, end = NULL, thin = 1) {
 nllik <- function(object, x, y) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
@@ -607,7 +607,7 @@ nllik <- function(object, x, y) {
 trace_plot <- function(object, layer = NULL, node = 1) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
 

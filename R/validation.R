@@ -117,7 +117,7 @@ validate <- function(object, x_test, y_test, method, verb, force, cores, ...){
 validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
@@ -269,7 +269,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
 validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
@@ -434,7 +434,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)

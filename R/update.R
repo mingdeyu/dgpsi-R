@@ -56,7 +56,7 @@ update <- function(object, X, Y, refit, reset, verb, ...){
 update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, N = 100, cores = 1, ess_burn = 10, B = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"dgp") ){
@@ -137,7 +137,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
 update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
-    if (pkg.env$restart) return()
+    if (pkg.env$restart) return(invisible(NULL))
   }
   #check class
   if ( !inherits(object,"gp") ){
