@@ -255,7 +255,7 @@ It can be seen from the plot above that with static space-filling designs, the q
 
 ### See also
 
-See [`Sequential Design II`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html) for the sequential design of a bundle of DGP emulators with automatic terminations.
+See [`Sequential Design II`](https://mingdeyu.github.io/dgpsi-R/articles/seq_design_2.html) for the sequential design of a bundle of DGP emulators with automatic terminations.
 
 ### References
 

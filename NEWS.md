@@ -1,4 +1,4 @@
-# dgpsi 2.2.0-9000 (development version)
+# dgpsi 2.3.0
 - A bug from the underlying Python implementations is fixed when `name = matern2.5` in `gp()` and `dgp()`.
 - Thanks to @yyimingucl, a bug from the underlying Python implementations for the MICE sequential design criterion `mice()` is fixed.
 - An argument `reset` is added to `update()` and `design()` to reset hyperparameters of a (D)GP emulator to their initial values (that were specified when the emulator is initialized) after the input and output of the emulator are updated and before the emulator is refitted. This argument can be useful for sequential designs in cases where the hyperparameters of a (D)GP emulator get caught in suboptimal estimates. In such circumstances, one can set `reset = TRUE` to reinitialize the (D)GP emulator in some steps of the sequential designs as a strategy to escape the poor estimates.
