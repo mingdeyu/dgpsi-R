@@ -55,10 +55,11 @@ library(dgpsi)
 to load the package. To install or activate the required Python environment automatically, simply run a function from the package. That's it, the package is now ready to use!
 
 > **Note**  
-> It can take a while for the package to compile and initiate the underlying Python environment when a function from 
-> the package is executed after `dgpsi` is loaded.
+> After loading `dgpsi`, the package may take some time to compile and initiate the underlying Python environment the first
+> time a function from `dgpsi` is executed. Any subsequent function calls won't require re-compiling and re-activation and 
+> will be faster.
 >
-> If you experience Python related issues while initiating the package, please try to reinstall the Python environment:    
+> If you experience Python related issues while using the package, please try to reinstall the Python environment:    
 > 
 > ```r
 > dgpsi::init_py(reinstall = T)
@@ -70,7 +71,11 @@ to load the package. To install or activate the required Python environment auto
 > dgpsi::init_py(uninstall = T)
 > ```
 > 
-> And restart the R session.
+> And then reinstall:
+>
+> ```r
+> dgpsi::init_py()
+> ```
 
 ## References
 > [Ming, D. and Williamson, D. (2023) Linked deep Gaussian process emulation for model networks. arXiv:2306.01212](https://arxiv.org/abs/2306.01212)
