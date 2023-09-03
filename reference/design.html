@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,9 +73,11 @@
 <span>  <span class="va">limits</span>,</span>
 <span>  <span class="va">int</span>,</span>
 <span>  <span class="va">f</span>,</span>
+<span>  <span class="va">reps</span>,</span>
 <span>  <span class="va">freq</span>,</span>
 <span>  <span class="va">x_test</span>,</span>
 <span>  <span class="va">y_test</span>,</span>
+<span>  <span class="va">reset</span>,</span>
 <span>  <span class="va">target</span>,</span>
 <span>  <span class="va">method</span>,</span>
 <span>  <span class="va">eval</span>,</span>
@@ -95,9 +97,11 @@
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -117,9 +121,11 @@
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -141,9 +147,11 @@
 <span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  f <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  freq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -212,6 +220,13 @@ need to be updated after each step of the sequential design.</p></li>
 </ul></dd>
 
 
+<dt>reps</dt>
+<dd><p>an integer that gives the number of repetitions of the located design points to be created and used for evaluations of <code>f</code>. Set the
+argument to an integer greater than <code>1</code> if <code>f</code> is a stochastic function that can generate different responses given a same input and the
+supplied emulator <code>object</code> can deal with stochastic responses, e.g., a (D)GP emulator with <code>nugget_est = TRUE</code> or a DGP emulator with a
+likelihood layer. The argument is only used when <code>f</code> is supplied. Defaults to <code>1</code>.</p></dd>
+
+
 <dt>freq</dt>
 <dd><p>a vector of two integers with the first element giving the frequency (in number of steps) to re-fit the
 emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to <code>c(1, 1)</code>.</p></dd>
@@ -228,6 +243,13 @@ Defaults to <code>NULL</code>. This argument is only used if <code>eval = NULL</
 <li><p>if <code>object</code> is an instance of the <code>dgp</code> class, <code>y_test</code> is a matrix with its rows being testing output data points and columns being
 output dimensions.</p></li>
 </ul><p>Set to <code>NULL</code> for the LOO-based emulator validation. Defaults to <code>NULL</code>. This argument is only used if <code>eval = NULL</code>.</p></dd>
+
+
+<dt>reset</dt>
+<dd><p>a bool or a vector of bools indicating whether to reset hyperparameters of the emulator to their initial values when it was initially
+constructed after the input-output update and before the re-fit. If a bool is given, it will be applied to
+every step of the sequential design. If a vector is provided, its length should be equal to <code>N</code> and will be applied to individual
+steps of the sequential design. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt>target</dt>
@@ -253,7 +275,7 @@ points to be added to individual emulators in the bundle.</p></li>
 
 
 <dt>eval</dt>
-<dd><p>an R function that calculates the customized evaluating metric of the emulator.The function must satisfy the following basic rules:</p><ul><li><p>the first argument is an emulator object that can be either an instance of</p><ul><li><p>the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>);</p></li>
+<dd><p>an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:</p><ul><li><p>the first argument is an emulator object that can be either an instance of</p><ul><li><p>the <code>gp</code> class (produced by <code><a href="gp.html">gp()</a></code>);</p></li>
 <li><p>the <code>dgp</code> class (produced by <code><a href="dgp.html">dgp()</a></code>);</p></li>
 <li><p>the <code>bundle</code> class (produced by <code><a href="pack.html">pack()</a></code>).</p></li>
 </ul></li>
@@ -278,7 +300,7 @@ to <code>NULL</code>.</p></dd>
 
 
 <dt>cores</dt>
-<dd><p>an integers that gives the number of cores to be used for emulator validations. If set to <code>NULL</code>, the number of cores is
+<dd><p>an integer that gives the number of cores to be used for emulator validations. If set to <code>NULL</code>, the number of cores is
 set to <code>(max physical cores available - 1)</code>. Defaults to <code>1</code>. This argument is only used if <code>eval = NULL</code>.</p></dd>
 
 
@@ -331,7 +353,7 @@ class) that indicate if the target RMSEs are reached at the end of the sequentia
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     
-<ul><li><p>The re-fitting and validation of an emulator are forced after the final step of a sequential design even <code>N</code> is not multiples of elements in <code>freq</code>.</p></li>
+<ul><li><p>The validation of an emulator is forced after the final step of a sequential design even <code>N</code> is not multiples of the second element in <code>freq</code>.</p></li>
 <li><p>Any <code>loo</code> or <code>oos</code> slot that already exists in <code>object</code> will be cleaned, and a new slot called <code>loo</code> or <code>oos</code> will be created in the returned object
 depending on whether <code>x_test</code> and <code>y_test</code> are provided. The new slot gives the validation information of the emulator constructed in the final step of
 the sequential design. See <code><a href="validate.html">validate()</a></code> for more information about the slots <code>loo</code> and <code>oos</code>.</p></li>
@@ -366,7 +388,6 @@ R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testin
 <span class="r-in"><span><span class="co"># load packages and the Python env</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bertcarnell/lhs" class="external-link">lhs</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># construct a 2D non-stationary function that takes a matrix as the input</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>

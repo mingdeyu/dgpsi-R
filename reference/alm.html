@@ -12,7 +12,7 @@ or a bundle of (D)GP emulators using the Active Learning MacKay (ALM), see the r
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -149,7 +149,10 @@ of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>ob
 of next design points from <code>x_cand</code>.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>dgp</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to one (if <code>aggregate</code>
 is not <code>NULL</code>) or the output dimension (if <code>aggregate</code> is <code>NULL</code>), giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added
-to the DGP emulator across different outputs.</p></li>
+to the DGP emulator across different outputs. If <code>object</code> is a DGP emulator with either <code>Hetero</code> or <code>NegBin</code> likelihood layer, the returned matrix has
+two columns with the first column giving positions of next design points from <code>x_cand</code> that correspond to the mean parameter of the normal or negative Binomial
+distribution, and the second column giving positions of next design points from <code>x_cand</code> that correspond to the variance parameter of the normal distribution or
+the dispersion parameter of the negative Binomial distribution.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>bundle</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to the number of
 emulators in the bundle, giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added to individual emulators.</p></li>
 </ul></div>
@@ -162,7 +165,6 @@ emulators in the bundle, giving positions (i.e., row numbers) of next design poi
     
 <ul><li><p>The column order of the first argument of <code>aggregate</code> must be consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the
 <code>dgp</code> class), or the order of emulators placed in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class;</p></li>
-<li><p>The function is only applicable to DGP emulators without likelihood layers.</p></li>
 <li><p>Any R vector detected in <code>x_cand</code> will be treated as a column vector and automatically converted into a single-column
 R matrix.</p></li>
 </ul></div>
@@ -178,7 +180,6 @@ R matrix.</p></li>
 <span class="r-in"><span><span class="co"># load packages and the Python env</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bertcarnell/lhs" class="external-link">lhs</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># construct a 1D non-stationary function</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>

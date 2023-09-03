@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">update</span><span class="op">(</span><span class="va">object</span>, <span class="va">X</span>, <span class="va">Y</span>, <span class="va">refit</span>, <span class="va">verb</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">update</span><span class="op">(</span><span class="va">object</span>, <span class="va">X</span>, <span class="va">Y</span>, <span class="va">refit</span>, <span class="va">reset</span>, <span class="va">verb</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for dgp</span></span>
 <span><span class="fu">update</span><span class="op">(</span></span>
@@ -72,6 +72,7 @@
 <span>  <span class="va">X</span>,</span>
 <span>  <span class="va">Y</span>,</span>
 <span>  refit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  N <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -81,7 +82,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for gp</span></span>
-<span><span class="fu">update</span><span class="op">(</span><span class="va">object</span>, <span class="va">X</span>, <span class="va">Y</span>, refit <span class="op">=</span> <span class="cn">FALSE</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">update</span><span class="op">(</span><span class="va">object</span>, <span class="va">X</span>, <span class="va">Y</span>, refit <span class="op">=</span> <span class="cn">FALSE</span>, reset <span class="op">=</span> <span class="cn">FALSE</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -105,6 +106,11 @@ output dimensions. When <code>likelihood</code> (see below) is not <code>NULL</c
 
 <dt>refit</dt>
 <dd><p>a bool indicating whether to re-fit the emulator <code>object</code> after the training input and output are updated. Defaults to <code>FALSE</code>.</p></dd>
+
+
+<dt>reset</dt>
+<dd><p>a bool indicating whether to reset hyperparameters of the emulator <code>object</code> to their initial values when the emulator was
+constructed, after the training input and output are updated. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt>verb</dt>
@@ -164,7 +170,7 @@ R matrix. Thus, if <code>X</code> is a single data point with multiple dimension
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># See locate() for an example.</span></span></span>
+<span class="r-in"><span><span class="co"># See alm(), mice() or pei() for an example.</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
