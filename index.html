@@ -126,14 +126,16 @@ You don’t need prior knowledge of Python to start using the package, all you n
 <p>to load the package. To install or activate the required Python environment automatically, simply run a function from the package. That’s it, the package is now ready to use!</p>
 <blockquote>
 <p><strong>Note</strong><br>
-It can take a while for the package to compile and initiate the underlying Python environment when a function from the package is executed after <code>dgpsi</code> is loaded.</p>
-<p>If you experience Python related issues while initiating the package, please try to reinstall the Python environment:</p>
+After loading <code>dgpsi</code>, the package may take some time to compile and initiate the underlying Python environment the first time a function from <code>dgpsi</code> is executed. Any subsequent function calls won’t require re-compiling and re-activation and will be faster.</p>
+<p>If you experience Python related issues while using the package, please try to reinstall the Python environment:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dgpsi</span><span class="fu">::</span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span>reinstall <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p>or uninstall completely the Python environment:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dgpsi</span><span class="fu">::</span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span>uninstall <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p>And restart the R session.</p>
+<p>And then reinstall:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">dgpsi</span><span class="fu">::</span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </blockquote>
 </div>
 <div class="section level2">
