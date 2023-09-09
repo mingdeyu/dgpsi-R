@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="index.html">dgpsi</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.0-9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.0-9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,8 +77,8 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="dgpsi">dgpsi<a class="anchor" aria-label="anchor" href="#dgpsi"></a>
 </h1></div>
-<p><a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://www.r-pkg.org/badges/version/dgpsi" alt="CRAN_Status_Badge"></a> <a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen" alt="Download"></a> <a href="https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link"><img src="https://img.shields.io/badge/DOC-release-brightgreen" alt="DOC"></a> <a href="https://doi.org/10.1137/20M1323771" class="external-link"><img src="https://img.shields.io/badge/REF-Linked%20GP-informational" alt="REF"></a> <a href="https://doi.org/10.1080/00401706.2022.2124311" class="external-link"><img src="https://img.shields.io/badge/REF-Deep%20GP-informational" alt="REF"></a> <a href="https://arxiv.org/abs/2306.01212" class="external-link"><img src="https://img.shields.io/badge/REF-Linked%20DGP-informational" alt="REF"></a> <a href="https://github.com/mingdeyu/DGP" class="external-link"><img src="https://img.shields.io/badge/Python-dgpsi%20v2.2.0-informational" alt="python"></a> <img src="https://img.shields.io/cran/l/dgpsi?color=green" alt="CRAN_License"></p>
-<p>The R package <code>dgpsi</code> provides R interface to Python package <a href="https://github.com/mingdeyu/DGP" class="external-link"><code>dgpsi</code></a> for deep and linked Gaussian process emulations.</p>
+<p><a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://www.r-pkg.org/badges/version/dgpsi" alt="CRAN_Status_Badge"></a> <a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen" alt="Download"></a> <a href="https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link"><img src="https://img.shields.io/badge/DOC-release-brightgreen" alt="DOC"></a> <a href="https://doi.org/10.1137/20M1323771" class="external-link"><img src="https://img.shields.io/badge/REF-Linked%20GP-informational" alt="REF"></a> <a href="https://doi.org/10.1080/00401706.2022.2124311" class="external-link"><img src="https://img.shields.io/badge/REF-Deep%20GP-informational" alt="REF"></a> <a href="https://arxiv.org/abs/2306.01212" class="external-link"><img src="https://img.shields.io/badge/REF-Linked%20DGP-informational" alt="REF"></a> <a href="https://github.com/mingdeyu/DGP" class="external-link"><img src="https://img.shields.io/badge/Python-dgpsi%20v2.3.0-informational" alt="python"></a> <img src="https://img.shields.io/cran/l/dgpsi?color=green" alt="CRAN_License"></p>
+<p>The R package <code>dgpsi</code> provides R interface to Python package <a href="https://github.com/mingdeyu/DGP" class="external-link"><code>dgpsi</code></a> for deep and linked Gaussian process emulations using stochastic imputation (SI).</p>
 <blockquote>
 <p><strong>Hassle-free Python Setup</strong><br>
 You don’t need prior knowledge of Python to start using the package, all you need is a single click in R (see <a href="#installation">Installation</a> section below) that automatically installs and activates the required Python environment for you!</p>
@@ -109,7 +109,7 @@ You don’t need prior knowledge of Python to start using the package, all you n
 </h2>
 <ul>
 <li>Check <a href="https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html" class="external-link">A Quick Guide to dgpsi</a> to get started with the package.</li>
-<li>For experimental features, check out our <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">website</a> for the development version.</li>
+<li>For experimental features, check out our <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">website for the development version</a>.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -123,22 +123,20 @@ You don’t need prior knowledge of Python to start using the package, all you n
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'mingdeyu/dgpsi-R'</span><span class="op">)</span></span></code></pre></div>
 <p>After the installation, run</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>to install and activate the required Python environment. That’s it, the package is now ready to use!</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span></code></pre></div>
+<p>to load the package. To install or activate the required Python environment automatically, simply run a function from the package. That’s it, the package is now ready to use!</p>
 <blockquote>
 <p><strong>Note</strong><br>
-Always run <code><a href="reference/init_py.html">init_py()</a></code> after <code><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">library(dgpsi)</a></code>, telling R to invoke the required Python environment.</p>
-<p>If you experience issues while running <code><a href="reference/init_py.html">init_py()</a></code>, please try to reinstall the Python environment:</p>
+After loading <code>dgpsi</code>, the package may take some time to compile and initiate the underlying Python environment the first time a function from <code>dgpsi</code> is executed. Any subsequent function calls won’t require re-compiling or re-activation of the Python environment, and will be faster.</p>
+<p>If you experience Python related issues while using the package, please try to reinstall the Python environment:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dgpsi</span><span class="fu">::</span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span>reinstall <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p>or uninstall completely the Python environment:</p>
+<p>Or uninstall completely the Python environment:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dgpsi</span><span class="fu">::</span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span>uninstall <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p>And then restart the R and rerun:</p>
+<p>and then reinstall:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">dgpsi</span><span class="fu">::</span><span class="fu"><a href="reference/init_py.html">init_py</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </blockquote>
 </div>
 <div class="section level2">
