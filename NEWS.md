@@ -1,4 +1,5 @@
 # dgpsi 2.3.0-9000 (development version)
+- One can now use `design()` to implement sequential designs using `f` and a fixed candidate set passed to `x_cand` with `y_cand = NULL`.
 
 # dgpsi 2.3.0
 - A bug from the underlying Python implementations is fixed when `name = 'matern2.5'` in `gp()` and `dgp()`.

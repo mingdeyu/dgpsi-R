@@ -255,24 +255,39 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     vnames <- methods::formalArgs(eval)
   }
 
-  if ( is.null(x_cand) ) {
+  if ( is.null(y_cand) ) {
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
     fnames <- methods::formalArgs(f)
 
-    limits <- check_limits(limits, n_dim_X)
-    if ( is.null(limits) ){
-      limits <- matrix(0, n_dim_X, 2)
-      limits[,1] <- pkg.env$np$amin(X, axis=0L)
-      limits[,2] <- pkg.env$np$amax(X, axis=0L)
-    }
-    if (identical(method, pei)) {
-      add_arg <- list(pseudo_points = pp(X, limits))
-      add_arg <- utils::modifyList(add_arg, list(...))
+    if ( is.null(x_cand) ) {
+      limits <- check_limits(limits, n_dim_X)
+      if ( is.null(limits) ){
+        limits <- matrix(0, n_dim_X, 2)
+        limits[,1] <- pkg.env$np$amin(X, axis=0L)
+        limits[,2] <- pkg.env$np$amax(X, axis=0L)
+      }
+      if (identical(method, pei)) {
+        add_arg <- list(pseudo_points = pp(X, limits))
+        add_arg <- utils::modifyList(add_arg, list(...))
+      } else {
+        add_arg <- list(...)
+      }
+      int <- check_int(int, n_dim_X)
     } else {
       add_arg <- list(...)
+      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+      xy_cand_list <- remove_dup(xy_cand_list, X)
+      x_cand_origin <- xy_cand_list[[1]]
+      x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
+      if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
+        x_cand <- x_cand_origin
+      } else {
+        x_cand <- x_cand_rep[[1]]
+      }
+      idx_x_cand0 <- c(1:nrow(x_cand))
+      idx_x_cand <- idx_x_cand0
+      idx_x_acq <- c()
     }
-
-    int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
     if ( is.null(eval) ){
@@ -319,23 +334,35 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 
     if ( run ){
       for ( i in 1:N ){
+
         if ( verb ) {
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
         }
 
-        x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
-
-        for (j in 1:n_dim_X){
-          if ( int[j] ){
-            #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-            x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+        if ( !is.null(x_cand) ){
+          if ( n_cand<=length(idx_x_cand) ){
+            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+            idx_sub_cand <- idx_x_cand[idx_idx]
+            #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
           } else {
-            x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+            idx_sub_cand <- idx_x_cand
+          }
+          sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+        } else {
+          sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+          for (j in 1:n_dim_X){
+            if ( int[j] ){
+              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+              sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+            } else {
+              sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+            }
           }
         }
 
-        arg_list <- list(object, x_cand)
+        arg_list <- list(object, sub_cand)
+
         if ("..." %in% mnames){
           res <- do.call(method, c(arg_list, add_arg))
         } else {
@@ -347,19 +374,24 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         if ( verb ) {
           message(" done")
           if ( length(res)==1 ){
-            message(paste(c(" * Next design point:", sprintf("%.06f", x_cand[res,])), collapse=" "))
+            message(paste(c(" * Next design point:", sprintf("%.06f", sub_cand[res,])), collapse=" "))
           } else {
             for (j in 1:length(res) ){
-              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", x_cand[res[j],])), collapse=" "))
+              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", sub_cand[res[j],])), collapse=" "))
             }
           }
         }
 
-        new_X <- x_cand[rep(res, reps),,drop=F]
+        new_X <- sub_cand[rep(res, reps),,drop=F]
 
         N_acq <- c(N_acq, nrow(new_X))
 
         X <- rbind(X, new_X)
+        if ( !is.null(x_cand) ){
+          idx_x_acq <- c(idx_x_acq, idx_sub_cand[res])
+          idx_x_cand <- idx_x_cand0[-idx_x_acq]
+        }
+
         if ("..." %in% fnames){
           new_output <- do.call(f, c(list(new_X), add_arg))
         } else {
@@ -712,24 +744,40 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     vnames <- methods::formalArgs(eval)
   }
   #if candidate set is given
-  if ( is.null(x_cand) ) {
+  if ( is.null(y_cand) ) {
 
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
     fnames <- methods::formalArgs(f)
 
-    limits <- check_limits(limits, n_dim_X)
-    if ( is.null(limits) ){
-      limits <- matrix(0, n_dim_X, 2)
-      limits[,1] <- pkg.env$np$amin(X, axis=0L)
-      limits[,2] <- pkg.env$np$amax(X, axis=0L)
-    }
-    if (identical(method, pei)) {
-      add_arg <- list(pseudo_points = pp(X, limits))
-      add_arg <- utils::modifyList(add_arg, list(...))
+    if ( is.null(x_cand) ) {
+      limits <- check_limits(limits, n_dim_X)
+      if ( is.null(limits) ){
+        limits <- matrix(0, n_dim_X, 2)
+        limits[,1] <- pkg.env$np$amin(X, axis=0L)
+        limits[,2] <- pkg.env$np$amax(X, axis=0L)
+      }
+      if (identical(method, pei)) {
+        add_arg <- list(pseudo_points = pp(X, limits))
+        add_arg <- utils::modifyList(add_arg, list(...))
+      } else {
+        add_arg <- list(...)
+      }
+      int <- check_int(int, n_dim_X)
     } else {
       add_arg <- list(...)
+      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+      xy_cand_list <- remove_dup(xy_cand_list, X)
+      x_cand_origin <- xy_cand_list[[1]]
+      x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
+      if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
+        x_cand <- x_cand_origin
+      } else {
+        x_cand <- x_cand_rep[[1]]
+      }
+      idx_x_cand0 <- c(1:nrow(x_cand))
+      idx_x_cand <- idx_x_cand0
+      idx_x_acq <- c()
     }
-    int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
     if ( is.null(eval) ){
@@ -781,18 +829,28 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           message(" - Locating ...", appendLF = FALSE)
         }
 
-        x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+        if ( is.null(x_cand) ){
+          sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
 
-        for (j in 1:n_dim_X){
-          if ( int[j] ){
-            #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-            x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-          } else {
-            x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+          for (j in 1:n_dim_X){
+            if ( int[j] ){
+              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+              sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+            } else {
+              sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+            }
           }
+        } else {
+          if ( n_cand<=length(idx_x_cand) ){
+            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+            idx_sub_cand <- idx_x_cand[idx_idx]
+          } else {
+            idx_sub_cand <- idx_x_cand
+          }
+          sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
         }
 
-        arg_list <- list(object, x_cand)
+        arg_list <- list(object, sub_cand)
         if ("..." %in% mnames){
           res <- do.call(method, c(arg_list, add_arg))
         } else {
@@ -805,30 +863,35 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           message(" done")
           if ( nrow(res)==1 ){
             if ( ncol(res)==1 ){
-              message(paste(c(" * Next design point:", sprintf("%.06f", x_cand[res[1,1],])), collapse=" "))
+              message(paste(c(" * Next design point:", sprintf("%.06f", sub_cand[res[1,1],])), collapse=" "))
             } else {
               for ( j in 1:ncol(res) ){
-                message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", x_cand[res[1,j],])), collapse=" "))
+                message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
               }
             }
           } else {
             for ( j in 1:nrow(res) ){
               if ( ncol(res)==1 ){
-                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", x_cand[res[j,1],])), collapse=" "))
+                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", sub_cand[res[j,1],])), collapse=" "))
               } else {
                 for ( k in 1:nrow(res) ){
-                  message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", x_cand[res[j,k],])), collapse=" "))
+                  message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
                 }
               }
             }
           }
         }
 
-        new_X <- x_cand[rep(unique(as.vector(t(res))), reps),,drop=FALSE]
+        new_X <- sub_cand[rep(unique(as.vector(t(res))), reps),,drop=FALSE]
 
         N_acq <- c(N_acq, nrow(new_X))
 
         X <- rbind(X, new_X)
+        if ( !is.null(x_cand) ){
+          idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
+          idx_x_cand <- idx_x_cand0[-idx_x_acq]
+        }
+
         if ("..." %in% fnames){
           new_output <- do.call(f, c(list(new_X), add_arg))
         } else {
@@ -1193,32 +1256,51 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   }
 
   #if candidate set is given
-  if ( is.null(x_cand) ) {
+  if ( is.null(y_cand) ) {
 
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
     fnames <- methods::formalArgs(f)
 
-    limits <- check_limits(limits, n_dim_X)
-    if ( is.null(limits) ){
-      all_training_input <- c()
-      for ( k in 1:n_emulators ){
-        all_training_input <- rbind(all_training_input, X[[k]])
+    if ( is.null(x_cand) ) {
+      limits <- check_limits(limits, n_dim_X)
+      if ( is.null(limits) ){
+        all_training_input <- c()
+        for ( k in 1:n_emulators ){
+          all_training_input <- rbind(all_training_input, X[[k]])
+        }
+        limits <- matrix(0, n_dim_X, 2)
+        limits[,1] <- pkg.env$np$amin(all_training_input, axis=0L)
+        limits[,2] <- pkg.env$np$amax(all_training_input, axis=0L)
       }
-      limits <- matrix(0, n_dim_X, 2)
-      limits[,1] <- pkg.env$np$amin(all_training_input, axis=0L)
-      limits[,2] <- pkg.env$np$amax(all_training_input, axis=0L)
-    }
-    if (identical(method, pei)) {
-      ppoints <- list()
-      for ( k in 1:n_emulators ){
-        ppoints[[k]] <- pp(X[[k]], limits)
+      if (identical(method, pei)) {
+        ppoints <- list()
+        for ( k in 1:n_emulators ){
+          ppoints[[k]] <- pp(X[[k]], limits)
+        }
+        add_arg <- list(pseudo_points = ppoints)
+        add_arg <- utils::modifyList(add_arg, list(...))
+      } else {
+        add_arg <- list(...)
       }
-      add_arg <- list(pseudo_points = ppoints)
-      add_arg <- utils::modifyList(add_arg, list(...))
+      int <- check_int(int, n_dim_X)
     } else {
       add_arg <- list(...)
+      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
+
+      for (j in 1:n_emulators){
+        xy_cand_list <- remove_dup(xy_cand_list, X[[paste('emulator',j,sep="")]])
+      }
+      x_cand_origin <- xy_cand_list[[1]]
+      x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
+      if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
+        x_cand <- x_cand_origin
+      } else {
+        x_cand <- x_cand_rep[[1]]
+      }
+      idx_x_cand0 <- c(1:nrow(x_cand))
+      idx_x_cand <- idx_x_cand0
+      idx_x_acq <- c()
     }
-    int <- check_int(int, n_dim_X)
 
     if ( verb ) message("Initializing ...", appendLF = FALSE)
     if ( is.null(eval) ){
@@ -1279,18 +1361,29 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           message(" - Locating ...", appendLF = FALSE)
         }
 
-        x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+        if ( is.null(x_cand) ){
+          sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
 
-        for (j in 1:n_dim_X){
-          if ( int[j] ){
-            #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-            x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-          } else {
-            x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+          for (j in 1:n_dim_X){
+            if ( int[j] ){
+              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+              sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+            } else {
+              sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+            }
           }
+        } else {
+          if ( n_cand<=length(idx_x_cand) ){
+            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+            idx_sub_cand <- idx_x_cand[idx_idx]
+            #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+          } else {
+            idx_sub_cand <- idx_x_cand
+          }
+          sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
         }
 
-        arg_list <- list(object, x_cand)
+        arg_list <- list(object, sub_cand)
         if ("..." %in% mnames){
           res <- do.call(method, c(arg_list, add_arg))
         } else {
@@ -1304,10 +1397,10 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           if ( nrow(res)==1 ){
             for ( j in 1:n_emulators ){
               if ( is.null(target) ){
-                message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", x_cand[res[1,j],])), collapse=" "))
+                message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
               } else {
                 if ( !istarget[j] ){
-                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", x_cand[res[1,j],])), collapse=" "))
+                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
                 } else {
                   message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))
                 }
@@ -1317,10 +1410,10 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             for ( j in 1:nrow(res) ){
               for ( k in 1:n_emulators ){
                 if ( is.null(target) ){
-                  message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", x_cand[res[j,k],])), collapse=" "))
+                  message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
                 } else {
                   if ( !istarget[k] ){
-                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", x_cand[res[j,k],])), collapse=" "))
+                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
                   } else {
                     message(sprintf(" * Next design point (Position%i for Emulator%i): None (target reached)", j, k))
                   }
@@ -1331,7 +1424,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
         }
 
         if ( nrow(res)==1 ){
-          new_X <- x_cand[res[1,],,drop=FALSE]
+          new_X <- sub_cand[res[1,],,drop=FALSE]
           if ( !is.null(target) ){
             new_X <- new_X[!istarget,,drop=FALSE]
           }
@@ -1363,6 +1456,15 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           if ( !is.null(target) ) temp[istarget] <- 0
           N_acq_ind <- rbind(N_acq_ind, temp)
 
+          if ( !is.null(x_cand) ) {
+            if ( is.null(target) ){
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res[1,])])
+            } else {
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res[1,!istarget])])
+            }
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+          }
+
           if ( !is.null(target) ) ctr <- 1
           for ( j in 1:n_emulators ){
             if ( is.null(target) ){
@@ -1382,9 +1484,9 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           new_X <- c()
           for (j in 1:nrow(res) ){
             if ( is.null(target) ) {
-              new_X <- rbind(new_X, x_cand[res[j,],,drop=FALSE])
+              new_X <- rbind(new_X, sub_cand[res[j,],,drop=FALSE])
             } else {
-              new_X <- rbind(new_X, x_cand[res[j,],,drop=FALSE][!istarget,,drop=FALSE])
+              new_X <- rbind(new_X, sub_cand[res[j,],,drop=FALSE][!istarget,,drop=FALSE])
             }
           }
           rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
@@ -1417,6 +1519,16 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           temp <- rep(nrow(res)*reps, n_emulators)
           if ( !is.null(target) ) temp[istarget] <- 0
           N_acq_ind <- rbind(N_acq_ind, temp)
+
+          if ( !is.null(x_cand) ) {
+            if ( is.null(target) ){
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
+            } else {
+              mask <- rep(!istarget, nrow(res))
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res))[mask])])
+            }
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+          }
 
           if ( !is.null(target) ) {
             ctr <- 1
@@ -2047,13 +2159,15 @@ check_reps <- function(reps){
 
 #check argument x_cand and y_cand
 check_xy_cand <- function(x_cand, y_cand, n_dim_Y){
-  if ( is.null(y_cand) ) stop("'y_cand' must be provided if 'x_cand' is not NULL.", call. = FALSE)
+  # if ( is.null(y_cand) ) stop("'y_cand' must be provided if 'x_cand' is not NULL.", call. = FALSE)
   if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( !is.matrix(y_cand)&!is.vector(y_cand) ) stop("'y_cand' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
-  if ( is.vector(y_cand) ) y_cand <- as.matrix(y_cand)
-  if ( nrow(x_cand)!=nrow(y_cand) ) stop("'x_cand' and 'y_cand' have different number of data points.", call. = FALSE)
-  if ( ncol(y_cand)!=n_dim_Y ) stop(sprintf("The dimension of 'y_cand' must be %i.", n_dim_Y), call. = FALSE)
+  if ( !is.null(y_cand) ) {
+    if ( !is.matrix(y_cand)&!is.vector(y_cand) ) stop("'y_cand' must be a vector or a matrix.", call. = FALSE)
+    if ( is.vector(y_cand) ) y_cand <- as.matrix(y_cand)
+    if ( nrow(x_cand)!=nrow(y_cand) ) stop("'x_cand' and 'y_cand' have different number of data points.", call. = FALSE)
+    if ( ncol(y_cand)!=n_dim_Y ) stop(sprintf("The dimension of 'y_cand' must be %i.", n_dim_Y), call. = FALSE)
+  }
   return(list(x_cand, y_cand))
 }
 
@@ -2067,7 +2181,9 @@ remove_dup <- function(xy_cand_list, X){
   if ( length(X_x_cand)!=0 ){
     idx <- !x_cand_s %in% X_x_cand
     x_cand <- x_cand[idx,,drop=FALSE]
-    y_cand <- y_cand[idx,,drop=FALSE]
+    if ( !is.null(y_cand) ) {
+      y_cand <- y_cand[idx,,drop=FALSE]
+    }
   }
   return(list(x_cand, y_cand))
 }
