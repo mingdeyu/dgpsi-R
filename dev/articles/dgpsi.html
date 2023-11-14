@@ -117,7 +117,7 @@ Python environment will be automatically loaded after we run
 <code><a href="../reference/set_seed.html">set_seed()</a></code> from the package to specify a seed for the
 reproducibility:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">999</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">9999</span><span class="op">)</span></span></code></pre></div>
 <p>We then define the step function:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
@@ -138,7 +138,7 @@ reproducibility:</p>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03&lt;00:00, 143.03it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03&lt;00:00, 148.10it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>The progress bar displayed shows how long it takes to finish the
 training. We are able to switch off the progress bar and the trace
@@ -153,9 +153,9 @@ DGP emulator.</p>
 <pre><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.322]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.290]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
-<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.682]     |     0.482     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.385]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
+<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.183]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
+<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.745]     |     0.480     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
 <span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
 <span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.</span></span>
 <span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.</span></span></code></pre>

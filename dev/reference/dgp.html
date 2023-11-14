@@ -91,7 +91,7 @@
 <span>  blocked_gibbs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  burnin <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  B <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  B <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -129,8 +129,11 @@ Defaults to <code>2</code>. This argument is only used when <code>struc = NULL</
 
 
 <dt>name</dt>
-<dd><p>kernel function to be used. Either <code>"sexp"</code> for squared exponential kernel or
-<code>"matern2.5"</code> for Matérn-2.5 kernel. Defaults to <code>"sexp"</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+<dd><p>a character or a vector of characters that indicates the kernel functions (either <code>"sexp"</code> for squared exponential kernel or
+<code>"matern2.5"</code> for Matérn-2.5 kernel) used in the DGP emulator:
+1. if a single character is supplied, the corresponding kernel function will be used for all GP nodes in the DGP hierarchy.
+2. if a vector of characters is supplied, each character of the vector specifies the kernel function that will be applied to all GP nodes in the corresponding layer.</p>
+<p>Defaults to <code>"sexp"</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
 
 
 <dt>lengthscale</dt>
@@ -262,7 +265,7 @@ are used. Defaults to <code>NULL</code>. This argument is only used when <code>t
 <dt>B</dt>
 <dd><p>the number of imputations to produce the later predictions. Increase the value to account for
 more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties but faster predictions.
-Defaults to <code>30</code>.</p></dd>
+Defaults to <code>10</code>.</p></dd>
 
 
 <dt>internal_input_idx</dt>
@@ -303,7 +306,11 @@ If a sub-list corresponds to a GP node, it contains four elements:</p><ul><li><p
 <li><p><code>nugget</code>: the nugget value in the kernel function.</p></li>
 </ul></li>
 <li><p><code>internal_dims</code>: the column indices of <code>X</code> that correspond to the linked emulators in the preceding layers of a linked system.</p></li>
-<li><p><code>external_dims</code>: the column indices of <code>X</code> that correspond to global inputs to the linked system of emulators.</p></li>
+<li><p><code>external_dims</code>: the column indices of <code>X</code> that correspond to global inputs to the linked system of emulators. It is shown as <code>FALSE</code> if <code>internal_input_idx = NULL</code>.</p></li>
+<li><p><code>linked_idx</code>: the value passed to argument <code>linked_idx</code>. It is shown as <code>FALSE</code> if the argument <code>linked_idx</code> is <code>NULL</code>.</p></li>
+<li><p><code>seed</code>: the random seed generated to produce the imputations. This information is stored for the reproducibility when the DGP emulator (that was saved by <code><a href="write.html">write()</a></code>
+with the light option <code>light = TRUE</code>) is loaded back to R by <code><a href="read.html">read()</a></code>.</p></li>
+<li><p><code>B</code>: the number of imputations used to generate the emulator.</p></li>
 </ol><p><code>internal_dims</code> and <code>external_dims</code> are generated only when <code>struc = NULL</code>.</p></li>
 <li><p><code>constructor_obj</code>: a 'python' object that stores the information of the constructed DGP emulator.</p></li>
 <li><p><code>container_obj</code>: a 'python' object that stores the information for the linked emulation.</p></li>
@@ -313,7 +320,14 @@ If a sub-list corresponds to a GP node, it contains four elements:</p><ul><li><p
 <li><p><code><a href="validate.html">validate()</a></code> for LOO and OOS validations.</p></li>
 <li><p><code><a href="plot.html">plot()</a></code> for validation plots.</p></li>
 <li><p><code><a href="lgp.html">lgp()</a></code> for linked (D)GP emulator constructions.</p></li>
+<li><p><code><a href="window.html">window()</a></code> for model parameter trimming.</p></li>
+<li><p><code><a href="summary.html">summary()</a></code> to summarize the trained DGP emulator.</p></li>
+<li><p><code><a href="write.html">write()</a></code> to save the DGP emulator to a <code>.pkl</code> file.</p></li>
+<li><p><code><a href="set_imp.html">set_imp()</a></code> to change the number of imputations.</p></li>
+<li><p><code><a href="set_linked_idx.html">set_linked_idx()</a></code> to add the linking information to the DGP emulator for linked emulations.</p></li>
 <li><p><code><a href="design.html">design()</a></code> for sequential designs.</p></li>
+<li><p><code><a href="update.html">update()</a></code> to update the DGP emulator with new inputs and outputs.</p></li>
+<li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -345,8 +359,8 @@ R matrix. Thus, if <code>X</code> is a single data point with multiple dimension
 <span class="r-in"><span><span class="co"># set a random seed</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">999</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># training a 3-layered DGP emulator</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">dgp</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, depth <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># training a DGP emulator</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">dgp</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># continue for further training iterations</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="continue.html">continue</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>

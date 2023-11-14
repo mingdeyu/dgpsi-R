@@ -60,6 +60,15 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.3.0-9000" id="dgpsi-230-9000-development-version">dgpsi 2.3.0-9000 (development version)<a class="anchor" aria-label="anchor" href="#dgpsi-230-9000-development-version"></a></h2>
 <ul><li>One can now use <code><a href="../reference/design.html">design()</a></code> to implement sequential designs using <code>f</code> and a fixed candidate set passed to <code>x_cand</code> with <code>y_cand = NULL</code>.</li>
+<li>The sizes of <code>.pkl</code> files written by <code><a href="../reference/write.html">write()</a></code> are significantly reduced.</li>
+<li>One can now set different kernel functions to nodes in different layers in a DGP emulator by passing a vector of kernel function names to <code>name</code> argument of <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
+<li>The default number of imputations <code>B</code> in <code><a href="../reference/dgp.html">dgp()</a></code> and <code><a href="../reference/lgp.html">lgp()</a></code> is changed to <code>10</code> for faster validations and predictions.</li>
+<li>The default method for sequential designs in <code><a href="../reference/design.html">design()</a></code> is changed to <code><a href="../reference/vigf.html">vigf()</a></code>.</li>
+<li>A new argument <code>new_wave</code> is added to <code><a href="../reference/design.html">design()</a></code> to allow users to resume sequential designs with or without a separate wave.</li>
+<li>A bug in <code><a href="../reference/vigf.html">vigf()</a></code> is fixed when <code>object</code> is an instance of the <code>bundle</code> class and <code>batch_size</code> is greater than one.</li>
+<li>Static and dynamic pruning of DGP structures are implemented in <code><a href="../reference/prune.html">prune()</a></code> and <code><a href="../reference/design.html">design()</a></code> (via the new arguments <code>pruning</code> and <code>control</code>) respectively.</li>
+<li>Some redundant codes are removed from <code><a href="../reference/update.html">update()</a></code> which makes <code><a href="../reference/design.html">design()</a></code> slightly faster.</li>
+<li>Updates of documentations and vignettes.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.3.0" id="dgpsi-230">dgpsi 2.3.0<a class="anchor" aria-label="anchor" href="#dgpsi-230"></a></h2><p class="text-muted">CRAN release: 2023-09-03</p>

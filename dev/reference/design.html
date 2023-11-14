@@ -83,6 +83,7 @@
 <span>  <span class="va">eval</span>,</span>
 <span>  <span class="va">verb</span>,</span>
 <span>  <span class="va">check_point</span>,</span>
+<span>  <span class="va">new_wave</span>,</span>
 <span>  <span class="va">cores</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -103,10 +104,11 @@
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
+<span>  method <span class="op">=</span> <span class="va">vigf</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -127,13 +129,16 @@
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
+<span>  method <span class="op">=</span> <span class="va">vigf</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  refit_cores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  pruning <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -153,10 +158,11 @@
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="va">mice</span>,</span>
+<span>  method <span class="op">=</span> <span class="va">vigf</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  refit_cores <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -271,7 +277,7 @@ for a given output or for all outputs, the indices of these design points are pl
 <li><p>is a matrix of indices if the first argument is an instance of the <code>bundle</code> class. Each row of the matrix gives the indices of the design
 points to be added to individual emulators in the bundle.</p></li>
 </ul></li>
-</ul><p>See <code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, and <code><a href="pei.html">pei()</a></code> for examples on customizing <code>method</code>. Defaults to <code><a href="mice.html">mice()</a></code>.</p></dd>
+</ul><p>See <code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> for examples on customizing <code>method</code>. Defaults to <code><a href="vigf.html">vigf()</a></code>.</p></dd>
 
 
 <dt>eval</dt>
@@ -299,6 +305,13 @@ from the user if the sequential design should continue or be terminated. Set to 
 to <code>NULL</code>.</p></dd>
 
 
+<dt>new_wave</dt>
+<dd><p>a bool indicating if the current execution of <code>design()</code> will create a new wave of sequential designs or add the sequential designs to
+the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
+of the sequential designs in different executions of <code>design()</code> in <code><a href="draw.html">draw()</a></code> and can specify a different evaluation frequency in <code>freq</code>. However, it can be
+beneficiary to turn this option off to restrict a large number of waves to be visualized in <code><a href="draw.html">draw()</a></code> that could run out of colors. Defaults to <code>TRUE</code>.</p></dd>
+
+
 <dt>cores</dt>
 <dd><p>an integer that gives the number of cores to be used for emulator validations. If set to <code>NULL</code>, the number of cores is
 set to <code>(max physical cores available - 1)</code>. Defaults to <code>1</code>. This argument is only used if <code>eval = NULL</code>.</p></dd>
@@ -321,6 +334,20 @@ of the sequential design:</p><ul><li><p>If <code>train_N</code> is an integer, t
 at each M-step during the re-fitting. If set to <code>NULL</code>, the number of cores is set to <code>(max physical cores available - 1)</code>.
 Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
 is computationally expensive. Defaults to <code>1</code>.</p></dd>
+
+
+<dt>pruning</dt>
+<dd><p>a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
+design points exceeds <code>min_size</code> in <code>control</code>. The argument is only applicable to DGP emulators (i.e., <code>object</code> is an instance of <code>dgp</code> class)
+produced by <code><a href="dgp.html">dgp()</a></code> with <code>struc = NULL</code>. Defaults to <code>TRUE</code>.</p></dd>
+
+
+<dt>control</dt>
+<dd><p>a list that can supply any of the following components to control the dynamic pruning of the DGP emulator:</p><ul><li><p><code>min_size</code>, the minimum number of design points required to trigger the dynamic pruning. Defaults to 10 times of the input dimensions.</p></li>
+<li><p><code>threshold</code>, the R2 value above which a GP node is considered redundant. Defaults to <code>0.97</code>.</p></li>
+<li><p><code>nexceed</code>, the minimum number of consecutive iterations that the R2 value of a GP node must exceed <code>threshold</code> to trigger the removal of that node from
+the DGP structure. Defaults to <code>3</code>.</p></li>
+</ul><p>The argument is only used when <code>pruning = TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -426,7 +453,7 @@ R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testin
 <span class="r-in"><span><span class="fu"><a href="draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>,<span class="st">'rmse'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># reduce the number of imputations for faster OOS</span></span></span>
-<span class="r-in"><span><span class="va">m_faster</span> <span class="op">&lt;-</span> <span class="fu"><a href="set_imp.html">set_imp</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m_faster</span> <span class="op">&lt;-</span> <span class="fu"><a href="set_imp.html">set_imp</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plot the OOS validation with the faster DGP emulator</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span><span class="va">m_faster</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></span>

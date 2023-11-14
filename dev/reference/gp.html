@@ -185,12 +185,13 @@ to add linking information to the GP emulator. Defaults to <code>NULL</code>.</p
     
 
 <p>An S3 class named <code>gp</code> that contains five slots:</p><ul><li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
-<li><p><code>specs</code>: a list that contains six elements:</p><ol><li><p><code>kernel</code>: the type of the kernel function used. Either <code>"sexp"</code> for squared exponential kernel or <code>"matern2.5"</code> for Matérn-2.5 kernel.</p></li>
+<li><p><code>specs</code>: a list that contains seven elements:</p><ol><li><p><code>kernel</code>: the type of the kernel function used. Either <code>"sexp"</code> for squared exponential kernel or <code>"matern2.5"</code> for Matérn-2.5 kernel.</p></li>
 <li><p><code>lengthscales</code>: a vector of lengthscales in the kernel function.</p></li>
 <li><p><code>scale</code>: the variance value in the kernel function.</p></li>
 <li><p><code>nugget</code>: the nugget value in the kernel function.</p></li>
 <li><p><code>internal_dims</code>: the column indices of <code>X</code> that correspond to the linked emulators in the preceding layers of a linked system.</p></li>
-<li><p><code>external_dims</code>: the column indices of <code>X</code> that correspond to global inputs to the linked system of emulators.</p></li>
+<li><p><code>external_dims</code>: the column indices of <code>X</code> that correspond to global inputs to the linked system of emulators. It is shown as <code>FALSE</code> if <code>internal_input_idx = NULL</code>.</p></li>
+<li><p><code>linked_idx</code>: the value passed to argument <code>linked_idx</code>. It is shown as <code>FALSE</code> if the argument <code>linked_idx</code> is <code>NULL</code>.</p></li>
 </ol><p><code>internal_dims</code> and <code>external_dims</code> are generated only when <code>struc = NULL</code>.</p></li>
 <li><p><code>constructor_obj</code>: a 'python' object that stores the information of the constructed GP emulator.</p></li>
 <li><p><code>container_obj</code>: a 'python' object that stores the information for the linked emulation.</p></li>
@@ -199,7 +200,12 @@ to add linking information to the GP emulator. Defaults to <code>NULL</code>.</p
 <li><p><code><a href="validate.html">validate()</a></code> for LOO and OOS validations.</p></li>
 <li><p><code><a href="plot.html">plot()</a></code> for validation plots.</p></li>
 <li><p><code><a href="lgp.html">lgp()</a></code> for linked (D)GP emulator constructions.</p></li>
+<li><p><code><a href="summary.html">summary()</a></code> to summarize the trained GP emulator.</p></li>
+<li><p><code><a href="write.html">write()</a></code> to save the GP emulator to a <code>.pkl</code> file.</p></li>
+<li><p><code><a href="set_linked_idx.html">set_linked_idx()</a></code> to add the linking information to the GP emulator for linked emulations.</p></li>
 <li><p><code><a href="design.html">design()</a></code> for sequential designs.</p></li>
+<li><p><code><a href="update.html">update()</a></code> to update the GP emulator with new inputs and outputs.</p></li>
+<li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
