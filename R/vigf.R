@@ -151,8 +151,10 @@ vigf.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
       idx_x_cand <- idx_x_cand0[-idx]
     }
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  if ( batch_size!=1 ){
+    pkg.env$py_gc$collect()
+    gc(full=T)
+  }
   return(idx)
 }
 
@@ -263,8 +265,10 @@ vigf.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FA
     }
     idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  if ( batch_size!=1 ){
+    pkg.env$py_gc$collect()
+    gc(full=T)
+  }
   return(idx)
 }
 
@@ -372,9 +376,9 @@ vigf.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading =
         } else {
           emulator_obj_list[[j]]$set_nb_parallel(threading)
           if ( identical(workers,as.integer(1)) ){
-            res = emulator_obj_list[[j]]$metric(x_cand = x_cand[idx_x_cand,,drop=F], obj = emulator_obj_list[[j]]$constructor_obj, method = 'VIGF', score_only = TRUE)
+            res = emulator_obj_list[[j]]$metric(x_cand = x_cand[idx_x_cand,,drop=F], obj = constructor_obj_list[[j]], method = 'VIGF', score_only = TRUE)
           } else {
-            res = emulator_obj_list[[j]]$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], obj = emulator_obj_list[[j]]$constructor_obj, method = 'VIGF', score_only = TRUE, core_num = workers)
+            res = emulator_obj_list[[j]]$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], obj = constructor_obj_list[[j]], method = 'VIGF', score_only = TRUE, core_num = workers)
           }
           emulator_obj_list[[j]]$set_nb_parallel(FALSE)
           scores <- cbind(scores, if(ncol(res) == 1) res else rowMeans(res))
@@ -416,7 +420,9 @@ vigf.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading =
     }
     idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  if ( batch_size!=1 ){
+    pkg.env$py_gc$collect()
+    gc(full=T)
+  }
   return(idx)
 }

@@ -150,8 +150,10 @@ alm.gp <- function(object, x_cand, batch_size = 1, workers = 1, ...) {
       idx_x_cand <- idx_x_cand0[-idx]
     }
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  if ( batch_size!=1 ){
+    pkg.env$py_gc$collect()
+    gc(full=T)
+  }
   return(idx)
 }
 
@@ -262,8 +264,10 @@ alm.dgp <- function(object, x_cand, batch_size = 1, workers = 1, threading = FAL
     }
     idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  if ( batch_size!=1 ){
+    pkg.env$py_gc$collect()
+    gc(full=T)
+  }
   return(idx)
 }
 
@@ -404,7 +408,9 @@ alm.bundle <- function(object, x_cand, batch_size = 1, workers = 1, threading = 
     }
     idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  if ( batch_size!=1 ){
+    pkg.env$py_gc$collect()
+    gc(full=T)
+  }
   return(idx)
 }

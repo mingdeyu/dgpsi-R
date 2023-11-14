@@ -28,6 +28,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 * Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
+* Automatic pruning of DGP emulators, both statically and dynamically.
 
 ## Getting started
 * Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.

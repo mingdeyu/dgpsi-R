@@ -29,7 +29,7 @@ library(dgpsi)
 `dgpsi` provides a function `init_py()` that helps us set up, initialize, re-install, or uninstall the underlying Python environment. We could run `init_py()` every time after `dgpsi` is loaded to manually initiate the Python environment. Alternatively, we could activate the Python environment by simply executing a function from `dgpsi`. For example, the Python environment will be automatically loaded after we run `set_seed()` from the package to specify a seed for the reproducibility:
 
 ```{r}
-set_seed(999)
+set_seed(9999)
 ```
 
 We then define the step function:
@@ -60,7 +60,7 @@ m <- dgp(X, Y, depth = 3)
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 143.03it/s]
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 148.10it/s]
 ## Imputing ... done
 ```
 
@@ -76,9 +76,9 @@ summary(m)
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.322]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.290]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.682]     |     0.482     | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.385]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
+## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.183]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
+## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.745]     |     0.480     | 1.000e-06 (fixed) |    [1]     |        [1]        |
 ## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
 ## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
 ## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.

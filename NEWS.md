@@ -1,5 +1,14 @@
 # dgpsi 2.3.0-9000 (development version)
 - One can now use `design()` to implement sequential designs using `f` and a fixed candidate set passed to `x_cand` with `y_cand = NULL`.
+- The sizes of `.pkl` files written by `write()` are significantly reduced.
+- One can now set different kernel functions to nodes in different layers in a DGP emulator by passing a vector of kernel function names to `name` argument of `dgp()`.
+- The default number of imputations `B` in `dgp()` and `lgp()` is changed to `10` for faster validations and predictions.
+- The default method for sequential designs in `design()` is changed to `vigf()`.
+- A new argument `new_wave` is added to `design()` to allow users to resume sequential designs with or without a separate wave. 
+- A bug in `vigf()` is fixed when `object` is an instance of the `bundle` class and `batch_size` is greater than one.
+- Static and dynamic pruning of DGP structures are implemented in `prune()` and `design()` (via the new arguments `pruning` and `control`) respectively.
+- Some redundant codes are removed from `update()` which makes `design()` slightly faster.
+- Updates of documentations and vignettes.
 
 # dgpsi 2.3.0
 - A bug from the underlying Python implementations is fixed when `name = 'matern2.5'` in `gp()` and `dgp()`.

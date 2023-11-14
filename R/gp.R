@@ -63,13 +63,14 @@
 #'
 #' @return An S3 class named `gp` that contains five slots:
 #' * `data`: a list that contains two elements: `X` and `Y` which are the training input and output data respectively.
-#' * `specs`: a list that contains six elements:
+#' * `specs`: a list that contains seven elements:
 #'    1. `kernel`: the type of the kernel function used. Either `"sexp"` for squared exponential kernel or `"matern2.5"` for Matérn-2.5 kernel.
 #'    2. `lengthscales`: a vector of lengthscales in the kernel function.
 #'    3. `scale`: the variance value in the kernel function.
 #'    4. `nugget`: the nugget value in the kernel function.
 #'    5. `internal_dims`: the column indices of `X` that correspond to the linked emulators in the preceding layers of a linked system.
-#'    6. `external_dims`: the column indices of `X` that correspond to global inputs to the linked system of emulators.
+#'    6. `external_dims`: the column indices of `X` that correspond to global inputs to the linked system of emulators. It is shown as `FALSE` if `internal_input_idx = NULL`.
+#'    7. `linked_idx`: the value passed to argument `linked_idx`. It is shown as `FALSE` if the argument `linked_idx` is `NULL`.
 #'
 #'    `internal_dims` and `external_dims` are generated only when `struc = NULL`.
 #' * `constructor_obj`: a 'python' object that stores the information of the constructed GP emulator.
@@ -81,7 +82,12 @@
 #' * [validate()] for LOO and OOS validations.
 #' * [plot()] for validation plots.
 #' * [lgp()] for linked (D)GP emulator constructions.
+#' * [summary()] to summarize the trained GP emulator.
+#' * [write()] to save the GP emulator to a `.pkl` file.
+#' * [set_linked_idx()] to add the linking information to the GP emulator for linked emulations.
 #' * [design()] for sequential designs.
+#' * [update()] to update the GP emulator with new inputs and outputs.
+#' * [alm()], [mice()], [pei()], and [vigf()] to locate next design points.
 #'
 #' @references
 #' Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. *Bayesian Analysis*, **14(3)**, 857-885.
@@ -146,20 +152,18 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
     stop("'Y' must be a vector or a matrix with only one column for a GP emulator.", call. = FALSE)
   }
 
+  if ( is.null(struc) ) {
+    is.null.struc <- TRUE
+  } else {
+    is.null.struc <- FALSE
+  }
+
   if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
   if ( prior!='ga' & prior!='inv_ga' & prior!='ref') stop("'prior' can only be 'ga', 'inv_ga', or 'ref'.", call. = FALSE)
 
-  if( !is.null(linked_idx) ) {
-    if ( !is.list(linked_idx) ) {
-      linked_idx <- reticulate::np_array(as.integer(linked_idx - 1))
-    } else {
-      for ( i in 1:length(linked_idx) ){
-        if ( !is.null(linked_idx[[i]]) ) linked_idx[[i]] <- reticulate::np_array(as.integer(linked_idx[[i]] - 1))
-      }
-    }
-  }
+  linked_idx_py <- linked_idx_r_to_py(linked_idx)
 
-  if ( is.null(struc) ) {
+  if ( is.null.struc ) {
     if ( verb ) message("Auto-generating a GP structure ...", appendLF = FALSE)
 
     if ( length(lengthscale) != 1 & length(lengthscale) != n_dim_X) {
@@ -221,12 +225,13 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
   res[['specs']] <- extract_specs(obj, "gp")
-  if ( !is.null(struc) ) {
+  if ( is.null.struc ) {
     res[['specs']][['internal_dims']] <- if( is.null(internal_input_idx) ) 1:n_dim_X else as.integer(reticulate::py_to_r(internal_input_idx)+1)
-    res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) NA else as.integer(reticulate::py_to_r(external_input_idx)+1)
+    res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) FALSE else as.integer(reticulate::py_to_r(external_input_idx)+1)
   }
+  res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx
   res[['constructor_obj']] <- obj
-  res[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
+  res[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx_py)
   res[['emulator_obj']] <- obj
 
   class(res) <- "gp"

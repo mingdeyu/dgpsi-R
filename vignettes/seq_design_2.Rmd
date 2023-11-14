@@ -59,7 +59,7 @@ wrap_plots(list(p1, p2, p3)) + plot_annotation(title = 'Synthetic Simulator')
 We now specify a seed with `set_seed()` from the package for reproducibility
 
 ```{r}
-set_seed(99)
+set_seed(999)
 ```
 
 and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
@@ -88,7 +88,7 @@ m1 <- dgp(X, Y[,1], connect = F)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 220.72it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 335.63it/s]
 ## Imputing ... done
 ```
 
@@ -100,7 +100,7 @@ m2 <- dgp(X, Y[,2], connect = F)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:02<00:00, 240.45it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 294.20it/s]
 ## Imputing ... done
 ```
 
@@ -112,7 +112,7 @@ m3 <- dgp(X, Y[,3])
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 413.38it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 387.69it/s]
 ## Imputing ... done
 ```
 
@@ -147,34 +147,34 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.521768 0.162249 0.010418
+##  * RMSE: 0.340553 0.158352 0.019125
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.003421
-##  * Next design point (Emulator2): 0.003421
-##  * Next design point (Emulator3): 0.007783
+##  * Next design point (Emulator1): 0.467905
+##  * Next design point (Emulator2): 0.003782
+##  * Next design point (Emulator3): 0.997096
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.476133 0.169318 0.005171
+##  * RMSE: 0.309701 0.158634 0.006056
 ## Iteration 2:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.362879
-##  * Next design point (Emulator2): 0.995688
+##  * Next design point (Emulator1): 0.997773
+##  * Next design point (Emulator2): 0.997773
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.472015 0.201739 0.005171
+##  * RMSE: 0.291350 0.159032 0.006056
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.033959
-##  * Next design point (Emulator2): 0.281797
+##  * Next design point (Emulator1): 0.198829
+##  * Next design point (Emulator2): 0.311879
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.067343 0.011225 0.005171
+##  * RMSE: 0.190766 0.014075 0.006056
 ## Targets are not reached for all emulators at the end of the sequential design.
 ```
 
@@ -203,38 +203,38 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.067343 0.011225 0.005171
+##  * RMSE: 0.190766 0.014075 0.006056
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.403398
-##  * Next design point (Emulator2): 0.403398
+##  * Next design point (Emulator1): 0.263892
+##  * Next design point (Emulator2): 0.263892
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.114102 0.007900 0.005171
+##  * RMSE: 0.176965 0.009466 0.006056
 ## Iteration 2:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.472785
+##  * Next design point (Emulator1): 0.030840
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.057033 0.007900 0.005171
+##  * RMSE: 0.204744 0.009466 0.006056
 ##  
 ##  ...
 ## 
-## Iteration 9:
+## Iteration 11:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.049099
+##  * Next design point (Emulator1): 0.105318
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.007011 0.007900 0.005171
-## Target reached! The sequential design stops at step 9.
+##  * RMSE: 0.009740 0.009466 0.006056
+## Target reached! The sequential design stops at step 11.
 ```
 
-The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
+The first and the second emulators reached the target after iteration 11 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
 
 ```{r}
 draw(m, 1, 'design') + draw(m, 2, 'design') + draw(m, 3, 'design') +
@@ -317,4 +317,4 @@ It can be seen from the plot above that with the sequential design, emulators in
 
 ### See also
 
-See [`Sequential Design I`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) for the sequential design of a DGP emulator on a 2D simulator.
+See [`Sequential Design I`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) for the sequential design and automatic structure simplification of a DGP emulator on a 2D simulator.

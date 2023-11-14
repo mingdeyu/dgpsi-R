@@ -31,7 +31,7 @@ articles:
   - linked_DGP
 
 - title: Sequential Design I
-  desc: Sequential design for the DGP emulator of a non-stationary simulator.
+  desc: Sequential design and dynamic pruning for the DGP emulator of a non-stationary simulator.
   navbar: ~
   contents:
   - seq_design
@@ -70,6 +70,7 @@ reference:
   - predict
   - validate
   - plot
+  - prune
 
 - title: "Sequential Design"
   desc: >

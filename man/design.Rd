@@ -26,6 +26,7 @@ design(
   eval,
   verb,
   check_point,
+  new_wave,
   cores,
   ...
 )
@@ -45,10 +46,11 @@ design(
   y_test = NULL,
   reset = FALSE,
   target = NULL,
-  method = mice,
+  method = vigf,
   eval = NULL,
   verb = TRUE,
   check_point = NULL,
+  new_wave = TRUE,
   cores = 1,
   ...
 )
@@ -68,13 +70,16 @@ design(
   y_test = NULL,
   reset = FALSE,
   target = NULL,
-  method = mice,
+  method = vigf,
   eval = NULL,
   verb = TRUE,
   check_point = NULL,
+  new_wave = TRUE,
   cores = 1,
   train_N = 100,
   refit_cores = 1,
+  pruning = TRUE,
+  control = list(),
   ...
 )
 
@@ -93,10 +98,11 @@ design(
   y_test = NULL,
   reset = FALSE,
   target = NULL,
-  method = mice,
+  method = vigf,
   eval = NULL,
   verb = TRUE,
   check_point = NULL,
+  new_wave = TRUE,
   cores = 1,
   train_N = 100,
   refit_cores = 1,
@@ -202,7 +208,7 @@ points to be added to individual emulators in the bundle.
 }
 }
 
-See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=pei]{pei()}} for examples on customizing \code{method}. Defaults to \code{\link[=mice]{mice()}}.}
+See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} for examples on customizing \code{method}. Defaults to \code{\link[=vigf]{vigf()}}.}
 
 \item{eval}{an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:
 \itemize{
@@ -231,6 +237,11 @@ Defaults to \code{TRUE}.}
 from the user if the sequential design should continue or be terminated. Set to \code{NULL} to suspend the manual intervention. Defaults
 to \code{NULL}.}
 
+\item{new_wave}{a bool indicating if the current execution of \code{\link[=design]{design()}} will create a new wave of sequential designs or add the sequential designs to
+the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
+of the sequential designs in different executions of \code{\link[=design]{design()}} in \code{\link[=draw]{draw()}} and can specify a different evaluation frequency in \code{freq}. However, it can be
+beneficiary to turn this option off to restrict a large number of waves to be visualized in \code{\link[=draw]{draw()}} that could run out of colors. Defaults to \code{TRUE}.}
+
 \item{cores}{an integer that gives the number of cores to be used for emulator validations. If set to \code{NULL}, the number of cores is
 set to \verb{(max physical cores available - 1)}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
 
@@ -250,6 +261,20 @@ Defaults to \code{100}.}
 at each M-step during the re-fitting. If set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
 Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
 is computationally expensive. Defaults to \code{1}.}
+
+\item{pruning}{a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
+design points exceeds \code{min_size} in \code{control}. The argument is only applicable to DGP emulators (i.e., \code{object} is an instance of \code{dgp} class)
+produced by \code{dgp()} with \code{struc = NULL}. Defaults to \code{TRUE}.}
+
+\item{control}{a list that can supply any of the following components to control the dynamic pruning of the DGP emulator:
+\itemize{
+\item \code{min_size}, the minimum number of design points required to trigger the dynamic pruning. Defaults to 10 times of the input dimensions.
+\item \code{threshold}, the R2 value above which a GP node is considered redundant. Defaults to \code{0.97}.
+\item \code{nexceed}, the minimum number of consecutive iterations that the R2 value of a GP node must exceed \code{threshold} to trigger the removal of that node from
+the DGP structure. Defaults to \code{3}.
+}
+
+The argument is only used when \code{pruning = TRUE}.}
 }
 \value{
 An updated \code{object} is returned with a slot called \code{design} that contains:
@@ -369,7 +394,7 @@ draw(m,'design')
 draw(m,'rmse')
 
 # reduce the number of imputations for faster OOS
-m_faster <- set_imp(m, 10)
+m_faster <- set_imp(m, 5)
 
 # plot the OOS validation with the faster DGP emulator
 plot(m_faster, x_test = validate_x, y_test = validate_y)

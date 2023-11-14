@@ -131,8 +131,8 @@ pack <- function(...) {
   res[['data']][['X']] <- X_all
   res[['data']][['Y']] <- Y_all
   class(res) <- "bundle"
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  #pkg.env$py_gc$collect()
+  #gc(full=T)
   return(res)
 }
 
@@ -185,6 +185,8 @@ unpack <- function(object) {
 #' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
+#' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be saved.
+#'     This argument has no effects on GP or bundles of GP emulators. Defaults to `TRUE`.
 #'
 #' @return No return value. `object` will be save to a local `.pkl` file specified by `pkl_file`.
 #'
@@ -197,13 +199,35 @@ unpack <- function(object) {
 #' }
 #' @md
 #' @export
-write <- function(object, pkl_file) {
+write <- function(object, pkl_file, light = TRUE) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
   pkl_file <- tools::file_path_sans_ext(pkl_file)
+  if (light) {
+    if (inherits(object,"dgp")){
+      if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or produce a new version of 'object' by set_imp().", call. = FALSE)
+      object[['emulator_obj']] <- NULL
+      object[['container_obj']] <- NULL
+    } else if (inherits(object,"lgp")){
+      if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct the 'object' by lgp().", call. = FALSE)
+      object[['emulator_obj']] <- NULL
+    } else if (inherits(object,"bundle")){
+      N <- length(object) - 1
+      if ( "design" %in% names(object) ) N <- N - 1
+      for ( i in 1:N ){
+        if ( inherits(object[[paste('emulator',i, sep='')]],"dgp") ) {
+          if ( !"seed" %in% names(object[[paste('emulator',i, sep='')]][['specs']]) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or produce a new version of 'object' by updating the included DGP emulators via set_imp().", call. = FALSE)
+          object[[paste('emulator',i, sep='')]][['emulator_obj']] <- NULL
+          object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
+        }
+      }
+    }
+  }
+  label <- class(object)
   lst <- unclass(object)
+  lst[['label']] <- label
   pkg.env$dgpsi$write(lst, pkl_file)
 }
 
@@ -258,25 +282,82 @@ read <- function(pkl_file) {
   }
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   res <- pkg.env$dgpsi$read(pkl_file)
-  if ('emulator_obj' %in% names(res)){
-    type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
-    if ( type=='emulator' ) {
-      class(res) <- "dgp"
-    } else if ( type=='gp' ) {
+  if ('label' %in% names(res)){
+    label <- res$label
+    res$label <- NULL
+    if (label == "gp"){
       class(res) <- "gp"
-    } else if ( type=='lgp' ) {
-      class(res) <- "lgp"
+    } else if (label == "dgp"){
+      if ('emulator_obj' %in% names(res)){
+        class(res) <- "dgp"
+      } else {
+        burnin <- res$constructor_obj$burnin
+        est_obj <- res$constructor_obj$estimate(burnin)
+        B <- res$specs$B
+        isblock <- res$constructor_obj$block
+        linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        set_seed(res$specs$seed)
+        res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+        class(res) <- "dgp"
+      }
+    } else if (label == "lgp"){
+      if ('emulator_obj' %in% names(res)){
+        class(res) <- "lgp"
+      } else {
+        B <- res$specs$B
+        extracted_struc <- res$constructor_obj
+        set_seed(res$specs$seed)
+        obj <- pkg.env$dgpsi$lgp(all_layer = pkg.env$copy$deepcopy(extracted_struc), N = B)
+        res[['emulator_obj']] <- obj
+        class(res) <- "lgp"
+      }
+    } else if (label == 'bundle'){
+      N <- length(res) - 1
+      if ( "design" %in% names(res) ) N <- N - 1
+      class(res) <- "bundle"
+      for ( i in 1:N ){
+        if ('emulator_obj' %in% names(res[[paste('emulator',i, sep='')]])) {
+          type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
+          if ( type=='emulator' ) {
+            class(res[[paste('emulator',i, sep='')]]) <- "dgp"
+          } else if ( type=='gp' ) {
+            class(res[[paste('emulator',i, sep='')]]) <- "gp"
+          }
+        } else {
+          burnin <- res[[paste('emulator',i, sep='')]]$constructor_obj$burnin
+          est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$estimate(burnin)
+          B <- res[[paste('emulator',i, sep='')]]$specs$B
+          isblock <- res[[paste('emulator',i, sep='')]]$constructor_obj$block
+          linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+          set_seed(res[[paste('emulator',i, sep='')]]$specs$seed)
+          res[[paste('emulator',i, sep='')]][['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+          res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+          class(res[[paste('emulator',i, sep='')]]) <- "dgp"
+        }
+      }
     }
   } else {
-    N <- length(res) - 1
-    if ( "design" %in% names(res) ) N <- N - 1
-    class(res) <- "bundle"
-    for ( i in 1:N ){
-      type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
+    if ('emulator_obj' %in% names(res)){
+      type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
       if ( type=='emulator' ) {
-        class(res[[paste('emulator',i, sep='')]]) <- "dgp"
+        class(res) <- "dgp"
       } else if ( type=='gp' ) {
-        class(res[[paste('emulator',i, sep='')]]) <- "gp"
+        class(res) <- "gp"
+      } else if ( type=='lgp' ) {
+        class(res) <- "lgp"
+      }
+    } else {
+      N <- length(res) - 1
+      if ( "design" %in% names(res) ) N <- N - 1
+      class(res) <- "bundle"
+      for ( i in 1:N ){
+        type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
+        if ( type=='emulator' ) {
+          class(res[[paste('emulator',i, sep='')]]) <- "dgp"
+        } else if ( type=='gp' ) {
+          class(res[[paste('emulator',i, sep='')]]) <- "gp"
+        }
       }
     }
   }
@@ -342,12 +423,11 @@ summary.lgp <- function(object, ...) {
 
 #' @title Set linked indices
 #'
-#' @description This function sets the linked indices of a GP or DGP emulator if the information is not provided
+#' @description This function adds the linked information to a GP or DGP emulator if the information is not provided
 #'     when the emulator is constructed by [gp()] or [dgp()].
 #'
 #' @param object an instance of the S3 class `gp` or `dgp`.
-#' @param idx indices of columns in the pooled output matrix (formed by column-combining outputs of all emulators
-#'     in the feeding layer) that will feed into the GP or DGP emulator represented by `object`.
+#' @param idx same as the argument `linked_idx` of [gp()] and [dgp()].
 #'
 #' @return An updated `object` with the information of `idx` incorporated.
 #'
@@ -368,13 +448,9 @@ set_linked_idx <- function(object, idx) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
-  idx <- reticulate::np_array(as.integer(idx - 1))
-  object[['constructor_obj']] <- pkg.env$copy$deepcopy(object[['constructor_obj']])
-  object[['emulator_obj']] <- pkg.env$copy$deepcopy(object[['emulator_obj']])
-  object[['container_obj']] <- pkg.env$copy$deepcopy(object[['container_obj']])
-  object$container_obj$set_local_input(idx)
-  pkg.env$py_gc$collect()
-  gc(full=T)
+  idx_py <- linked_idx_r_to_py(idx)
+  object[['container_obj']] <- object$container_obj$set_local_input(idx_py, TRUE)
+  object[['specs']][['linked_idx']] <- if ( is.null(idx) ) FALSE else idx
   return(object)
 }
 
@@ -385,7 +461,7 @@ set_linked_idx <- function(object, idx) {
 #' @param object an instance of the S3 class `dgp`.
 #' @param B the number of imputations to produce predictions from `object`. Increase the value to account for
 #'     more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
-#'     but faster predictions. Defaults to `10`.
+#'     but faster predictions. Defaults to `5`.
 #'
 #' @return An updated `object` with the information of `B` incorporated.
 #'
@@ -404,7 +480,7 @@ set_linked_idx <- function(object, idx) {
 #' }
 #' @md
 #' @export
-set_imp <- function(object, B = 10) {
+set_imp <- function(object, B = 5) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -428,9 +504,14 @@ set_imp <- function(object, B = 10) {
     new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
+  new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['constructor_obj']] <- constructor_obj_cp
+  id <- sample.int(100000, 1)
+  set_seed(id)
   new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
+  new_object[['specs']][['seed']] <- id
+  new_object[['specs']][['B']] <- B
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
   pkg.env$py_gc$collect()
@@ -520,9 +601,14 @@ window <- function(object, start, end = NULL, thin = 1) {
     new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
+  new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['constructor_obj']] <- constructor_obj_cp
+  id <- sample.int(100000, 1)
+  set_seed(id)
   new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
+  new_object[['specs']][['seed']] <- id
+  new_object[['specs']][['B']] <- B
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"
   pkg.env$py_gc$collect()
@@ -649,6 +735,135 @@ trace_plot <- function(object, layer = NULL, node = 1) {
 
 }
 
+#' @title Static pruning of a DGP emulator
+#'
+#' @description This function implements the static pruning of a DGP emulator.
+#'
+#' @param object an instance of the `dgp` class that is generated by `dgp()` with `struc = NULL`.
+#' @param control a list that can supply the following two components to control the static pruning of the DGP emulator:
+#' * `min_size`, the minimum number of design points required to trigger the pruning. Defaults to 10 times of the input dimensions.
+#' * `threshold`, the R2 value above which a GP node is considered redundant and removable. Defaults to `0.97`.
+#' @param verb a bool indicating if the trace information will be printed during the function execution. Defaults to `TRUE`.
+#'
+#' @return An updated `object` that could be an instance of `gp`, `dgp`, or `bundle` (of GP emulators) class.
+#'
+#' @note
+#' The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to `min_size` in `control`.
+#'    If the training dataset size is smaller than this, it is suggested to enrich the design of the DGP emulator and prune its
+#'    structure dynamically using the `design()` function. Depending on the design of the DGP emulator, the static pruning may not be accurate.
+#'    It is thus suggested to implement dynamic pruning as a part of the sequential design via `design()`.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @examples
+#' \dontrun{
+#'
+#' # load the package and the Python env
+#' library(dgpsi)
+#'
+#' # construct the borehole function over a hypercube
+#' f <- function(x){
+#'   x[,1] <- (0.15 - 0.5) * x[,1] + 0.5
+#'   x[,2] <- exp((log(50000) - log(100)) * x[,2] + log(100))
+#'   x[,3] <- (115600 - 63070) *x[,3] + 63070
+#'   x[,4] <- (1110 - 990) * x[,4] + 990
+#'   x[,5] <- (116 - 63.1) * x[,5] + 63.1
+#'   x[,6] <- (820 - 700) * x[,6] + 700
+#'   x[,7] <- (1680 - 1120) * x[,7] + 1120
+#'   x[,8] <- (12045 - 9855) * x[,8] + 9855
+#'   y <- apply(x, 1, RobustGaSP::borehole)
+#' }
+#'
+#' # set a random seed
+#' set_seed(999)
+#'
+#' # generate training data
+#' X <- maximinLHS(80, 8)
+#' Y <- f(X)
+#'
+#' # generate validation data
+#' validate_x <- maximinLHS(500, 8)
+#' validate_y <- f(validate_x)
+#'
+#' # training a DGP emulator with anisotropic squared exponential kernels
+#' m <- dgp(X, Y, share = F)
+#'
+#' # OOS validation of the DGP emulator
+#' plot(m, validate_x, validate_y)
+#'
+#' # prune the emulator until no more GP nodes are removable
+#' m <- prune(m)
+#'
+#' # OOS validation of the resulting emulator
+#' plot(m, validate_x, validate_y)
+#' }
+#' @md
+#' @export
+
+prune <- function(object, control = list(), verb = TRUE) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return(invisible(NULL))
+  }
+  if ( !inherits(object,"dgp") ){
+    stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  }
+
+  n_dim_X <- ncol(object$data$X)
+  con <- list(min_size = 10*n_dim_X, threshold = 0.97)
+  nmsC <- names(con)
+  con[(namc <- names(control))] <- control
+  if (length(noNms <- namc[!namc %in% nmsC])){
+    warning("unknown names in 'control': ", paste(noNms,collapse=", "), call. = FALSE, immediate. = TRUE)
+  }
+
+  if (con$min_size<1) stop("'min_size' in 'control' must be at least 1.", call. = FALSE)
+  if (con$threshold>1 || con$threshold<0) stop("'threshold' in 'control' must be between 0 and 1.", call. = FALSE)
+
+  if (nrow(object$data$X) < con$min_size) {
+    stop("To prune, 'object' needs to be trained with a dataset comprising a size at least equal to 'min_size' in 'control'. Use design() to enrich the design size.", call. = FALSE)
+  }
+
+  if (!"internal_dims" %in% names(object[['specs']])) {
+    stop("'object' must be an instance of the 'dgp' class generated by dgp() with 'struc = NULL'.", call. = FALSE)
+  } else {
+    n_layer <- object$constructor_obj$n_layer
+    if (object$constructor_obj$all_layer[[n_layer]][[1]]$type!='gp') {
+      n_layer <- n_layer - 1
+      if (n_layer == 1) {
+        stop("To prune when a likelihood layer is included, the 'object' must be generated by dgp() with the argument 'depth' of at least 3.", call. = FALSE)
+      }
+    }
+    for (i in 2:n_layer){
+      for (ker in object$constructor_obj$all_layer[[i]]){
+        if (is.null(ker$global_input)) {
+          stop("To prune, 'object' must be generated by dgp() with 'connect = TRUE'.", call. = FALSE)
+        }
+      }
+    }
+  }
+
+  is.finish <- FALSE
+  while (!is.finish){
+    crop_id_list <- create_drop_list(object)
+    r2 <- object$constructor_obj$aggregate_r2()
+    N_cropped <- 0
+    for (l in length(crop_id_list):1){
+      crop_id <- (r2[[l+1]][[1]]>con$threshold)
+      crop_id_list[[l]] <- crop_id
+      N_cropped <- N_cropped + sum(crop_id)
+    }
+    if (N_cropped!=0) {
+      object <- copy_in_design(object)
+      object <- crop(object, crop_id_list, refit_cores = as.integer(1), verb = verb)
+      if ( !inherits(object,"dgp") ) is.finish <- TRUE
+    } else {
+      if (verb) message("No more GP nodes can be pruned.", appendLF = FALSE)
+      is.finish <- TRUE
+    }
+  }
+  return(object)
+}
+
 extract_specs <- function(obj, type) {
   res <- list()
   if ( type=='gp' ){
@@ -672,4 +887,165 @@ extract_specs <- function(obj, type) {
     }
   }
   return(res)
+}
+
+crop <- function(object, crop_id_list, refit_cores, verb) {
+  total_layer <- object$constructor_obj$n_layer
+  all_layer <- object$constructor_obj$all_layer
+  blocked_gibbs <- object$constructor_obj$block
+  B <- as.integer(length(object$emulator_obj$all_layer_set))
+  X <- object[['data']][['X']]
+  Y <- object[['data']][['Y']]
+  linked_idx <- object$container_obj$local_input_idx
+  n_layer <- length(crop_id_list)
+  for (i in n_layer:1){
+    if (all(crop_id_list[[i]])){
+      if ( (total_layer-i)==1 ){
+        nodes <- all_layer[[total_layer]]
+        if (length(nodes)==1){
+          if ( verb ) message(paste(" - Transiting to a GP emulator ...", collapse=" "), appendLF = FALSE)
+          struc <- nodes[[1]]
+          struc$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
+          struc$connect <- if( isFALSE(object[['specs']][['external_dims']]) ) NULL else reticulate::np_array(as.integer(object[['specs']][['external_dims']]-1))
+          struc$input <- X[,struc$input_dim+1,drop=F]
+          if ( is.null(struc$connect) ){
+            struc$global_input <- NULL
+          } else {
+            struc$global_input <- X[,struc$connect+1,drop=F]
+          }
+          if (length(struc$length)!=1) {
+            length_dim <- ncol(X)
+            struc$length <- utils::tail(struc$length, length_dim)
+            struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow=T)
+          }
+          obj <- pkg.env$dgpsi$gp(X, Y, struc)
+          obj$train()
+          res <- list()
+          res[['data']][['X']] <- X
+          res[['data']][['Y']] <- Y
+          res[['specs']] <- extract_specs(obj, "gp")
+          res[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+          res[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
+          res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+          res[['constructor_obj']] <- obj
+          res[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
+          res[['emulator_obj']] <- obj
+          class(res) <- "gp"
+          if ( verb ) message(" done")
+          return(res)
+        } else {
+          if ( verb ) message(paste(" - Transiting to a bundle of GP emulators ...", collapse=" "), appendLF = FALSE)
+          gp_list <- list()
+          for (j in 1:length(nodes)){
+            struc <- nodes[[j]]
+            struc$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
+            struc$connect <- if( isFALSE(object[['specs']][['external_dims']]) ) NULL else reticulate::np_array(as.integer(object[['specs']][['external_dims']]-1))
+            struc$input <- X[,struc$input_dim+1,drop=F]
+            if ( is.null(struc$connect) ){
+              struc$global_input <- NULL
+            } else {
+              struc$global_input <- X[,struc$connect+1,drop=F]
+            }
+            if (length(struc$length)!=1) {
+              length_dim <- ncol(X)
+              struc$length <- utils::tail(struc$length, length_dim)
+              struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow = T)
+            }
+            obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], struc)
+            obj$train()
+            res_j <- list()
+            res_j[['data']][['X']] <- X
+            res_j[['data']][['Y']] <- Y[,j,drop=F]
+            res_j[['specs']] <- extract_specs(obj, "gp")
+            res_j[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+            res_j[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
+            res_j[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+            res_j[['constructor_obj']] <- obj
+            res_j[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
+            res_j[['emulator_obj']] <- obj
+            class(res_j) <- "gp"
+            gp_list[[j]] <- res_j
+          }
+          res <- do.call(pack, gp_list)
+          if ( verb ) message(" done")
+          return(res)
+        }
+      } else {
+        if ( verb ) message(paste(c(" - Pruning all nodes below layer", sprintf("%i", i+1), "..."), collapse=" "), appendLF = FALSE)
+        all_layer <- all_layer[-c(1:i)]
+        for ( j in 1:length(all_layer[[1]]) ){
+          all_layer[[1]][[j]]$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
+          all_layer[[1]][[j]]$connect <- if( isFALSE(object[['specs']][['external_dims']]) ) NULL else reticulate::np_array(as.integer(object[['specs']][['external_dims']]-1))
+          all_layer[[1]][[j]]$input <- object$constructor_obj$X[,all_layer[[1]][[j]]$input_dim+1,drop=F]
+          all_layer[[1]][[j]]$R2 <- NULL
+          if ( is.null(all_layer[[1]][[j]]$connect) ){
+            all_layer[[1]][[j]]$global_input <- NULL
+          } else {
+            all_layer[[1]][[j]]$global_input <- object$constructor_obj$X[,all_layer[[1]][[j]]$connect+1,drop=F]
+          }
+          if (length(all_layer[[1]][[j]]$length)!=1) {
+            length_dim <- ncol(all_layer[[1]][[j]]$input)+ifelse( is.null(all_layer[[1]][[j]]$global_input), 0, ncol(all_layer[[1]][[j]]$global_input) )
+            all_layer[[1]][[j]]$length <- utils::tail(all_layer[[1]][[j]]$length, length_dim)
+          }
+        }
+        if ( verb ) message(" done")
+        object$constructor_obj$update_all_layer(all_layer)
+        if ( verb ) message(" - Re-fitting ...", appendLF = FALSE)
+        if ( identical(refit_cores, as.integer(1)) ){
+          object$constructor_obj$train(as.integer(100), as.integer(10), TRUE)
+        } else {
+          object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores)
+        }
+        est_obj <- object$constructor_obj$estimate()
+        internal_dims <- object[['specs']][['internal_dims']]
+        external_dims <- object[['specs']][['external_dims']]
+        object[['specs']] <- extract_specs(est_obj, "dgp")
+        object[['specs']][['internal_dims']] <- internal_dims
+        object[['specs']][['external_dims']] <- external_dims
+        object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+        id <- sample.int(100000, 1)
+        set_seed(id)
+        object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
+        object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, blocked_gibbs)
+        object[['specs']][['seed']] <- id
+        if ( verb ) message(" done")
+        return(object)
+      }
+    } else {
+      if (any(crop_id_list[[i]])){
+        if ( verb ) message(paste(c(" - Pruning", sprintf("%i", sum(crop_id_list[[i]])), "node(s) in layer", sprintf("%i", i), "..."), collapse=" "), appendLF = FALSE)
+        all_layer[[i]] <- all_layer[[i]][!crop_id_list[[i]]]
+        for ( j in 1:length(all_layer[[i+1]]) ){
+          all_layer[[i+1]][[j]]$input_dim <- reticulate::np_array(as.integer((1:sum(!crop_id_list[[i]])) - 1))
+          all_layer[[i+1]][[j]]$input <- all_layer[[i+1]][[j]]$input[,!crop_id_list[[i]],drop=F]
+          if (length(all_layer[[i+1]][[j]]$length)!=1) {
+            all_layer[[i+1]][[j]]$length <- all_layer[[i+1]][[j]]$length[c(!crop_id_list[[i]], rep(T, ncol(all_layer[[i+1]][[j]]$global_input)))]
+          }
+        }
+        if ( verb ) message(" done")
+      }
+    }
+  }
+
+  object$constructor_obj$update_all_layer(all_layer)
+  if ( verb ) message(" - Re-fitting ...", appendLF = FALSE)
+  if ( identical(refit_cores, as.integer(1)) ){
+    object$constructor_obj$train(as.integer(100), as.integer(10), TRUE)
+  } else {
+    object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores)
+  }
+  est_obj <- object$constructor_obj$estimate()
+  internal_dims <- object[['specs']][['internal_dims']]
+  external_dims <- object[['specs']][['external_dims']]
+  object[['specs']] <- extract_specs(est_obj, "dgp")
+  object[['specs']][['internal_dims']] <- internal_dims
+  object[['specs']][['external_dims']] <- external_dims
+  object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  id <- sample.int(100000, 1)
+  set_seed(id)
+  object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
+  object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, blocked_gibbs)
+  object[['specs']][['seed']] <- id
+  if ( verb ) message(" done")
+  return(object)
 }

@@ -3,7 +3,7 @@ title: "Sequential Design I"
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
-  Sequential design for the DGP emulator of a non-stationary simulator.
+  Sequential design and dynamic pruning for the DGP emulator of a non-stationary simulator.
 vignette: >
   %\VignetteIndexEntry{Sequential Design I}
   %\VignetteEngine{knitr::rmarkdown}
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to use the package to sequentially enrich the design for adaptive improvements of a DGP emulator.
+This vignette shows how to use the package to sequentially enrich the design for adaptive improvements and pruning of a DGP emulator.
 
 ## Load the packages
 
@@ -75,7 +75,7 @@ validate_y <- f(validate_x)
 
 ## DGP emulation with sequential designs
 
-To start with the sequential design, we initialize a two-layered DGP emulator using the generated initial design:
+To start with the sequential design, we initialize a two-layered DGP emulator (with 2 GP nodes in the first layer and 1 GP node in the second layer) using the generated initial design:
 
 ```{r}
 m <- dgp(X, Y)
@@ -85,7 +85,7 @@ m <- dgp(X, Y)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 344.20it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 353.90it/s]
 ## Imputing ... done
 ```
 
@@ -99,32 +99,45 @@ lim <- rbind(lim_1, lim_2)
 
 The boundaries of input parameters are defined as a matrix with each row giving the lower and upper limits of an input parameter. After the boundaries are specified, we are ready to conduct the sequential design to adaptively improve the emulator `m` via `design()`. The function `design()` provides a simple and flexible implementation of sequential designs for DGP emulators. In this vignette, we only demonstrate its basic usage and refer users to `?design` for more advanced specifications, e.g., on checkpoints to manually control the design progress and on schedules to re-fit and validate emulators. 
 
-For illustrative purpose, we implement three waves of sequential designs on `m`:
+For illustrative purpose, we implement two waves of sequential designs on `m`:
 
 ```{r}
-# 1st wave with 15 steps
-m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+# 1st wave with 25 steps
+m <- design(m, N = 25, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.529337
+##  * RMSE: 0.527337
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.093332 0.075594
+##  * Next design point: 0.868213 0.037359
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.521201
+##  * RMSE: 0.541914
 ## 
 ## ...
 ## 
-## Iteration 15:
+## Iteration 18:
 ##  - Locating ... done
-##  * Next design point: 0.996120 0.904685
+##  * Next design point: 0.341178 0.003477
+##  - Updating and re-fitting ... done
+##  - Pruning 1 node(s) in layer 1 ... done
+##  - Re-fitting ... done
+##  - Validating ... done
+##  * RMSE: 0.107640
+## 
+## ...
+## 
+## Iteration 25:
+##  - Locating ... done
+##  * Next design point: 0.168364 0.984091
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.170959
+##  * RMSE: 0.032189
 ```
+
+After the first wave of the sequential design, we see that 1 GP node is removed from the first layer by the automatic pruning of the DGP which leaves only one node in both the first and second layer of the DGP hierarchy respectively. This helps accelerate the inference of the DGP emulator in subsequent waves of the sequential design while maintaining accuracy. We now start the second wave of the sequential design:
 
 ```{r}
 # 2nd wave with 10 steps
@@ -132,47 +145,46 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.170959
+##  * RMSE: 0.032189
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.862600 0.722212
+##  * Next design point: 0.215369 0.384567
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.150731
+##  * RMSE: 0.017259
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.519293 0.463623
+##  * Next design point: 0.198905 0.873454
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.112657
+##  * RMSE: 0.008300
 ```
+Finally, we resume the second wave with 10 additional iterations:
 
 ```{r}
-# 3rd wave with 10 steps
-m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+# 2nd wave with 10 additional steps
+m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, new_wave = FALSE)
 ```
 
 ```
-## Initializing ... done
-##  * RMSE: 0.112657
-## Iteration 1:
+## Iteration 11:
 ##  - Locating ... done
-##  * Next design point: 0.045685 0.039926
+##  * Next design point: 0.977752 0.011568
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.033327
+##  * RMSE: 0.007264
 ##  
 ##  ...
 ##  
-## Iteration 10:
+## Iteration 20:
 ##  - Locating ... done
-##  * Next design point: 0.776195 0.364631
+##  * Next design point: 0.258375 0.028753
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.004254
+##  * RMSE: 0.003784
 ```
 
 After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
@@ -192,7 +204,7 @@ draw(m, 'rmse')
 
 ## Comparison to DGP emulators with space-filling designs
 
-We build four DGP emulators with static space-filling Latin hypercube designs (LHD) of size 10, 20, 30, and 40 respectively:
+We build four DGP emulators with static space-filling Latin hypercube designs (LHD) of size 10, 20, 30, 40, and 50 respectively:
 
 ```{r}
 # DGP emulator with a LHD of size 10
@@ -222,6 +234,13 @@ Y4 <- f(X4)
 m4 <- dgp(X4, Y4, verb = F)
 ```
 
+```{r}
+# DGP emulator with a LHD of size 50
+X5 <- maximinLHS(50,2)
+Y5 <- f(X5)
+m5 <- dgp(X5, Y5, verb = F)
+```
+
 We then extract their RMSEs
 
 ```{r}
@@ -237,8 +256,11 @@ rmse3 <- m3$oos$rmse
 # validation of the DGP emulator with the LHD of size 40
 m4 <- validate(m4, x_test = validate_x, y_test = validate_y, verb = F)
 rmse4 <- m4$oos$rmse
+# validation of the DGP emulator with the LHD of size 50
+m5 <- validate(m5, x_test = validate_x, y_test = validate_y, verb = F)
+rmse5 <- m5$oos$rmse
 # create a dataframe that stores the RMSEs of the four DGP emulators
-rmse_static <- data.frame('N' = c(10, 20, 30, 40), 'rmse' = c(rmse1, rmse2, rmse3, rmse4), 'LHD' = c('lhd-10', 'lhd-20', 'lhd-30', 'lhd-40'))
+rmse_static <- data.frame('N' = c(10, 20, 30, 40, 50), 'rmse' = c(rmse1, rmse2, rmse3, rmse4, rmse5), 'LHD' = c('lhd-10', 'lhd-20', 'lhd-30', 'lhd-40', 'lhd-50'))
 ```
 
 and add them to the sequential design validation plot (in log-scale) for comparisons:
@@ -246,7 +268,7 @@ and add them to the sequential design validation plot (in log-scale) for compari
 ```{r}
 draw(m, 'rmse', log = T) + 
   geom_point(data = rmse_static, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
-  scale_shape_manual(values = c(2, 3, 4, 8))
+  scale_shape_manual(values = c(2, 3, 4, 8, 15))
 ```
 
 ![](images/seq_comparison.png)

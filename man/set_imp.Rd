@@ -4,14 +4,14 @@
 \alias{set_imp}
 \title{Reset number of imputations for a DGP emulator}
 \usage{
-set_imp(object, B = 10)
+set_imp(object, B = 5)
 }
 \arguments{
 \item{object}{an instance of the S3 class \code{dgp}.}
 
 \item{B}{the number of imputations to produce predictions from \code{object}. Increase the value to account for
 more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
-but faster predictions. Defaults to \code{10}.}
+but faster predictions. Defaults to \code{5}.}
 }
 \value{
 An updated \code{object} with the information of \code{B} incorporated.

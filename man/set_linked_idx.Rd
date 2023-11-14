@@ -9,14 +9,13 @@ set_linked_idx(object, idx)
 \arguments{
 \item{object}{an instance of the S3 class \code{gp} or \code{dgp}.}
 
-\item{idx}{indices of columns in the pooled output matrix (formed by column-combining outputs of all emulators
-in the feeding layer) that will feed into the GP or DGP emulator represented by \code{object}.}
+\item{idx}{same as the argument \code{linked_idx} of \code{\link[=gp]{gp()}} and \code{\link[=dgp]{dgp()}}.}
 }
 \value{
 An updated \code{object} with the information of \code{idx} incorporated.
 }
 \description{
-This function sets the linked indices of a GP or DGP emulator if the information is not provided
+This function adds the linked information to a GP or DGP emulator if the information is not provided
 when the emulator is constructed by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}.
 }
 \details{

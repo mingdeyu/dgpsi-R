@@ -108,14 +108,15 @@ to add linking information to the GP emulator. Defaults to \code{NULL}.}
 An S3 class named \code{gp} that contains five slots:
 \itemize{
 \item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
-\item \code{specs}: a list that contains six elements:
+\item \code{specs}: a list that contains seven elements:
 \enumerate{
 \item \code{kernel}: the type of the kernel function used. Either \code{"sexp"} for squared exponential kernel or \code{"matern2.5"} for Matérn-2.5 kernel.
 \item \code{lengthscales}: a vector of lengthscales in the kernel function.
 \item \code{scale}: the variance value in the kernel function.
 \item \code{nugget}: the nugget value in the kernel function.
 \item \code{internal_dims}: the column indices of \code{X} that correspond to the linked emulators in the preceding layers of a linked system.
-\item \code{external_dims}: the column indices of \code{X} that correspond to global inputs to the linked system of emulators.
+\item \code{external_dims}: the column indices of \code{X} that correspond to global inputs to the linked system of emulators. It is shown as \code{FALSE} if \code{internal_input_idx = NULL}.
+\item \code{linked_idx}: the value passed to argument \code{linked_idx}. It is shown as \code{FALSE} if the argument \code{linked_idx} is \code{NULL}.
 }
 
 \code{internal_dims} and \code{external_dims} are generated only when \code{struc = NULL}.
@@ -130,7 +131,12 @@ The returned \code{gp} object can be used by
 \item \code{\link[=validate]{validate()}} for LOO and OOS validations.
 \item \code{\link[=plot]{plot()}} for validation plots.
 \item \code{\link[=lgp]{lgp()}} for linked (D)GP emulator constructions.
+\item \code{\link[=summary]{summary()}} to summarize the trained GP emulator.
+\item \code{\link[=write]{write()}} to save the GP emulator to a \code{.pkl} file.
+\item \code{\link[=set_linked_idx]{set_linked_idx()}} to add the linking information to the GP emulator for linked emulations.
 \item \code{\link[=design]{design()}} for sequential designs.
+\item \code{\link[=update]{update()}} to update the GP emulator with new inputs and outputs.
+\item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.
 }
 }
 \description{

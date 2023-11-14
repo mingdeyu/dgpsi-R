@@ -4,13 +4,16 @@
 \alias{write}
 \title{Save the constructed emulator}
 \usage{
-write(object, pkl_file)
+write(object, pkl_file, light = TRUE)
 }
 \arguments{
 \item{object}{an instance of the S3 class \code{gp}, \code{dgp}, \code{lgp}, or \code{bundle}.}
 
 \item{pkl_file}{the path to and the name of the \code{.pkl} file to which
 the emulator \code{object} is saved.}
+
+\item{light}{a bool indicating if a light version of the constructed emulator (that requires a small storage) will be saved.
+This argument has no effects on GP or bundles of GP emulators. Defaults to \code{TRUE}.}
 }
 \value{
 No return value. \code{object} will be save to a local \code{.pkl} file specified by \code{pkl_file}.

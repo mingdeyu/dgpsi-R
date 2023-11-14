@@ -158,8 +158,6 @@ pei.gp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, ...) {
     idx <- c(idx, idx_i)
     pseudo_training_points <- rbind(pseudo_training_points, x_cand[idx_i,,drop = F])
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
   return(idx)
 }
 
@@ -277,8 +275,6 @@ pei.dgp <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, worker
     idx <- rbind(idx, idx_i)
     pseudo_training_points <- rbind(pseudo_training_points, x_cand[idx_i,,drop = F])
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
   return(idx)
 }
 
@@ -411,8 +407,6 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
       pseudo_training_points[[j]] <- rbind(pseudo_training_points[[j]], x_cand[idx_i[j],,drop = F])
     }
   }
-  pkg.env$py_gc$collect()
-  gc(full=T)
   return(idx)
 }
 

@@ -4,7 +4,7 @@
 \alias{lgp}
 \title{Linked (D)GP emulator construction}
 \usage{
-lgp(struc, B = 50)
+lgp(struc, B = 10)
 }
 \arguments{
 \item{struc}{a list contains \emph{L} (the number of layers in a systems of computer models) sub-lists,
@@ -14,15 +14,29 @@ in the same order of the specified computer model system's hierarchy.}
 
 \item{B}{the number of imputations to produce the predictions. Increase the value to account for more
 imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
-If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{50}.}
+If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{10}.}
 }
 \value{
-An S3 class named \code{lgp} that contains a slot called \code{emulator_obj}, which is a 'python' object that
-stores the information for predictions from the linked emulator. The returned \code{lgp} object can be used by
+An S3 class named \code{lgp} that contains three slots:
+\itemize{
+\item \code{constructor_obj}: a list of 'python' objects that stores the information of the constructed linked emulator.
+\item \code{emulator_obj}, a 'python' object that stores the information for predictions from the linked emulator.
+\item \code{specs}: a list that contains
+\enumerate{
+\item \code{seed}: the random seed generated to produce the imputations. This information is stored for the reproducibility
+when the linked (D)GP emulator (that was saved by \code{\link[=write]{write()}} with the light option \code{light = TRUE}) is loaded back
+to R by \code{\link[=read]{read()}}.
+\item \code{B}: the number of imputations used to generate the linked (D)GP emulator.
+}
+}
+
+The returned \code{lgp} object can be used by
 \itemize{
 \item \code{\link[=predict]{predict()}} for linked (D)GP predictions.
 \item \code{\link[=validate]{validate()}} for the OOS validation.
 \item \code{\link[=plot]{plot()}} for the validation plots.
+\item \code{\link[=summary]{summary()}} to summarize the constructed linked (D)GP emulator.
+\item \code{\link[=write]{write()}} to save the linked (D)GP emulator to a \code{.pkl} file.
 }
 }
 \description{

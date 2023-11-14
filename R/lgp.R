@@ -8,13 +8,23 @@
 #'     in the same order of the specified computer model system's hierarchy.
 #' @param B the number of imputations to produce the predictions. Increase the value to account for more
 #'     imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
-#'     If the system consists only GP emulators, `B` is set to `1` automatically. Defaults to `50`.
+#'     If the system consists only GP emulators, `B` is set to `1` automatically. Defaults to `10`.
 #'
-#' @return An S3 class named `lgp` that contains a slot called `emulator_obj`, which is a 'python' object that
-#'     stores the information for predictions from the linked emulator. The returned `lgp` object can be used by
+#' @return An S3 class named `lgp` that contains three slots:
+#' * `constructor_obj`: a list of 'python' objects that stores the information of the constructed linked emulator.
+#' * `emulator_obj`, a 'python' object that stores the information for predictions from the linked emulator.
+#' * `specs`: a list that contains
+#'   1. `seed`: the random seed generated to produce the imputations. This information is stored for the reproducibility
+#'      when the linked (D)GP emulator (that was saved by [write()] with the light option `light = TRUE`) is loaded back
+#'      to R by [read()].
+#'   2. `B`: the number of imputations used to generate the linked (D)GP emulator.
+#'
+#' The returned `lgp` object can be used by
 #' * [predict()] for linked (D)GP predictions.
 #' * [validate()] for the OOS validation.
 #' * [plot()] for the validation plots.
+#' * [summary()] to summarize the constructed linked (D)GP emulator.
+#' * [write()] to save the linked (D)GP emulator to a `.pkl` file.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
@@ -72,7 +82,7 @@
 #' }
 #' @md
 #' @export
-lgp <- function(struc, B = 50) {
+lgp <- function(struc, B = 10) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -92,8 +102,13 @@ lgp <- function(struc, B = 50) {
     }
     extracted_struc[[l]] <- layer
   }
-  obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
-  res <- list(emulator_obj = obj)
+  res <- list(constructor_obj = extracted_struc)
+  id <- sample.int(100000, 1)
+  set_seed(id)
+  obj <- pkg.env$dgpsi$lgp(all_layer = pkg.env$copy$deepcopy(extracted_struc), N = B)
+  res[['emulator_obj']] <- obj
+  res[['specs']][['seed']] <- id
+  res[['specs']][['B']] <- B
   class(res) <- "lgp"
   return(res)
 }
