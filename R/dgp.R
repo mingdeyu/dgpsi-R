@@ -125,8 +125,11 @@
 #'
 #' Set `linked_idx = NULL` if the DGP emulator will not be used for linked emulations. However, if this is no longer the case, one can use [set_linked_idx()]
 #' to add linking information to the DGP emulator. Defaults to `NULL`.
+#' @param id an ID to be assigned to the DGP emulator. If an ID is not provided (i.e., `id = NULL`), a UUID (Universally Unique Identifier) will be automatically generated
+#'    and assigned to the emulator. Default to `NULL`.
 #'
 #' @return An S3 class named `dgp` that contains five slots:
+#' * `id`: A number or character string assigned through the `id` argument.
 #' * `data`: a list that contains two elements: `X` and `Y` which are the training input and output data respectively.
 #' * `specs`: a list that contains
 #'   1. *L* (i.e., the number of layers in the DGP hierarchy) sub-lists named `layer1, layer2,..., layerL`. Each sub-list contains *D*
@@ -223,7 +226,7 @@
 dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, cores = 1, blocked_gibbs = TRUE,
-                ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL) {
+                ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -554,6 +557,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   if ( isTRUE(verb) ) message("Imputing ...", appendLF = FALSE)
 
   res <- list()
+  res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
   res[['specs']] <- extract_specs(est_obj, "dgp")
@@ -563,11 +567,11 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   }
   res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx
   res[['constructor_obj']] <- obj
-  id <- sample.int(100000, 1)
-  set_seed(id)
+  seed <- sample.int(100000, 1)
+  set_seed(seed)
   res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
   res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_py, block = blocked_gibbs)
-  res[['specs']][['seed']] <- id
+  res[['specs']][['seed']] <- seed
   res[['specs']][['B']] <- B
 
   class(res) <- "dgp"
@@ -663,6 +667,7 @@ continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, bur
 
   if ( isTRUE(verb) ) message("Imputing ...", appendLF = FALSE)
   new_object <- list()
+  new_object[['id']] <- object$id
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
@@ -672,11 +677,11 @@ continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, bur
   }
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['constructor_obj']] <- constructor_obj_cp
-  id <- sample.int(100000, 1)
-  set_seed(id)
+  seed <- sample.int(100000, 1)
+  set_seed(seed)
   new_object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
   new_object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, isblock)
-  new_object[['specs']][['seed']] <- id
+  new_object[['specs']][['seed']] <- seed
   new_object[['specs']][['B']] <- B
   if ( "design" %in% names(object) ) new_object[['design']] <- object$design
   class(new_object) <- "dgp"

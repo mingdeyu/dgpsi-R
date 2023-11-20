@@ -4,7 +4,7 @@
 \alias{lgp}
 \title{Linked (D)GP emulator construction}
 \usage{
-lgp(struc, B = 10)
+lgp(struc, B = 10, id = NULL)
 }
 \arguments{
 \item{struc}{a list contains \emph{L} (the number of layers in a systems of computer models) sub-lists,
@@ -15,10 +15,14 @@ in the same order of the specified computer model system's hierarchy.}
 \item{B}{the number of imputations to produce the predictions. Increase the value to account for more
 imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{10}.}
+
+\item{id}{an ID to be assigned to the linked (D)GP emulator. If an ID is not provided (i.e., \code{id = NULL}), a UUID
+(Universally Unique Identifier) will be automatically generated and assigned to the emulator. Default to \code{NULL}.}
 }
 \value{
 An S3 class named \code{lgp} that contains three slots:
 \itemize{
+\item \code{id}: A number or character string assigned through the \code{id} argument.
 \item \code{constructor_obj}: a list of 'python' objects that stores the information of the constructed linked emulator.
 \item \code{emulator_obj}, a 'python' object that stores the information for predictions from the linked emulator.
 \item \code{specs}: a list that contains

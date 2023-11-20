@@ -9,8 +9,11 @@
 #' @param B the number of imputations to produce the predictions. Increase the value to account for more
 #'     imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 #'     If the system consists only GP emulators, `B` is set to `1` automatically. Defaults to `10`.
+#' @param id an ID to be assigned to the linked (D)GP emulator. If an ID is not provided (i.e., `id = NULL`), a UUID
+#'    (Universally Unique Identifier) will be automatically generated and assigned to the emulator. Default to `NULL`.
 #'
 #' @return An S3 class named `lgp` that contains three slots:
+#' * `id`: A number or character string assigned through the `id` argument.
 #' * `constructor_obj`: a list of 'python' objects that stores the information of the constructed linked emulator.
 #' * `emulator_obj`, a 'python' object that stores the information for predictions from the linked emulator.
 #' * `specs`: a list that contains
@@ -82,7 +85,7 @@
 #' }
 #' @md
 #' @export
-lgp <- function(struc, B = 10) {
+lgp <- function(struc, B = 10, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -103,11 +106,12 @@ lgp <- function(struc, B = 10) {
     extracted_struc[[l]] <- layer
   }
   res <- list(constructor_obj = extracted_struc)
-  id <- sample.int(100000, 1)
-  set_seed(id)
+  res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
+  seed <- sample.int(100000, 1)
+  set_seed(seed)
   obj <- pkg.env$dgpsi$lgp(all_layer = pkg.env$copy$deepcopy(extracted_struc), N = B)
   res[['emulator_obj']] <- obj
-  res[['specs']][['seed']] <- id
+  res[['specs']][['seed']] <- seed
   res[['specs']][['B']] <- B
   class(res) <- "lgp"
   return(res)

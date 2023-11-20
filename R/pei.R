@@ -8,7 +8,9 @@
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
 #' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-#'     from which the next design point(s) are determined.
+#'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class, `x_cand` could also
+#'     be a list with the length equal to the number of emulators contained in the `object`. Each slot in `x_cand` is a matrix
+#'     that gives a candidate set for each emulator included in the bundle. See *Note* section below for further information.
 #' @param pseudo_points an optional matrix (with columns being input dimensions) that gives the pseudo input points for PEI calculations. See the reference below
 #'    for further details about the pseudo points. When `object` is an instance of the `bundle` class, `pseudo_points` can also be a list with the length
 #'    equal to the number of emulators in the bundle. Each element in the list is a matrix that gives the the pseudo input points for the corresponding
@@ -45,6 +47,8 @@
 #' @note
 #' * The column order of the first argument of `aggregate` must be consistent with the order of emulator output dimensions (if `object` is an instance of the
 #'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
+#' * If `x_cand` is supplied as a list when `object` is an instance of `bundle` class and a `aggregate` function is provided, the matrices in `x_cand` must have
+#'   common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the `aggregate` function can be applied.
 #' * The function is only applicable to DGP emulators without likelihood layers.
 #' * Any R vector detected in `x_cand` and `pseudo_points` will be treated as a column vector and automatically converted into a single-column
 #'   R matrix.
@@ -293,6 +297,7 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
   n_emulators <- length(object)
   if ( "data" %in% names(object) ) n_emulators <- n_emulators - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
+  if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
   training_input <- list()
   training_output <- list()
   for ( k in 1:n_emulators ){
@@ -301,9 +306,25 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
   }
   n_dim_X <- ncol(training_input[[1]])
   #check x_cand
-  if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
-  if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
+  if ( !is.list(x_cand) ){
+    if ( !is.matrix(x_cand) ) {
+      if ( !is.vector(x_cand) ) {
+        stop("'x_cand' must be a vector, a matrix, or a list.", call. = FALSE)
+      }
+    }
+  }
+  if ( is.list(x_cand) ){
+    if (length(x_cand) != n_emulators) stop("When 'x_cand' is a list, the number of elements in it should match the number of emulators in the bundle.", call. = FALSE)
+    for ( i in 1:n_emulators ){
+      if ( is.vector(x_cand[[i]]) ) x_cand[[i]] <- as.matrix(x_cand[[i]])
+      if ( ncol(x_cand[[i]])!=n_dim_X ) stop("Elements in 'x_cand' have different number of dimensions with the training input.", call. = FALSE)
+    }
+    islist <- TRUE
+  } else {
+    if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
+    if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
+    islist <- FALSE
+  }
   #check pseudo_points
   if ( !is.null(pseudo_points) ){
     if ( is.list(pseudo_points) ){
@@ -329,6 +350,11 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
   #check aggregate
   if ( !is.null(aggregate) ){
     gnames <- methods::formalArgs(aggregate)
+    if (islist){
+      x_cand_dfs <- lapply(x_cand, as.data.frame)
+      x_cand <- as.matrix(Reduce(function(x, y) merge(x, y, all = FALSE), x_cand_dfs))
+      if (length(x_cand)==0) stop("Elements in 'x_cand' must have common positions when 'aggregate' is used.", call. = FALSE)
+    }
   }
   #set gp params
   default_param <- list(name = 'matern2.5', nugget = 1e-12, verb = FALSE)
@@ -340,9 +366,9 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
   batch_size <- as.integer(batch_size)
   if ( batch_size < 1 ) stop("'batch_size' must be >= 1.", call. = FALSE)
   #locate
-  ei <- matrix(0, nrow(x_cand), n_emulators)
-  length_list <- list()
-  name_list <- list()
+  ei <- if (is.list(x_cand)) {lapply(x_cand, function(x){numeric(nrow(x))})} else replicate(n_emulators, numeric(nrow(x_cand)), simplify = FALSE)
+  length_list <- vector('list', n_emulators)
+  name_list <- vector('list', n_emulators)
   for ( i in 1:n_emulators ){
     obj_i <- object[[paste('emulator',i,sep='')]]
     if ( inherits(obj_i,"gp") ){
@@ -361,7 +387,7 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
     score_gp <- do.call(gp, c(list(training_input[[i]], score), final_gp_arg))
     length_list[[i]] <- score_gp$emulator_obj$kernel$length
     name_list[[i]] <- score_gp$emulator_obj$kernel$name
-    score_gp <- predict.gp(score_gp, x_cand)
+    score_gp <- predict.gp(score_gp, if (is.list(x_cand)) {x_cand[[i]]} else {x_cand})
     score_mean <- score_gp$results$mean
     score_var <- score_gp$results$var
     score_std <- sqrt(score_gp$results$var)
@@ -369,7 +395,7 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
     mask <- (score_var/score_scale)>1e-6
     error <- score_mean[mask]-max(score)
     st_error <- error/score_std[mask]
-    ei[mask,i] <- error*stats::pnorm(st_error) + score_std[mask]*stats::dnorm(st_error)
+    ei[[i]][mask] <- error*stats::pnorm(st_error) + score_std[mask]*stats::dnorm(st_error)
   }
   pseudo_training_points <- training_input
   if ( !is.null(pseudo_points) ){
@@ -380,17 +406,19 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
 
   idx <- c()
   for ( i in 1:batch_size){
-    pei <- c()
+    pei <- vector('list', n_emulators)
 
     for ( j in 1:n_emulators ){
       rf <- pkg.env$np$prod(1 - pkg.env$dgpsi$functions$k_one_vec(pseudo_training_points[[j]],
-                                                                  x_cand, length_list[[j]], name_list[[j]]), axis=0L)
-      pei <- cbind(pei, rf*ei[,j])
+                                  if (is.list(x_cand)) {x_cand[[j]]} else {x_cand}, length_list[[j]], name_list[[j]]), axis=0L)
+      pei[[j]] <- rf*ei[[j]]
     }
 
     if ( is.null(aggregate) ){
-      idx_i <- pkg.env$np$argmax(pei, axis=0L) + 1
+      idx_i <- sapply(pei, function(x){pkg.env$np$argmax(x, axis=0L) + 1})
+      idx <- rbind(idx, idx_i)
     } else {
+      pei <- do.call(cbind, pei)
       if ("..." %in% gnames){
         agg_pei <- do.call(aggregate, c(list(pei), add_arg))
       } else {
@@ -400,14 +428,22 @@ pei.bundle <- function(object, x_cand, pseudo_points = NULL, batch_size = 1, wor
       }
       idx_i <- which.max(agg_pei)
       idx_i <- rep(idx_i, n_emulators)
+      if (islist){
+        chosen_row <- x_cand[idx_i[1], ]
+        idx <- rbind( idx, unlist(lapply(x_cand_dfs, function(df) {
+          which(colSums(t(as.matrix(df)) == chosen_row, na.rm = TRUE) == n_dim_X)
+        })))
+      } else {
+        idx <- rbind(idx, idx_i)
+      }
     }
 
-    idx <- rbind(idx, idx_i)
     for ( j in 1:n_emulators ){
-      pseudo_training_points[[j]] <- rbind(pseudo_training_points[[j]], x_cand[idx_i[j],,drop = F])
+      new_pseudo_training_points <- if (is.list(x_cand)) {x_cand[[j]][idx_i[j],,drop = F]} else {x_cand[idx_i[j],,drop = F]}
+      pseudo_training_points[[j]] <- rbind(pseudo_training_points[[j]], new_pseudo_training_points)
     }
   }
-  return(idx)
+  return(unname(idx))
 }
 
 

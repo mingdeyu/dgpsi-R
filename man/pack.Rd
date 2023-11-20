@@ -4,14 +4,18 @@
 \alias{pack}
 \title{Pack GP and DGP emulators into a bundle}
 \usage{
-pack(...)
+pack(..., id = NULL)
 }
 \arguments{
-\item{...}{a sequence of emulators produced by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}.}
+\item{...}{a sequence or a list of emulators produced by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}.}
+
+\item{id}{an ID to be assigned to the bundle emulator. If an ID is not provided (i.e., \code{id = NULL}), a UUID (Universally Unique Identifier) will be automatically generated
+and assigned to the emulator. Default to \code{NULL}.}
 }
 \value{
 An S3 class named \code{bundle} to be used by \code{\link[=design]{design()}} for sequential designs. It has:
 \itemize{
+\item a slot called \code{id} that is assigned through the \code{id} argument.
 \item \emph{N} slots named \verb{emulator1,...,emulatorN}, each of which contains a GP or DGP emulator, where \emph{N} is the number of emulators
 that are provided to the function.
 \item a slot called \code{data} which contains two elements \code{X} and \code{Y}. \code{X} contains \emph{N} matrices named \verb{emulator1,...,emulatorN} that are

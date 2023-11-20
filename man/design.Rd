@@ -25,7 +25,7 @@ design(
   method,
   eval,
   verb,
-  check_point,
+  autosave,
   new_wave,
   cores,
   ...
@@ -49,7 +49,7 @@ design(
   method = vigf,
   eval = NULL,
   verb = TRUE,
-  check_point = NULL,
+  autosave = list(),
   new_wave = TRUE,
   cores = 1,
   ...
@@ -73,7 +73,7 @@ design(
   method = vigf,
   eval = NULL,
   verb = TRUE,
-  check_point = NULL,
+  autosave = list(),
   new_wave = TRUE,
   cores = 1,
   train_N = 100,
@@ -101,7 +101,7 @@ design(
   method = vigf,
   eval = NULL,
   verb = TRUE,
-  check_point = NULL,
+  autosave = list(),
   new_wave = TRUE,
   cores = 1,
   train_N = 100,
@@ -137,9 +137,8 @@ Defaults to \code{200}.}
 
 \item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
-dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
-\code{limits = NULL}, the ranges of input dimensions will be determined from the training data contained in \code{object}. This argument
-is used when \code{x_cand = NULL} and \code{y_cand = NULL}. Defaults to \code{NULL}.}
+dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. Set
+\code{limits = NULL} if \code{x_cand} is supplied. This argument is only used when \code{x_cand} is not supplied, i.e., \code{x_cand = NULL}. Defaults to \code{NULL}.}
 
 \item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a bool is given, it will be applied to
 all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
@@ -156,7 +155,9 @@ only one output dimension, the matrix still needs to be returned with a single c
 of any arguments with the same names passed via \code{...}. The list output can be useful if some additional arguments of \code{f} and \code{aggregate}
 need to be updated after each step of the sequential design.
 }
-}}
+}
+
+See \emph{Note} section below for further information. This argument is used when \code{y_cand = NULL}. Defaults to \code{NULL}.}
 
 \item{reps}{an integer that gives the number of repetitions of the located design points to be created and used for evaluations of \code{f}. Set the
 argument to an integer greater than \code{1} if \code{f} is a stochastic function that can generate different responses given a same input and the
@@ -233,9 +234,17 @@ If no customized function is provided, the built-in evaluation metric, RMSE, wil
 \item{verb}{a bool indicating if the trace information will be printed during the sequential design.
 Defaults to \code{TRUE}.}
 
-\item{check_point}{a vector of integers that indicates at which steps the sequential design will pause and ask for the confirmation
-from the user if the sequential design should continue or be terminated. Set to \code{NULL} to suspend the manual intervention. Defaults
-to \code{NULL}.}
+\item{autosave}{a list that contains configuration settings for the automatic saving of the emulator:
+\itemize{
+\item \code{switch}: a bool indicating whether to enable the automatic saving of the emulator during the sequential design. When set to \code{TRUE},
+the emulator in the final iteration is always saved. Defaults to \code{FALSE}.
+\item \code{directory}: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
+of \code{directory} named 'emulator-\code{id}'. Defaults to './check_points'.
+\item \code{fname}: a string representing the base name for the saved emulator files. Defaults to 'check_point'.
+\item \code{freq}: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to \code{5}.
+\item \code{overwrite}: a bool value controlling the file saving behavior. When set to \code{TRUE}, each new automatic saving overwrites the previous one,
+keeping only the latest version. If \code{FALSE}, each automatic saving creates a new file, preserving all previous versions. Defaults to \code{FALSE}.
+}}
 
 \item{new_wave}{a bool indicating if the current execution of \code{\link[=design]{design()}} will create a new wave of sequential designs or add the sequential designs to
 the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
@@ -304,6 +313,9 @@ class) that indicate if the target RMSEs are reached at the end of the sequentia
 \item the customized R function provided to \code{eval}.
 }
 \item two slots called \code{x_test} and \code{y_test} that contain the data points for the OOS validation if the \code{type} slot is \code{oos}.
+\item If \code{y_cand = NULL} and there are \code{NA}s returned from the supplied \code{f} during the sequential design, a slot called \code{exclusion} is included
+that records the located design positions that produced \code{NA}s via \code{f}. The sequential design will use this information to
+avoid re-visiting the same locations (if \code{x_cand} is supplied) or their neighborhoods (if \code{x_cand} is \code{NULL}) in later runs of \code{design()}.
 }
 
 See \emph{Note} section below for further information.
@@ -344,6 +356,9 @@ to that of the output from \code{eval}.
 \item the column order of the output matrix of \code{f} is consistent with the order of emulator output dimensions (if \code{object} is an instance of the \code{dgp} class),
 or the order of emulators placed in \code{object} (if \code{object} is an instance of the \code{bundle} class).
 }
+\item The output matrix produced by \code{f} may include \code{NA}s. This is especially beneficial as it allows the sequential design process to continue without interruption,
+even if errors or \code{NA} outputs are encountered from \code{f} at certain input locations identified by the sequential designs. Users should ensure to handle any errors
+within \code{f} by appropriately returning \code{NA}s.
 \item When defining \code{eval}, the output metric needs to be positive if \code{\link[=draw]{draw()}} is used with \code{log = T}. And one needs to ensure that a lower metric value indicates
 a better emulation performance if \code{target} is set.
 \item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column

@@ -121,6 +121,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
   est_obj <- constructor_obj_cp$estimate(burnin)
 
   new_object <- list()
+  new_object[['id']] <- object$id
   new_object[['data']][['X']] <- unname(X)
   new_object[['data']][['Y']] <- unname(Y)
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
@@ -189,6 +190,7 @@ update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, .
   }
 
   new_object <- list()
+  new_object[['id']] <- object$id
   new_object[['data']][['X']] <- unname(X)
   new_object[['data']][['Y']] <- unname(Y)
   new_object[['specs']] <- extract_specs(constructor_obj_cp, "gp")

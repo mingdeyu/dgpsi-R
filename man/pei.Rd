@@ -42,7 +42,9 @@ pei(object, x_cand, ...)
 }}
 
 \item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-from which the next design point(s) are determined.}
+from which the next design point(s) are determined. If \code{object} is an instance of the \code{bundle} class, \code{x_cand} could also
+be a list with the length equal to the number of emulators contained in the \code{object}. Each slot in \code{x_cand} is a matrix
+that gives a candidate set for each emulator included in the bundle. See \emph{Note} section below for further information.}
 
 \item{...}{any arguments (with names different from those of arguments used in \code{\link[=pei]{pei()}}) that are used by \code{aggregate} or \code{\link[=gp]{gp()}} (for emulating the
 ES-LOO errors) can be passed here.}
@@ -99,6 +101,8 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \itemize{
 \item The column order of the first argument of \code{aggregate} must be consistent with the order of emulator output dimensions (if \code{object} is an instance of the
 \code{dgp} class), or the order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
+\item If \code{x_cand} is supplied as a list when \code{object} is an instance of \code{bundle} class and a \code{aggregate} function is provided, the matrices in \code{x_cand} must have
+common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the \code{aggregate} function can be applied.
 \item The function is only applicable to DGP emulators without likelihood layers.
 \item Any R vector detected in \code{x_cand} and \code{pseudo_points} will be treated as a column vector and automatically converted into a single-column
 R matrix.

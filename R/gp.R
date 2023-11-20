@@ -60,8 +60,11 @@
 #'
 #' Set `linked_idx = NULL` if the GP emulator will not be used for linked emulations. However, if this is no longer the case, one can use [set_linked_idx()]
 #' to add linking information to the GP emulator. Defaults to `NULL`.
+#' @param id an ID to be assigned to the GP emulator. If an ID is not provided (i.e., `id = NULL`), a UUID (Universally Unique Identifier) will be automatically generated
+#'    and assigned to the emulator. Default to `NULL`.
 #'
 #' @return An S3 class named `gp` that contains five slots:
+#' * `id`: A number or character string assigned through the `id` argument.
 #' * `data`: a list that contains two elements: `X` and `Y` which are the training input and output data respectively.
 #' * `specs`: a list that contains seven elements:
 #'    1. `kernel`: the type of the kernel function used. Either `"sexp"` for squared exponential kernel or `"matern2.5"` for Matérn-2.5 kernel.
@@ -135,7 +138,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-8), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL) {
+gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-8), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -222,6 +225,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   }
 
   res <- list()
+  res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
   res[['specs']] <- extract_specs(obj, "gp")

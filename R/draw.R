@@ -54,6 +54,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
       Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
@@ -76,6 +77,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
     cust <- ifelse ( is.function(object$design$type), T, F )
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
@@ -173,6 +175,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
       Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment)
@@ -196,6 +199,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
     cust <- ifelse ( is.function(object$design$type), T, F )
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
@@ -312,6 +316,7 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){
       Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
@@ -336,6 +341,7 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
     seq_N <- 0
     wave_N <- length(object$design)
     if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
     cust <- ifelse ( is.function(object$design$type), T, F )
     if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
     for ( i in 1:wave_N ){

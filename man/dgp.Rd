@@ -33,7 +33,8 @@ dgp(
   burnin = NULL,
   B = 10,
   internal_input_idx = NULL,
-  linked_idx = NULL
+  linked_idx = NULL,
+  id = NULL
 )
 }
 \arguments{
@@ -204,10 +205,14 @@ correspond to the output dimensions 1 to 3 from layer 3.
 
 Set \code{linked_idx = NULL} if the DGP emulator will not be used for linked emulations. However, if this is no longer the case, one can use \code{\link[=set_linked_idx]{set_linked_idx()}}
 to add linking information to the DGP emulator. Defaults to \code{NULL}.}
+
+\item{id}{an ID to be assigned to the DGP emulator. If an ID is not provided (i.e., \code{id = NULL}), a UUID (Universally Unique Identifier) will be automatically generated
+and assigned to the emulator. Default to \code{NULL}.}
 }
 \value{
 An S3 class named \code{dgp} that contains five slots:
 \itemize{
+\item \code{id}: A number or character string assigned through the \code{id} argument.
 \item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
 \item \code{specs}: a list that contains
 \enumerate{

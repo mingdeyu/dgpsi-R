@@ -19,7 +19,8 @@ gp(
   training = TRUE,
   verb = TRUE,
   internal_input_idx = NULL,
-  linked_idx = NULL
+  linked_idx = NULL,
+  id = NULL
 )
 }
 \arguments{
@@ -103,10 +104,14 @@ In addition, the first and second columns of \code{X[,internal_input_idx]} shoul
 
 Set \code{linked_idx = NULL} if the GP emulator will not be used for linked emulations. However, if this is no longer the case, one can use \code{\link[=set_linked_idx]{set_linked_idx()}}
 to add linking information to the GP emulator. Defaults to \code{NULL}.}
+
+\item{id}{an ID to be assigned to the GP emulator. If an ID is not provided (i.e., \code{id = NULL}), a UUID (Universally Unique Identifier) will be automatically generated
+and assigned to the emulator. Default to \code{NULL}.}
 }
 \value{
 An S3 class named \code{gp} that contains five slots:
 \itemize{
+\item \code{id}: A number or character string assigned through the \code{id} argument.
 \item \code{data}: a list that contains two elements: \code{X} and \code{Y} which are the training input and output data respectively.
 \item \code{specs}: a list that contains seven elements:
 \enumerate{

@@ -29,9 +29,12 @@ combine <- function(...) {
 #' @description This function packs GP emulators and DGP emulators into a `bundle` class for
 #'     sequential designs if each emulator emulates one output dimension of the underlying simulator.
 #'
-#' @param ... a sequence of emulators produced by [gp()] or [dgp()].
+#' @param ... a sequence or a list of emulators produced by [gp()] or [dgp()].
+#' @param id an ID to be assigned to the bundle emulator. If an ID is not provided (i.e., `id = NULL`), a UUID (Universally Unique Identifier) will be automatically generated
+#'    and assigned to the emulator. Default to `NULL`.
 #'
 #' @return An S3 class named `bundle` to be used by [design()] for sequential designs. It has:
+#' - a slot called `id` that is assigned through the `id` argument.
 #' - *N* slots named `emulator1,...,emulatorN`, each of which contains a GP or DGP emulator, where *N* is the number of emulators
 #'   that are provided to the function.
 #' - a slot called `data` which contains two elements `X` and `Y`. `X` contains *N* matrices named `emulator1,...,emulatorN` that are
@@ -103,12 +106,17 @@ combine <- function(...) {
 #' }
 #' @md
 #' @export
-pack <- function(...) {
+pack <- function(..., id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
+
   res <- list(...)
+  if (length(res) == 1 && is.list(res[[1]])) {
+    res <- res[[1]]
+  }
+
   X_all <- list()
   Y_all <- list()
   if ( length(res)==1 ) stop("The function needs at least two emulators to pack.", call. = FALSE)
@@ -128,6 +136,7 @@ pack <- function(...) {
     Y_all[[paste('emulator', i ,sep="")]] <- unname(res[[i]]$data$Y)
     names(res)[i] <- paste('emulator', i, sep="")
   }
+  res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
   res[['data']][['X']] <- X_all
   res[['data']][['Y']] <- Y_all
   class(res) <- "bundle"
@@ -165,6 +174,7 @@ unpack <- function(object) {
   }
   n_emulators <- length(object) - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
+  if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
   res <- list()
   for ( i in 1:n_emulators ){
     res[[paste('emulator', i, sep="")]] <- object[[paste('emulator', i, sep="")]]
@@ -215,6 +225,7 @@ write <- function(object, pkl_file, light = TRUE) {
       object[['emulator_obj']] <- NULL
     } else if (inherits(object,"bundle")){
       N <- length(object) - 1
+      if ( "id" %in% names(object) ) N <- N - 1
       if ( "design" %in% names(object) ) N <- N - 1
       for ( i in 1:N ){
         if ( inherits(object[[paste('emulator',i, sep='')]],"dgp") ) {
@@ -286,9 +297,11 @@ read <- function(pkl_file) {
     label <- res$label
     res$label <- NULL
     if (label == "gp"){
+      if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
       class(res) <- "gp"
     } else if (label == "dgp"){
       if ('emulator_obj' %in% names(res)){
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "dgp"
       } else {
         burnin <- res$constructor_obj$burnin
@@ -299,10 +312,12 @@ read <- function(pkl_file) {
         set_seed(res$specs$seed)
         res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
         res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "dgp"
       }
     } else if (label == "lgp"){
       if ('emulator_obj' %in% names(res)){
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"
       } else {
         B <- res$specs$B
@@ -310,10 +325,12 @@ read <- function(pkl_file) {
         set_seed(res$specs$seed)
         obj <- pkg.env$dgpsi$lgp(all_layer = pkg.env$copy$deepcopy(extracted_struc), N = B)
         res[['emulator_obj']] <- obj
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"
       }
     } else if (label == 'bundle'){
-      N <- length(res) - 1
+      if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+      N <- length(res) - 2
       if ( "design" %in% names(res) ) N <- N - 1
       class(res) <- "bundle"
       for ( i in 1:N ){
@@ -335,27 +352,34 @@ read <- function(pkl_file) {
           res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"
         }
+        if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
       }
     }
   } else {
     if ('emulator_obj' %in% names(res)){
       type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
       if ( type=='emulator' ) {
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "dgp"
       } else if ( type=='gp' ) {
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "gp"
       } else if ( type=='lgp' ) {
+        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"
       }
     } else {
       N <- length(res) - 1
       if ( "design" %in% names(res) ) N <- N - 1
+      if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
       class(res) <- "bundle"
       for ( i in 1:N ){
         type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
         if ( type=='emulator' ) {
+          if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"
         } else if ( type=='gp' ) {
+          if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
           class(res[[paste('emulator',i, sep='')]]) <- "gp"
         }
       }
@@ -497,6 +521,7 @@ set_imp <- function(object, B = 5) {
   est_obj <- constructor_obj_cp$estimate(burnin)
 
   new_object <- list()
+  new_object[['id']] <- object$id
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
@@ -594,6 +619,7 @@ window <- function(object, start, end = NULL, thin = 1) {
   B <- length(object$emulator_obj$all_layer_set)
 
   new_object <- list()
+  new_object[['id']] <- object$id
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
@@ -921,6 +947,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
           obj <- pkg.env$dgpsi$gp(X, Y, struc)
           obj$train()
           res <- list()
+          res[['id']] <- object$id
           res[['data']][['X']] <- X
           res[['data']][['Y']] <- Y
           res[['specs']] <- extract_specs(obj, "gp")
@@ -935,7 +962,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
           return(res)
         } else {
           if ( verb ) message(paste(" - Transiting to a bundle of GP emulators ...", collapse=" "), appendLF = FALSE)
-          gp_list <- list()
+          gp_list <- vector('list', length(nodes))
           for (j in 1:length(nodes)){
             struc <- nodes[[j]]
             struc$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
@@ -954,6 +981,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], struc)
             obj$train()
             res_j <- list()
+            res_j[['id']] <- uuid::UUIDgenerate()
             res_j[['data']][['X']] <- X
             res_j[['data']][['Y']] <- Y[,j,drop=F]
             res_j[['specs']] <- extract_specs(obj, "gp")
@@ -966,7 +994,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             class(res_j) <- "gp"
             gp_list[[j]] <- res_j
           }
-          res <- do.call(pack, gp_list)
+          res <- pack(gp_list, id = object$id)
           if ( verb ) message(" done")
           return(res)
         }

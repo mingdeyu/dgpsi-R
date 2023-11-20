@@ -33,7 +33,9 @@ Imports:
     methods,
     stats,
     bitops,
-    clhs
+    clhs,
+    dplyr,
+    uuid
 Suggests:
     knitr,
     rmarkdown,

@@ -8,6 +8,13 @@
 - A bug in `vigf()` is fixed when `object` is an instance of the `bundle` class and `batch_size` is greater than one.
 - Static and dynamic pruning of DGP structures are implemented in `prune()` and `design()` (via the new arguments `pruning` and `control`) respectively.
 - Some redundant codes are removed from `update()` which makes `design()` slightly faster.
+- `limits` argument in `design()` is now required when `x_cand` is not supplied to avoid under-sampling using the limits inferred from the training data.
+- `design()` now supports `f` that produce `NA` as outputs. This is useful to prevent the sequential design from stopping due to errors or `NA` outputs from a simulator at some input locations identified by the sequential design process.
+- A bug is fixed in `design()` when `x_cand` is supplied and the input dimension is one.
+- `alm()`, `mice()`, `pei()`, and `vigf()` now accept separate candidate sets (even with different number of candidate points) via `x_cand` for bundle emulators.
+- A slot called `id` is added to instances of `gp`, `dgp`, `lgp`, and `bundle` classes to uniquely identify the emulators. `id` can also be passed to instances of `gp`, `dgp`,`lgp`, and `bundle` classes by the new `id` argument in `gp()`, `dgp()`, `lgp()`, and `pack()`.
+- `pack()` can now accept a list of (D)GP emulators as the input.
+- Automatic saving of emulators during the sequential design is added to `design()` through the new argument `autosave`.
 - Updates of documentations and vignettes.
 
 # dgpsi 2.3.0

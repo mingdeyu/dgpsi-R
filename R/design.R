@@ -20,9 +20,8 @@
 #' Defaults to `200`.
 #' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 #'     input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
-#'     dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
-#'     `limits = NULL`, the ranges of input dimensions will be determined from the training data contained in `object`. This argument
-#'     is used when `x_cand = NULL` and `y_cand = NULL`. Defaults to `NULL`.
+#'     dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. Set
+#'     `limits = NULL` if `x_cand` is supplied. This argument is only used when `x_cand` is not supplied, i.e., `x_cand = NULL`. Defaults to `NULL`.
 #' @param int a bool or a vector of bools that indicates if an input dimension is an integer type. If a bool is given, it will be applied to
 #'     all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
 #'     input dimensions. Defaults to `FALSE`.
@@ -34,6 +33,8 @@
 #'   - a list with the first element being the output matrix described above and, optionally, additional named elements which will update values
 #'     of any arguments with the same names passed via `...`. The list output can be useful if some additional arguments of `f` and `aggregate`
 #'     need to be updated after each step of the sequential design.
+#'
+#' See *Note* section below for further information. This argument is used when `y_cand = NULL`. Defaults to `NULL`.
 #' @param reps an integer that gives the number of repetitions of the located design points to be created and used for evaluations of `f`. Set the
 #'     argument to an integer greater than `1` if `f` is a stochastic function that can generate different responses given a same input and the
 #'     supplied emulator `object` can deal with stochastic responses, e.g., a (D)GP emulator with `nugget_est = TRUE` or a DGP emulator with a
@@ -86,9 +87,15 @@
 #' If no customized function is provided, the built-in evaluation metric, RMSE, will be calculated. Defaults to `NULL`. See *Note* section below for further information.
 #' @param verb a bool indicating if the trace information will be printed during the sequential design.
 #'     Defaults to `TRUE`.
-#' @param check_point a vector of integers that indicates at which steps the sequential design will pause and ask for the confirmation
-#'     from the user if the sequential design should continue or be terminated. Set to `NULL` to suspend the manual intervention. Defaults
-#'     to `NULL`.
+#' @param autosave a list that contains configuration settings for the automatic saving of the emulator:
+#' * `switch`: a bool indicating whether to enable the automatic saving of the emulator during the sequential design. When set to `TRUE`,
+#'   the emulator in the final iteration is always saved. Defaults to `FALSE`.
+#' * `directory`: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
+#'   of `directory` named 'emulator-`id`'. Defaults to './check_points'.
+#' * `fname`: a string representing the base name for the saved emulator files. Defaults to 'check_point'.
+#' * `freq`: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to `5`.
+#' * `overwrite`: a bool value controlling the file saving behavior. When set to `TRUE`, each new automatic saving overwrites the previous one,
+#'   keeping only the latest version. If `FALSE`, each automatic saving creates a new file, preserving all previous versions. Defaults to `FALSE`.
 #' @param new_wave a bool indicating if the current execution of [design()] will create a new wave of sequential designs or add the sequential designs to
 #'     the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
 #'     of the sequential designs in different executions of [design()] in [draw()] and can specify a different evaluation frequency in `freq`. However, it can be
@@ -139,6 +146,9 @@
 #'     - either LOO (`loo`) or OOS (`oos`) if `eval = NULL`. See [validate()] for more information about LOO and OOS.
 #'     - the customized R function provided to `eval`.
 #'   - two slots called `x_test` and `y_test` that contain the data points for the OOS validation if the `type` slot is `oos`.
+#'   - If `y_cand = NULL` and there are `NA`s returned from the supplied `f` during the sequential design, a slot called `exclusion` is included
+#'     that records the located design positions that produced `NA`s via `f`. The sequential design will use this information to
+#'     avoid re-visiting the same locations (if `x_cand` is supplied) or their neighborhoods (if `x_cand` is `NULL`) in later runs of `design()`.
 #'
 #' See *Note* section below for further information.
 #' @note
@@ -166,6 +176,9 @@
 #'   - the column order of the first argument of `f` is consistent with the training input used for the emulator;
 #'   - the column order of the output matrix of `f` is consistent with the order of emulator output dimensions (if `object` is an instance of the `dgp` class),
 #'     or the order of emulators placed in `object` (if `object` is an instance of the `bundle` class).
+#' * The output matrix produced by `f` may include `NA`s. This is especially beneficial as it allows the sequential design process to continue without interruption,
+#'   even if errors or `NA` outputs are encountered from `f` at certain input locations identified by the sequential designs. Users should ensure to handle any errors
+#'   within `f` by appropriately returning `NA`s.
 #' * When defining `eval`, the output metric needs to be positive if [draw()] is used with `log = T`. And one needs to ensure that a lower metric value indicates
 #'   a better emulation performance if `target` is set.
 #' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
@@ -224,14 +237,14 @@
 #' @md
 #' @name design
 #' @export
-design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, reps, freq, x_test, y_test, reset, target, method, eval, verb, check_point, new_wave, cores, ...){
+design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, reps, freq, x_test, y_test, reset, target, method, eval, verb, autosave, new_wave, cores, ...){
   UseMethod("design")
 }
 
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, check_point = NULL, new_wave = TRUE, cores = 1, ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -260,6 +273,34 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     n_wave <- 0
   }
 
+  autosave_config <- list(switch = FALSE, directory = './check_points', fname = 'check_point', freq = 5, overwrite = FALSE)
+  nms_autosave_config <- names(autosave_config)
+  autosave_config[(nam_autosave <- names(autosave))] <- autosave
+  if (length(noNms_autosave <- nam_autosave[!nam_autosave %in% nms_autosave_config])){
+    warning("unknown names in 'autosave': ", paste(noNms_autosave,collapse=", "), call. = FALSE, immediate. = TRUE)
+  }
+
+  if (autosave_config$switch) {
+    autosave_config$directory <- paste0(autosave_config$directory, '/emulator-', object$id)
+    if (dir.exists(autosave_config$directory)){
+      if (!first_time & !new_wave){
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave)
+      } else {
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave+1)
+      }
+      if (!dir.exists(autosave_config$directory)){
+        dir.create(autosave_config$directory, recursive = TRUE)
+      }
+    } else {
+      if (!first_time & !new_wave){
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave)
+      } else {
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave+1)
+      }
+      dir.create(autosave_config$directory, recursive = TRUE)
+    }
+  }
+
   if (!first_time & !new_wave){
     start_point <- object[["design"]][[paste('wave', n_wave, sep="")]][["N"]]
     N <- N + start_point
@@ -283,13 +324,23 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
     fnames <- methods::formalArgs(f)
 
+    if ( "design" %in% names(object) ){
+      if ( 'exclusion' %in% names(object$design) ){
+        target_points <- object$design$exclusion
+      } else {
+        target_points <- c()
+      }
+    } else {
+      target_points <- c()
+    }
+
     if ( is.null(x_cand) ) {
       limits <- check_limits(limits, n_dim_X)
-      if ( is.null(limits) ){
-        limits <- matrix(0, n_dim_X, 2)
-        limits[,1] <- pkg.env$np$amin(X, axis=0L)
-        limits[,2] <- pkg.env$np$amax(X, axis=0L)
-      }
+      #if ( is.null(limits) ){
+      #  limits <- matrix(0, n_dim_X, 2)
+      #  limits[,1] <- pkg.env$np$amin(X, axis=0L)
+      #  limits[,2] <- pkg.env$np$amax(X, axis=0L)
+      #}
       if (identical(method, pei)) {
         add_arg <- list(pseudo_points = pp(X, limits))
         add_arg <- utils::modifyList(add_arg, list(...))
@@ -300,7 +351,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     } else {
       add_arg <- list(...)
       xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
-      xy_cand_list <- remove_dup(xy_cand_list, X)
+      xy_cand_list <- remove_dup(xy_cand_list, rbind(X, target_points))
       x_cand_origin <- xy_cand_list[[1]]
       x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
       if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
@@ -370,49 +421,106 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           message(" - Locating ...", appendLF = FALSE)
         }
 
-        if ( !is.null(x_cand) ){
-          if ( n_cand<=length(idx_x_cand) ){
-            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
-            idx_sub_cand <- idx_x_cand[idx_idx]
-            #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
-          } else {
-            idx_sub_cand <- idx_x_cand
-          }
-          sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
-        } else {
-          sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-              sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+        tryagain <- TRUE
+
+        while(tryagain){
+
+          if ( !is.null(x_cand) ){
+            if ( n_cand<=length(idx_x_cand) ){
+              if (n_dim_X == 1){
+                idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+              } else {
+                idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+                idx_sub_cand <- idx_x_cand[idx_idx]
+              }
+              #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
             } else {
-              sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+              idx_sub_cand <- idx_x_cand
             }
-          }
-        }
-
-        arg_list <- list(object, sub_cand)
-
-        if ("..." %in% mnames){
-          res <- do.call(method, c(arg_list, add_arg))
-        } else {
-          midx <- mnames %in% names(add_arg)
-          mparam <- add_arg[mnames[midx]]
-          res <- do.call(method, c(arg_list, mparam))
-        }
-
-        if ( verb ) {
-          message(" done")
-          if ( length(res)==1 ){
-            message(paste(c(" * Next design point:", sprintf("%.06f", sub_cand[res,])), collapse=" "))
+            sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
           } else {
-            for (j in 1:length(res) ){
-              message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", sub_cand[res[j],])), collapse=" "))
+            sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+            if( !is.null(target_points) ){
+              eud_dist <- sqrt(t(t(rowSums(sub_cand^2)-2*sub_cand%*%t(target_points))+rowSums(target_points^2)))
+              rows_to_keep <- rowSums(eud_dist > 0.01) == ncol(eud_dist)
+              sub_cand <- sub_cand[rows_to_keep,,drop = F]
+            }
+            sub_cand_lhd <- sub_cand
+            for (j in 1:n_dim_X){
+              if ( int[j] ){
+                #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+                sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+              } else {
+                sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+              }
             }
           }
-        }
 
-        new_X <- sub_cand[rep(res, reps),,drop=F]
+          arg_list <- list(object, sub_cand)
+
+          if ("..." %in% mnames){
+            res <- do.call(method, c(arg_list, add_arg))
+          } else {
+            midx <- mnames %in% names(add_arg)
+            mparam <- add_arg[mnames[midx]]
+            res <- do.call(method, c(arg_list, mparam))
+          }
+
+          if ( verb ) {
+            message(" done")
+            if ( length(res)==1 ){
+              message(paste(c(" * Next design point:", sprintf("%.06f", sub_cand[res,])), collapse=" "))
+            } else {
+              for (j in 1:length(res) ){
+                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", sub_cand[res[j],])), collapse=" "))
+              }
+            }
+          }
+
+          new_X <- sub_cand[rep(res, reps),,drop=F]
+
+          if ("..." %in% fnames){
+            new_output <- do.call(f, c(list(new_X), add_arg))
+          } else {
+            fidx <- fnames %in% names(add_arg)
+            fparam <- add_arg[fnames[fidx]]
+            new_output <- do.call(f, c(list(new_X), fparam))
+          }
+
+          if (ifelse(is.list(new_output), all(!is.na(new_output[[1]])), all(!is.na(new_output)))) {
+            tryagain <- FALSE
+          } else if ( ifelse(is.list(new_output), all(is.na(new_output[[1]])), all(is.na(new_output))) ){
+            if ( is.null(x_cand) ){
+              target_points <- rbind(target_points, sub_cand_lhd[res,,drop=FALSE])
+            } else {
+              target_points <- rbind(target_points, sub_cand[res,,drop=FALSE])
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[res])
+              idx_x_cand <- idx_x_cand0[-idx_x_acq]
+            }
+            if ( verb ) {
+              message(" - Re-Locating ...", appendLF = FALSE)
+            }
+          } else {
+            if ( is.list(new_output) ){
+              keep_idx <- !is.na(new_output[[1]])
+              new_X <- new_X[keep_idx,,drop=F]
+              new_output[[1]] <- new_output[[1]][keep_idx,,drop=F]
+            } else {
+              keep_idx <- !is.na(new_output[[1]])
+              new_X <- new_X[keep_idx,,drop=F]
+              new_output <- new_output[keep_idx,,drop=F]
+            }
+            if ( is.null(x_cand) ){
+              keep_dat_idx <- unique(rep(res, reps)[keep_idx])
+              target_points <- rbind(target_points, sub_cand_lhd[setdiff(res, keep_dat_idx),,drop=FALSE])
+            } else {
+              keep_dat_idx <- unique(rep(res, reps)[keep_idx])
+              target_points <- rbind(target_points, sub_cand[setdiff(res, keep_dat_idx),,drop=FALSE])
+            }
+            tryagain <- FALSE
+          }
+
+        }
 
         N_acq <- c(N_acq, nrow(new_X))
 
@@ -420,14 +528,6 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
         if ( !is.null(x_cand) ){
           idx_x_acq <- c(idx_x_acq, idx_sub_cand[res])
           idx_x_cand <- idx_x_cand0[-idx_x_acq]
-        }
-
-        if ("..." %in% fnames){
-          new_output <- do.call(f, c(list(new_X), add_arg))
-        } else {
-          fidx <- fnames %in% names(add_arg)
-          fparam <- add_arg[fnames[fidx]]
-          new_output <- do.call(f, c(list(new_X), fparam))
         }
 
         if ( is.list(new_output) ){
@@ -490,14 +590,24 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           }
         }
 
-        if ( !is.null(check_point) ){
-          if (i %in% check_point ){
-            ans <- readline(prompt="Do you want to continue? (Y/N) ")
-            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-              message(sprintf("The sequential design is terminated at step %i.", i))
-              N <- i
-              break
+        if (autosave_config$switch && i %% autosave_config$freq == 0) {
+          if (i != N) {
+            if ( verb ) message(" - Auto-saving ...", appendLF = FALSE)
+            save_file_name <- if (autosave_config$overwrite) {
+              autosave_config$fname
+            } else {
+              paste0(autosave_config$fname, "_", i)
             }
+            object_temp <- pack_gp(object, first_time, i, eval, new_wave, rmse_records, freq, N_acq, target, type, y_cand,
+                                   n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                                   design_info = if(isFALSE(first_time)) design_info else NULL,
+                                   x_test = if(identical(type, 'oos')) x_test else NULL,
+                                   y_test = if(identical(type, 'oos')) y_test else NULL,
+                                   istarget = if(!is.null(target)) istarget else NULL,
+                                   target_points = if(is.null(y_cand)) target_points else NULL)
+            save_file_path <- file.path(autosave_config$directory, save_file_name)
+            write(object_temp, save_file_path)
+            if ( verb ) message(" done")
           }
         }
       }
@@ -572,8 +682,12 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     if ( run ){
       for ( i in (1+start_point):N ){
         if ( n_cand<=length(idx_x_cand) ){
-          idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
-          idx_sub_cand <- idx_x_cand[idx_idx]
+          if (n_dim_X == 1){
+            idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+          } else {
+            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+            idx_sub_cand <- idx_x_cand[idx_idx]
+          }
           #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
         } else {
           idx_sub_cand <- idx_x_cand
@@ -674,14 +788,24 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           }
         }
 
-        if ( !is.null(check_point) ){
-          if (i %in% check_point ){
-            ans <- readline(prompt="Do you want to continue? (Y/N) ")
-            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-              message(sprintf("The sequential design is terminated at step %i.", i))
-              N <- i
-              break
+        if (autosave_config$switch && i %% autosave_config$freq == 0) {
+          if (i != N) {
+            if ( verb ) message(" - Auto-saving ...", appendLF = FALSE)
+            save_file_name <- if (autosave_config$overwrite) {
+              autosave_config$fname
+            } else {
+              paste0(autosave_config$fname, "_", i)
             }
+            object_temp <- pack_gp(object, first_time, i, eval, new_wave, rmse_records, freq, N_acq, target, type, y_cand,
+                                   n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                                   design_info = if(isFALSE(first_time)) design_info else NULL,
+                                   x_test = if(identical(type, 'oos')) x_test else NULL,
+                                   y_test = if(identical(type, 'oos')) y_test else NULL,
+                                   istarget = if(!is.null(target)) istarget else NULL,
+                                   target_points = if(is.null(y_cand)) target_points else NULL)
+            save_file_path <- file.path(autosave_config$directory, save_file_name)
+            write(object_temp, save_file_path)
+            if ( verb ) message(" done")
           }
         }
       }
@@ -689,54 +813,26 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   }
 
   if ( run ){
-    if ( isTRUE(first_time) ){
-      object$design <- list()
-      object[["design"]][["wave1"]][["N"]] <- N
-      if ( is.null(eval) ){
-        object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+    object <- pack_gp(object, first_time, N, eval, new_wave, rmse_records, freq, N_acq, target, type, y_cand,
+                      n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                      design_info = if(isFALSE(first_time)) design_info else NULL,
+                      x_test = if(identical(type, 'oos')) x_test else NULL,
+                      y_test = if(identical(type, 'oos')) y_test else NULL,
+                      istarget = if(!is.null(target)) istarget else NULL,
+                      target_points = if(is.null(y_cand)) target_points else NULL)
+
+    if (autosave_config$switch) {
+      if ( verb ) message(" - Auto-saving the final iteration ...", appendLF = FALSE)
+      save_file_name <- if (autosave_config$overwrite) {
+        autosave_config$fname
       } else {
-        object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
+        paste0(autosave_config$fname, "_", N)
       }
-      object[["design"]][["wave1"]][["freq"]] <- freq[2]
-      object[["design"]][["wave1"]][["enrichment"]] <- N_acq
-      if( !is.null(target) ) {
-        object[["design"]][["wave1"]][["target"]] <- target
-        object[["design"]][["wave1"]][["reached"]] <- istarget
-      }
-      object[["design"]][["type"]] <- type
-      if ( identical(type, 'oos') ){
-        object[["design"]][["x_test"]] <- x_test
-        object[["design"]][["y_test"]] <- y_test
-      }
-    } else {
-      object$design <- design_info
-      if (new_wave){
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-        if ( is.null(eval) ){
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
-        } else {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
-        }
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <-  N_acq
-        if( !is.null(target) ) {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
-        }
-      } else {
-        object[["design"]][[paste('wave', n_wave, sep="")]][["N"]] <- N
-        if ( is.null(eval) ){
-          object[["design"]][[paste('wave', n_wave, sep="")]][["rmse"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["rmse"]], unname(rmse_records))
-        } else {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["metric"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["metric"]], unname(rmse_records))
-        }
-        object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]] <- c(object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]], N_acq)
-        if( !is.null(target) ) {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["target"]] <- target
-          object[["design"]][[paste('wave', n_wave, sep="")]][["reached"]] <- istarget
-        }
-      }
+      save_file_path <- file.path(autosave_config$directory, save_file_name)
+      write(object, save_file_path)
+      if ( verb ) message(" done")
     }
+
     if( !is.null(target) ) {
       if ( !istarget ) message("The target is not reached at the end of the sequential design.")
     }
@@ -750,7 +846,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, check_point = NULL, new_wave = TRUE, cores = 1, train_N = 100, refit_cores = 1, pruning = TRUE, control = list(), ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, cores = 1, train_N = 100, refit_cores = 1, pruning = TRUE, control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -783,6 +879,34 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   } else {
     first_time <- TRUE
     n_wave <- 0
+  }
+
+  autosave_config <- list(switch = FALSE, directory = './check_points', fname = 'check_point', freq = 5, overwrite = FALSE)
+  nms_autosave_config <- names(autosave_config)
+  autosave_config[(nam_autosave <- names(autosave))] <- autosave
+  if (length(noNms_autosave <- nam_autosave[!nam_autosave %in% nms_autosave_config])){
+    warning("unknown names in 'autosave': ", paste(noNms_autosave,collapse=", "), call. = FALSE, immediate. = TRUE)
+  }
+
+  if (autosave_config$switch) {
+    autosave_config$directory <- paste0(autosave_config$directory, '/emulator-', object$id)
+    if (dir.exists(autosave_config$directory)){
+      if (!first_time & !new_wave){
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave)
+      } else {
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave+1)
+      }
+      if (!dir.exists(autosave_config$directory)){
+        dir.create(autosave_config$directory, recursive = TRUE)
+      }
+    } else {
+      if (!first_time & !new_wave){
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave)
+      } else {
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave+1)
+      }
+      dir.create(autosave_config$directory, recursive = TRUE)
+    }
   }
 
   if (!first_time & !new_wave){
@@ -832,13 +956,23 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
     fnames <- methods::formalArgs(f)
 
+    if ( "design" %in% names(object) ){
+      if ( 'exclusion' %in% names(object$design) ){
+        target_points <- object$design$exclusion
+      } else {
+        target_points <- c()
+      }
+    } else {
+      target_points <- c()
+    }
+
     if ( is.null(x_cand) ) {
       limits <- check_limits(limits, n_dim_X)
-      if ( is.null(limits) ){
-        limits <- matrix(0, n_dim_X, 2)
-        limits[,1] <- pkg.env$np$amin(X, axis=0L)
-        limits[,2] <- pkg.env$np$amax(X, axis=0L)
-      }
+      #if ( is.null(limits) ){
+      #  limits <- matrix(0, n_dim_X, 2)
+      #  limits[,1] <- pkg.env$np$amin(X, axis=0L)
+      #  limits[,2] <- pkg.env$np$amax(X, axis=0L)
+      #}
       if (identical(method, pei)) {
         add_arg <- list(pseudo_points = pp(X, limits))
         add_arg <- utils::modifyList(add_arg, list(...))
@@ -849,7 +983,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     } else {
       add_arg <- list(...)
       xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
-      xy_cand_list <- remove_dup(xy_cand_list, X)
+      xy_cand_list <- remove_dup(xy_cand_list, rbind(X, target_points))
       x_cand_origin <- xy_cand_list[[1]]
       x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
       if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
@@ -918,60 +1052,117 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           message(" - Locating ...", appendLF = FALSE)
         }
 
-        if ( is.null(x_cand) ){
-          sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+        tryagain <- TRUE
 
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-              sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-            } else {
-              sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+        while(tryagain){
+          if ( is.null(x_cand) ){
+            sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+            if( !is.null(target_points) ){
+              eud_dist <- sqrt(t(t(rowSums(sub_cand^2)-2*sub_cand%*%t(target_points))+rowSums(target_points^2)))
+              rows_to_keep <- rowSums(eud_dist > 0.01) == ncol(eud_dist)
+              sub_cand <- sub_cand[rows_to_keep,,drop = F]
             }
-          }
-        } else {
-          if ( n_cand<=length(idx_x_cand) ){
-            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
-            idx_sub_cand <- idx_x_cand[idx_idx]
-          } else {
-            idx_sub_cand <- idx_x_cand
-          }
-          sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
-        }
-
-        arg_list <- list(object, sub_cand)
-        if ("..." %in% mnames){
-          res <- do.call(method, c(arg_list, add_arg))
-        } else {
-          midx <- mnames %in% names(add_arg)
-          mparam <- add_arg[mnames[midx]]
-          res <- do.call(method, c(arg_list, mparam))
-        }
-
-        if ( verb ) {
-          message(" done")
-          if ( nrow(res)==1 ){
-            if ( ncol(res)==1 ){
-              message(paste(c(" * Next design point:", sprintf("%.06f", sub_cand[res[1,1],])), collapse=" "))
-            } else {
-              for ( j in 1:ncol(res) ){
-                message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
+            sub_cand_lhd <- sub_cand
+            for (j in 1:n_dim_X){
+              if ( int[j] ){
+                #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+                sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+              } else {
+                sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
               }
             }
           } else {
-            for ( j in 1:nrow(res) ){
-              if ( ncol(res)==1 ){
-                message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", sub_cand[res[j,1],])), collapse=" "))
+            if ( n_cand<=length(idx_x_cand) ){
+              if (n_dim_X == 1){
+                idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
               } else {
-                for ( k in 1:nrow(res) ){
-                  message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
+                idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+                idx_sub_cand <- idx_x_cand[idx_idx]
+              }
+            } else {
+              idx_sub_cand <- idx_x_cand
+            }
+            sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+          }
+
+          arg_list <- list(object, sub_cand)
+          if ("..." %in% mnames){
+            res <- do.call(method, c(arg_list, add_arg))
+          } else {
+            midx <- mnames %in% names(add_arg)
+            mparam <- add_arg[mnames[midx]]
+            res <- do.call(method, c(arg_list, mparam))
+          }
+
+          if ( verb ) {
+            message(" done")
+            if ( nrow(res)==1 ){
+              if ( ncol(res)==1 ){
+                message(paste(c(" * Next design point:", sprintf("%.06f", sub_cand[res[1,1],])), collapse=" "))
+              } else {
+                for ( j in 1:ncol(res) ){
+                  message(paste(c(sprintf(" * Next design point (Output%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
+                }
+              }
+            } else {
+              for ( j in 1:nrow(res) ){
+                if ( ncol(res)==1 ){
+                  message(paste(c(sprintf(" * Next design point (Position%i):", j), sprintf("%.06f", sub_cand[res[j,1],])), collapse=" "))
+                } else {
+                  for ( k in 1:nrow(res) ){
+                    message(paste(c(sprintf(" * Next design point (Position%i for Output%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
+                  }
                 }
               }
             }
           }
-        }
 
-        new_X <- sub_cand[rep(unique(as.vector(t(res))), reps),,drop=FALSE]
+          new_X <- sub_cand[rep(unique(as.vector(t(res))), reps),,drop=FALSE]
+
+          if ("..." %in% fnames){
+            new_output <- do.call(f, c(list(new_X), add_arg))
+          } else {
+            fidx <- fnames %in% names(add_arg)
+            fparam <- add_arg[fnames[fidx]]
+            new_output <- do.call(f, c(list(new_X), fparam))
+          }
+
+          if (ifelse(is.list(new_output), all(!is.na(new_output[[1]])), all(!is.na(new_output)))) {
+            tryagain <- FALSE
+          } else if ( ifelse(is.list(new_output), all(!pkg.env$np$prod(!is.na(new_output[[1]]), axis=as.integer(1))), all(!pkg.env$np$prod(!is.na(new_output), axis=as.integer(1)))) )  {
+            if ( is.null(x_cand) ){
+              target_points <- rbind(target_points, sub_cand_lhd[unique(as.vector(t(res))),,drop=FALSE])
+            } else {
+              target_points <- rbind(target_points, sub_cand[unique(as.vector(t(res))),,drop=FALSE])
+              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
+              idx_x_cand <- idx_x_cand0[-idx_x_acq]
+            }
+            if ( verb ) {
+              message(" - Re-Locating ...", appendLF = FALSE)
+            }
+          } else {
+            if ( is.list(new_output) ){
+              keep_idx <- pkg.env$np$prod(!is.na(new_output[[1]]), axis=as.integer(1))
+              new_X <- new_X[keep_idx,,drop=F]
+              new_output[[1]] <- new_output[[1]][keep_idx,,drop=F]
+            } else {
+              keep_idx <- pkg.env$np$prod(!is.na(new_output), axis=as.integer(1))
+              new_X <- new_X[keep_idx,,drop=F]
+              new_output <- new_output[keep_idx,,drop=F]
+            }
+            if ( is.null(x_cand) ){
+              keep_dat_idx <- unique(rep(unique(as.vector(t(res))), reps)[keep_idx])
+              target_point_idx <- setdiff(unique(as.vector(t(res))), keep_dat_idx)
+              if (length(target_point_idx)!=0) target_points <- rbind(target_points, sub_cand_lhd[target_point_idx,,drop=FALSE])
+            } else {
+              keep_dat_idx <- unique(rep(unique(as.vector(t(res))), reps)[keep_idx])
+              target_point_idx <- setdiff(unique(as.vector(t(res))), keep_dat_idx)
+              if (length(target_point_idx)!=0) target_points <- rbind(target_points, sub_cand[target_point_idx,,drop=FALSE])
+            }
+            tryagain <- FALSE
+          }
+
+        }
 
         N_acq <- c(N_acq, nrow(new_X))
 
@@ -979,14 +1170,6 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
         if ( !is.null(x_cand) ){
           idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
           idx_x_cand <- idx_x_cand0[-idx_x_acq]
-        }
-
-        if ("..." %in% fnames){
-          new_output <- do.call(f, c(list(new_X), add_arg))
-        } else {
-          fidx <- fnames %in% names(add_arg)
-          fparam <- add_arg[fnames[fidx]]
-          new_output <- do.call(f, c(list(new_X), fparam))
         }
 
         if ( is.list(new_output) ){
@@ -1045,6 +1228,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
                 rmse <- object$loo$rmse
               } else if ( inherits(object,"bundle") ) {
                 n_emulators <- length(object) - 1
+                if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
                   object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$loo$rmse
@@ -1062,6 +1246,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
                 rmse <- object$oos$rmse
               } else if ( inherits(object,"bundle") ){
                 n_emulators <- length(object) - 1
+                if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
                   object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$oos$rmse
@@ -1103,14 +1288,24 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           }
         }
 
-        if ( !is.null(check_point) ){
-          if (i %in% check_point ){
-            ans <- readline(prompt="Do you want to continue? (Y/N) ")
-            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-              message(sprintf("The sequential design is terminated at step %i.", i))
-              N <- i
-              break
+        if (autosave_config$switch && i %% autosave_config$freq == 0) {
+          if (i != N) {
+            if ( verb ) message(" - Auto-saving ...", appendLF = FALSE)
+            save_file_name <- if (autosave_config$overwrite) {
+              autosave_config$fname
+            } else {
+              paste0(autosave_config$fname, "_", i)
             }
+            object_temp <- pack_dgp(object, first_time, i, eval, new_wave, rmse_records, freq, N_acq, n_dim_Y, target, type, y_cand,
+                                    n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                                    design_info = if(isFALSE(first_time)) design_info else NULL,
+                                    x_test = if(identical(type, 'oos')) x_test else NULL,
+                                    y_test = if(identical(type, 'oos')) y_test else NULL,
+                                    istarget = if(!is.null(target)) istarget else NULL,
+                                    target_points = if(is.null(y_cand)) target_points else NULL)
+            save_file_path <- file.path(autosave_config$directory, save_file_name)
+            write(object_temp, save_file_path)
+            if ( verb ) message(" done")
           }
         }
 
@@ -1194,8 +1389,12 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     if ( run ){
       for ( i in (1+start_point):N ){
         if ( n_cand<=length(idx_x_cand) ){
-          idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
-          idx_sub_cand <- idx_x_cand[idx_idx]
+          if (n_dim_X == 1){
+            idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
+          } else {
+            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+            idx_sub_cand <- idx_x_cand[idx_idx]
+          }
         } else {
           idx_sub_cand <- idx_x_cand
         }
@@ -1302,6 +1501,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
                 rmse <- object$loo$rmse
               } else if ( inherits(object,"bundle") ) {
                 n_emulators <- length(object) - 1
+                if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
                   object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$loo$rmse
@@ -1319,6 +1519,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
                 rmse <- object$oos$rmse
               } else if ( inherits(object,"bundle") ){
                 n_emulators <- length(object) - 1
+                if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
                   object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$oos$rmse
@@ -1360,14 +1561,24 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           }
         }
 
-        if ( !is.null(check_point) ){
-          if (i %in% check_point ){
-            ans <- readline(prompt="Do you want to continue? (Y/N) ")
-            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-              message(sprintf("The sequential design is terminated at step %i.", i))
-              N <- i
-              break
+        if (autosave_config$switch && i %% autosave_config$freq == 0) {
+          if (i != N) {
+            if ( verb ) message(" - Auto-saving ...", appendLF = FALSE)
+            save_file_name <- if (autosave_config$overwrite) {
+              autosave_config$fname
+            } else {
+              paste0(autosave_config$fname, "_", i)
             }
+            object_temp <- pack_dgp(object, first_time, i, eval, new_wave, rmse_records, freq, N_acq, n_dim_Y, target, type, y_cand,
+                                    n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                                    design_info = if(isFALSE(first_time)) design_info else NULL,
+                                    x_test = if(identical(type, 'oos')) x_test else NULL,
+                                    y_test = if(identical(type, 'oos')) y_test else NULL,
+                                    istarget = if(!is.null(target)) istarget else NULL,
+                                    target_points = if(is.null(y_cand)) target_points else NULL)
+            save_file_path <- file.path(autosave_config$directory, save_file_name)
+            write(object_temp, save_file_path)
+            if ( verb ) message(" done")
           }
         }
 
@@ -1384,100 +1595,33 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   }
 
   if ( run ){
-    if ( isTRUE(first_time) ){
-      object$design <- list()
-      object[["design"]][["wave1"]][["N"]] <- N
-      if ( is.null(eval) ){
-        object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
-      } else {
-        object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
-      }
-      object[["design"]][["wave1"]][["freq"]] <- freq[2]
-      if (inherits(object,"bundle")){
-        object[["design"]][["wave1"]][["enrichment"]] <- matrix(rep(N_acq, n_dim_Y), nrow = length(N_acq), byrow = F)
-      } else {
-        object[["design"]][["wave1"]][["enrichment"]] <- N_acq
-      }
-      if( !is.null(target) ) {
-        object[["design"]][["wave1"]][["target"]] <- target
-        if (inherits(object,"bundle")){
-          object[["design"]][["wave1"]][["reached"]] <- if(length(target)==1) {all(istarget)} else {istarget}
-        } else {
-          object[["design"]][["wave1"]][["reached"]] <- istarget
-        }
-      }
-      object[["design"]][["type"]] <- type
-      if ( identical(type, 'oos') ){
-        object[["design"]][["x_test"]] <- x_test
-        object[["design"]][["y_test"]] <- y_test
-      }
-    } else {
-      object$design <- design_info
-      if (new_wave){
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-        if ( is.null(eval) ){
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
-        } else {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
-        }
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-        if (inherits(object,"bundle")){
-          for (w in 1:n_wave){
-            current_enrichments <- object[["design"]][[paste('wave', w, sep="")]][["enrichment"]]
-            object[["design"]][[paste('wave', w, sep="")]][["enrichment"]] <- matrix(rep(current_enrichments, n_dim_Y), nrow = length(current_enrichments), byrow = F)
-          }
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- matrix(rep(N_acq, n_dim_Y), nrow = length(N_acq), byrow = F)
-        } else {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- N_acq
-        }
-        if( !is.null(target) ) {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
-          if (inherits(object,"bundle")){
-            for (w in 1:n_wave){
-              object[["design"]][[paste('wave', w, sep="")]][["reached"]] <- rep(object[["design"]][[paste('wave', w, sep="")]][["reached"]], length(target))
-            }
-            object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- if(length(target)==1) {all(istarget)} else {istarget}
-          } else {
-            object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- istarget
-          }
-        }
-      } else {
-        object[["design"]][[paste('wave', n_wave, sep="")]][["N"]] <- N
-        if ( is.null(eval) ){
-          object[["design"]][[paste('wave', n_wave, sep="")]][["rmse"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["rmse"]], unname(rmse_records))
-        } else {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["metric"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["metric"]], unname(rmse_records))
-        }
-        if (inherits(object,"bundle")){
-          for (w in 1:n_wave){
-            current_enrichments <- object[["design"]][[paste('wave', w, sep="")]][["enrichment"]]
-            object[["design"]][[paste('wave', w, sep="")]][["enrichment"]] <- matrix(rep(current_enrichments, n_dim_Y), nrow = length(current_enrichments), byrow = F)
-          }
-          object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]], matrix(rep(N_acq, n_dim_Y), nrow = length(N_acq), byrow = F))
-        } else {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]] <- c(object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]], N_acq)
-        }
-        if( !is.null(target) ) {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["target"]] <- target
-          if (inherits(object,"bundle")){
-            for (w in 1:(n_wave-1)){
-              object[["design"]][[paste('wave', w, sep="")]][["reached"]] <- rep(object[["design"]][[paste('wave', w, sep="")]][["reached"]], length(target))
-            }
-            object[["design"]][[paste('wave', n_wave, sep="")]][["reached"]] <- if(length(target)==1) {all(istarget)} else {istarget}
-          } else {
-            object[["design"]][[paste('wave', n_wave, sep="")]][["reached"]] <- istarget
-          }
-        }
-      }
-    }
+    object <- pack_dgp(object, first_time, N, eval, new_wave, rmse_records, freq, N_acq, n_dim_Y, target, type, y_cand,
+                       n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                       design_info = if(isFALSE(first_time)) design_info else NULL,
+                       x_test = if(identical(type, 'oos')) x_test else NULL,
+                       y_test = if(identical(type, 'oos')) y_test else NULL,
+                       istarget = if(!is.null(target)) istarget else NULL,
+                       target_points = if(is.null(y_cand)) target_points else NULL)
 
     if (!inherits(object,"dgp")){
       if (remaining_steps > 0){
         object <- design(object, remaining_steps, x_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[1]]}, y_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[2]]},
                          n_cand = n_cand, limits = limits, int = int, f = f, reps = reps, freq = freq, x_test = x_test, y_test = y_test, reset = utils::tail(reset, remaining_steps), target = target,
-                         method = method, eval = eval, verb = verb, check_point = check_point, new_wave = FALSE, cores = cores, train_N = utils::tail(train_N, remaining_steps), refit_cores = refit_cores, ...)
+                         method = method, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, cores = cores, train_N = utils::tail(train_N, remaining_steps), refit_cores = refit_cores, ...)
         return(object)
       }
+    }
+
+    if (autosave_config$switch) {
+      if ( verb ) message(" - Auto-saving the final iteration ...", appendLF = FALSE)
+      save_file_name <- if (autosave_config$overwrite) {
+        autosave_config$fname
+      } else {
+        paste0(autosave_config$fname, "_", N)
+      }
+      save_file_path <- file.path(autosave_config$directory, save_file_name)
+      write(object, save_file_path)
+      if ( verb ) message(" done")
     }
 
     if( !is.null(target) ) {
@@ -1494,7 +1638,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, check_point = NULL, new_wave = TRUE, cores = 1, train_N = 100, refit_cores = 1,  ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, cores = 1, train_N = 100, refit_cores = 1,  ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1526,6 +1670,34 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     n_wave <- 0
   }
 
+  autosave_config <- list(switch = FALSE, directory = './check_points', fname = 'check_point', freq = 5, overwrite = FALSE)
+  nms_autosave_config <- names(autosave_config)
+  autosave_config[(nam_autosave <- names(autosave))] <- autosave
+  if (length(noNms_autosave <- nam_autosave[!nam_autosave %in% nms_autosave_config])){
+    warning("unknown names in 'autosave': ", paste(noNms_autosave,collapse=", "), call. = FALSE, immediate. = TRUE)
+  }
+
+  if (autosave_config$switch) {
+    autosave_config$directory <- paste0(autosave_config$directory, '/emulator-', object$id)
+    if (dir.exists(autosave_config$directory)){
+      if (!first_time & !new_wave){
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave)
+      } else {
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave+1)
+      }
+      if (!dir.exists(autosave_config$directory)){
+        dir.create(autosave_config$directory, recursive = TRUE)
+      }
+    } else {
+      if (!first_time & !new_wave){
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave)
+      } else {
+        autosave_config$directory <- paste0(autosave_config$directory,'/wave_',n_wave+1)
+      }
+      dir.create(autosave_config$directory, recursive = TRUE)
+    }
+  }
+
   if (!first_time & !new_wave){
     start_point <- object[["design"]][[paste('wave', n_wave, sep="")]][["N"]]
     N <- N + start_point
@@ -1538,6 +1710,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   Y <- object$data$Y
   n_dim_X <- ncol(X[[1]])
   n_emulators <- length(object) - 1
+  if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
 
   for ( k in 1:n_emulators ){
@@ -1556,17 +1729,31 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     if ( is.null(f) ) stop("'f' must be provided.", call. = FALSE)
     fnames <- methods::formalArgs(f)
 
+    if ( "design" %in% names(object) ){
+      if ( 'exclusion' %in% names(object$design) ){
+        target_points <- object$design$exclusion
+      } else {
+        target_points <- vector('list', n_emulators)
+        target_list_names <- sapply(1:n_emulators, function(i) paste('emulator',i,sep=''))
+        names(target_points) <- target_list_names
+      }
+    } else {
+      target_points <- vector('list', n_emulators)
+      target_list_names <- sapply(1:n_emulators, function(i) paste('emulator',i,sep=''))
+      names(target_points) <- target_list_names
+    }
+
     if ( is.null(x_cand) ) {
       limits <- check_limits(limits, n_dim_X)
-      if ( is.null(limits) ){
-        all_training_input <- c()
-        for ( k in 1:n_emulators ){
-          all_training_input <- rbind(all_training_input, X[[k]])
-        }
-        limits <- matrix(0, n_dim_X, 2)
-        limits[,1] <- pkg.env$np$amin(all_training_input, axis=0L)
-        limits[,2] <- pkg.env$np$amax(all_training_input, axis=0L)
-      }
+      #if ( is.null(limits) ){
+      #  all_training_input <- c()
+      #  for ( k in 1:n_emulators ){
+      #    all_training_input <- rbind(all_training_input, X[[k]])
+      #  }
+      #  limits <- matrix(0, n_dim_X, 2)
+      #  limits[,1] <- pkg.env$np$amin(all_training_input, axis=0L)
+      #  limits[,2] <- pkg.env$np$amax(all_training_input, axis=0L)
+      #}
       if (identical(method, pei)) {
         ppoints <- list()
         for ( k in 1:n_emulators ){
@@ -1581,20 +1768,20 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     } else {
       add_arg <- list(...)
       xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
-
+      x_cand <- vector('list', n_emulators)
       for (j in 1:n_emulators){
-        xy_cand_list <- remove_dup(xy_cand_list, X[[paste('emulator',j,sep="")]])
+        xy_cand_list_j <- remove_dup( xy_cand_list, rbind(X[[paste('emulator',j,sep="")]], target_points[[paste('emulator',j,sep="")]]) )
+        x_cand_origin <- xy_cand_list_j[[1]]
+        x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
+        if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
+          x_cand[[j]] <- x_cand_origin
+        } else {
+          x_cand[[j]] <- x_cand_rep[[1]]
+        }
       }
-      x_cand_origin <- xy_cand_list[[1]]
-      x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
-      if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
-        x_cand <- x_cand_origin
-      } else {
-        x_cand <- x_cand_rep[[1]]
-      }
-      idx_x_cand0 <- c(1:nrow(x_cand))
+      idx_x_cand0 <- lapply(1:n_emulators, function(k){c(1:nrow(x_cand[[k]]))})
       idx_x_cand <- idx_x_cand0
-      idx_x_acq <- c()
+      idx_x_acq <- vector('list', n_emulators)
     }
 
     if (start_point == 0){
@@ -1662,87 +1849,197 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           message(" - Locating ...", appendLF = FALSE)
         }
 
-        if ( is.null(x_cand) ){
-          sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+        tryagain <- TRUE
 
-          for (j in 1:n_dim_X){
-            if ( int[j] ){
-              #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
-              sub_cand[,j] <- floor( sub_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
-            } else {
-              sub_cand[,j] <- sub_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+        while(tryagain){
+
+          if ( is.null(x_cand) ){
+            sub_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+            sub_cand <- replicate(n_emulators, sub_cand, simplify = FALSE)
+
+            for (j in 1:n_emulators){
+              if( !is.null(target_points[[j]]) ){
+                eud_dist <- sqrt(t(t(rowSums(sub_cand[[j]]^2)-2*sub_cand[[j]]%*%t(target_points[[j]]))+rowSums(target_points[[j]]^2)))
+                rows_to_keep <- rowSums(eud_dist > 0.01) == ncol(eud_dist)
+                sub_cand[[j]] <- sub_cand[[j]][rows_to_keep,,drop = F]
+              }
             }
-          }
-        } else {
-          if ( n_cand<=length(idx_x_cand) ){
-            idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
-            idx_sub_cand <- idx_x_cand[idx_idx]
-            #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
-          } else {
-            idx_sub_cand <- idx_x_cand
-          }
-          sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
-        }
+            sub_cand_lhd <- sub_cand
 
-        arg_list <- list(object, sub_cand)
-        if ("..." %in% mnames){
-          res <- do.call(method, c(arg_list, add_arg))
-        } else {
-          midx <- mnames %in% names(add_arg)
-          mparam <- add_arg[mnames[midx]]
-          res <- do.call(method, c(arg_list, mparam))
-        }
-
-        if ( verb ) {
-          message(" done")
-          if ( nrow(res)==1 ){
-            for ( j in 1:n_emulators ){
-              if ( is.null(target) ){
-                message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
-              } else {
-                if ( !istarget[j] ){
-                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
+            for (k in 1:n_emulators){
+              for (j in 1:n_dim_X){
+                if ( int[j] ){
+                  #if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+                  sub_cand[[k]][,j] <- floor( sub_cand[[k]][,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
                 } else {
-                  message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))
+                  sub_cand[[k]][,j] <- sub_cand[[k]][,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
                 }
               }
             }
           } else {
-            for ( j in 1:nrow(res) ){
-              for ( k in 1:n_emulators ){
-                if ( is.null(target) ){
-                  message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
+            sub_cand <- vector('list', n_emulators)
+            idx_sub_cand <- vector('list', n_emulators)
+            for (j in 1:n_emulators){
+              if ( n_cand<=length(idx_x_cand[[j]]) ){
+                if (n_dim_X == 1){
+                  idx_sub_cand[[j]] <- sample(idx_x_cand[[j]], n_cand, replace = FALSE)
                 } else {
-                  if ( !istarget[k] ){
-                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
+                  idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[[j]][idx_x_cand[[j]],,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+                  idx_sub_cand[[j]] <- idx_x_cand[[j]][idx_idx]
+                }
+              } else {
+                idx_sub_cand[[j]] <- idx_x_cand[[j]]
+              }
+              sub_cand[[j]] <- x_cand[[j]][idx_sub_cand[[j]],,drop = FALSE]
+            }
+          }
+
+          arg_list <- list(object, sub_cand)
+          if ("..." %in% mnames){
+            res <- do.call(method, c(arg_list, add_arg))
+          } else {
+            midx <- mnames %in% names(add_arg)
+            mparam <- add_arg[mnames[midx]]
+            res <- do.call(method, c(arg_list, mparam))
+          }
+
+          if ( verb ) {
+            message(" done")
+            if ( nrow(res)==1 ){
+              for ( j in 1:n_emulators ){
+                if ( is.null(target) ){
+                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[[j]][res[1,j],])), collapse=" "))
+                } else {
+                  if ( !istarget[j] ){
+                    message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[[j]][res[1,j],])), collapse=" "))
                   } else {
-                    message(sprintf(" * Next design point (Position%i for Emulator%i): None (target reached)", j, k))
+                    message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))
+                  }
+                }
+              }
+            } else {
+              for ( j in 1:nrow(res) ){
+                for ( k in 1:n_emulators ){
+                  if ( is.null(target) ){
+                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[[j]][res[j,k],])), collapse=" "))
+                  } else {
+                    if ( !istarget[k] ){
+                      message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[[j]][res[j,k],])), collapse=" "))
+                    } else {
+                      message(sprintf(" * Next design point (Position%i for Emulator%i): None (target reached)", j, k))
+                    }
                   }
                 }
               }
             }
           }
+
+          if ( nrow(res)==1 ){
+            new_X <- do.call(rbind, lapply(1:n_emulators, function(i) {
+              sub_cand[[i]][res[i],,drop = FALSE]
+            }))
+
+            if ( !is.null(target) ){
+              new_X <- new_X[!istarget,,drop=FALSE]
+            }
+            rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
+            new_X_unique <- matrix( rep( t( rep_new_X[[1]] ) , reps ) , ncol = ncol(rep_new_X[[1]]) , byrow = TRUE )
+            rep_idx0 <- rep_new_X[[2]] + 1
+            rep_idx <- c()
+            for (j in 1:reps){
+              rep_idx <- c(rep_idx, rep_idx0+(j-1)*nrow(rep_new_X[[1]]))
+            }
+            if ("..." %in% fnames){
+              new_output_unique <- do.call(f, c(list(new_X_unique), add_arg))
+            } else {
+              fidx <- fnames %in% names(add_arg)
+              fparam <- add_arg[fnames[fidx]]
+              new_output_unique <- do.call(f, c(list(new_X_unique), fparam))
+            }
+          } else {
+            new_X <- c()
+            for (j in 1:nrow(res) ){
+              if ( is.null(target) ) {
+                new_X <- rbind(new_X, do.call(rbind, lapply(1:n_emulators, function(i) {
+                  sub_cand[[i]][res[j,i],,drop = FALSE]
+                })))
+              } else {
+                new_X <- rbind(new_X, do.call(rbind, lapply(1:n_emulators, function(i) {
+                  sub_cand[[i]][res[j,i],,drop = FALSE]
+                }))[!istarget,,drop=FALSE])
+              }
+            }
+            rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
+            new_X_unique <- matrix( rep( t( rep_new_X[[1]] ) , reps ) , ncol = ncol(rep_new_X[[1]]) , byrow = TRUE )
+            rep_idx0 <- rep_new_X[[2]] + 1
+            rep_idx <- c()
+            for (j in 1:reps){
+              rep_idx <- c(rep_idx, rep_idx0+(j-1)*nrow(rep_new_X[[1]]))
+            }
+
+            if ("..." %in% fnames){
+              new_output_unique <- do.call(f, c(list(new_X_unique), add_arg))
+            } else {
+              fidx <- fnames %in% names(add_arg)
+              fparam <- add_arg[fnames[fidx]]
+              new_output_unique <- do.call(f, c(list(new_X_unique), fparam))
+            }
+          }
+
+          if (ifelse(is.list(new_output_unique), all(!is.na(new_output_unique[[1]])), all(!is.na(new_output_unique)))) {
+            tryagain <- FALSE
+          } else if ( ifelse(is.list(new_output_unique), all(is.na(new_output_unique[[1]])), all(is.na(new_output_unique)) ))  {
+            if ( is.null(x_cand) ){
+              exclude_lhd_input <- c()
+              for (j in 1:nrow(res) ){
+                if ( is.null(target) ) {
+                  exclude_lhd_input <- rbind(exclude_lhd_input, do.call(rbind, lapply(1:n_emulators, function(i) {
+                    sub_cand_lhd[[i]][res[j,i],,drop = FALSE]
+                  })))
+                } else {
+                  exclude_lhd_input <- rbind(exclude_lhd_input, do.call(rbind, lapply(1:n_emulators, function(i) {
+                    sub_cand_lhd[[i]][res[j,i],,drop = FALSE]
+                  }))[!istarget,,drop=FALSE])
+                }
+              }
+              unique_exclude_lhd_input <- pkg.env$np$unique(exclude_lhd_input, return_inverse=TRUE, axis=0L)
+              target_points <- lapply(target_points, function(x) rbind(x, unique_exclude_lhd_input[[1]]))
+            } else {
+              target_points <- lapply(target_points, function(x) rbind(x, rep_new_X))
+
+              if ( is.null(target) ){
+                idx_x_acq <- Map(c, idx_x_acq, lapply(x_cand, find_matching_indices, mat2 = rep_new_X))
+              } else {
+                idx_x_acq[!istarget] <- Map(c, idx_x_acq[!istarget], lapply(x_cand[!istarget], find_matching_indices, mat2 = rep_new_X))
+              }
+
+              idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
+            }
+            if ( verb ) {
+              message(" - Re-Locating ...", appendLF = FALSE)
+            }
+          } else {
+            if ( is.list(new_output_unique) ){
+              keep_idx <- !is.na(new_output_unique[[1]])
+              keep_X <- lapply(1:n_emulators, function(k) if (all(!keep_idx[,k])) {NULL} else {new_X_unique[keep_idx[,k],,drop=F]})
+            } else {
+              keep_idx <- !is.na(new_output_unique)
+              keep_X <- lapply(1:n_emulators, function(k) if (all(!keep_idx[,k])) {NULL} else {new_X_unique[keep_idx[,k],,drop=F]})
+            }
+            if ( is.null(x_cand) ){
+              exclude_points <- lapply(keep_X, function(mat) if (is.null(mat)) {new_X_unique} else {unname(as.matrix(dplyr::setdiff(as.data.frame(new_X_unique), as.data.frame(mat))))})
+              exclude_points_lhd <- lapply(1:n_emulators, function(k) if (length(exclude_points[[k]])==0) {exclude_points[[k]]} else {sub_cand_lhd[[k]][find_matching_indices(sub_cand[[k]], exclude_points[[k]]),,drop=F]})
+              target_points <- lapply(1:n_emulators, function(k) rbind(target_points[[k]], exclude_points_lhd[[k]]))
+            } else {
+              exclude_points <- lapply(keep_X, function(mat) if (is.null(mat)) {new_X_unique} else {unname(as.matrix(dplyr::setdiff(as.data.frame(new_X_unique), as.data.frame(mat))))})
+              target_points <- lapply(1:n_emulators, function(k) rbind(target_points[[k]], exclude_points[[k]]))
+            }
+            tryagain <- FALSE
+          }
+
         }
 
         if ( nrow(res)==1 ){
-          new_X <- sub_cand[res[1,],,drop=FALSE]
-          if ( !is.null(target) ){
-            new_X <- new_X[!istarget,,drop=FALSE]
-          }
-          rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
-          new_X_unique <- matrix( rep( t( rep_new_X[[1]] ) , reps ) , ncol = ncol(rep_new_X[[1]]) , byrow = TRUE )
-          rep_idx0 <- rep_new_X[[2]] + 1
-          rep_idx <- c()
-          for (j in 1:reps){
-            rep_idx <- c(rep_idx, rep_idx0+(j-1)*nrow(rep_new_X[[1]]))
-          }
-          if ("..." %in% fnames){
-            new_output_unique <- do.call(f, c(list(new_X_unique), add_arg))
-          } else {
-            fidx <- fnames %in% names(add_arg)
-            fparam <- add_arg[fnames[fidx]]
-            new_output_unique <- do.call(f, c(list(new_X_unique), fparam))
-          }
           if ( is.list(new_output_unique) ){
             new_Y_unique <- new_output_unique[[1]]
             if ( length(new_output_unique)!=1 ){
@@ -1753,58 +2050,41 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             new_Y_unique <- new_output_unique
           }
           new_Y <- new_Y_unique[rep_idx,,drop=F]
-          temp <- rep(reps, n_emulators)
-          if ( !is.null(target) ) temp[istarget] <- 0
-          N_acq_ind <- rbind(N_acq_ind, temp)
 
-          if ( !is.null(x_cand) ) {
-            if ( is.null(target) ){
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res[1,])])
-            } else {
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res[1,!istarget])])
+          temp_before <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+
+          if ( is.null(target) ){
+            new_X_list <- lapply(1:n_emulators, function(k) matrix(rep(new_X[k, ], each = reps), nrow = reps, byrow = TRUE))
+            new_Y_list <- lapply(1:n_emulators, function(k) new_Y[seq(k, by = n_emulators, length = reps), k, drop = FALSE] )
+            if ( !is.null(x_cand) ) idx_x_acq <- Map(c, idx_x_acq, lapply(Map(find_matching_indices, x_cand, new_X_list), unique))
+          } else {
+            new_X_list <- vector('list', n_emulators)
+            new_Y_list <- vector('list', n_emulators)
+            ct <- 1
+            for (k in 1:n_emulators){
+              if (!istarget[k]){
+                new_X_list[[k]] <- matrix(rep(new_X[ct, ], each = reps), nrow = reps, byrow = TRUE)
+                new_Y_list[[k]] <- new_Y[seq(ct, by = sum(!istarget), length = reps), k, drop = FALSE]
+                ct <- ct + 1
+              }
             }
-            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+            if ( !is.null(x_cand) ) idx_x_acq[!istarget] <- Map(c, idx_x_acq[!istarget], lapply(Map(find_matching_indices, x_cand[!istarget], new_X_list[!istarget]), unique))
           }
+          if ( !is.null(x_cand) ) idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
 
-          if ( !is.null(target) ) ctr <- 1
           for ( j in 1:n_emulators ){
-            if ( is.null(target) ){
-              X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]],
-                 matrix( rep( t( new_X[j,,drop=FALSE] ) , reps ) , ncol = ncol(new_X[j,,drop=FALSE]) , byrow = TRUE ))
-              Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[seq(j, by = n_emulators, length = reps),j,drop=FALSE])
-            } else {
-              if ( !istarget[j] ) {
-                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]],
-                  matrix( rep( t( new_X[ctr,,drop=FALSE] ) , reps ) , ncol = ncol(new_X[ctr,,drop=FALSE]) , byrow = TRUE ))
-                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[seq(ctr, by = sum(!istarget), length = reps),j,drop=FALSE])
-                ctr <- ctr + 1
+            if ( !is.null(new_Y_list[[j]]) ){
+              na.idx <- is.na(new_Y_list[[j]])
+              if ( !all(na.idx) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X_list[[j]][!na.idx,,drop=FALSE])
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y_list[[j]][!na.idx,,drop=FALSE])
               }
             }
           }
+
+          temp_after <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+          N_acq_ind <- rbind(N_acq_ind, temp_after-temp_before)
         } else {
-          new_X <- c()
-          for (j in 1:nrow(res) ){
-            if ( is.null(target) ) {
-              new_X <- rbind(new_X, sub_cand[res[j,],,drop=FALSE])
-            } else {
-              new_X <- rbind(new_X, sub_cand[res[j,],,drop=FALSE][!istarget,,drop=FALSE])
-            }
-          }
-          rep_new_X <- pkg.env$np$unique(new_X, return_inverse=TRUE, axis=0L)
-          new_X_unique <- matrix( rep( t( rep_new_X[[1]] ) , reps ) , ncol = ncol(rep_new_X[[1]]) , byrow = TRUE )
-          rep_idx0 <- rep_new_X[[2]] + 1
-          rep_idx <- c()
-          for (j in 1:reps){
-            rep_idx <- c(rep_idx, rep_idx0+(j-1)*nrow(rep_new_X[[1]]))
-          }
-
-          if ("..." %in% fnames){
-            new_output_unique <- do.call(f, c(list(new_X_unique), add_arg))
-          } else {
-            fidx <- fnames %in% names(add_arg)
-            fparam <- add_arg[fnames[fidx]]
-            new_output_unique <- do.call(f, c(list(new_X_unique), fparam))
-          }
           if ( is.list(new_output_unique) ){
             new_Y_unique <- new_output_unique[[1]]
             if ( length(new_output_unique)!=1 ){
@@ -1817,83 +2097,72 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
 
           new_Y <- new_Y_unique[rep_idx,,drop=F]
 
-          temp <- rep(nrow(res)*reps, n_emulators)
-          if ( !is.null(target) ) temp[istarget] <- 0
-          N_acq_ind <- rbind(N_acq_ind, temp)
+          temp_before <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
 
-          if ( !is.null(x_cand) ) {
-            if ( is.null(target) ){
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
-            } else {
-              mask <- rep(!istarget, nrow(res))
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res))[mask])])
+          if ( is.null(target) ){
+            new_X_list <- vector('list', n_emulators)
+            new_Y_list <- vector('list', n_emulators)
+            for (k in 1:n_emulators){
+              extract0 <- k + seq(0, by = n_emulators, length = nrow(res))
+              extract <- rep(extract0, reps) +  rep(seq(0, by = nrow(new_X), length.out = reps), each = length(extract0))
+              extracted_X <- new_X[extract0,,drop=FALSE]
+              new_X_list[[k]] <- matrix( rep( t( extracted_X ) , reps ) , ncol = ncol(extracted_X) , byrow = TRUE )
+              new_Y_list[[k]] <- new_Y[extract,k,drop=FALSE]
             }
-            idx_x_cand <- idx_x_cand0[-idx_x_acq]
-          }
-
-          if ( !is.null(target) ) {
-            ctr <- 1
+            if ( !is.null(x_cand) ) idx_x_acq <- Map(c, idx_x_acq, lapply(Map(find_matching_indices, x_cand, new_X_list), unique))
+          } else {
+            ct <- 1
             active_emu <- sum(!istarget)
-          }
-          for ( j in 1:n_emulators ){
-            if ( is.null(target) ){
-              extract0 <- j + seq(0, by = n_emulators, length = nrow(res))
-              extract <- c()
-              for (l in 1:reps){
-                extract <- c(extract, extract0+(l-1)*nrow(new_X))
+            new_X_list <- vector('list', n_emulators)
+            new_Y_list <- vector('list', n_emulators)
+            for (k in 1:n_emulators){
+              if (!istarget[k]){
+                extract0 <- ct + seq(0, by = active_emu, length = nrow(res))
+                extract <- rep(extract0, reps) +  rep(seq(0, by = nrow(new_X), length.out = reps), each = length(extract0))
+                extracted_X <- new_X[extract0,,drop=FALSE]
+                new_X_list[[k]] <- matrix( rep( t( extracted_X ) , reps ) , ncol = ncol(extracted_X) , byrow = TRUE )
+                new_Y_list[[k]] <- new_Y[extract,k,drop=FALSE]
+                ct <- ct + 1
               }
-              X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]],
-                  matrix( rep( t( new_X[extract0,,drop=FALSE] ) , reps ) , ncol = ncol(new_X[extract0,,drop=FALSE]) , byrow = TRUE ))
-              Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
-            } else {
-              if ( !istarget[j] ) {
-                extract0 <- ctr + seq(0, by = active_emu, length = nrow(res))
-                extract <- c()
-                for (l in 1:reps){
-                  extract <- c(extract, extract0+(l-1)*nrow(new_X))
-                }
-                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]],
-                    matrix( rep( t( new_X[extract0,,drop=FALSE] ) , reps ) , ncol = ncol(new_X[extract0,,drop=FALSE]) , byrow = TRUE ))
-                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
-                ctr <- ctr + 1
+            }
+
+            if ( !is.null(x_cand) ) idx_x_acq[!istarget] <- Map(c, idx_x_acq[!istarget], lapply(Map(find_matching_indices, x_cand[!istarget], new_X_list[!istarget]), unique))
+          }
+          if ( !is.null(x_cand) ) idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
+
+          for ( j in 1:n_emulators ){
+            if ( !is.null(new_Y_list[[j]]) ){
+              na.idx <- is.na(new_Y_list[[j]])
+              if ( !all(na.idx) ){
+                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X_list[[j]][!na.idx,,drop=FALSE])
+                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y_list[[j]][!na.idx,,drop=FALSE])
               }
             }
           }
+
+          temp_after <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+          N_acq_ind <- rbind(N_acq_ind, temp_after-temp_before)
         }
 
         if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
           for ( k in 1:n_emulators ){
-            if ( is.null(target) ) {
+            if (N_acq_ind[nrow(N_acq_ind),k]!=0){
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
               if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
               object[[paste('emulator',k,sep='')]] <- obj_k
-            } else {
-              if ( !istarget[k] ){
-                obj_k <- object[[paste('emulator',k,sep='')]]
-                if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
-                object[[paste('emulator',k,sep='')]] <- obj_k
-              }
             }
           }
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
           for ( k in 1:n_emulators ){
-            if ( is.null(target) ) {
+            if ( N_acq_ind[nrow(N_acq_ind),k]!=0 ) {
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
               if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, reset = reset[i-start_point], verb = FALSE, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
               object[[paste('emulator',k,sep='')]] <- obj_k
-            } else {
-              if ( !istarget[k] ){
-                obj_k <- object[[paste('emulator',k,sep='')]]
-                if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = FALSE, reset = reset[i-start_point], verb = FALSE, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
-                object[[paste('emulator',k,sep='')]] <- obj_k
-              }
             }
           }
           if ( verb ) message(" done")
@@ -1904,20 +2173,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               for ( k in 1:n_emulators ){
-                if ( is.null(target) ) {
+                if ( N_acq_ind[nrow(N_acq_ind),k]!=0 ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
                   if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$loo$rmse
-                } else {
-                  if ( !istarget[k] ){
-                    obj_k <- object[[paste('emulator',k,sep='')]]
-                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
-                    object[[paste('emulator',k,sep='')]] <- obj_k
-                    rmse[k] <- obj_k$loo$rmse
-                  }
                 }
               }
               if ( verb ) message(" done")
@@ -1925,20 +2186,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               for ( k in 1:n_emulators ){
-                if ( is.null(target) ) {
+                if ( N_acq_ind[nrow(N_acq_ind),k]!=0 ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
                   if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$oos$rmse
-                } else {
-                  if ( !istarget[k] ){
-                    obj_k <- object[[paste('emulator',k,sep='')]]
-                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
-                    object[[paste('emulator',k,sep='')]] <- obj_k
-                    rmse[k] <- obj_k$oos$rmse
-                  }
                 }
               }
               if ( verb ) message(" done")
@@ -1953,14 +2206,11 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               vparam <- add_arg[vnames[vidx]]
               rmse_tmp <- do.call(eval, c(list(object), vparam))
             }
-            if ( is.null(target) ) {
+            if( length(rmse_tmp)==1 ){
               rmse <- rmse_tmp
             } else {
-              if( length(rmse_tmp)==1 ){
-                rmse <- rmse_tmp
-              } else {
-                rmse[!istarget] <- rmse_tmp[!istarget]
-              }
+              idx_rmse <- N_acq_ind[nrow(N_acq_ind),]!=0
+              rmse[idx_rmse] <- rmse_tmp[idx_rmse]
             }
             if ( verb ) message(" done")
             if ( verb ) message(paste(c(" * Metric:", sprintf("%.06f", rmse)), collapse=" "))
@@ -1980,14 +2230,24 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           }
         }
 
-        if ( !is.null(check_point) ){
-          if (i %in% check_point ){
-            ans <- readline(prompt="Do you want to continue? (Y/N) ")
-            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-              message(sprintf("The sequential design is terminated at step %i.", i))
-              N <- i
-              break
+        if (autosave_config$switch && i %% autosave_config$freq == 0) {
+          if (i != N) {
+            if ( verb ) message(" - Auto-saving ...", appendLF = FALSE)
+            save_file_name <- if (autosave_config$overwrite) {
+              autosave_config$fname
+            } else {
+              paste0(autosave_config$fname, "_", i)
             }
+            object_temp <- pack_bundle(object, first_time, i, eval, new_wave, rmse_records, freq, N_acq_ind, target, type, X, Y, y_cand,
+                                       n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                                       design_info = if(isFALSE(first_time)) design_info else NULL,
+                                       x_test = if(identical(type, 'oos')) x_test else NULL,
+                                       y_test = if(identical(type, 'oos')) y_test else NULL,
+                                       istarget = if(!is.null(target)) istarget else NULL,
+                                       target_points = if(is.null(y_cand)) target_points else NULL)
+            save_file_path <- file.path(autosave_config$directory, save_file_name)
+            write(object_temp, save_file_path)
+            if ( verb ) message(" done")
           }
         }
 
@@ -1997,22 +2257,26 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     add_arg <- list(...)
     xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
 
+    x_cand <- vector('list', n_emulators)
+    x_cand_origin <- vector('list', n_emulators)
+    y_cand <- vector('list', n_emulators)
+    is.dup <- vector('list', n_emulators)
     for (j in 1:n_emulators){
-      xy_cand_list <- remove_dup(xy_cand_list, X[[paste('emulator',j,sep="")]])
+      xy_cand_list_j <- remove_dup( xy_cand_list, X[[paste('emulator',j,sep="")]] )
+      y_cand[[j]] <- xy_cand_list_j[[2]]
+      x_cand_origin[[j]] <- xy_cand_list_j[[1]]
+      x_cand_rep <- pkg.env$np$unique(x_cand_origin[[j]], return_inverse=TRUE, axis=0L)
+      if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin[[j]]) ){
+        x_cand[[j]] <- x_cand_origin[[j]]
+        is.dup[[j]] <- FALSE
+      } else {
+        x_cand[[j]] <- x_cand_rep[[1]]
+        is.dup[[j]] <- TRUE
+      }
     }
-    x_cand_origin <- xy_cand_list[[1]]
-    x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
-    if ( nrow(x_cand_rep[[1]])==nrow(x_cand_origin) ){
-      x_cand <- x_cand_origin
-      is.dup <- FALSE
-    } else {
-      x_cand <- x_cand_rep[[1]]
-      is.dup <- TRUE
-    }
-    y_cand <- xy_cand_list[[2]]
-    idx_x_cand0 <- c(1:nrow(x_cand))
+    idx_x_cand0 <- lapply(1:n_emulators, function(k){c(1:nrow(x_cand[[k]]))})
     idx_x_cand <- idx_x_cand0
-    idx_x_acq <- c()
+    idx_x_acq <- vector('list', n_emulators)
 
     if (start_point == 0){
       if ( verb ) message("Initializing ...", appendLF = FALSE)
@@ -2074,14 +2338,23 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
 
     if ( run ){
       for ( i in (1+start_point):N ){
-        if ( n_cand<=length(idx_x_cand) ){
-          idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[idx_x_cand,,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
-          idx_sub_cand <- idx_x_cand[idx_idx]
-          #idx_sub_cand <- sample(idx_x_cand, n_cand, replace = FALSE)
-        } else {
-          idx_sub_cand <- idx_x_cand
+        sub_cand <- vector('list', n_emulators)
+        idx_sub_cand <- vector('list', n_emulators)
+        for (j in 1:n_emulators){
+          if ( n_cand<=length(idx_x_cand[[j]]) ){
+            if (n_dim_X == 1){
+              idx_sub_cand[[j]] <- sample(idx_x_cand[[j]], n_cand, replace = FALSE)
+            } else {
+              idx_idx <- suppressPackageStartupMessages(clhs::clhs(as.data.frame(x_cand[[j]][idx_x_cand[[j]],,drop = FALSE]), size = n_cand, progress = FALSE, simple = TRUE))
+              idx_sub_cand[[j]] <- idx_x_cand[[j]][idx_idx]
+            }
+          } else {
+            idx_sub_cand[[j]] <- idx_x_cand[[j]]
+          }
+          sub_cand[[j]] <- x_cand[[j]][idx_sub_cand[[j]],,drop = FALSE]
         }
-        sub_cand <- x_cand[idx_sub_cand,,drop = FALSE]
+
+
         if ( verb ) {
           message(sprintf("Iteration %i:", i))
           message(" - Locating ...", appendLF = FALSE)
@@ -2101,10 +2374,10 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           if ( nrow(res)==1 ){
             for ( j in 1:n_emulators ){
               if ( is.null(target) ){
-                message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
+                message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[[j]][res[1,j],])), collapse=" "))
               } else {
                 if ( !istarget[j] ){
-                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[res[1,j],])), collapse=" "))
+                  message(paste(c(sprintf(" * Next design point (Emulator%i):", j), sprintf("%.06f", sub_cand[[j]][res[1,j],])), collapse=" "))
                 } else {
                   message(sprintf(" * Next design point (Emulator%i): None (target reached)", j))
                 }
@@ -2114,10 +2387,10 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             for ( j in 1:nrow(res) ){
               for ( k in 1:n_emulators ){
                 if ( is.null(target) ){
-                  message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
+                  message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[[j]][res[j,k],])), collapse=" "))
                 } else {
                   if ( !istarget[k] ){
-                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[res[j,k],])), collapse=" "))
+                    message(paste(c(sprintf(" * Next design point (Position%i for Emulator%i):", j, k), sprintf("%.06f", sub_cand[[j]][res[j,k],])), collapse=" "))
                   } else {
                     message(sprintf(" * Next design point (Position%i for Emulator%i): None (target reached)", j, k))
                   }
@@ -2128,128 +2401,75 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
         }
 
         if ( nrow(res)==1 ){
-          new_X_temp <- sub_cand[res[1,],,drop=FALSE]
-          if ( is.dup ){
-            temp <- c()
-            for ( j in 1:n_emulators ){
-              new_idx <- extract_all(new_X_temp[j,,drop=FALSE], x_cand_origin)
-              new_X <- x_cand_origin[new_idx,,drop=FALSE]
-              new_Y <- y_cand[new_idx,,drop=FALSE]
-              if ( is.null(target) ){
-                temp <- c(temp, nrow(new_X))
+          temp_before <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+          for ( j in 1:n_emulators ){
+            if ( is.dup[[j]] ){
+              new_X_temp <- sub_cand[[j]][res[1,j],,drop=FALSE]
+              new_idx <- extract_all(new_X_temp, x_cand_origin[[j]])
+              new_X <- x_cand_origin[[j]][new_idx,,drop=FALSE]
+              new_Y <- y_cand[[j]][new_idx,,drop=FALSE]
+            } else {
+              new_idx <- res[1,j]
+              new_X <- sub_cand[[j]][new_idx,,drop=FALSE]
+              new_Y <- y_cand[[j]][idx_sub_cand[[j]],,drop=FALSE][new_idx,,drop=FALSE]
+            }
+            if ( is.null(target) ){
+              X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+              Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+            } else {
+              if ( !istarget[j] ) {
                 X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
                 Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
-              } else {
-                if ( !istarget[j] ) {
-                  temp <- c(temp, nrow(new_X))
-                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
-                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
-                } else {
-                  temp <- c(temp, 0)
-                }
               }
             }
 
-            N_acq_ind <- rbind(N_acq_ind, temp)
-
             if ( is.null(target) ){
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res[1,])])
+              idx_x_acq[[j]] <- c(idx_x_acq[[j]], idx_sub_cand[[j]][res[1,j]])
+              idx_x_cand[[j]] <- idx_x_cand0[[j]][-idx_x_acq[[j]]]
             } else {
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res[1,][!istarget])])
-            }
-            idx_x_cand <- idx_x_cand0[-idx_x_acq]
-          } else {
-            new_X <- new_X_temp
-            new_idx <- res[1,]
-            new_Y <- y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE]
-
-            temp <- rep(1, n_emulators)
-            if ( !is.null(target) ) temp[istarget] <- 0
-            N_acq_ind <- rbind(N_acq_ind, temp)
-
-            for ( j in 1:n_emulators ){
-              if ( is.null(target) ){
-                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[j,,drop=FALSE])
-                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[j,j,drop=FALSE])
-              } else {
-                if ( !istarget[j] ) {
-                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[j,,drop=FALSE])
-                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[j,j,drop=FALSE])
-                }
+              if ( !istarget[j] ) {
+                idx_x_acq[[j]] <- c(idx_x_acq[[j]], idx_sub_cand[[j]][res[1,j]])
+                idx_x_cand[[j]] <- idx_x_cand0[[j]][-idx_x_acq[[j]]]
               }
             }
-            if ( is.null(target) ){
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx)])
-            } else {
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx[!istarget])])
-            }
-            idx_x_cand <- idx_x_cand0[-idx_x_acq]
           }
+          temp_after <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+          N_acq_ind <- rbind(N_acq_ind, temp_after-temp_before)
         } else {
-          if ( is.dup ){
-            temp <- c()
-            for ( j in 1:n_emulators ){
-              new_X_temp <- sub_cand[res[,j],,drop=FALSE]
-              new_idx <- extract_all(new_X_temp, x_cand_origin)
-              new_X <- x_cand_origin[new_idx,,drop=FALSE]
-              new_Y <- y_cand[new_idx,,drop=FALSE]
-              if ( is.null(target) ){
-                temp <- c(temp, nrow(new_X))
+          temp_before <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+          for ( j in 1:n_emulators ){
+            if ( is.dup[[j]] ){
+              new_X_temp <- sub_cand[[j]][res[,j],,drop=FALSE]
+              new_idx <- extract_all(new_X_temp, x_cand_origin[[j]])
+              new_X <- x_cand_origin[[j]][new_idx,,drop=FALSE]
+              new_Y <- y_cand[[j]][new_idx,,drop=FALSE]
+            } else {
+              new_idx <- res[,j]
+              new_X <- sub_cand[[j]][new_idx,,drop=FALSE]
+              new_Y <- y_cand[[j]][idx_sub_cand[[j]],,drop=FALSE][new_idx,,drop=FALSE]
+            }
+            if ( is.null(target) ){
+              X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
+              Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
+            } else {
+              if ( !istarget[j] ) {
                 X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
                 Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
-              } else {
-                if ( !istarget[j] ) {
-                  temp <- c(temp, nrow(new_X))
-                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X)
-                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[,j,drop=FALSE])
-                } else {
-                  temp <- c(temp, 0)
-                }
               }
             }
 
-            N_acq_ind <- rbind(N_acq_ind, temp)
-
             if ( is.null(target) ){
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res)))])
+              idx_x_acq[[j]] <- c(idx_x_acq[[j]], idx_sub_cand[[j]][res[,j]])
+              idx_x_cand[[j]] <- idx_x_cand0[[j]][-idx_x_acq[[j]]]
             } else {
-              mask <- rep(!istarget, nrow(res))
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(as.vector(t(res))[mask])])
-            }
-            idx_x_cand <- idx_x_cand0[-idx_x_acq]
-          } else {
-            new_X <- c()
-            new_idx <- c()
-            for (j in 1:nrow(res) ){
-              new_X <- rbind(new_X, sub_cand[res[j,],,drop=FALSE])
-              new_idx <- c(new_idx, res[j,])
-            }
-            new_Y <- y_cand[idx_sub_cand,,drop=FALSE][new_idx,,drop=FALSE]
-
-            temp <- rep(nrow(res), n_emulators)
-            if ( !is.null(target) ) temp[istarget] <- 0
-            N_acq_ind <- rbind(N_acq_ind, temp)
-
-            for ( j in 1:n_emulators ){
-              extract <- j + seq(0, by = n_emulators, length = nrow(res))
-              if ( is.null(target) ){
-                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[extract,,drop=FALSE])
-                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
-              } else {
-                if ( !istarget[j] ) {
-                  X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X[extract,,drop=FALSE])
-                  Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y[extract,j,drop=FALSE])
-                }
+              if ( !istarget[j] ) {
+                idx_x_acq[[j]] <- c(idx_x_acq[[j]], idx_sub_cand[[j]][res[,j]])
+                idx_x_cand[[j]] <- idx_x_cand0[[j]][-idx_x_acq[[j]]]
               }
             }
-            if ( is.null(target) ){
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx)])
-            } else {
-              mask <- rep(!istarget, nrow(res))
-              idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(new_idx[mask])])
-            }
-            idx_x_cand <- idx_x_cand0[-idx_x_acq]
           }
+          temp_after <- unlist(lapply(1:n_emulators, function(k) nrow(X[[paste('emulator',k,sep="")]])))
+          N_acq_ind <- rbind(N_acq_ind, temp_after-temp_before)
         }
 
         if ( i %% freq[1]==0 ){
@@ -2372,14 +2592,24 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           }
         }
 
-        if ( !is.null(check_point) ){
-          if (i %in% check_point ){
-            ans <- readline(prompt="Do you want to continue? (Y/N) ")
-            if ( tolower(ans)=='n'|tolower(ans)=='no' ) {
-              message(sprintf("The sequential design is terminated at step %i.", i))
-              N <- i
-              break
+        if (autosave_config$switch && i %% autosave_config$freq == 0) {
+          if (i != N) {
+            if ( verb ) message(" - Auto-saving ...", appendLF = FALSE)
+            save_file_name <- if (autosave_config$overwrite) {
+              autosave_config$fname
+            } else {
+              paste0(autosave_config$fname, "_", i)
             }
+            object_temp <- pack_bundle(object, first_time, i, eval, new_wave, rmse_records, freq, N_acq_ind, target, type, X, Y, y_cand,
+                                       n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                                       design_info = if(isFALSE(first_time)) design_info else NULL,
+                                       x_test = if(identical(type, 'oos')) x_test else NULL,
+                                       y_test = if(identical(type, 'oos')) y_test else NULL,
+                                       istarget = if(!is.null(target)) istarget else NULL,
+                                       target_points = if(is.null(y_cand)) target_points else NULL)
+            save_file_path <- file.path(autosave_config$directory, save_file_name)
+            write(object_temp, save_file_path)
+            if ( verb ) message(" done")
           }
         }
 
@@ -2388,58 +2618,26 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   }
 
   if ( run ){
-    if ( isTRUE(first_time) ){
-      object$design <- list()
-      object[["design"]][["wave1"]][["N"]] <- N
-      if ( is.null(eval) ){
-        object[["design"]][["wave1"]][["rmse"]] <- unname(rmse_records)
+    object <- pack_bundle(object, first_time, N, eval, new_wave, rmse_records, freq, N_acq_ind, target, type, X, Y, y_cand,
+                          n_wave = if(isFALSE(first_time)) n_wave else NULL,
+                          design_info = if(isFALSE(first_time)) design_info else NULL,
+                          x_test = if(identical(type, 'oos')) x_test else NULL,
+                          y_test = if(identical(type, 'oos')) y_test else NULL,
+                          istarget = if(!is.null(target)) istarget else NULL,
+                          target_points = if(is.null(y_cand)) target_points else NULL)
+
+    if (autosave_config$switch) {
+      if ( verb ) message(" - Auto-saving the final iteration ...", appendLF = FALSE)
+      save_file_name <- if (autosave_config$overwrite) {
+        autosave_config$fname
       } else {
-        object[["design"]][["wave1"]][["metric"]] <- unname(rmse_records)
+        paste0(autosave_config$fname, "_", N)
       }
-      object[["design"]][["wave1"]][["freq"]] <- freq[2]
-      object[["design"]][["wave1"]][["enrichment"]] <- unname(N_acq_ind)
-      if( !is.null(target) ) {
-        object[["design"]][["wave1"]][["target"]] <- target
-        object[["design"]][["wave1"]][["reached"]] <- if(length(target)==1) { all(istarget) } else { istarget }
-      }
-      object[["design"]][["type"]] <- type
-      if ( identical(type, 'oos') ){
-        object[["design"]][["x_test"]] <- x_test
-        object[["design"]][["y_test"]] <- y_test
-      }
-      object[['data']][['X']] <- X
-      object[['data']][['Y']] <- Y
-    } else {
-      object$design <- design_info
-      if (new_wave){
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["N"]] <- N
-        if ( is.null(eval) ){
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["rmse"]] <- unname(rmse_records)
-        } else {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["metric"]] <- unname(rmse_records)
-        }
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["freq"]] <- freq[2]
-        object[["design"]][[paste('wave', n_wave+1, sep="")]][["enrichment"]] <- unname(N_acq_ind)
-        if( !is.null(target) ) {
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["target"]] <- target
-          object[["design"]][[paste('wave', n_wave+1, sep="")]][["reached"]] <- if(length(target)==1) { all(istarget) } else { istarget }
-        }
-      } else {
-        object[["design"]][[paste('wave', n_wave, sep="")]][["N"]] <- N
-        if ( is.null(eval) ){
-          object[["design"]][[paste('wave', n_wave, sep="")]][["rmse"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["rmse"]], unname(rmse_records))
-        } else {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["metric"]] <- rbind( object[["design"]][[paste('wave', n_wave, sep="")]][["metric"]], unname(rmse_records))
-        }
-        object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]] <- rbind(object[["design"]][[paste('wave', n_wave, sep="")]][["enrichment"]], unname(N_acq_ind))
-        if( !is.null(target) ) {
-          object[["design"]][[paste('wave', n_wave, sep="")]][["target"]] <- target
-          object[["design"]][[paste('wave', n_wave, sep="")]][["reached"]] <- if(length(target)==1) { all(istarget) } else { istarget }
-        }
-      }
-      object[['data']][['X']] <- X
-      object[['data']][['Y']] <- Y
+      save_file_path <- file.path(autosave_config$directory, save_file_name)
+      write(object, save_file_path)
+      if ( verb ) message(" done")
     }
+
     if( !is.null(target) ) {
       if ( !all(istarget) ) message("Targets are not reached for all emulators at the end of the sequential design.")
     }
@@ -2476,6 +2674,15 @@ check_reps <- function(reps){
   reps <- as.integer(reps)
   if ( reps < 1 ) stop("'reps' must be greater than or equal to 1.", call. = FALSE)
   return(reps)
+}
+
+# find match indices between two matrices
+find_matching_indices <- function(mat1, mat2) {
+  mat1_string <- apply(mat1, 1, paste, collapse = "_")
+  mat2_string <- apply(mat2, 1, paste, collapse = "_")
+  idx <- match(mat2_string, mat1_string)
+  idx <- idx[!is.na(idx)]
+  return(idx)
 }
 
 #check argument x_cand and y_cand
@@ -2565,6 +2772,8 @@ check_limits <- function(limits, n_dim_X){
       limits <- matrix(limits, ncol=2, byrow=TRUE)
     }
     if ( nrow(limits)!=n_dim_X ) stop("You must provide ranges for all input dimensions through 'limits'.", call. = FALSE)
+  } else {
+    stop("'limits' must be provided.", call. = FALSE)
   }
   return(limits)
 }
@@ -2639,6 +2848,7 @@ check_design <- function(object, x_test, y_test, eval){
         first_time <- FALSE
         n_wave <- length(object$design)
         if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
+        if ( "exclusion" %in% names(object$design) ) n_wave <- n_wave - 1
         if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) n_wave <- n_wave - 2
       }
     } else {
@@ -2650,6 +2860,7 @@ check_design <- function(object, x_test, y_test, eval){
           first_time <- FALSE
           n_wave <- length(object$design)
           if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
+          if ( "exclusion" %in% names(object$design) ) n_wave <- n_wave - 1
           if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) n_wave <- n_wave - 2
         } else {
           first_time <- TRUE
@@ -2662,6 +2873,7 @@ check_design <- function(object, x_test, y_test, eval){
       first_time <- FALSE
       n_wave <- length(object$design)
       if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1
+      if ( "exclusion" %in% names(object$design) ) n_wave <- n_wave - 1
     } else {
       first_time <- TRUE
       n_wave <- 0
