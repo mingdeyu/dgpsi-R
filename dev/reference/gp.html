@@ -79,7 +79,8 @@
 <span>  training <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -179,12 +180,18 @@ In addition, the first and second columns of <code>X[,internal_input_idx]</code>
 </ul><p>Set <code>linked_idx = NULL</code> if the GP emulator will not be used for linked emulations. However, if this is no longer the case, one can use <code><a href="set_linked_idx.html">set_linked_idx()</a></code>
 to add linking information to the GP emulator. Defaults to <code>NULL</code>.</p></dd>
 
+
+<dt>id</dt>
+<dd><p>an ID to be assigned to the GP emulator. If an ID is not provided (i.e., <code>id = NULL</code>), a UUID (Universally Unique Identifier) will be automatically generated
+and assigned to the emulator. Default to <code>NULL</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An S3 class named <code>gp</code> that contains five slots:</p><ul><li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
+<p>An S3 class named <code>gp</code> that contains five slots:</p><ul><li><p><code>id</code>: A number or character string assigned through the <code>id</code> argument.</p></li>
+<li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
 <li><p><code>specs</code>: a list that contains seven elements:</p><ol><li><p><code>kernel</code>: the type of the kernel function used. Either <code>"sexp"</code> for squared exponential kernel or <code>"matern2.5"</code> for Matérn-2.5 kernel.</p></li>
 <li><p><code>lengthscales</code>: a vector of lengthscales in the kernel function.</p></li>
 <li><p><code>scale</code>: the variance value in the kernel function.</p></li>

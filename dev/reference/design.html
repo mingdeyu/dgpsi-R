@@ -82,7 +82,7 @@
 <span>  <span class="va">method</span>,</span>
 <span>  <span class="va">eval</span>,</span>
 <span>  <span class="va">verb</span>,</span>
-<span>  <span class="va">check_point</span>,</span>
+<span>  <span class="va">autosave</span>,</span>
 <span>  <span class="va">new_wave</span>,</span>
 <span>  <span class="va">cores</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -107,7 +107,7 @@
 <span>  method <span class="op">=</span> <span class="va">vigf</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autosave <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -132,7 +132,7 @@
 <span>  method <span class="op">=</span> <span class="va">vigf</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autosave <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -161,7 +161,7 @@
 <span>  method <span class="op">=</span> <span class="va">vigf</span>,</span>
 <span>  eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  check_point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autosave <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -204,9 +204,8 @@ design point, if <code>x_cand</code> is not <code>NULL</code>.</p></li>
 <dt>limits</dt>
 <dd><p>a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
-dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. If
-<code>limits = NULL</code>, the ranges of input dimensions will be determined from the training data contained in <code>object</code>. This argument
-is used when <code>x_cand = NULL</code> and <code>y_cand = NULL</code>. Defaults to <code>NULL</code>.</p></dd>
+dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. Set
+<code>limits = NULL</code> if <code>x_cand</code> is supplied. This argument is only used when <code>x_cand</code> is not supplied, i.e., <code>x_cand = NULL</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>int</dt>
@@ -223,7 +222,7 @@ only one output dimension, the matrix still needs to be returned with a single c
 of any arguments with the same names passed via <code>...</code>. The list output can be useful if some additional arguments of <code>f</code> and <code>aggregate</code>
 need to be updated after each step of the sequential design.</p></li>
 </ul></li>
-</ul></dd>
+</ul><p>See <em>Note</em> section below for further information. This argument is used when <code>y_cand = NULL</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>reps</dt>
@@ -299,10 +298,16 @@ argument is an instance of the <code>bundle</code> class.</p></li>
 Defaults to <code>TRUE</code>.</p></dd>
 
 
-<dt>check_point</dt>
-<dd><p>a vector of integers that indicates at which steps the sequential design will pause and ask for the confirmation
-from the user if the sequential design should continue or be terminated. Set to <code>NULL</code> to suspend the manual intervention. Defaults
-to <code>NULL</code>.</p></dd>
+<dt>autosave</dt>
+<dd><p>a list that contains configuration settings for the automatic saving of the emulator:</p><ul><li><p><code>switch</code>: a bool indicating whether to enable the automatic saving of the emulator during the sequential design. When set to <code>TRUE</code>,
+the emulator in the final iteration is always saved. Defaults to <code>FALSE</code>.</p></li>
+<li><p><code>directory</code>: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
+of <code>directory</code> named 'emulator-<code>id</code>'. Defaults to './check_points'.</p></li>
+<li><p><code>fname</code>: a string representing the base name for the saved emulator files. Defaults to 'check_point'.</p></li>
+<li><p><code>freq</code>: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to <code>5</code>.</p></li>
+<li><p><code>overwrite</code>: a bool value controlling the file saving behavior. When set to <code>TRUE</code>, each new automatic saving overwrites the previous one,
+keeping only the latest version. If <code>FALSE</code>, each automatic saving creates a new file, preserving all previous versions. Defaults to <code>FALSE</code>.</p></li>
+</ul></dd>
 
 
 <dt>new_wave</dt>
@@ -371,6 +376,9 @@ class) that indicate if the target RMSEs are reached at the end of the sequentia
 <li><p>the customized R function provided to <code>eval</code>.</p></li>
 </ul></li>
 <li><p>two slots called <code>x_test</code> and <code>y_test</code> that contain the data points for the OOS validation if the <code>type</code> slot is <code>oos</code>.</p></li>
+<li><p>If <code>y_cand = NULL</code> and there are <code>NA</code>s returned from the supplied <code>f</code> during the sequential design, a slot called <code>exclusion</code> is included
+that records the located design positions that produced <code>NA</code>s via <code>f</code>. The sequential design will use this information to
+avoid re-visiting the same locations (if <code>x_cand</code> is supplied) or their neighborhoods (if <code>x_cand</code> is <code>NULL</code>) in later runs of <code>design()</code>.</p></li>
 </ul><p>See <em>Note</em> section below for further information.</p>
     </div>
     <div class="section level2">
@@ -402,6 +410,9 @@ to that of the output from <code>eval</code>.</p></li>
 <li><p>the column order of the output matrix of <code>f</code> is consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the <code>dgp</code> class),
 or the order of emulators placed in <code>object</code> (if <code>object</code> is an instance of the <code>bundle</code> class).</p></li>
 </ul></li>
+<li><p>The output matrix produced by <code>f</code> may include <code>NA</code>s. This is especially beneficial as it allows the sequential design process to continue without interruption,
+even if errors or <code>NA</code> outputs are encountered from <code>f</code> at certain input locations identified by the sequential designs. Users should ensure to handle any errors
+within <code>f</code> by appropriately returning <code>NA</code>s.</p></li>
 <li><p>When defining <code>eval</code>, the output metric needs to be positive if <code><a href="draw.html">draw()</a></code> is used with <code>log = T</code>. And one needs to ensure that a lower metric value indicates
 a better emulation performance if <code>target</code> is set.</p></li>
 <li><p>Any R vector detected in <code>x_test</code> and <code>y_test</code> will be treated as a column vector and automatically converted into a single-column

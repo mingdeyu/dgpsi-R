@@ -93,7 +93,8 @@
 <span>  burnin <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  B <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -291,12 +292,18 @@ correspond to the output dimensions 1 to 3 from layer 3.</p></li>
 </ul><p>Set <code>linked_idx = NULL</code> if the DGP emulator will not be used for linked emulations. However, if this is no longer the case, one can use <code><a href="set_linked_idx.html">set_linked_idx()</a></code>
 to add linking information to the DGP emulator. Defaults to <code>NULL</code>.</p></dd>
 
+
+<dt>id</dt>
+<dd><p>an ID to be assigned to the DGP emulator. If an ID is not provided (i.e., <code>id = NULL</code>), a UUID (Universally Unique Identifier) will be automatically generated
+and assigned to the emulator. Default to <code>NULL</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An S3 class named <code>dgp</code> that contains five slots:</p><ul><li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
+<p>An S3 class named <code>dgp</code> that contains five slots:</p><ul><li><p><code>id</code>: A number or character string assigned through the <code>id</code> argument.</p></li>
+<li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
 <li><p><code>specs</code>: a list that contains</p><ol><li><p><em>L</em> (i.e., the number of layers in the DGP hierarchy) sub-lists named <code>layer1, layer2,..., layerL</code>. Each sub-list contains <em>D</em>
 (i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named <code>node1, node2,..., nodeD</code>. If a sub-list
 corresponds to a likelihood node, it contains one element called <code>type</code> that gives the name (<code>Hetero</code>, <code>Poisson</code>, or <code>NegBin</code>) of the likelihood node.

@@ -68,6 +68,17 @@
 <li>A bug in <code><a href="../reference/vigf.html">vigf()</a></code> is fixed when <code>object</code> is an instance of the <code>bundle</code> class and <code>batch_size</code> is greater than one.</li>
 <li>Static and dynamic pruning of DGP structures are implemented in <code><a href="../reference/prune.html">prune()</a></code> and <code><a href="../reference/design.html">design()</a></code> (via the new arguments <code>pruning</code> and <code>control</code>) respectively.</li>
 <li>Some redundant codes are removed from <code><a href="../reference/update.html">update()</a></code> which makes <code><a href="../reference/design.html">design()</a></code> slightly faster.</li>
+<li>
+<code>limits</code> argument in <code><a href="../reference/design.html">design()</a></code> is now required when <code>x_cand</code> is not supplied to avoid under-sampling using the limits inferred from the training data.</li>
+<li>
+<code><a href="../reference/design.html">design()</a></code> now supports <code>f</code> that produce <code>NA</code> as outputs. This is useful to prevent the sequential design from stopping due to errors or <code>NA</code> outputs from a simulator at some input locations identified by the sequential design process.</li>
+<li>A bug is fixed in <code><a href="../reference/design.html">design()</a></code> when <code>x_cand</code> is supplied and the input dimension is one.</li>
+<li>
+<code><a href="../reference/alm.html">alm()</a></code>, <code><a href="../reference/mice.html">mice()</a></code>, <code><a href="../reference/pei.html">pei()</a></code>, and <code><a href="../reference/vigf.html">vigf()</a></code> now accept separate candidate sets (even with different number of candidate points) via <code>x_cand</code> for bundle emulators.</li>
+<li>A slot called <code>id</code> is added to instances of <code>gp</code>, <code>dgp</code>, <code>lgp</code>, and <code>bundle</code> classes to uniquely identify the emulators. <code>id</code> can also be passed to instances of <code>gp</code>, <code>dgp</code>,<code>lgp</code>, and <code>bundle</code> classes by the new <code>id</code> argument in <code><a href="../reference/gp.html">gp()</a></code>, <code><a href="../reference/dgp.html">dgp()</a></code>, <code><a href="../reference/lgp.html">lgp()</a></code>, and <code><a href="../reference/pack.html">pack()</a></code>.</li>
+<li>
+<code><a href="../reference/pack.html">pack()</a></code> can now accept a list of (D)GP emulators as the input.</li>
+<li>Automatic saving of emulators during the sequential design is added to <code><a href="../reference/design.html">design()</a></code> through the new argument <code>autosave</code>.</li>
 <li>Updates of documentations and vignettes.</li>
 </ul></div>
     <div class="section level2">
