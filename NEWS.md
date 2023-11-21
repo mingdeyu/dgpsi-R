@@ -14,6 +14,7 @@
 - `alm()`, `mice()`, `pei()`, and `vigf()` now accept separate candidate sets (even with different number of candidate points) via `x_cand` for bundle emulators.
 - A slot called `id` is added to instances of `gp`, `dgp`, `lgp`, and `bundle` classes to uniquely identify the emulators. `id` can also be passed to instances of `gp`, `dgp`,`lgp`, and `bundle` classes by the new `id` argument in `gp()`, `dgp()`, `lgp()`, and `pack()`.
 - `pack()` can now accept a list of (D)GP emulators as the input.
+- The `check_point` argument is removed from `design()` and replaced by `autosave`.
 - Automatic saving of emulators during the sequential design is added to `design()` through the new argument `autosave`.
 - Updates of documentations and vignettes.
 
