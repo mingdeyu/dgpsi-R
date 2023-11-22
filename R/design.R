@@ -143,9 +143,9 @@
 #'     - `reached`, a bool (if `object` is an instance of the `gp` or `dgp` class) or a vector of bools (if `object` is an instance of the `bundle`
 #'       class) that indicate if the target RMSEs are reached at the end of the sequential design.
 #'   - a slot called `type` that gives the type of validations:
-#'     - either LOO (`loo`) or OOS (`oos`) if `eval = NULL`. See [validate()] for more information about LOO and OOS.
-#'     - the customized R function provided to `eval`.
-#'   - two slots called `x_test` and `y_test` that contain the data points for the OOS validation if the `type` slot is `oos`.
+#'     - either LOO ('loo') or OOS ('oos') if `eval = NULL`. See [validate()] for more information about LOO and OOS.
+#'     - 'customized' if a customized R function is provided to `eval`.
+#'   - two slots called `x_test` and `y_test` that contain the data points for the OOS validation if the `type` slot is 'oos'.
 #'   - If `y_cand = NULL` and there are `NA`s returned from the supplied `f` during the sequential design, a slot called `exclusion` is included
 #'     that records the located design positions that produced `NA`s via `f`. The sequential design will use this information to
 #'     avoid re-visiting the same locations (if `x_cand` is supplied) or their neighborhoods (if `x_cand` is `NULL`) in later runs of `design()`.
@@ -157,13 +157,15 @@
 #'   depending on whether `x_test` and `y_test` are provided. The new slot gives the validation information of the emulator constructed in the final step of
 #'   the sequential design. See [validate()] for more information about the slots `loo` and `oos`.
 #' * If `object` has previously been used by [design()] for sequential designs, the information of the current wave of the sequential design will replace
-#'   those of old waves and be contained in the returned object, unless the following conditions are met:
-#'   - the validation type (`loo`, `oos`, or the customized function provided to `eval`) of the current wave of the sequential design is the same as the
-#'     validation types in previous waves, and
-#'   - if the validation type is OOS, `x_test` and `y_test` in the current wave of the sequential design are identical to those in the previous waves.
+#'   those of old waves and be contained in the returned object, unless
+#'   - the validation type (LOO or OOS depending on whether `x_test` and `y_test` are supplied or not) of the current wave of the sequential design is the
+#'     same as the validation types (shown in the `type` of the `design` slot of `object`) in previous waves, and if the validation type is OOS,
+#'     `x_test` and `y_test` in the current wave must also be identical to those in the previous waves;
+#'   - both the current and previous waves of the sequential design supply customized evaluation functions to `eval`. Users need to ensure the customized evaluation
+#'     functions are consistent among different waves. Otherwise, the trace plot of RMSEs produced by [draw()] will show values of different evaluation metrics in
+#'     different waves.
 #'
-#'   When the above conditions are met, the information of the current wave of the sequential design will be added to
-#'       the `design` slot of the returned object under the name `waveS`.
+#'   In above two cases, the information of the current wave of the sequential design will be added to the `design` slot of the returned object under the name `waveS`.
 #' * If `object` is an instance of the `gp` class and `eval = NULL`, the matrix in the `rmse` slot is single-columned. If `object` is an instance of
 #'   the `dgp` or `bundle` class and `eval = NULL`, the matrix in the `rmse` slot can have multiple columns that correspond to different output dimensions
 #'   or different emulators in the bundle.
@@ -377,7 +379,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           rmse <- object$oos$rmse
         }
       } else {
-        type <- eval
+        type <- 'customized'
         if ("..." %in% vnames){
           rmse <- do.call(eval, c(list(object), add_arg))
         } else {
@@ -643,7 +645,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           rmse <- object$oos$rmse
         }
       } else {
-        type <- eval
+        type <- 'customized'
         if ("..." %in% vnames){
           rmse <- do.call(eval, c(list(object), add_arg))
         } else {
@@ -1009,7 +1011,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           rmse <- object$oos$rmse
         }
       } else {
-        type <- eval
+        type <- 'customized'
         if ("..." %in% vnames){
           rmse <- do.call(eval, c(list(object), add_arg))
         } else {
@@ -1350,7 +1352,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
           rmse <- object$oos$rmse
         }
       } else {
-        type <- eval
+        type <- 'customized'
         if ("..." %in% vnames){
           rmse <- do.call(eval, c(list(object), add_arg))
         } else {
@@ -1805,7 +1807,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           }
         }
       } else {
-        type <- eval
+        type <- 'customized'
         if ("..." %in% vnames){
           rmse <- do.call(eval, c(list(object), add_arg))
         } else {
@@ -2299,7 +2301,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           }
         }
       } else {
-        type <- eval
+        type <- 'customized'
         if ("..." %in% vnames){
           rmse <- do.call(eval, c(list(object), add_arg))
         } else {
@@ -2869,7 +2871,7 @@ check_design <- function(object, x_test, y_test, eval){
       }
     }
   } else {
-    if ( identical(object$design$type, eval) ) {
+    if ( identical(object$design$type, 'customized') ) {
       first_time <- FALSE
       n_wave <- length(object$design)
       if ( "type" %in% names(object$design) ) n_wave <- n_wave - 1

@@ -309,10 +309,10 @@ class) that indicate if the target RMSEs are reached at the end of the sequentia
 }
 \item a slot called \code{type} that gives the type of validations:
 \itemize{
-\item either LOO (\code{loo}) or OOS (\code{oos}) if \code{eval = NULL}. See \code{\link[=validate]{validate()}} for more information about LOO and OOS.
-\item the customized R function provided to \code{eval}.
+\item either LOO ('loo') or OOS ('oos') if \code{eval = NULL}. See \code{\link[=validate]{validate()}} for more information about LOO and OOS.
+\item 'customized' if a customized R function is provided to \code{eval}.
 }
-\item two slots called \code{x_test} and \code{y_test} that contain the data points for the OOS validation if the \code{type} slot is \code{oos}.
+\item two slots called \code{x_test} and \code{y_test} that contain the data points for the OOS validation if the \code{type} slot is 'oos'.
 \item If \code{y_cand = NULL} and there are \code{NA}s returned from the supplied \code{f} during the sequential design, a slot called \code{exclusion} is included
 that records the located design positions that produced \code{NA}s via \code{f}. The sequential design will use this information to
 avoid re-visiting the same locations (if \code{x_cand} is supplied) or their neighborhoods (if \code{x_cand} is \code{NULL}) in later runs of \code{design()}.
@@ -333,15 +333,17 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 depending on whether \code{x_test} and \code{y_test} are provided. The new slot gives the validation information of the emulator constructed in the final step of
 the sequential design. See \code{\link[=validate]{validate()}} for more information about the slots \code{loo} and \code{oos}.
 \item If \code{object} has previously been used by \code{\link[=design]{design()}} for sequential designs, the information of the current wave of the sequential design will replace
-those of old waves and be contained in the returned object, unless the following conditions are met:
+those of old waves and be contained in the returned object, unless
 \itemize{
-\item the validation type (\code{loo}, \code{oos}, or the customized function provided to \code{eval}) of the current wave of the sequential design is the same as the
-validation types in previous waves, and
-\item if the validation type is OOS, \code{x_test} and \code{y_test} in the current wave of the sequential design are identical to those in the previous waves.
+\item the validation type (LOO or OOS depending on whether \code{x_test} and \code{y_test} are supplied or not) of the current wave of the sequential design is the
+same as the validation types (shown in the \code{type} of the \code{design} slot of \code{object}) in previous waves, and if the validation type is OOS,
+\code{x_test} and \code{y_test} in the current wave must also be identical to those in the previous waves;
+\item both the current and previous waves of the sequential design supply customized evaluation functions to \code{eval}. Users need to ensure the customized evaluation
+functions are consistent among different waves. Otherwise, the trace plot of RMSEs produced by \code{\link[=draw]{draw()}} will show values of different evaluation metrics in
+different waves.
 }
 
-When the above conditions are met, the information of the current wave of the sequential design will be added to
-the \code{design} slot of the returned object under the name \code{waveS}.
+In above two cases, the information of the current wave of the sequential design will be added to the \code{design} slot of the returned object under the name \code{waveS}.
 \item If \code{object} is an instance of the \code{gp} class and \code{eval = NULL}, the matrix in the \code{rmse} slot is single-columned. If \code{object} is an instance of
 the \code{dgp} or \code{bundle} class and \code{eval = NULL}, the matrix in the \code{rmse} slot can have multiple columns that correspond to different output dimensions
 or different emulators in the bundle.
