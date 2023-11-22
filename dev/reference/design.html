@@ -372,10 +372,10 @@ the sequential design (if <code>object</code> is an instance of the <code>bundle
 <li><p><code>reached</code>, a bool (if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class) or a vector of bools (if <code>object</code> is an instance of the <code>bundle</code>
 class) that indicate if the target RMSEs are reached at the end of the sequential design.</p></li>
 </ul></li>
-<li><p>a slot called <code>type</code> that gives the type of validations:</p><ul><li><p>either LOO (<code>loo</code>) or OOS (<code>oos</code>) if <code>eval = NULL</code>. See <code><a href="validate.html">validate()</a></code> for more information about LOO and OOS.</p></li>
-<li><p>the customized R function provided to <code>eval</code>.</p></li>
+<li><p>a slot called <code>type</code> that gives the type of validations:</p><ul><li><p>either LOO ('loo') or OOS ('oos') if <code>eval = NULL</code>. See <code><a href="validate.html">validate()</a></code> for more information about LOO and OOS.</p></li>
+<li><p>'customized' if a customized R function is provided to <code>eval</code>.</p></li>
 </ul></li>
-<li><p>two slots called <code>x_test</code> and <code>y_test</code> that contain the data points for the OOS validation if the <code>type</code> slot is <code>oos</code>.</p></li>
+<li><p>two slots called <code>x_test</code> and <code>y_test</code> that contain the data points for the OOS validation if the <code>type</code> slot is 'oos'.</p></li>
 <li><p>If <code>y_cand = NULL</code> and there are <code>NA</code>s returned from the supplied <code>f</code> during the sequential design, a slot called <code>exclusion</code> is included
 that records the located design positions that produced <code>NA</code>s via <code>f</code>. The sequential design will use this information to
 avoid re-visiting the same locations (if <code>x_cand</code> is supplied) or their neighborhoods (if <code>x_cand</code> is <code>NULL</code>) in later runs of <code>design()</code>.</p></li>
@@ -393,11 +393,13 @@ avoid re-visiting the same locations (if <code>x_cand</code> is supplied) or the
 depending on whether <code>x_test</code> and <code>y_test</code> are provided. The new slot gives the validation information of the emulator constructed in the final step of
 the sequential design. See <code><a href="validate.html">validate()</a></code> for more information about the slots <code>loo</code> and <code>oos</code>.</p></li>
 <li><p>If <code>object</code> has previously been used by <code>design()</code> for sequential designs, the information of the current wave of the sequential design will replace
-those of old waves and be contained in the returned object, unless the following conditions are met:</p><ul><li><p>the validation type (<code>loo</code>, <code>oos</code>, or the customized function provided to <code>eval</code>) of the current wave of the sequential design is the same as the
-validation types in previous waves, and</p></li>
-<li><p>if the validation type is OOS, <code>x_test</code> and <code>y_test</code> in the current wave of the sequential design are identical to those in the previous waves.</p></li>
-</ul><p>When the above conditions are met, the information of the current wave of the sequential design will be added to
-the <code>design</code> slot of the returned object under the name <code>waveS</code>.</p></li>
+those of old waves and be contained in the returned object, unless</p><ul><li><p>the validation type (LOO or OOS depending on whether <code>x_test</code> and <code>y_test</code> are supplied or not) of the current wave of the sequential design is the
+same as the validation types (shown in the <code>type</code> of the <code>design</code> slot of <code>object</code>) in previous waves, and if the validation type is OOS,
+<code>x_test</code> and <code>y_test</code> in the current wave must also be identical to those in the previous waves;</p></li>
+<li><p>both the current and previous waves of the sequential design supply customized evaluation functions to <code>eval</code>. Users need to ensure the customized evaluation
+functions are consistent among different waves. Otherwise, the trace plot of RMSEs produced by <code><a href="draw.html">draw()</a></code> will show values of different evaluation metrics in
+different waves.</p></li>
+</ul><p>In above two cases, the information of the current wave of the sequential design will be added to the <code>design</code> slot of the returned object under the name <code>waveS</code>.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>gp</code> class and <code>eval = NULL</code>, the matrix in the <code>rmse</code> slot is single-columned. If <code>object</code> is an instance of
 the <code>dgp</code> or <code>bundle</code> class and <code>eval = NULL</code>, the matrix in the <code>rmse</code> slot can have multiple columns that correspond to different output dimensions
 or different emulators in the bundle.</p></li>

@@ -80,6 +80,7 @@
 <code><a href="../reference/pack.html">pack()</a></code> can now accept a list of (D)GP emulators as the input.</li>
 <li>The <code>check_point</code> argument is removed from <code><a href="../reference/design.html">design()</a></code> and replaced by <code>autosave</code>.</li>
 <li>Automatic saving of emulators during the sequential design is added to <code><a href="../reference/design.html">design()</a></code> through the new argument <code>autosave</code>.</li>
+<li>When a customized evaluation function is provided to <code><a href="../reference/design.html">design()</a></code> via <code>eval</code>, the design information in previous waves will be retained as long as the previous waves of the sequential design also use customized evaluation functions. If different customized evaluation functions are supplied to <code><a href="../reference/design.html">design()</a></code> in different waves, the trace plot of RMSEs produced by <code><a href="../reference/draw.html">draw()</a></code> will show RMSEs from different evaluation functions in different waves.</li>
 <li>Updates of documentations and vignettes.</li>
 </ul></div>
     <div class="section level2">
