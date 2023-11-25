@@ -108,9 +108,9 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
     }
     N0 <- constructor_obj_cp$N
     if ( identical(cores,as.integer(1)) ){
-      constructor_obj_cp$train(N, ess_burn, disable)
+      with(pkg.env$np$errstate(divide = 'ignore'), constructor_obj_cp$train(N, ess_burn, disable))
     } else {
-      constructor_obj_cp$ptrain(N, ess_burn, disable, cores)
+      with(pkg.env$np$errstate(divide = 'ignore'), constructor_obj_cp$ptrain(N, ess_burn, disable, cores))
     }
     burnin <- as.integer(N0 + 0.75*N)
   } else {
@@ -185,7 +185,7 @@ update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, .
 
   if ( refit ){
     if ( verb ) message("Re-fitting ...", appendLF = FALSE)
-    constructor_obj_cp$train()
+    with(pkg.env$np$errstate(divide = 'ignore'), constructor_obj_cp$train())
     if ( verb ) message(" done")
   }
 

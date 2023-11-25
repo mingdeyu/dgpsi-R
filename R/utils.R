@@ -945,7 +945,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow=T)
           }
           obj <- pkg.env$dgpsi$gp(X, Y, struc)
-          obj$train()
+          with(pkg.env$np$errstate(divide = 'ignore'), obj$train())
           res <- list()
           res[['id']] <- object$id
           res[['data']][['X']] <- X
@@ -979,7 +979,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
               struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow = T)
             }
             obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], struc)
-            obj$train()
+            with(pkg.env$np$errstate(divide = 'ignore'), obj$train())
             res_j <- list()
             res_j[['id']] <- uuid::UUIDgenerate()
             res_j[['data']][['X']] <- X
@@ -1020,9 +1020,9 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
         object$constructor_obj$update_all_layer(all_layer)
         if ( verb ) message(" - Re-fitting ...", appendLF = FALSE)
         if ( identical(refit_cores, as.integer(1)) ){
-          object$constructor_obj$train(as.integer(100), as.integer(10), TRUE)
+          with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$train(as.integer(100), as.integer(10), TRUE))
         } else {
-          object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores)
+          with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores))
         }
         est_obj <- object$constructor_obj$estimate()
         internal_dims <- object[['specs']][['internal_dims']]
@@ -1058,9 +1058,9 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
   object$constructor_obj$update_all_layer(all_layer)
   if ( verb ) message(" - Re-fitting ...", appendLF = FALSE)
   if ( identical(refit_cores, as.integer(1)) ){
-    object$constructor_obj$train(as.integer(100), as.integer(10), TRUE)
+    with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$train(as.integer(100), as.integer(10), TRUE))
   } else {
-    object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores)
+    with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores))
   }
   est_obj <- object$constructor_obj$estimate()
   internal_dims <- object[['specs']][['internal_dims']]
