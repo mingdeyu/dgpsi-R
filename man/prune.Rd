@@ -27,10 +27,19 @@ This function implements the static pruning of a DGP emulator.
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to \code{min_size} in \code{control}.
+\itemize{
+\item The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to \code{min_size} in \code{control}.
 If the training dataset size is smaller than this, it is suggested to enrich the design of the DGP emulator and prune its
 structure dynamically using the \code{design()} function. Depending on the design of the DGP emulator, the static pruning may not be accurate.
 It is thus suggested to implement dynamic pruning as a part of the sequential design via \code{design()}.
+\item The following slots:
+\itemize{
+\item \code{loo} and \code{oos} created by \code{\link[=validate]{validate()}}; and
+\item \code{results} created by \code{\link[=predict]{predict()}};
+}
+
+in \code{object} will be removed and not contained in the returned object.
+}
 }
 \examples{
 \dontrun{

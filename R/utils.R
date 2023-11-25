@@ -774,10 +774,15 @@ trace_plot <- function(object, layer = NULL, node = 1) {
 #' @return An updated `object` that could be an instance of `gp`, `dgp`, or `bundle` (of GP emulators) class.
 #'
 #' @note
-#' The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to `min_size` in `control`.
+#' * The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to `min_size` in `control`.
 #'    If the training dataset size is smaller than this, it is suggested to enrich the design of the DGP emulator and prune its
 #'    structure dynamically using the `design()` function. Depending on the design of the DGP emulator, the static pruning may not be accurate.
 #'    It is thus suggested to implement dynamic pruning as a part of the sequential design via `design()`.
+#' * The following slots:
+#'   - `loo` and `oos` created by [validate()]; and
+#'   - `results` created by [predict()];
+#'
+#'   in `object` will be removed and not contained in the returned object.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
@@ -869,6 +874,7 @@ prune <- function(object, control = list(), verb = TRUE) {
   }
 
   is.finish <- FALSE
+  cropping_times <- 0
   while (!is.finish){
     crop_id_list <- create_drop_list(object)
     r2 <- object$constructor_obj$aggregate_r2()
@@ -881,11 +887,27 @@ prune <- function(object, control = list(), verb = TRUE) {
     if (N_cropped!=0) {
       object <- copy_in_design(object)
       object <- crop(object, crop_id_list, refit_cores = as.integer(1), verb = verb)
-      if ( !inherits(object,"dgp") ) is.finish <- TRUE
+      if ( !inherits(object,"dgp") ) {
+        is.finish <- TRUE
+      } else {
+        n_layer <- object$constructor_obj$n_layer
+        if (object$constructor_obj$all_layer[[n_layer]][[1]]$type!='gp') {
+          n_layer <- n_layer - 1
+          if (n_layer == 1) is.finish <- TRUE
+        }
+      }
+      cropping_times <- cropping_times + 1
     } else {
-      if (verb) message("No more GP nodes can be pruned.", appendLF = FALSE)
       is.finish <- TRUE
     }
+  }
+  if (cropping_times == 0) {
+    if (verb) message("No GP nodes can be pruned.", appendLF = FALSE)
+  } else {
+    if ('loo' %in% names(object)) object[['loo']] <- NULL
+    if ('oos' %in% names(object)) object[['oos']] <- NULL
+    if ('results' %in% names(object)) object[['results']] <- NULL
+    if (verb) message(" * No more GP nodes can be pruned.", appendLF = FALSE)
   }
   return(object)
 }
