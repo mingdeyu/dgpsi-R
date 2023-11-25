@@ -95,11 +95,15 @@
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to <code>min_size</code> in <code>control</code>.
+    
+<ul><li><p>The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to <code>min_size</code> in <code>control</code>.
 If the training dataset size is smaller than this, it is suggested to enrich the design of the DGP emulator and prune its
 structure dynamically using the <code><a href="design.html">design()</a></code> function. Depending on the design of the DGP emulator, the static pruning may not be accurate.
-It is thus suggested to implement dynamic pruning as a part of the sequential design via <code><a href="design.html">design()</a></code>.</p>
-    </div>
+It is thus suggested to implement dynamic pruning as a part of the sequential design via <code><a href="design.html">design()</a></code>.</p></li>
+<li><p>The following slots:</p><ul><li><p><code>loo</code> and <code>oos</code> created by <code><a href="validate.html">validate()</a></code>; and</p></li>
+<li><p><code>results</code> created by <code><a href="predict.html">predict()</a></code>;</p></li>
+</ul><p>in <code>object</code> will be removed and not contained in the returned object.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
