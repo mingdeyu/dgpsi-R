@@ -17,6 +17,7 @@
 - The `check_point` argument is removed from `design()` and replaced by `autosave`.
 - Automatic saving of emulators during the sequential design is added to `design()` through the new argument `autosave`.
 - When a customized evaluation function is provided to `design()` via `eval`, the design information in previous waves will be retained as long as the previous waves of the sequential design also use customized evaluation functions. If different customized evaluation functions are supplied to `design()` in different waves, the trace plot of RMSEs produced by `draw()` will show RMSEs from different evaluation functions in different waves.
+- One can now link the same emulator multiple times in a chain via `lgp()` by setting different linking information for the emulator via `set_linked_idx()`.
 - Updates of documentations and vignettes.
 
 # dgpsi 2.3.0
