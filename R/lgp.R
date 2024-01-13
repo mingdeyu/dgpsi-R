@@ -97,13 +97,14 @@ lgp <- function(struc, B = 10, id = NULL) {
     layer <- list()
     K <- length(struc[[l]])
     for (k in 1:K) {
-      cont <- pkg.env$copy$deepcopy(struc[[l]][[k]]$container_obj)
+      cont <- struc[[l]][[k]]$container_obj
       if ( is.null(cont$local_input_idx) ){
         stop(sprintf("Emulator %i in Layer %i has no 'linked_idx' specified. Use set_linked_idx() to specify this attribute.", k, l), call. = FALSE)
       }
       if ( l==1 ){
         if (cont$type=='gp'){
           if ( !is.null(cont$structure$connect) ){
+            cont <- pkg.env$copy$deepcopy(cont)
             inverse_order <- order(c(cont$structure$input_dim, cont$structure$connect) + 1)
             cont$structure$input <- cbind(cont$structure$input, cont$structure$global_input)[,inverse_order,drop=F]
             cont$structure$global_input <- NULL
@@ -112,14 +113,24 @@ lgp <- function(struc, B = 10, id = NULL) {
             if (length(cont$structure$length)!=1) cont$structure$length <- cont$structure$length[inverse_order]
           }
         } else {
+          exist.connect <- FALSE
           for (item in cont$structure[[1]]){
             if ( !is.null(item$connect) ){
-              inverse_order <- order(c(item$input_dim, item$connect) + 1)
-              item$input <- cbind(item$input, item$global_input)[,inverse_order,drop=F]
-              item$global_input <- NULL
-              item$input_dim <- (1:length(inverse_order))-1
-              item$connect <- NULL
-              if (length(item$length)!=1) item$length <- item$length[inverse_order]
+              exist.connect <- TRUE
+              break
+            }
+          }
+          if ( exist.connect ){
+            cont <- pkg.env$copy$deepcopy(cont)
+            for (item in cont$structure[[1]]){
+              if ( !is.null(item$connect) ){
+                inverse_order <- order(c(item$input_dim, item$connect) + 1)
+                item$input <- cbind(item$input, item$global_input)[,inverse_order,drop=F]
+                item$global_input <- NULL
+                item$input_dim <- (1:length(inverse_order))-1
+                item$connect <- NULL
+                if (length(item$length)!=1) item$length <- item$length[inverse_order]
+              }
             }
           }
         }
@@ -132,7 +143,7 @@ lgp <- function(struc, B = 10, id = NULL) {
   res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
   seed <- sample.int(100000, 1)
   set_seed(seed)
-  obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
+  obj <- pkg.env$dgpsi$lgp(all_layer = pkg.env$copy$deepcopy(extracted_struc), N = B)
   res[['emulator_obj']] <- obj
   res[['specs']][['seed']] <- seed
   res[['specs']][['B']] <- B
