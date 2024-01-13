@@ -5,15 +5,15 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="Sequential design for the DGP emulator of a non-stationary simulator.
+<meta name="description" content="Sequential design and dynamic pruning for the DGP emulator of a non-stationary simulator.
 ">
 <title>Sequential Design I • dgpsi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sequential Design I">
-<meta property="og:description" content="Sequential design for the DGP emulator of a non-stationary simulator.
+<meta property="og:description" content="Sequential design and dynamic pruning for the DGP emulator of a non-stationary simulator.
 ">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -28,7 +28,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,7 @@
     
     
 <p>This vignette shows how to use the package to sequentially enrich the
-design for adaptive improvements of a DGP emulator.</p>
+design for adaptive improvements and pruning of a DGP emulator.</p>
 <div class="section level2">
 <h2 id="load-the-packages">Load the packages<a class="anchor" aria-label="anchor" href="#load-the-packages"></a>
 </h2>
@@ -144,13 +144,14 @@ design, we generate a validation dataset:</p>
 <h2 id="dgp-emulation-with-sequential-designs">DGP emulation with sequential designs<a class="anchor" aria-label="anchor" href="#dgp-emulation-with-sequential-designs"></a>
 </h2>
 <p>To start with the sequential design, we initialize a two-layered DGP
-emulator using the generated initial design:</p>
+emulator (with 2 GP nodes in the first layer and 1 GP node in the second
+layer) using the generated initial design:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 344.20it/s]</span></span>
+<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 353.90it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>We then specify the boundaries of input parameters of <code>f</code>
 for the sequential design to locate design points to be added:</p>
@@ -168,68 +169,84 @@ emulators. In this vignette, we only demonstrate its basic usage and
 refer users to <code><a href="../reference/design.html">?design</a></code> for more advanced specifications,
 e.g., on checkpoints to manually control the design progress and on
 schedules to re-fit and validate emulators.</p>
-<p>For illustrative purpose, we implement three waves of sequential
+<p>For illustrative purpose, we implement two waves of sequential
 designs on <code>m</code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1st wave with 15 steps</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">15</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># 1st wave with 25 steps</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">25</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.529337</span></span>
+<span><span class="co">##  * RMSE: 0.527337</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.093332 0.075594</span></span>
+<span><span class="co">##  * Next design point: 0.868213 0.037359</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.521201</span></span>
+<span><span class="co">##  * RMSE: 0.541914</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Iteration 15:</span></span>
+<span><span class="co">## Iteration 18:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.996120 0.904685</span></span>
+<span><span class="co">##  * Next design point: 0.341178 0.003477</span></span>
+<span><span class="co">##  - Updating and re-fitting ... done</span></span>
+<span><span class="co">##  - Pruning 1 node(s) in layer 1 ... done</span></span>
+<span><span class="co">##  - Re-fitting ... done</span></span>
+<span><span class="co">##  - Validating ... done</span></span>
+<span><span class="co">##  * RMSE: 0.107640</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## ...</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Iteration 25:</span></span>
+<span><span class="co">##  - Locating ... done</span></span>
+<span><span class="co">##  * Next design point: 0.168364 0.984091</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.170959</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.032189</span></span></code></pre>
+<p>After the first wave of the sequential design, we see that 1 GP node
+is removed from the first layer by the automatic pruning of the DGP
+which leaves only one node in both the first and second layer of the DGP
+hierarchy respectively. This helps accelerate the inference of the DGP
+emulator in subsequent waves of the sequential design while maintaining
+accuracy. We now start the second wave of the sequential design:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.170959</span></span>
+<span><span class="co">##  * RMSE: 0.032189</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.862600 0.722212</span></span>
+<span><span class="co">##  * Next design point: 0.215369 0.384567</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.150731</span></span>
+<span><span class="co">##  * RMSE: 0.017259</span></span>
 <span><span class="co">##   </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.519293 0.463623</span></span>
+<span><span class="co">##  * Next design point: 0.198905 0.873454</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.112657</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.008300</span></span></code></pre>
+<p>Finally, we resume the second wave with 10 additional iterations:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 3rd wave with 10 steps</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.112657</span></span>
-<span><span class="co">## Iteration 1:</span></span>
+<code class="sourceCode R"><span><span class="co"># 2nd wave with 10 additional steps</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, new_wave <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Iteration 11:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.045685 0.039926</span></span>
+<span><span class="co">##  * Next design point: 0.977752 0.011568</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.033327</span></span>
+<span><span class="co">##  * RMSE: 0.007264</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
-<span><span class="co">## Iteration 10:</span></span>
+<span><span class="co">## Iteration 20:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.776195 0.364631</span></span>
+<span><span class="co">##  * Next design point: 0.258375 0.028753</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.004254</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.003784</span></span></code></pre>
 <p>After the sequential design is done, we can inspect the enriched
 design by applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -249,7 +266,7 @@ of sequential designs:</p>
 <h2 id="comparison-to-dgp-emulators-with-space-filling-designs">Comparison to DGP emulators with space-filling designs<a class="anchor" aria-label="anchor" href="#comparison-to-dgp-emulators-with-space-filling-designs"></a>
 </h2>
 <p>We build four DGP emulators with static space-filling Latin hypercube
-designs (LHD) of size 10, 20, 30, and 40 respectively:</p>
+designs (LHD) of size 10, 20, 30, 40, and 50 respectively:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># DGP emulator with a LHD of size 10</span></span>
 <span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">10</span>,<span class="fl">2</span><span class="op">)</span></span>
@@ -270,8 +287,13 @@ designs (LHD) of size 10, 20, 30, and 40 respectively:</p>
 <span><span class="va">X4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">40</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">Y4</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">X4</span><span class="op">)</span></span>
 <span><span class="va">m4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X4</span>, <span class="va">Y4</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
-<p>We then extract their RMSEs</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># DGP emulator with a LHD of size 50</span></span>
+<span><span class="va">X5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">Y5</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">X5</span><span class="op">)</span></span>
+<span><span class="va">m5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X5</span>, <span class="va">Y5</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>We then extract their RMSEs</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># validation of the DGP emulator with the LHD of size 10</span></span>
 <span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m1</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="va">rmse1</span> <span class="op">&lt;-</span> <span class="va">m1</span><span class="op">$</span><span class="va">oos</span><span class="op">$</span><span class="va">rmse</span></span>
@@ -284,14 +306,17 @@ designs (LHD) of size 10, 20, 30, and 40 respectively:</p>
 <span><span class="co"># validation of the DGP emulator with the LHD of size 40</span></span>
 <span><span class="va">m4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m4</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="va">rmse4</span> <span class="op">&lt;-</span> <span class="va">m4</span><span class="op">$</span><span class="va">oos</span><span class="op">$</span><span class="va">rmse</span></span>
+<span><span class="co"># validation of the DGP emulator with the LHD of size 50</span></span>
+<span><span class="va">m5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m5</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="va">rmse5</span> <span class="op">&lt;-</span> <span class="va">m5</span><span class="op">$</span><span class="va">oos</span><span class="op">$</span><span class="va">rmse</span></span>
 <span><span class="co"># create a dataframe that stores the RMSEs of the four DGP emulators</span></span>
-<span><span class="va">rmse_static</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="st">'N'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">40</span><span class="op">)</span>, <span class="st">'rmse'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rmse1</span>, <span class="va">rmse2</span>, <span class="va">rmse3</span>, <span class="va">rmse4</span><span class="op">)</span>, <span class="st">'LHD'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'lhd-10'</span>, <span class="st">'lhd-20'</span>, <span class="st">'lhd-30'</span>, <span class="st">'lhd-40'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">rmse_static</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="st">'N'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">40</span>, <span class="fl">50</span><span class="op">)</span>, <span class="st">'rmse'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rmse1</span>, <span class="va">rmse2</span>, <span class="va">rmse3</span>, <span class="va">rmse4</span>, <span class="va">rmse5</span><span class="op">)</span>, <span class="st">'LHD'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'lhd-10'</span>, <span class="st">'lhd-20'</span>, <span class="st">'lhd-30'</span>, <span class="st">'lhd-40'</span>, <span class="st">'lhd-50'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>and add them to the sequential design validation plot (in log-scale)
 for comparisons:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rmse_static</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">N</span>, y <span class="op">=</span> <span class="va">rmse</span>, group <span class="op">=</span> <span class="va">LHD</span>, shape <span class="op">=</span> <span class="va">LHD</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">'#E69F00'</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">8</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/seq_comparison.png"></p>
 <p>It can be seen from the plot above that with static space-filling
 designs, the quality of an emulator may not be improved as the design
