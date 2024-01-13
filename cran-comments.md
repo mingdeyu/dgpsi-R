@@ -1,6 +1,6 @@
-This is the submission of 'dgpsi' 2.3.0.
+This is the submission of 'dgpsi' 2.4.0.
 
-Various updates have been made in this version. A detailed list of changes that have been made since the last version 2.2.0 is contained in NEWS.md.  
+Various updates have been made in this version. A detailed list of changes that have been made since the last version 2.3.0 is contained in NEWS.md.  
 
 ## Test environments
 
