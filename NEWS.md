@@ -1,3 +1,5 @@
+# dgpsi 2.4.0-9000 (development version)
+
 # dgpsi 2.4.0
 - One can now use `design()` to implement sequential designs using `f` and a fixed candidate set passed to `x_cand` with `y_cand = NULL`.
 - The sizes of `.pkl` files written by `write()` are significantly reduced.
