@@ -1058,6 +1058,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
         object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
         object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, blocked_gibbs)
         object[['specs']][['seed']] <- id
+        object[['specs']][['B']] <- B
         if ( verb ) message(" done")
         return(object)
       }
@@ -1096,6 +1097,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
   object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
   object[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx, blocked_gibbs)
   object[['specs']][['seed']] <- id
+  object[['specs']][['B']] <- B
   if ( verb ) message(" done")
   return(object)
 }
