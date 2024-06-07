@@ -29,7 +29,7 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 * Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 * Automatic pruning of DGP emulators, both statically and dynamically.
-* Large-scale GP, DGP, and Linked (D)GP emulations.
+* Large-scale GP, DGP, and Linked (D)GP emulations. (Development version)
 
 ## Getting started
 * Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
