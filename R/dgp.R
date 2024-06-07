@@ -87,7 +87,7 @@
 #'     position has multiple outputs. Defaults to `TRUE`.
 #' @param vecchia a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to `FALSE`.
 #' @param M the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to `25`.
-#' @param N number of iterations for the training. Defaults to `500`. This argument is only used when `training = TRUE`.
+#' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
 #' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
 #'     the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE` and `max physical cores available %/% 2` if `vecchia = TRUE`.
 #'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
@@ -226,7 +226,7 @@
 #' @export
 dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
-                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, N = 500, cores = 1, blocked_gibbs = TRUE,
+                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
                 ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
@@ -586,7 +586,8 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #' @description This function implements additional training iterations for a DGP emulator.
 #'
 #' @param object an instance of the `dgp` class.
-#' @param N additional number of iterations for the DGP emulator training. Defaults to `500`.
+#' @param N additional number of iterations for the DGP emulator training. If set to `NULL`, the number of iterations is set to `500` if the DGP emulator
+#'     was constructed without the Vecchia approximation. Otherwise, the number of iterations is set to `200`. Defaults to `NULL`.
 #' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
 #'     the number of processes is set to `(max physical cores available - 1)` if the DGP emulator was constructed without the Vecchia approximation.
 #'     Otherwise, the number of processes is set to `max physical cores available %/% 2`. Only use multiple processes when there is a large number of
@@ -623,13 +624,21 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #' @md
 #' @export
 
-continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
+continue <- function(object, N = NULL, cores = 1, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  }
+
+  if( is.null(N) ) {
+    if (object[['specs']][['vecchia']]) {
+      N <- 200
+    } else {
+      N <- 500
+    }
   }
   N <- as.integer(N)
 
