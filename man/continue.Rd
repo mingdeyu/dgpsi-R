@@ -18,7 +18,7 @@ continue(
 \item{object}{an instance of the \code{dgp} class.}
 
 \item{N}{additional number of iterations for the DGP emulator training. If set to \code{NULL}, the number of iterations is set to \code{500} if the DGP emulator
-was constructed without the Vecchia approximation. Otherwise, the number of iterations is set to \code{200}. Defaults to \code{NULL}.}
+was constructed without the Vecchia approximation, and is set to \code{200} if Vecchia approximation was used. Defaults to \code{NULL}.}
 
 \item{cores}{the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
 the number of processes is set to \verb{(max physical cores available - 1)} if the DGP emulator was constructed without the Vecchia approximation.

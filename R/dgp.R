@@ -87,7 +87,7 @@
 #'     position has multiple outputs. Defaults to `TRUE`.
 #' @param vecchia a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to `FALSE`.
 #' @param M the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to `25`.
-#' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
+#' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
 #' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
 #'     the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE` and `max physical cores available %/% 2` if `vecchia = TRUE`.
 #'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
@@ -587,7 +587,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #'
 #' @param object an instance of the `dgp` class.
 #' @param N additional number of iterations for the DGP emulator training. If set to `NULL`, the number of iterations is set to `500` if the DGP emulator
-#'     was constructed without the Vecchia approximation. Otherwise, the number of iterations is set to `200`. Defaults to `NULL`.
+#'     was constructed without the Vecchia approximation, and is set to `200` if Vecchia approximation was used. Defaults to `NULL`.
 #' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
 #'     the number of processes is set to `(max physical cores available - 1)` if the DGP emulator was constructed without the Vecchia approximation.
 #'     Otherwise, the number of processes is set to `max physical cores available %/% 2`. Only use multiple processes when there is a large number of

@@ -158,7 +158,7 @@ position has multiple outputs. Defaults to \code{TRUE}.}
 
 \item{M}{the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to \code{25}.}
 
-\item{N}{number of iterations for the training. Defaults to \code{500} if \code{vecchia = FALSE} and \code{200} if if \code{vecchia = TRUE}. This argument is only used when \code{training = TRUE}.}
+\item{N}{number of iterations for the training. Defaults to \code{500} if \code{vecchia = FALSE} and \code{200} if \code{vecchia = TRUE}. This argument is only used when \code{training = TRUE}.}
 
 \item{cores}{the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
 the number of processes is set to \verb{(max physical cores available - 1)} if \code{vecchia = FALSE} and \verb{max physical cores available \%/\% 2} if \code{vecchia = TRUE}.
