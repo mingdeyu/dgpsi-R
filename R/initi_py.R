@@ -5,6 +5,7 @@ pkg.env$np <- NULL
 pkg.env$copy <- NULL
 pkg.env$py_gc <- NULL
 pkg.env$restart <- FALSE
+pkg.env$thread_num <- NULL
 
 #' @title 'python' environment initialization
 #'
@@ -134,6 +135,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     assign('np', reticulate::import("numpy"), pkg.env)
     assign('copy', reticulate::import("copy"), pkg.env)
     assign('py_gc', reticulate::import("gc"), pkg.env)
+    pkg.env$thread_num <- pkg.env$dgpsi$get_thread()
     if ( verb ) message(" done")
     Sys.sleep(0.5)
     if ( verb ) message("The Python environment for 'dgpsi' is successfully loaded.")

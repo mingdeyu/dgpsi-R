@@ -37,9 +37,9 @@
 #'     individual points when the input of the emulator is one-dimensional and `style = 1`. Defaults to `'points'`
 #' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
 #'     Defaults to `TRUE`.
+#' @param M same as that of [validate()].
 #' @param force same as that of [validate()].
 #' @param cores same as that of [validate()].
-#' @param threading same as that of [validate()].
 #' @param ... N/A.
 #'
 #' @return A `patchwork` object.
@@ -72,7 +72,7 @@ NULL
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -83,9 +83,10 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
+  M <- as.integer(M)
 
   if ( isTRUE(verb) ) message("Initializing ...", appendLF = FALSE)
-  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, force = force, cores = cores, threading = threading)
+  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, M = M, force = force, cores = cores)
   if ( isTRUE(verb) ) message(" done")
 
   # For LOO
@@ -243,9 +244,9 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
         x_max <- max(max(oos_res$x_test[,1]),max(x_train))
         x_range <- as.matrix(seq(x_min, x_max, length=500))
         if ( identical(cores,as.integer(1)) ){
-          res <- results$emulator_obj$predict(x_range, method = method)
+          res <- results$emulator_obj$predict(x_range, method = method, m = M)
         } else {
-          res <- results$emulator_obj$ppredict(x_range, method = method, core_num = cores)
+          res <- results$emulator_obj$ppredict(x_range, method = method, m = M, core_num = cores)
         }
         if ( method=='sampling' ) {
           res_np <- pkg.env$np$array(res)
@@ -405,7 +406,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', M = 50, verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -416,8 +417,9 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
+  M <- as.integer(M)
   if ( isTRUE(verb) ) message("Initializing ...", appendLF = FALSE)
-  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, force = force, cores = cores, threading = threading)
+  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, M = M, force = force, cores = cores)
   if ( isTRUE(verb) ) message(" done")
 
   if ( isTRUE(verb) ) message("Post-processing OOS results ...", appendLF = FALSE)
@@ -480,9 +482,9 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 
       x_range <- as.matrix(seq(x_min, x_max, length=500))
       if ( identical(cores,as.integer(1)) ){
-        res <- results$emulator_obj$predict(x_range, method = method)
+        res <- results$emulator_obj$predict(x_range, method = method, m = M)
       } else {
-        res <- results$emulator_obj$ppredict(x_range, method = method, core_num = cores)
+        res <- results$emulator_obj$ppredict(x_range, method = method, m = M, core_num = cores)
       }
 
       counter <- 1
@@ -672,7 +674,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -683,9 +685,10 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
+  M <- as.integer(M)
 
   if ( isTRUE(verb) ) message("Initializing ...", appendLF = FALSE)
-  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, force = force, cores = cores)
+  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, M = M, force = force, cores = cores)
   if ( isTRUE(verb) ) message(" done")
 
   dat <- list()
@@ -825,9 +828,9 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
         x_max <- max(max(oos_res$x_test[,1]), max(dat_train$x_train))
         x_range <- as.matrix(seq(x_min, x_max, length=500))
         if ( identical(cores,as.integer(1)) ){
-          res <- results$emulator_obj$predict(x_range, method = method, sample_size=500L)
+          res <- results$emulator_obj$predict(x_range, method = method, sample_size=500L, m = M)
         } else {
-          res <- results$emulator_obj$ppredict(x_range, method = method, sample_size=500L, core_num = cores)
+          res <- results$emulator_obj$ppredict(x_range, method = method, sample_size=500L, m = M, core_num = cores)
         }
 
         dat_range[["range"]] <- x_range[,1]

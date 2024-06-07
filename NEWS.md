@@ -1,4 +1,10 @@
 # dgpsi 2.4.0-9000 (development version)
+- The computation of training for DGP emulators is now roughly 30%-40% faster.
+- The computation of (D)GP prediction and LOO is now 6-7 times faster.
+- The `nb_parallel` argument is removed from relevant functions as the multi-thread implementation is now integrated into the package by default.
+- A Vecchia implementation under the SI framework is available for all functions of the package for large-scale emulations.
+- Two new functions, `get_thread_num()` and `set_thread_num()`, are included to inspect and change the number of threads used for multi-thread computations in the package.
+- A new vignette showcasing large-scale DGP emulation has been added.
 
 # dgpsi 2.4.0
 - One can now use `design()` to implement sequential designs using `f` and a fixed candidate set passed to `x_cand` with `y_cand = NULL`.

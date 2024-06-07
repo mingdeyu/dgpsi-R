@@ -19,10 +19,10 @@ continue(
 
 \item{N}{additional number of iterations for the DGP emulator training. Defaults to \code{500}.}
 
-\item{cores}{the number of cores/workers to be used to optimize GP components (in the same layer)
-at each M-step of the training. If set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
-Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
-is computationally expensive. Defaults to \code{1}.}
+\item{cores}{the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
+the number of processes is set to \verb{(max physical cores available - 1)} if the DGP emulator was constructed without the Vecchia approximation.
+Otherwise, the number of processes is set to \verb{max physical cores available \%/\% 2}. Only use multiple processes when there is a large number of
+GP components in different layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
 at each I-step of the training. Defaults to \code{10}.}

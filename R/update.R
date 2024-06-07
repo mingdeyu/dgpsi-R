@@ -16,10 +16,10 @@
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. Defaults to `100`.
-#' @param cores the number of cores/workers to be used to re-fit GP components (in the same layer)
-#'     at each M-step during the re-fitting. If set to `NULL`, the number of cores is set to `(max physical cores available - 1)`.
-#'     Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
-#'     is computationally expensive. Defaults to `1`.
+#' @param cores the number of processes to be used to re-fit GP components (in the same layer)
+#'     at each M-step during the re-fitting. If set to `NULL`, the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE`
+#'     and `max physical cores available %/% 2` if `vecchia = TRUE`. Only use multiple processes when there is a large number of GP components in different
+#'     layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs at each I-step in training the emulator `object` if it is an
 #'     instance of the `dgp` class. Defaults to `10`.
 #' @param B the number of imputations for predictions from the updated emulator `object` if it is an instance of the `dgp` class.
@@ -130,6 +130,8 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
+  new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
   id <- sample.int(100000, 1)
   set_seed(id)
@@ -199,6 +201,8 @@ update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, .
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
+  new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
   new_object[['container_obj']] <- pkg.env$dgpsi$container(constructor_obj_cp$export(), linked_idx)
   new_object[['emulator_obj']] <- constructor_obj_cp

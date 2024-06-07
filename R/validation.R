@@ -38,14 +38,13 @@
 #' @param method the prediction approach in validations: mean-variance (`"mean_var"`) or sampling (`"sampling"`) approach. Defaults to `"mean_var"`.
 #' @param verb a bool indicating if the trace information on validations will be printed during the function execution.
 #'     Defaults to `TRUE`.
+#' @param M the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator `object`
+#'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param force a bool indicating whether to force the LOO or OOS re-evaluation when `loo` or `oos` slot already exists in `object`. When `force = FALSE`,
 #'     [validate()] will try to determine automatically if the LOO or OOS re-evaluation is needed. Set `force` to `TRUE` when LOO or OOS re-evaluation
 #'     is required. Defaults to `FALSE`.
-#' @param cores the number of cores/workers to be used for the LOO or OOS validation. If set to `NULL`,
-#'     the number of cores is set to `(max physical cores available - 1)`. Defaults to `1`.
-#' @param threading a bool indicating whether to use the multi-threading to accelerate the LOO or OOS.
-#'     Turning this option on could improve the speed of validations when the emulator is built with a moderately large number of
-#'     training data points and the Matérn-2.5 kernel.
+#' @param cores the number of processes to be used for validations. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`.
+#'     Defaults to `1`.
 #' @param ... N/A.
 #'
 #' @return
@@ -107,14 +106,14 @@
 #' @md
 #' @name validate
 #' @export
-validate <- function(object, x_test, y_test, method, verb, force, cores, ...){
+validate <- function(object, x_test, y_test, method, verb, M, force, cores, ...){
   UseMethod("validate")
 }
 
 #' @rdname validate
 #' @method validate gp
 #' @export
-validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, ...) {
+validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -126,7 +125,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
-
+  M <- as.integer(M)
   if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   #For LOO
@@ -160,7 +159,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
-    res <- object$emulator_obj$loo(method = method, sample_size = 500L)
+    res <- object$emulator_obj$loo(method = method, sample_size = 500L, m = M)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Saving results to the slot 'loo' in the gp object ...", appendLF = FALSE)
@@ -195,7 +194,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
     if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
     if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
-
+    if ( ncol(x_test) != ncol(object$data$X) ) stop("'x_test' must have the same number of dimensions as the training input.", call. = FALSE)
     #check existing OOS
     if ( isFALSE(force) ){
       if ( "oos" %in% names(object) ){
@@ -228,9 +227,9 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     rep <- rep_x[[2]] + 1
 
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x_test_unique, method = method, sample_size=500L)
+      res <- object$emulator_obj$predict(x_test_unique, method = method, sample_size = 500L, m = M)
     } else {
-      res <- object$emulator_obj$ppredict(x_test_unique, method = method, sample_size=500L, core_num = cores)
+      res <- object$emulator_obj$ppredict(x_test_unique, method = method, sample_size = 500L, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
 
@@ -266,7 +265,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
 #' @rdname validate
 #' @method validate dgp
 #' @export
-validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -278,7 +277,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
-  object$emulator_obj$set_nb_parallel(threading)
+  M <- as.integer(M)
 
   if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
@@ -319,9 +318,9 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$loo(X = x_train, method = method)
+      res <- object$emulator_obj$loo(X = x_train, method = method, m = M)
     } else {
-      res <- object$emulator_obj$ploo(X = x_train, method = method, core_num = cores)
+      res <- object$emulator_obj$ploo(X = x_train, method = method, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
 
@@ -358,7 +357,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
     if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
     if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
-
+    if ( ncol(x_test) != ncol(object$data$X) ) stop("'x_test' must have the same number of dimensions as the training input.", call. = FALSE)
     #check existing OOS
     if ( isFALSE(force) ){
       if ( "oos" %in% names(object) ){
@@ -391,9 +390,9 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     rep <- rep_x[[2]] + 1
 
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x = x_test_unique, method = method)
+      res <- object$emulator_obj$predict(x = x_test_unique, method = method, m = M)
     } else {
-      res <- object$emulator_obj$ppredict(x = x_test_unique, method = method, core_num = cores)
+      res <- object$emulator_obj$ppredict(x = x_test_unique, method = method, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
 
@@ -431,7 +430,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 #' @rdname validate
 #' @method validate lgp
 #' @export
-validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, force = FALSE, cores = 1, threading = FALSE, ...) {
+validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -443,7 +442,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
-  object$emulator_obj$set_nb_parallel(threading)
+  M <- as.integer(M)
 
   if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
@@ -535,9 +534,9 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
     if ( isTRUE(verb) ) message("Calculating the OOS ...", appendLF = FALSE)
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x = x_test, method = method)
+      res <- object$emulator_obj$predict(x = x_test, method = method, m = M)
     } else {
-      res <- object$emulator_obj$ppredict(x = x_test, method = method, core_num = cores)
+      res <- object$emulator_obj$ppredict(x = x_test, method = method, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
 

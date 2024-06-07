@@ -13,9 +13,9 @@
   method = "mean_var",
   full_layer = FALSE,
   sample_size = 50,
+  M = 50,
   cores = 1,
   chunks = NULL,
-  threading = FALSE,
   ...
 )
 
@@ -25,9 +25,9 @@
   method = "mean_var",
   full_layer = FALSE,
   sample_size = 50,
+  M = 50,
   cores = 1,
   chunks = NULL,
-  threading = FALSE,
   ...
 )
 
@@ -36,6 +36,7 @@
   x,
   method = "mean_var",
   sample_size = 50,
+  M = 50,
   cores = 1,
   chunks = NULL,
   ...
@@ -69,15 +70,14 @@ set \code{NULL} in the corresponding sub-list of \code{x}.
 
 \item{sample_size}{the number of samples to draw for each given imputation if \code{method = "sampling"}. Defaults to \code{50}.}
 
-\item{cores}{the number of cores/workers to be used. If set to \code{NULL},
-the number of cores is set to \verb{(max physical cores available - 1)}. Defaults to \code{1}.}
+\item{M}{the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to \code{50}. This argument is only used if the emulator \code{object}
+was constructed under the Vecchia approximation.}
+
+\item{cores}{the number of processes to be used for predictions. If set to \code{NULL}, the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
 
 \item{chunks}{the number of chunks that the testing input matrix \code{x} will be divided into for multi-cores to work on.
 Only used when \code{cores} is not \code{1}. If not specified (i.e., \code{chunks = NULL}), the number of chunks is set to the value of \code{cores}.
 Defaults to \code{NULL}.}
-
-\item{threading}{a bool indicating whether to use the multi-threading to accelerate the predictions of DGP or linked (D)GP emulators. Turn this option on
-when you use the Matérn-2.5 kernel and have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to \code{FALSE}.}
 
 \item{...}{N/A.}
 }

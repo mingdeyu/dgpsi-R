@@ -174,7 +174,7 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.190766 0.014075 0.006056
+##  * RMSE: 0.190767 0.014075 0.006056
 ## Targets are not reached for all emulators at the end of the sequential design.
 ```
 
@@ -203,7 +203,7 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.190766 0.014075 0.006056
+##  * RMSE: 0.190767 0.014075 0.006056
 ## Iteration 1:
 ##  - Locating ... done
 ##  * Next design point (Emulator1): 0.263892
@@ -211,7 +211,7 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.176965 0.009466 0.006056
+##  * RMSE: 0.176961 0.009467 0.006056
 ## Iteration 2:
 ##  - Locating ... done
 ##  * Next design point (Emulator1): 0.030840
@@ -219,22 +219,22 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.204744 0.009466 0.006056
+##  * RMSE: 0.203489 0.009467 0.006056
 ##  
 ##  ...
 ## 
-## Iteration 11:
+## Iteration 10:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.105318
+##  * Next design point (Emulator1): 0.788265
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.009740 0.009466 0.006056
-## Target reached! The sequential design stops at step 11.
+##  * RMSE: 0.009116 0.009467 0.006056
+## Target reached! The sequential design stops at step 10.
 ```
 
-The first and the second emulators reached the target after iteration 11 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
+The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
 
 ```{r}
 draw(m, 1, 'design') + draw(m, 2, 'design') + draw(m, 3, 'design') +

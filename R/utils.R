@@ -270,6 +270,48 @@ set_seed <- function(seed) {
   pkg.env$dgpsi$nb_seed(seed)
 }
 
+#' @title Set the number of threads
+#'
+#' @description This function sets the number of threads for parallel computations involved
+#'    in the package.
+#'
+#' @param num the number of threads. If it is greater than the maximum number of threads available, the
+#'     number of threads will be set to the maximum value.
+#'
+#' @return No return value.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @md
+#' @export
+set_thread_num <- function(num) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return(invisible(NULL))
+  }
+  if (num >= pkg.env$thread_num) num <- pkg.env$thread_num
+  num <- as.integer(num)
+  pkg.env$dgpsi$set_thread(num)
+}
+
+#' @title Get the number of threads
+#'
+#' @description This function gets the number of threads used for parallel computations involved
+#'    in the package.
+#'
+#' @return the number of threads.
+#'
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @md
+#' @export
+get_thread_num <- function() {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return(invisible(NULL))
+  }
+  thread_num <- pkg.env$dgpsi$get_thread()
+  return(thread_num)
+}
+
 #' @title Load the stored emulator
 #'
 #' @description This function loads the `.pkl` file that stores the emulator.
@@ -530,6 +572,8 @@ set_imp <- function(object, B = 5) {
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
+  new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
   id <- sample.int(100000, 1)
   set_seed(id)
@@ -628,6 +672,8 @@ window <- function(object, start, end = NULL, thin = 1) {
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
+  new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
   id <- sample.int(100000, 1)
   set_seed(id)
@@ -944,6 +990,8 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
   B <- as.integer(length(object$emulator_obj$all_layer_set))
   X <- object[['data']][['X']]
   Y <- object[['data']][['Y']]
+  vecchia <- object[['specs']][['vecchia']]
+  M <- object[['specs']][['M']]
   linked_idx <- object$container_obj$local_input_idx
   n_layer <- length(crop_id_list)
   for (i in n_layer:1){
@@ -966,7 +1014,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             struc$length <- utils::tail(struc$length, length_dim)
             struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow=T)
           }
-          obj <- pkg.env$dgpsi$gp(X, Y, struc)
+          obj <- pkg.env$dgpsi$gp(X, Y, struc, vecchia, M)
           with(pkg.env$np$errstate(divide = 'ignore'), obj$train())
           res <- list()
           res[['id']] <- object$id
@@ -976,6 +1024,8 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
           res[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
           res[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
           res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+          res[['specs']][['vecchia']] <- vecchia
+          res[['specs']][['M']] <- M
           res[['constructor_obj']] <- obj
           res[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
           res[['emulator_obj']] <- obj
@@ -1000,7 +1050,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
               struc$length <- utils::tail(struc$length, length_dim)
               struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow = T)
             }
-            obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], struc)
+            obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], struc, vecchia, M)
             with(pkg.env$np$errstate(divide = 'ignore'), obj$train())
             res_j <- list()
             res_j[['id']] <- uuid::UUIDgenerate()
@@ -1010,6 +1060,8 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             res_j[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
             res_j[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
             res_j[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+            res_j[['specs']][['vecchia']] <- vecchia
+            res_j[['specs']][['M']] <- M
             res_j[['constructor_obj']] <- obj
             res_j[['container_obj']] <- pkg.env$dgpsi$container(obj$export(), linked_idx)
             res_j[['emulator_obj']] <- obj
@@ -1053,6 +1105,8 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
         object[['specs']][['internal_dims']] <- internal_dims
         object[['specs']][['external_dims']] <- external_dims
         object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+        object[['specs']][['vecchia']] <- vecchia
+        object[['specs']][['M']] <- M
         id <- sample.int(100000, 1)
         set_seed(id)
         object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)
@@ -1092,6 +1146,8 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
   object[['specs']][['internal_dims']] <- internal_dims
   object[['specs']][['external_dims']] <- external_dims
   object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  object[['specs']][['vecchia']] <- vecchia
+  object[['specs']][['M']] <- M
   id <- sample.int(100000, 1)
   set_seed(id)
   object[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = blocked_gibbs)

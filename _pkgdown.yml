@@ -42,6 +42,12 @@ articles:
   contents:
   - seq_design_2
 
+- title: Large-scale DGP Emulation
+  desc: Large-scale DGP emulation using a Vecchia implementation under the SI.
+  navbar: ~
+  contents:
+  - large_scale_emulation
+
 reference:
 - title: "Initalization"
   desc: >
@@ -97,6 +103,8 @@ reference:
   - window
   - trace_plot
   - nllik
+  - set_thread_num
+  - get_thread_num
 
 
 

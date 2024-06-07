@@ -18,9 +18,9 @@
   color = "turbo",
   type = "points",
   verb = TRUE,
+  M = 50,
   force = FALSE,
   cores = 1,
-  threading = FALSE,
   ...
 )
 
@@ -34,10 +34,10 @@
   min_max = TRUE,
   color = "turbo",
   type = "points",
+  M = 50,
   verb = TRUE,
   force = FALSE,
   cores = 1,
-  threading = FALSE,
   ...
 )
 
@@ -52,6 +52,7 @@
   color = "turbo",
   type = "points",
   verb = TRUE,
+  M = 50,
   force = FALSE,
   cores = 1,
   ...
@@ -111,11 +112,11 @@ individual points when the input of the emulator is one-dimensional and \code{st
 \item{verb}{a bool indicating if the trace information on plotting will be printed during the function execution.
 Defaults to \code{TRUE}.}
 
+\item{M}{same as that of \code{\link[=validate]{validate()}}.}
+
 \item{force}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{cores}{same as that of \code{\link[=validate]{validate()}}.}
-
-\item{threading}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{...}{N/A.}
 }

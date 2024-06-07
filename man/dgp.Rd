@@ -24,8 +24,8 @@ dgp(
   training = TRUE,
   verb = TRUE,
   check_rep = TRUE,
-  rff = FALSE,
-  M = NULL,
+  vecchia = FALSE,
+  M = 25,
   N = 500,
   cores = 1,
   blocked_gibbs = TRUE,
@@ -154,18 +154,15 @@ Defaults to \code{TRUE}.}
 \item{check_rep}{a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 position has multiple outputs. Defaults to \code{TRUE}.}
 
-\item{rff}{a bool indicating whether to use random Fourier features to approximate the correlation matrices in training. Turning on this option could help accelerate
-the training when the training data is relatively large but may reduce the quality of the resulting emulator. Defaults to \code{FALSE}.}
+\item{vecchia}{a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to \code{FALSE}.}
 
-\item{M}{the number of features to be used by random Fourier approximation. It is only used
-when \code{rff} is set to \code{TRUE}. Defaults to \code{NULL}. If it is \code{NULL}, \code{M} is automatically set to
-\code{max(100, ceiling(sqrt(nrow(X))*log(nrow(X))))}.}
+\item{M}{the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to \code{25}.}
 
 \item{N}{number of iterations for the training. Defaults to \code{500}. This argument is only used when \code{training = TRUE}.}
 
-\item{cores}{the number of cores/workers to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
-the number of cores is set to \verb{(max physical cores available - 1)}. Only use multiple cores when there is a large number of GP components in
-different layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
+\item{cores}{the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
+the number of processes is set to \verb{(max physical cores available - 1)} if \code{vecchia = FALSE} and \verb{max physical cores available \%/\% 2} if \code{vecchia = TRUE}.
+Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
 
 \item{blocked_gibbs}{a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
 more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during the Gibbs,
@@ -234,9 +231,11 @@ If a sub-list corresponds to a GP node, it contains four elements:
 \item \code{seed}: the random seed generated to produce the imputations. This information is stored for the reproducibility when the DGP emulator (that was saved by \code{\link[=write]{write()}}
 with the light option \code{light = TRUE}) is loaded back to R by \code{\link[=read]{read()}}.
 \item \code{B}: the number of imputations used to generate the emulator.
+\item \code{vecchia}: whether the Vecchia approximation is used for the GP emulator training.
+\item \code{M}: the size of the conditioning set for the Vecchia approximation in the DGP emulator training.
 }
 
-\code{internal_dims} and \code{external_dims} are generated only when \code{struc = NULL}.
+\code{internal_dims} and \code{external_dims} are generated only when \code{struc = NULL}. \code{M} is generated only when \code{vecchia = TRUE}.
 \item \code{constructor_obj}: a 'python' object that stores the information of the constructed DGP emulator.
 \item \code{container_obj}: a 'python' object that stores the information for the linked emulation.
 \item \code{emulator_obj}: a 'python' object that stores the information for the predictions from the DGP emulator.

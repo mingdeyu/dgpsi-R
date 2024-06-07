@@ -85,15 +85,12 @@
 #'     Defaults to `TRUE`.
 #' @param check_rep a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 #'     position has multiple outputs. Defaults to `TRUE`.
-#' @param rff a bool indicating whether to use random Fourier features to approximate the correlation matrices in training. Turning on this option could help accelerate
-#'     the training when the training data is relatively large but may reduce the quality of the resulting emulator. Defaults to `FALSE`.
-#' @param M the number of features to be used by random Fourier approximation. It is only used
-#'     when `rff` is set to `TRUE`. Defaults to `NULL`. If it is `NULL`, `M` is automatically set to
-#'     `max(100, ceiling(sqrt(nrow(X))*log(nrow(X))))`.
+#' @param vecchia a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to `FALSE`.
+#' @param M the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to `25`.
 #' @param N number of iterations for the training. Defaults to `500`. This argument is only used when `training = TRUE`.
-#' @param cores the number of cores/workers to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
-#'     the number of cores is set to `(max physical cores available - 1)`. Only use multiple cores when there is a large number of GP components in
-#'     different layers and optimization of GP components is computationally expensive. Defaults to `1`.
+#' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
+#'     the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE` and `max physical cores available %/% 2` if `vecchia = TRUE`.
+#'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param blocked_gibbs a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
 #'     more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during the Gibbs,
 #'     especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to `TRUE`.
@@ -148,8 +145,10 @@
 #'   5. `seed`: the random seed generated to produce the imputations. This information is stored for the reproducibility when the DGP emulator (that was saved by [write()]
 #'      with the light option `light = TRUE`) is loaded back to R by [read()].
 #'   6. `B`: the number of imputations used to generate the emulator.
+#'   7. `vecchia`: whether the Vecchia approximation is used for the GP emulator training.
+#'   8. `M`: the size of the conditioning set for the Vecchia approximation in the DGP emulator training.
 #'
-#'   `internal_dims` and `external_dims` are generated only when `struc = NULL`.
+#'   `internal_dims` and `external_dims` are generated only when `struc = NULL`. `M` is generated only when `vecchia = TRUE`.
 #' * `constructor_obj`: a 'python' object that stores the information of the constructed DGP emulator.
 #' * `container_obj`: a 'python' object that stores the information for the linked emulation.
 #' * `emulator_obj`: a 'python' object that stores the information for the predictions from the DGP emulator.
@@ -227,7 +226,7 @@
 #' @export
 dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
-                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, rff = FALSE, M = NULL, N = 500, cores = 1, blocked_gibbs = TRUE,
+                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, N = 500, cores = 1, blocked_gibbs = TRUE,
                 ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
@@ -261,9 +260,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   B <- as.integer(B)
   ess_burn <- as.integer(ess_burn)
 
-  if ( !is.null(M) ) {
-    M <- as.integer(M)
-  }
+  M <- as.integer(M)
 
   if ( !is.null(burnin) ) {
     burnin <- as.integer(burnin)
@@ -532,7 +529,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 
   if ( isTRUE(verb) ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
-  obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, blocked_gibbs, rff, M)
+  obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, blocked_gibbs, vecchia, M)
 
   if ( isTRUE(verb) ) {
     message(" done")
@@ -568,6 +565,8 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
     res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) FALSE else as.integer(reticulate::py_to_r(external_input_idx)+1)
   }
   res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx
+  res[['specs']][['vecchia']] <- vecchia
+  res[['specs']][['M']] <- M
   res[['constructor_obj']] <- obj
   seed <- sample.int(100000, 1)
   set_seed(seed)
@@ -588,10 +587,10 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #'
 #' @param object an instance of the `dgp` class.
 #' @param N additional number of iterations for the DGP emulator training. Defaults to `500`.
-#' @param cores the number of cores/workers to be used to optimize GP components (in the same layer)
-#'     at each M-step of the training. If set to `NULL`, the number of cores is set to `(max physical cores available - 1)`.
-#'     Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
-#'     is computationally expensive. Defaults to `1`.
+#' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
+#'     the number of processes is set to `(max physical cores available - 1)` if the DGP emulator was constructed without the Vecchia approximation.
+#'     Otherwise, the number of processes is set to `max physical cores available %/% 2`. Only use multiple processes when there is a large number of
+#'     GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`.
 #' @param verb a bool indicating if the progress bar will be printed during the training:
@@ -678,6 +677,8 @@ continue <- function(object, N = 500, cores = 1, ess_burn = 10, verb = TRUE, bur
     new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   }
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
+  new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
+  new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
   seed <- sample.int(100000, 1)
   set_seed(seed)

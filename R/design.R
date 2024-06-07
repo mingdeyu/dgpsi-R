@@ -100,17 +100,20 @@
 #'     the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
 #'     of the sequential designs in different executions of [design()] in [draw()] and can specify a different evaluation frequency in `freq`. However, it can be
 #'     beneficiary to turn this option off to restrict a large number of waves to be visualized in [draw()] that could run out of colors. Defaults to `TRUE`.
-#' @param cores an integer that gives the number of cores to be used for emulator validations. If set to `NULL`, the number of cores is
-#'     set to `(max physical cores available - 1)`. Defaults to `1`. This argument is only used if `eval = NULL`.
+#' @param M_val an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
+#'     was constructed under the Vecchia approximation. Defaults to `50`.
+#' @param cores an integer that gives the number of processes to be used for emulator validations. If set to `NULL`, the number of processes is set to
+#'     `max physical cores available %/% 2`. Defaults to `1`. This argument is only used if `eval = NULL`.
 #' @param train_N an integer or a vector of integers that gives the number of training iterations to be used to re-fit the DGP emulator at each step
 #'     of the sequential design:
 #' * If `train_N` is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in `freq`) with `train_N` iterations.
 #' * If `train_N` is a vector, then its size must be `N` even the re-fit frequency specified in `freq` is not one.
 #'
 #' Defaults to `100`.
-#' @param refit_cores the number of cores/workers to be used to re-fit GP components (in the same layer of a DGP emulator)
-#'     at each M-step during the re-fitting. If set to `NULL`, the number of cores is set to `(max physical cores available - 1)`.
-#'     Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+#' @param refit_cores the number of processes to be used to re-fit GP components (in the same layer of a DGP emulator)
+#'     at each M-step during the re-fitting. If set to `NULL`, the number of processes is set to `(max physical cores available - 1)`
+#'     if the DGP emulator was constructed without the Vecchia approximation. Otherwise, the number of processes is set to `max physical cores available %/% 2`.
+#'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components
 #'     is computationally expensive. Defaults to `1`.
 #' @param pruning a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
 #'     design points exceeds `min_size` in `control`. The argument is only applicable to DGP emulators (i.e., `object` is an instance of `dgp` class)
@@ -239,14 +242,14 @@
 #' @md
 #' @name design
 #' @export
-design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, reps, freq, x_test, y_test, reset, target, method, eval, verb, autosave, new_wave, cores, ...){
+design <- function(object, N, x_cand, y_cand, n_cand, limits, int, f, reps, freq, x_test, y_test, reset, target, method, eval, verb, autosave, new_wave, M_val, cores, ...){
   UseMethod("design")
 }
 
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, cores = 1, ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -371,11 +374,11 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores)
           rmse <- object$loo$rmse
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores)
           rmse <- object$oos$rmse
         }
       } else {
@@ -557,13 +560,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           if ( is.null(eval) ){
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, M = M_val, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, M = M_val, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
@@ -637,11 +640,11 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores)
           rmse <- object$loo$rmse
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores)
           rmse <- object$oos$rmse
         }
       } else {
@@ -755,13 +758,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
           if ( is.null(eval) ){
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, cores = cores)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
@@ -848,7 +851,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, cores = 1, train_N = 100, refit_cores = 1, pruning = TRUE, control = list(), ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = 100, refit_cores = 1, pruning = TRUE, control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1003,11 +1006,11 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
           rmse <- object$loo$rmse
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores, ...)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores, ...)
           rmse <- object$oos$rmse
         }
       } else {
@@ -1223,16 +1226,16 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                 rmse <- object$loo$rmse
               } else if ( inherits(object,"gp") ) {
-                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
                 rmse <- object$loo$rmse
               } else if ( inherits(object,"bundle") ) {
                 n_emulators <- length(object) - 1
                 if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
-                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$loo$rmse
                 }
               }
@@ -1241,16 +1244,16 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                 rmse <- object$oos$rmse
               } else if ( inherits(object,"gp") ) {
-                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE)
+                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE)
                 rmse <- object$oos$rmse
               } else if ( inherits(object,"bundle") ){
                 n_emulators <- length(object) - 1
                 if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
-                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$oos$rmse
                 }
               }
@@ -1344,11 +1347,11 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
           rmse <- object$loo$rmse
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, cores = cores, ...)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores, ...)
           rmse <- object$oos$rmse
         }
       } else {
@@ -1496,16 +1499,16 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                 rmse <- object$loo$rmse
               } else if ( inherits(object,"gp") ) {
-                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
                 rmse <- object$loo$rmse
               } else if ( inherits(object,"bundle") ) {
                 n_emulators <- length(object) - 1
                 if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
-                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
+                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$loo$rmse
                 }
               }
@@ -1514,16 +1517,16 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                 rmse <- object$oos$rmse
               } else if ( inherits(object,"gp") ) {
-                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE)
+                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE)
                 rmse <- object$oos$rmse
               } else if ( inherits(object,"bundle") ){
                 n_emulators <- length(object) - 1
                 if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
-                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
+                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$oos$rmse
                 }
               }
@@ -1609,7 +1612,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
       if (remaining_steps > 0){
         object <- design(object, remaining_steps, x_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[1]]}, y_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[2]]},
                          n_cand = n_cand, limits = limits, int = int, f = f, reps = reps, freq = freq, x_test = x_test, y_test = y_test, reset = utils::tail(reset, remaining_steps), target = target,
-                         method = method, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, cores = cores, train_N = utils::tail(train_N, remaining_steps), refit_cores = refit_cores, ...)
+                         method = method, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, M_val = M_val, cores = cores, train_N = utils::tail(train_N, remaining_steps), refit_cores = refit_cores, ...)
         return(object)
       }
     }
@@ -1640,7 +1643,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, cores = 1, train_N = 100, refit_cores = 1,  ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = 100, refit_cores = 1,  ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1794,14 +1797,14 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           obj_k <- object[[paste('emulator',k,sep='')]]
           if (is.null(x_test) & is.null(y_test)){
             type <- 'loo'
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val)
+            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
             object[[paste('emulator',k,sep='')]] <- obj_k
             rmse <- c(rmse, obj_k$loo$rmse)
           } else {
             type <- 'oos'
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, cores = cores, ...)
+            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val)
+            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, cores = cores, ...)
             object[[paste('emulator',k,sep='')]] <- obj_k
             rmse <- c(rmse, obj_k$oos$rmse)
           }
@@ -2177,8 +2180,8 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               for ( k in 1:n_emulators ){
                 if ( N_acq_ind[nrow(N_acq_ind),k]!=0 ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
-                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$loo$rmse
                 }
@@ -2190,8 +2193,8 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               for ( k in 1:n_emulators ){
                 if ( N_acq_ind[nrow(N_acq_ind),k]!=0 ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
-                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$oos$rmse
                 }
@@ -2288,14 +2291,14 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
           obj_k <- object[[paste('emulator',k,sep='')]]
           if (is.null(x_test) & is.null(y_test)){
             type <- 'loo'
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, cores = cores, ...)
+            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val)
+            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
             object[[paste('emulator',k,sep='')]] <- obj_k
             rmse <- c(rmse, obj_k$loo$rmse)
           } else {
             type <- 'oos'
-            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE)
-            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, cores = cores, ...)
+            if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val)
+            if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, cores = cores, ...)
             object[[paste('emulator',k,sep='')]] <- obj_k
             rmse <- c(rmse, obj_k$oos$rmse)
           }
@@ -2520,15 +2523,15 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               for ( k in 1:n_emulators ){
                 if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
-                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$loo$rmse
                 } else {
                   if ( !istarget[k] ){
                     obj_k <- object[[paste('emulator',k,sep='')]]
-                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE)
-                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, cores = cores, ...)
+                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
+                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     rmse[k] <- obj_k$loo$rmse
                   }
@@ -2541,15 +2544,15 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
               for ( k in 1:n_emulators ){
                 if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
-                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
+                  if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                  if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                   object[[paste('emulator',k,sep='')]] <- obj_k
                   rmse[k] <- obj_k$oos$rmse
                 } else {
                   if ( !istarget[k] ){
                     obj_k <- object[[paste('emulator',k,sep='')]]
-                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE)
-                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, force = TRUE, cores = cores, ...)
+                    if ( inherits(obj_k,"gp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                    if ( inherits(obj_k,"dgp") ) obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     rmse[k] <- obj_k$oos$rmse
                   }

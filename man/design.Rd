@@ -27,6 +27,7 @@ design(
   verb,
   autosave,
   new_wave,
+  M_val,
   cores,
   ...
 )
@@ -51,6 +52,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
+  M_val = 50,
   cores = 1,
   ...
 )
@@ -75,6 +77,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
+  M_val = 50,
   cores = 1,
   train_N = 100,
   refit_cores = 1,
@@ -103,6 +106,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
+  M_val = 50,
   cores = 1,
   train_N = 100,
   refit_cores = 1,
@@ -251,8 +255,11 @@ the last existing wave. This argument is only used if there are waves existing i
 of the sequential designs in different executions of \code{\link[=design]{design()}} in \code{\link[=draw]{draw()}} and can specify a different evaluation frequency in \code{freq}. However, it can be
 beneficiary to turn this option off to restrict a large number of waves to be visualized in \code{\link[=draw]{draw()}} that could run out of colors. Defaults to \code{TRUE}.}
 
-\item{cores}{an integer that gives the number of cores to be used for emulator validations. If set to \code{NULL}, the number of cores is
-set to \verb{(max physical cores available - 1)}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
+\item{M_val}{an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
+was constructed under the Vecchia approximation. Defaults to \code{50}.}
+
+\item{cores}{an integer that gives the number of processes to be used for emulator validations. If set to \code{NULL}, the number of processes is set to
+\verb{max physical cores available \%/\% 2}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
 
 \item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f}, \code{method}, and \code{eval}
 can be passed here. \code{\link[=design]{design()}} will pass relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of additional arguments provided.}
@@ -266,9 +273,10 @@ of the sequential design:
 
 Defaults to \code{100}.}
 
-\item{refit_cores}{the number of cores/workers to be used to re-fit GP components (in the same layer of a DGP emulator)
-at each M-step during the re-fitting. If set to \code{NULL}, the number of cores is set to \verb{(max physical cores available - 1)}.
-Only use multiple cores when there is a large number of GP components in different layers and optimization of GP components
+\item{refit_cores}{the number of processes to be used to re-fit GP components (in the same layer of a DGP emulator)
+at each M-step during the re-fitting. If set to \code{NULL}, the number of processes is set to \verb{(max physical cores available - 1)}
+if the DGP emulator was constructed without the Vecchia approximation. Otherwise, the number of processes is set to \verb{max physical cores available \%/\% 2}.
+Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components
 is computationally expensive. Defaults to \code{1}.}
 
 \item{pruning}{a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of

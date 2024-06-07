@@ -21,13 +21,12 @@
 #' @param method the prediction approach: mean-variance (`"mean_var"`) or sampling (`"sampling"`) approach. Defaults to `"mean_var"`.
 #' @param full_layer a bool indicating whether to output the predictions of all layers. Defaults to `FALSE`. Only used when `object` is a DGP and linked (D)GP emulator.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
-#' @param cores the number of cores/workers to be used. If set to `NULL`,
-#'     the number of cores is set to `(max physical cores available - 1)`. Defaults to `1`.
+#' @param M the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to `50`. This argument is only used if the emulator `object`
+#'     was constructed under the Vecchia approximation.
+#' @param cores the number of processes to be used for predictions. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`.
 #' @param chunks the number of chunks that the testing input matrix `x` will be divided into for multi-cores to work on.
 #'     Only used when `cores` is not `1`. If not specified (i.e., `chunks = NULL`), the number of chunks is set to the value of `cores`.
 #'     Defaults to `NULL`.
-#' @param threading a bool indicating whether to use the multi-threading to accelerate the predictions of DGP or linked (D)GP emulators. Turn this option on
-#'     when you use the Matérn-2.5 kernel and have a moderately large number of training data points as in such a case you could gain faster predictions. Defaults to `FALSE`.
 #' @param ... N/A.
 #' @return
 #' * If `object` is an instance of the `gp` class:
@@ -92,7 +91,7 @@ NULL
 #' @rdname predict
 #' @method predict dgp
 #' @export
-predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
+predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -100,7 +99,9 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x) ) x <- as.matrix(x)
+  if ( ncol(x) != ncol(object$data$X) ) stop("'x' must have the same number of dimensions as the training input.", call. = FALSE)
   sample_size <- as.integer(sample_size)
+  M <- as.integer(M)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
     if ( chunks < 1 ) stop("The chunk number must be >= 1.", call. = FALSE)
@@ -110,11 +111,10 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
 
-  object$emulator_obj$set_nb_parallel(threading)
   if ( identical(cores,as.integer(1)) ){
-    res <- object$emulator_obj$predict(x, method, full_layer, sample_size)
+    res <- object$emulator_obj$predict(x, method, full_layer, sample_size, M)
   } else {
-    res <- object$emulator_obj$ppredict(x, method, full_layer, sample_size, chunks, cores)
+    res <- object$emulator_obj$ppredict(x, method, full_layer, sample_size, M, chunks, cores)
   }
 
   if (method == 'mean_var'){
@@ -152,7 +152,7 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @rdname predict
 #' @method predict lgp
 #' @export
-predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, cores = 1, chunks = NULL, threading = FALSE, ...) {
+predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -188,6 +188,7 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
   }
 
   sample_size <- as.integer(sample_size)
+  M <- as.integer(M)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
     if ( chunks < 1 ) stop("The chunk number must be >= 1.", call. = FALSE)
@@ -197,11 +198,10 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
 
-  object$emulator_obj$set_nb_parallel(threading)
   if ( identical(cores,as.integer(1)) ){
-    res <- object$emulator_obj$predict(x, method, full_layer, sample_size)
+    res <- object$emulator_obj$predict(x, method, full_layer, sample_size, M)
   } else {
-    res <- object$emulator_obj$ppredict(x, method, full_layer, sample_size, chunks, cores)
+    res <- object$emulator_obj$ppredict(x, method, full_layer, sample_size, M, chunks, cores)
   }
 
   if (method == 'mean_var'){
@@ -255,7 +255,7 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
 #' @rdname predict
 #' @method predict gp
 #' @export
-predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores = 1, chunks = NULL, ...) {
+predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -263,7 +263,9 @@ predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores =
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x) ) x <- as.matrix(x)
+  if ( ncol(x) != ncol(object$data$X) ) stop("'x' must have the same number of dimensions as the training input.", call. = FALSE)
   sample_size <- as.integer(sample_size)
+  M <- as.integer(M)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
     if ( chunks < 1 ) stop("The chunk number must be >= 1.", call. = FALSE)
@@ -274,9 +276,9 @@ predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, cores =
   }
 
   if ( identical(cores,as.integer(1)) ){
-    res <- object$emulator_obj$predict(x, method, sample_size)
+    res <- object$emulator_obj$predict(x, method, sample_size, M)
   } else {
-    res <- object$emulator_obj$ppredict(x, method, sample_size, chunks, cores)
+    res <- object$emulator_obj$ppredict(x, method, sample_size, M, chunks, cores)
   }
 
   if (method == 'mean_var'){

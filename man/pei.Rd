@@ -9,15 +9,23 @@
 \usage{
 pei(object, x_cand, ...)
 
-\method{pei}{gp}(object, x_cand, pseudo_points = NULL, batch_size = 1, ...)
+\method{pei}{gp}(
+  object,
+  x_cand,
+  pseudo_points = NULL,
+  batch_size = 1,
+  M = 50,
+  workers = 1,
+  ...
+)
 
 \method{pei}{dgp}(
   object,
   x_cand,
   pseudo_points = NULL,
   batch_size = 1,
+  M = 50,
   workers = 1,
-  threading = FALSE,
   aggregate = NULL,
   ...
 )
@@ -27,8 +35,8 @@ pei(object, x_cand, ...)
   x_cand,
   pseudo_points = NULL,
   batch_size = 1,
+  M = 50,
   workers = 1,
-  threading = FALSE,
   aggregate = NULL,
   ...
 )
@@ -57,12 +65,11 @@ emulator in the bundle. Defaults to \code{NULL}. When \code{\link[=pei]{pei()}} 
 \item{batch_size}{an integer that gives the number of design points to be chosen.
 Defaults to \code{1}.}
 
-\item{workers}{the number of workers/cores to be used for the criterion calculation. If set to \code{NULL},
-the number of workers is set to \verb{(max physical cores available - 1)}. Defaults to \code{1}.}
+\item{M}{the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
+was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
-\item{threading}{a bool indicating whether to use the multi-threading to accelerate the criterion calculation for a DGP emulator.
-Turning this option on could improve the speed of criterion calculations when the DGP emulator is built with a moderately large number of
-training data points and the Matérn-2.5 kernel.}
+\item{workers}{the number of processes to be used for the criterion calculation. If set to \code{NULL},
+the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
 
 \item{aggregate}{an R function that aggregates scores of the PEI across different output dimensions (if \code{object} is an instance
 of the \code{dgp} class) or across different emulators (if \code{object} is an instance of the \code{bundle} class). The function should be specified in the

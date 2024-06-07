@@ -7,7 +7,7 @@
 \alias{validate.lgp}
 \title{Validate a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
-validate(object, x_test, y_test, method, verb, force, cores, ...)
+validate(object, x_test, y_test, method, verb, M, force, cores, ...)
 
 \method{validate}{gp}(
   object,
@@ -15,6 +15,7 @@ validate(object, x_test, y_test, method, verb, force, cores, ...)
   y_test = NULL,
   method = "mean_var",
   verb = TRUE,
+  M = 50,
   force = FALSE,
   cores = 1,
   ...
@@ -26,9 +27,9 @@ validate(object, x_test, y_test, method, verb, force, cores, ...)
   y_test = NULL,
   method = "mean_var",
   verb = TRUE,
+  M = 50,
   force = FALSE,
   cores = 1,
-  threading = FALSE,
   ...
 )
 
@@ -38,9 +39,9 @@ validate(object, x_test, y_test, method, verb, force, cores, ...)
   y_test = NULL,
   method = "mean_var",
   verb = TRUE,
+  M = 50,
   force = FALSE,
   cores = 1,
-  threading = FALSE,
   ...
 )
 }
@@ -95,18 +96,17 @@ in the final layer.
 \item{verb}{a bool indicating if the trace information on validations will be printed during the function execution.
 Defaults to \code{TRUE}.}
 
+\item{M}{the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator \code{object}
+was constructed under the Vecchia approximation. Defaults to \code{50}.}
+
 \item{force}{a bool indicating whether to force the LOO or OOS re-evaluation when \code{loo} or \code{oos} slot already exists in \code{object}. When \code{force = FALSE},
 \code{\link[=validate]{validate()}} will try to determine automatically if the LOO or OOS re-evaluation is needed. Set \code{force} to \code{TRUE} when LOO or OOS re-evaluation
 is required. Defaults to \code{FALSE}.}
 
-\item{cores}{the number of cores/workers to be used for the LOO or OOS validation. If set to \code{NULL},
-the number of cores is set to \verb{(max physical cores available - 1)}. Defaults to \code{1}.}
+\item{cores}{the number of processes to be used for validations. If set to \code{NULL}, the number of processes is set to \verb{max physical cores available \%/\% 2}.
+Defaults to \code{1}.}
 
 \item{...}{N/A.}
-
-\item{threading}{a bool indicating whether to use the multi-threading to accelerate the LOO or OOS.
-Turning this option on could improve the speed of validations when the emulator is built with a moderately large number of
-training data points and the Matérn-2.5 kernel.}
 }
 \value{
 \itemize{
