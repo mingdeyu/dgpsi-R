@@ -13,6 +13,9 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/articles/index.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/articles/large_scale_emulation.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/articles/linked_DGP.html</loc>
   </url>
   <url>
@@ -61,6 +64,9 @@
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/draw.html</loc>
   </url>
   <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/get_thread_num.html</loc>
+  </url>
+  <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.html</loc>
   </url>
   <url>
@@ -107,6 +113,9 @@
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/set_seed.html</loc>
+  </url>
+  <url>
+    <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/set_thread_num.html</loc>
   </url>
   <url>
     <loc>http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.html</loc>
