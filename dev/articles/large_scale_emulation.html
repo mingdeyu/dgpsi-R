@@ -136,7 +136,7 @@ implementation under our Stochastic Imputation (SI) framework:</p>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
 <span><span class="co">## Initializing the DGP emulator ... done</span></span>
 <span><span class="co">## Training the DGP emulator: </span></span>
-<span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [05:23&lt;00:00,  1.55it/s]</span></span>
+<span><span class="co">## Iteration 200: Layer 2: 100%|██████████| 200/200 [02:20&lt;00:00,  1.43it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 </div>
 <div class="section level2">
@@ -146,13 +146,19 @@ implementation under our Stochastic Imputation (SI) framework:</p>
 (LOO) cross validation plot:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Initializing ... done</span></span>
+<span><span class="co">## Post-processing LOO results ... done</span></span>
+<span><span class="co">## Plotting ... done</span></span></code></pre>
 <p><img src="images/vecchia_loo.png"></p>
 <p>or the Out-Of-Sample (OOS) validation plot over <code>1000</code>
 randomly generated testing locations:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oos_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/randomLHS.html" class="external-link">randomLHS</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">oos_y</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">oos_x</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">oos_x</span>, <span class="va">oos_y</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Initializing ... done</span></span>
+<span><span class="co">## Post-processing OOS results ... done</span></span>
+<span><span class="co">## Plotting ... done</span></span></code></pre>
 <p><img src="images/vecchia_oos.png"></p>
 <div class="section level3">
 <h3 id="performance-tip">Performance tip<a class="anchor" aria-label="anchor" href="#performance-tip"></a>

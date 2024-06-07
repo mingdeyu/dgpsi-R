@@ -68,7 +68,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">continue</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
-<span>  N <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  N <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -84,7 +84,8 @@
 
 
 <dt>N</dt>
-<dd><p>additional number of iterations for the DGP emulator training. Defaults to <code>500</code>.</p></dd>
+<dd><p>additional number of iterations for the DGP emulator training. If set to <code>NULL</code>, the number of iterations is set to <code>500</code> if the DGP emulator
+was constructed without the Vecchia approximation. Otherwise, the number of iterations is set to <code>200</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>cores</dt>

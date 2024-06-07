@@ -88,7 +88,7 @@
 <span>  check_rep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  vecchia <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">25</span>,</span>
-<span>  N <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">vecchia</span>, <span class="fl">200</span>, <span class="fl">500</span><span class="op">)</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  blocked_gibbs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -236,7 +236,7 @@ position has multiple outputs. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt>N</dt>
-<dd><p>number of iterations for the training. Defaults to <code>500</code>. This argument is only used when <code>training = TRUE</code>.</p></dd>
+<dd><p>number of iterations for the training. Defaults to <code>500</code> if <code>vecchia = FALSE</code> and <code>200</code> if if <code>vecchia = TRUE</code>. This argument is only used when <code>training = TRUE</code>.</p></dd>
 
 
 <dt>cores</dt>
