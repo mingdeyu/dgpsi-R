@@ -97,7 +97,10 @@ This argument has no effects on GP or bundles of GP emulators. Defaults to <code
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Since the constructed emulators are 'python' objects, <code><a href="https://rdrr.io/r/base/save.html" class="external-link">save()</a></code> from R will not work as it is only for R objects.</p>
+    <p>Since the constructed emulators are 'python' objects, <code><a href="https://rdrr.io/r/base/save.html" class="external-link">save()</a></code> from R will not work as it is only for R objects. If <code>object</code>
+was processed by <code><a href="set_vecchia.html">set_vecchia()</a></code> to add or remove the Vecchia approximation, <code>light</code> needs to be set to <code>FALSE</code> to ensure
+reproducibility after the saved emulator is loaded by <code><a href="read.html">read()</a></code>, since when <code>light = TRUE</code>, the imputations generated during
+emulator loading will be different.</p>
     </div>
 
     <div class="section level2">

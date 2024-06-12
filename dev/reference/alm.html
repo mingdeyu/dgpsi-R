@@ -196,8 +196,8 @@ R matrix.</p></li>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">X_new</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">Y</span>, <span class="va">Y_new</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># update the DGP emulator with the new input and output data and refit with 500 training iterations</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="update.html">update</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">X</span>, <span class="va">Y</span>, refit <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># update the DGP emulator with the new input and output data and refit</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="update.html">update</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">X</span>, <span class="va">Y</span>, refit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plot the LOO validation</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>

@@ -140,7 +140,7 @@
 <span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M_val <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  train_N <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  refit_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  pruning <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -170,7 +170,7 @@
 <span>  new_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M_val <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  train_N <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  train_N <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  refit_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -339,10 +339,11 @@ can be passed here. <code>design()</code> will pass relevant arguments to <code>
 
 
 <dt>train_N</dt>
-<dd><p>an integer or a vector of integers that gives the number of training iterations to be used to re-fit the DGP emulator at each step
-of the sequential design:</p><ul><li><p>If <code>train_N</code> is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in <code>freq</code>) with <code>train_N</code> iterations.</p></li>
+<dd><p>the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:</p><ul><li><p>If <code>train_N</code> is an integer, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in <code>freq</code>) with <code>train_N</code> iterations.</p></li>
 <li><p>If <code>train_N</code> is a vector, then its size must be <code>N</code> even the re-fit frequency specified in <code>freq</code> is not one.</p></li>
-</ul><p>Defaults to <code>100</code>.</p></dd>
+<li><p>If <code>train_N</code> is <code>NULL</code>, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in <code>freq</code>) with <code>100</code> iterations
+if the DGP emulator was constructed without the Vecchia approximation, and with <code>50</code> iterations if Vecchia approximation was used.</p></li>
+</ul><p>Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>refit_cores</dt>

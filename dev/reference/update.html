@@ -76,7 +76,7 @@
 <span>  refit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  N <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  N <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  ess_burn <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  B <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -125,7 +125,9 @@ Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt>N</dt>
-<dd><p>number of training iterations used to re-fit the emulator <code>object</code> if it is an instance of the <code>dgp</code> class. Defaults to <code>100</code>.</p></dd>
+<dd><p>number of training iterations used to re-fit the emulator <code>object</code> if it is an instance of the <code>dgp</code> class. If set to <code>NULL</code>,
+the number of iterations is set to <code>100</code> if the DGP emulator was constructed without the Vecchia approximation, and is set to <code>50</code>
+if Vecchia approximation was used. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>cores</dt>
