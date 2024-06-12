@@ -104,12 +104,13 @@
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param cores an integer that gives the number of processes to be used for emulator validations. If set to `NULL`, the number of processes is set to
 #'     `max physical cores available %/% 2`. Defaults to `1`. This argument is only used if `eval = NULL`.
-#' @param train_N an integer or a vector of integers that gives the number of training iterations to be used to re-fit the DGP emulator at each step
-#'     of the sequential design:
-#' * If `train_N` is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in `freq`) with `train_N` iterations.
+#' @param train_N the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:
+#' * If `train_N` is an integer, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in `freq`) with `train_N` iterations.
 #' * If `train_N` is a vector, then its size must be `N` even the re-fit frequency specified in `freq` is not one.
+#' * If `train_N` is `NULL`, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in `freq`) with `100` iterations
+#'   if the DGP emulator was constructed without the Vecchia approximation, and with `50` iterations if Vecchia approximation was used.
 #'
-#' Defaults to `100`.
+#' Defaults to `NULL`.
 #' @param refit_cores the number of processes to be used to re-fit GP components (in the same layer of a DGP emulator)
 #'     at each M-step during the re-fitting. If set to `NULL`, the number of processes is set to `(max physical cores available - 1)`
 #'     if the DGP emulator was constructed without the Vecchia approximation. Otherwise, the number of processes is set to `max physical cores available %/% 2`.
@@ -851,7 +852,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = 100, refit_cores = 1, pruning = TRUE, control = list(), ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1, pruning = TRUE, control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -863,7 +864,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   N <- check_N(N)
   freq <- check_freq(freq)
   reset <- check_reset(reset, N)
-  train_N <- check_train_N(train_N, N)
+  if ( !is.null(train_N) ) train_N <- check_train_N(train_N, N)
   reps <- check_reps(reps)
   if( !is.null(refit_cores) ) {
     refit_cores <- as.integer(refit_cores)
@@ -1189,7 +1190,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
         if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
@@ -1463,7 +1464,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
         if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
@@ -1612,7 +1613,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
       if (remaining_steps > 0){
         object <- design(object, remaining_steps, x_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[1]]}, y_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[2]]},
                          n_cand = n_cand, limits = limits, int = int, f = f, reps = reps, freq = freq, x_test = x_test, y_test = y_test, reset = utils::tail(reset, remaining_steps), target = target,
-                         method = method, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, M_val = M_val, cores = cores, train_N = utils::tail(train_N, remaining_steps), refit_cores = refit_cores, ...)
+                         method = method, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, M_val = M_val, cores = cores, train_N = if(!is.null(train_N)) utils::tail(train_N, remaining_steps) else NULL, refit_cores = refit_cores, ...)
         return(object)
       }
     }
@@ -1643,7 +1644,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = 100, refit_cores = 1,  ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, limits = NULL, int = FALSE, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1,  ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1653,7 +1654,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   N <- check_N(N)
   reset <- check_reset(reset, N)
   freq <- check_freq(freq)
-  train_N <- check_train_N(train_N, N)
+  if( !is.null(train_N) ) train_N <- check_train_N(train_N, N)
   reps <- check_reps(reps)
   if( !is.null(refit_cores) ) {
     refit_cores <- as.integer(refit_cores)
@@ -2155,7 +2156,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             if (N_acq_ind[nrow(N_acq_ind),k]!=0){
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
               object[[paste('emulator',k,sep='')]] <- obj_k
             }
           }
@@ -2483,13 +2484,13 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
             if ( is.null(target) ){
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
               object[[paste('emulator',k,sep='')]] <- obj_k
             } else {
               if ( !istarget[k] ){
                 obj_k <- object[[paste('emulator',k,sep='')]]
                 if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = train_N[i-start_point], cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
                 object[[paste('emulator',k,sep='')]] <- obj_k
               }
             }

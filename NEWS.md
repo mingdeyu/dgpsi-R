@@ -4,6 +4,7 @@
 - The `nb_parallel` argument is removed from relevant functions as the multi-thread implementation is now integrated into the package by default.
 - A Vecchia implementation under the SI framework is available for all functions of the package for large-scale emulations.
 - Two new functions, `get_thread_num()` and `set_thread_num()`, are included to inspect and change the number of threads used for multi-thread computations in the package.
+- A new function `set_vecchia()` is added to allow users to quickly add or remove the Vecchia approximation from an existing GP, DGP or linked (D)GP emulator.
 - A new vignette showcasing large-scale DGP emulation has been added.
 
 # dgpsi 2.4.0

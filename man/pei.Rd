@@ -148,8 +148,8 @@ Y_new <- f(X_new)
 X <- rbind(X, X_new)
 Y <- rbind(Y, Y_new)
 
-# update the DGP emulator with the new input and output data and refit with 500 training iterations
-m <- update(m, X, Y, refit = TRUE, N = 500)
+# update the DGP emulator with the new input and output data and refit
+m <- update(m, X, Y, refit = TRUE)
 
 # plot the LOO validation
 plot(m)

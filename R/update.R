@@ -15,7 +15,9 @@
 #'     constructed, after the training input and output are updated. Defaults to `FALSE`.
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
-#' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. Defaults to `100`.
+#' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. If set to `NULL`,
+#'     the number of iterations is set to `100` if the DGP emulator was constructed without the Vecchia approximation, and is set to `50`
+#'     if Vecchia approximation was used. Defaults to `NULL`.
 #' @param cores the number of processes to be used to re-fit GP components (in the same layer)
 #'     at each M-step during the re-fitting. If set to `NULL`, the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE`
 #'     and `max physical cores available %/% 2` if `vecchia = TRUE`. Only use multiple processes when there is a large number of GP components in different
@@ -54,7 +56,7 @@ update <- function(object, X, Y, refit, reset, verb, ...){
 #' @rdname update
 #' @method update dgp
 #' @export
-update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, N = 100, cores = 1, ess_burn = 10, B = NULL, ...) {
+update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, N = NULL, cores = 1, ess_burn = 10, B = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -62,6 +64,13 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
   #check class
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  }
+  if( is.null(N) ) {
+    if (object[['specs']][['vecchia']]) {
+      N <- 50
+    } else {
+      N <- 100
+    }
   }
   N <- as.integer(N)
   if( !is.null(cores) ) {

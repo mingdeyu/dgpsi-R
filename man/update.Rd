@@ -15,7 +15,7 @@ update(object, X, Y, refit, reset, verb, ...)
   refit = FALSE,
   reset = FALSE,
   verb = TRUE,
-  N = 100,
+  N = NULL,
   cores = 1,
   ess_burn = 10,
   B = NULL,
@@ -50,7 +50,9 @@ Defaults to \code{TRUE}.}
 
 \item{...}{N/A.}
 
-\item{N}{number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. Defaults to \code{100}.}
+\item{N}{number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. If set to \code{NULL},
+the number of iterations is set to \code{100} if the DGP emulator was constructed without the Vecchia approximation, and is set to \code{50}
+if Vecchia approximation was used. Defaults to \code{NULL}.}
 
 \item{cores}{the number of processes to be used to re-fit GP components (in the same layer)
 at each M-step during the re-fitting. If set to \code{NULL}, the number of processes is set to \verb{(max physical cores available - 1)} if \code{vecchia = FALSE}

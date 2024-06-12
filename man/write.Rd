@@ -25,7 +25,10 @@ This function saves the constructed emulator to a \code{.pkl} file.
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
-Since the constructed emulators are 'python' objects, \code{\link[=save]{save()}} from R will not work as it is only for R objects.
+Since the constructed emulators are 'python' objects, \code{\link[=save]{save()}} from R will not work as it is only for R objects. If \code{object}
+was processed by \code{\link[=set_vecchia]{set_vecchia()}} to add or remove the Vecchia approximation, \code{light} needs to be set to \code{FALSE} to ensure
+reproducibility after the saved emulator is loaded by \code{\link[=read]{read()}}, since when \code{light = TRUE}, the imputations generated during
+emulator loading will be different.
 }
 \examples{
 \dontrun{

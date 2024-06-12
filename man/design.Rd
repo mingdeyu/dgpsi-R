@@ -79,7 +79,7 @@ design(
   new_wave = TRUE,
   M_val = 50,
   cores = 1,
-  train_N = 100,
+  train_N = NULL,
   refit_cores = 1,
   pruning = TRUE,
   control = list(),
@@ -108,7 +108,7 @@ design(
   new_wave = TRUE,
   M_val = 50,
   cores = 1,
-  train_N = 100,
+  train_N = NULL,
   refit_cores = 1,
   ...
 )
@@ -264,14 +264,15 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 \item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f}, \code{method}, and \code{eval}
 can be passed here. \code{\link[=design]{design()}} will pass relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of additional arguments provided.}
 
-\item{train_N}{an integer or a vector of integers that gives the number of training iterations to be used to re-fit the DGP emulator at each step
-of the sequential design:
+\item{train_N}{the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:
 \itemize{
-\item If \code{train_N} is an integer, then at each step the DGP emulator will re-fitted (based on the frequency of re-fit specified in \code{freq}) with \code{train_N} iterations.
+\item If \code{train_N} is an integer, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in \code{freq}) with \code{train_N} iterations.
 \item If \code{train_N} is a vector, then its size must be \code{N} even the re-fit frequency specified in \code{freq} is not one.
+\item If \code{train_N} is \code{NULL}, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in \code{freq}) with \code{100} iterations
+if the DGP emulator was constructed without the Vecchia approximation, and with \code{50} iterations if Vecchia approximation was used.
 }
 
-Defaults to \code{100}.}
+Defaults to \code{NULL}.}
 
 \item{refit_cores}{the number of processes to be used to re-fit GP components (in the same layer of a DGP emulator)
 at each M-step during the re-fitting. If set to \code{NULL}, the number of processes is set to \verb{(max physical cores available - 1)}

@@ -201,7 +201,10 @@ unpack <- function(object) {
 #' @return No return value. `object` will be save to a local `.pkl` file specified by `pkl_file`.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note Since the constructed emulators are 'python' objects, [save()] from R will not work as it is only for R objects.
+#' @note Since the constructed emulators are 'python' objects, [save()] from R will not work as it is only for R objects. If `object`
+#'     was processed by [set_vecchia()] to add or remove the Vecchia approximation, `light` needs to be set to `FALSE` to ensure
+#'     reproducibility after the saved emulator is loaded by [read()], since when `light = TRUE`, the imputations generated during
+#'     emulator loading will be different.
 #' @examples
 #' \dontrun{
 #'
@@ -340,10 +343,18 @@ read <- function(pkl_file) {
     res$label <- NULL
     if (label == "gp"){
       if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+      if (!'vecchia' %in% names(res$specs)) {
+        res[['specs']][['vecchia']] <- FALSE
+        res[['specs']][['M']] <- 25
+      }
       class(res) <- "gp"
     } else if (label == "dgp"){
       if ('emulator_obj' %in% names(res)){
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+        if (!'vecchia' %in% names(res$specs)) {
+          res[['specs']][['vecchia']] <- FALSE
+          res[['specs']][['M']] <- 25
+        }
         class(res) <- "dgp"
       } else {
         burnin <- res$constructor_obj$burnin
@@ -351,6 +362,10 @@ read <- function(pkl_file) {
         B <- res$specs$B
         isblock <- res$constructor_obj$block
         linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        if (!'vecchia' %in% names(res$specs)) {
+          res[['specs']][['vecchia']] <- FALSE
+          res[['specs']][['M']] <- 25
+        }
         set_seed(res$specs$seed)
         res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
         res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
@@ -365,7 +380,7 @@ read <- function(pkl_file) {
         B <- res$specs$B
         extracted_struc <- res$constructor_obj
         set_seed(res$specs$seed)
-        obj <- pkg.env$dgpsi$lgp(all_layer = pkg.env$copy$deepcopy(extracted_struc), N = B)
+        obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
         res[['emulator_obj']] <- obj
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"
@@ -395,18 +410,43 @@ read <- function(pkl_file) {
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"
         }
         if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
+        if (!'vecchia' %in% names(res[[paste('emulator',i, sep='')]]$specs)) {
+          res[[paste('emulator',i, sep='')]][['specs']][['vecchia']] <- FALSE
+          res[[paste('emulator',i, sep='')]][['specs']][['M']] <- 25
+        }
       }
     }
   } else {
     if ('emulator_obj' %in% names(res)){
       type <- pkg.env$py_buildin$type(res$emulator_obj)$'__name__'
       if ( type=='emulator' ) {
+        if (!'specs' %in% names(res)) {
+          est_obj <- res$emulator_obj$all_layer
+          res[['specs']] <- extract_specs(est_obj, "dgp")
+        }
+        if (!'vecchia' %in% names(res$specs)) {
+          res[['specs']][['vecchia']] <- FALSE
+          res[['specs']][['M']] <- 25
+        }
+        if (!'B' %in% names(res$specs)) {
+          res[['specs']][['B']] <- length(res$emulator_obj$all_layer_set)
+        }
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "dgp"
       } else if ( type=='gp' ) {
+        if (!'specs' %in% names(res)) {
+          res[['specs']] <- extract_specs(res[['constructor_obj']], "gp")
+        }
+        if (!'vecchia' %in% names(res$specs)) {
+          res[['specs']][['vecchia']] <- FALSE
+          res[['specs']][['M']] <- 25
+        }
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "gp"
       } else if ( type=='lgp' ) {
+        if (!'specs' %in% names(res)) {
+          res[['specs']][['B']] <- length(res$emulator_obj$all_layer_set)
+        }
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"
       }
@@ -418,9 +458,27 @@ read <- function(pkl_file) {
       for ( i in 1:N ){
         type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
         if ( type=='emulator' ) {
+          if (!'specs' %in% names(res[[paste('emulator',i, sep='')]])) {
+            est_obj <- res[[paste('emulator',i, sep='')]]$emulator_obj$all_layer
+            res[[paste('emulator',i, sep='')]][['specs']] <- extract_specs(est_obj, "dgp")
+          }
+          if (!'vecchia' %in% names(res[[paste('emulator',i, sep='')]]$specs)) {
+            res[[paste('emulator',i, sep='')]][['specs']][['vecchia']] <- FALSE
+            res[[paste('emulator',i, sep='')]][['specs']][['M']] <- 25
+          }
+          if (!'B' %in% names(res[[paste('emulator',i, sep='')]]$specs)) {
+            res[[paste('emulator',i, sep='')]][['specs']][['B']] <- length(res[[paste('emulator',i, sep='')]]$emulator_obj$all_layer_set)
+          }
           if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"
         } else if ( type=='gp' ) {
+          if (!'specs' %in% names(res[[paste('emulator',i, sep='')]])) {
+            res[[paste('emulator',i, sep='')]][['specs']] <- extract_specs(res[[paste('emulator',i, sep='')]][['constructor_obj']], "gp")
+          }
+          if (!'vecchia' %in% names(res[[paste('emulator',i, sep='')]]$specs)) {
+            res[[paste('emulator',i, sep='')]][['specs']][['vecchia']] <- FALSE
+            res[[paste('emulator',i, sep='')]][['specs']][['M']] <- 25
+          }
           if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
           class(res[[paste('emulator',i, sep='')]]) <- "gp"
         }
@@ -484,6 +542,94 @@ summary.lgp <- function(object, ...) {
     if (pkg.env$restart) return(invisible(NULL))
   }
   pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+}
+
+#' @title Add or remove the Vecchia approximation
+#'
+#' @description This function adds or removes the Vecchia approximation from a GP, DGP or linked (D)GP emulator
+#'     constructed by [gp()], [dgp()] or [lgp()].
+#'
+#' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
+#' @param vecchia a boolean or a list of booleans to indicate the addition or removal of the Vecchia approximation:
+#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` is a boolean that indicates
+#'   either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of the Vecchia approximation from `object`.
+#' * if `object` is an instance of the `lgp` class, `x` can be a boolean or a list of booleans:
+#'   - if `vecchia` is a boolean, it indicates either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of
+#'     the Vecchia approximation from all individual (D)GP emulators contained in `object`.
+#'   - if `vecchia` is a list of booleans, it should have same shape as `struc` that was supplied to [lgp()]. Each boolean
+#'     in the list indicates if the corresponding (D)GP emulator contained in `object` shall have the Vecchia approximation
+#'     added or removed.
+#' @param M the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to `25`.
+#'
+#' @return An updated `object` with the Vecchia approximation either added or removed.
+#'
+#' @note This function is useful for quickly switching between Vecchia and non-Vecchia approximations for an existing emulator
+#'     without the need to reconstruct the emulator. If the emulator was built without the Vecchia approximation, the function
+#'     can add it, and if the emulator was built with the Vecchia approximation, the function can remove it. If the current
+#'     state already matches the requested state, the emulator remains unchanged.
+#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @md
+#' @export
+set_vecchia <- function(object, vecchia = TRUE, M = 25) {
+  if ( is.null(pkg.env$dgpsi) ) {
+    init_py(verb = F)
+    if (pkg.env$restart) return(invisible(NULL))
+  }
+  M <- as.integer(M)
+  if ( inherits(object,"gp") ){
+    if (vecchia){
+      if (object$specs$vecchia) {
+        return(object)
+      } else {
+        object$constructor_obj$to_vecchia(m = M)
+        object$container_obj$to_vecchia()
+        object[['specs']][['vecchia']] <- TRUE
+        object[['specs']][['M']] <- M
+        return(object)
+      }
+    } else {
+      if (object$specs$vecchia) {
+        object$constructor_obj$remove_vecchia()
+        object$container_obj$remove_vecchia()
+        object[['specs']][['vecchia']] <- FALSE
+        return(object)
+      } else {
+        return(object)
+      }
+    }
+  } else if ( inherits(object,"dgp") ) {
+    if (vecchia){
+      if (object$specs$vecchia) {
+        return(object)
+      } else {
+        object$constructor_obj$to_vecchia(m = M)
+        object$emulator_obj$to_vecchia()
+        object$container_obj$to_vecchia()
+        object[['specs']][['vecchia']] <- TRUE
+        object[['specs']][['M']] <- M
+        return(object)
+      }
+    } else {
+      if (object$specs$vecchia) {
+        object$constructor_obj$remove_vecchia()
+        object$emulator_obj$remove_vecchia()
+        object$container_obj$remove_vecchia()
+        object[['specs']][['vecchia']] <- FALSE
+        return(object)
+      } else {
+        return(object)
+      }
+    }
+  } else if ( inherits(object,"lgp") ) {
+    tryCatch({
+      object$emulator_obj$set_vecchia(mode = vecchia)
+    }, error = function(e) {
+      if(grepl("mode has a different shape as all_layer", e$message)) {
+        stop("'vecchia' has a different shape as 'struc' supplied to lgp().", call. = FALSE)
+      }
+    })
+    return(object)
+  }
 }
 
 
