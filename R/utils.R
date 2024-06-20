@@ -560,7 +560,14 @@ summary.lgp <- function(object, ...) {
 #'     in the list indicates if the corresponding (D)GP emulator contained in `object` shall have the Vecchia approximation
 #'     added or removed.
 #' @param M the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to `25`.
+#' @param ord an R function that returns the ordering of the input to the (D)GP emulator for the Vecchia approximation. The
+#'    function must satisfy the following basic rules:
+#' * the first argument represents the lengthscale-scaled input to the GP emulator or the lengthscale-scaled input to a GP node
+#'   of the DGP emulator.
+#' * the output of the function is a vector of indices that gives the ordering of the input to the GP emulator or the input to
+#'   the GP nodes of the DGP emulator.
 #'
+#' If `ord = NULL`, the default random ordering is used. Defaults to `NULL`.
 #' @return An updated `object` with the Vecchia approximation either added or removed.
 #'
 #' @note This function is useful for quickly switching between Vecchia and non-Vecchia approximations for an existing emulator
@@ -570,18 +577,27 @@ summary.lgp <- function(object, ...) {
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @md
 #' @export
-set_vecchia <- function(object, vecchia = TRUE, M = 25) {
+set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
   M <- as.integer(M)
+  if ( !is.null(ord) ) {
+    ord_wrapper <- function(x) {
+      return( as.integer(ord(x) - 1) )
+    }
+    ord_wrapper <- reticulate::py_func(ord_wrapper)
+  } else {
+    ord_wrapper <- NULL
+  }
+
   if ( inherits(object,"gp") ){
     if (vecchia){
       if (object$specs$vecchia) {
         return(object)
       } else {
-        object$constructor_obj$to_vecchia(m = M)
+        object$constructor_obj$to_vecchia(m = M, ord_fun = ord_wrapper)
         object$container_obj$to_vecchia()
         object[['specs']][['vecchia']] <- TRUE
         object[['specs']][['M']] <- M
@@ -602,7 +618,7 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25) {
       if (object$specs$vecchia) {
         return(object)
       } else {
-        object$constructor_obj$to_vecchia(m = M)
+        object$constructor_obj$to_vecchia(m = M, ord_fun = ord_wrapper)
         object$emulator_obj$to_vecchia()
         object$container_obj$to_vecchia()
         object[['specs']][['vecchia']] <- TRUE

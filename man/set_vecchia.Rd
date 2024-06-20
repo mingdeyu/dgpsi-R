@@ -4,7 +4,7 @@
 \alias{set_vecchia}
 \title{Add or remove the Vecchia approximation}
 \usage{
-set_vecchia(object, vecchia = TRUE, M = 25)
+set_vecchia(object, vecchia = TRUE, M = 25, ord = NULL)
 }
 \arguments{
 \item{object}{an instance of the S3 class \code{gp}, \code{dgp}, or \code{lgp}.}
@@ -24,6 +24,17 @@ added or removed.
 }}
 
 \item{M}{the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to \code{25}.}
+
+\item{ord}{an R function that returns the ordering of the input to the (D)GP emulator for the Vecchia approximation. The
+function must satisfy the following basic rules:
+\itemize{
+\item the first argument represents the lengthscale-scaled input to the GP emulator or the lengthscale-scaled input to a GP node
+of the DGP emulator.
+\item the output of the function is a vector of indices that gives the ordering of the input to the GP emulator or the input to
+the GP nodes of the DGP emulator.
+}
+
+If \code{ord = NULL}, the default random ordering is used. Defaults to \code{NULL}.}
 }
 \value{
 An updated \code{object} with the Vecchia approximation either added or removed.

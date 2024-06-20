@@ -87,6 +87,12 @@
 #'     position has multiple outputs. Defaults to `TRUE`.
 #' @param vecchia a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to `FALSE`.
 #' @param M the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to `25`.
+#' @param ord an R function that returns the ordering of the input to each GP node contained in the DGP emulator for the Vecchia approximation. The
+#'    function must satisfy the following basic rules:
+#' * the first argument represents the input to a GP node scaled by its lengthscales.
+#' * the output of the function is a vector of indices that gives the ordering of the input to the GP node.
+#'
+#' If `ord = NULL`, the default random ordering is used. Defaults to `NULL`.
 #' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
 #' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
 #'     the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE` and `max physical cores available %/% 2` if `vecchia = TRUE`.
@@ -226,7 +232,7 @@
 #' @export
 dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = ifelse(all(nugget_est), 0.01, 1e-6), scale_est = TRUE, scale = 1., connect = TRUE,
-                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
+                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
                 ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
@@ -261,6 +267,14 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   ess_burn <- as.integer(ess_burn)
 
   M <- as.integer(M)
+  if ( !is.null(ord) ) {
+    ord_wrapper <- function(x) {
+      return( as.integer(ord(x) - 1) )
+    }
+    ord_wrapper <- reticulate::py_func(ord_wrapper)
+  } else {
+    ord_wrapper <- NULL
+  }
 
   if ( !is.null(burnin) ) {
     burnin <- as.integer(burnin)
@@ -529,7 +543,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 
   if ( isTRUE(verb) ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
-  obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, blocked_gibbs, vecchia, M)
+  obj <- pkg.env$dgpsi$dgp(X, Y, struc, check_rep, blocked_gibbs, vecchia, M, ord_wrapper)
 
   if ( isTRUE(verb) ) {
     message(" done")

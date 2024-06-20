@@ -26,6 +26,7 @@ dgp(
   check_rep = TRUE,
   vecchia = FALSE,
   M = 25,
+  ord = NULL,
   N = ifelse(vecchia, 200, 500),
   cores = 1,
   blocked_gibbs = TRUE,
@@ -157,6 +158,15 @@ position has multiple outputs. Defaults to \code{TRUE}.}
 \item{vecchia}{a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to \code{FALSE}.}
 
 \item{M}{the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to \code{25}.}
+
+\item{ord}{an R function that returns the ordering of the input to each GP node contained in the DGP emulator for the Vecchia approximation. The
+function must satisfy the following basic rules:
+\itemize{
+\item the first argument represents the input to a GP node scaled by its lengthscales.
+\item the output of the function is a vector of indices that gives the ordering of the input to the GP node.
+}
+
+If \code{ord = NULL}, the default random ordering is used. Defaults to \code{NULL}.}
 
 \item{N}{number of iterations for the training. Defaults to \code{500} if \code{vecchia = FALSE} and \code{200} if \code{vecchia = TRUE}. This argument is only used when \code{training = TRUE}.}
 
