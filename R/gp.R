@@ -105,8 +105,8 @@
 #' * [alm()], [mice()], [pei()], and [vigf()] to locate next design points.
 #'
 #' @references
-#' Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. *Bayesian Analysis*, **14(3)**, 857-885.
-#' Katzfuss, M., Guinness, J., & Lawrence, E. (2022). Scaled Vecchia approximation for fast computer-model emulation. *SIAM/ASA Journal on Uncertainty Quantification*, **10(2)**, 537-554.
+#' - Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. *Bayesian Analysis*, **14(3)**, 857-885.
+#' - Katzfuss, M., Guinness, J., & Lawrence, E. (2022). Scaled Vecchia approximation for fast computer-model emulation. *SIAM/ASA Journal on Uncertainty Quantification*, **10(2)**, 537-554.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
 #'     R matrix. Thus, if `X` is a single data point with multiple dimensions, it must be given as a matrix.

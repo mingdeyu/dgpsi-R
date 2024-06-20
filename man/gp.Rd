@@ -215,6 +215,8 @@ m <- read('step_gp')
 
 }
 \references{
-Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. \emph{Bayesian Analysis}, \strong{14(3)}, 857-885.
-Katzfuss, M., Guinness, J., & Lawrence, E. (2022). Scaled Vecchia approximation for fast computer-model emulation. \emph{SIAM/ASA Journal on Uncertainty Quantification}, \strong{10(2)}, 537-554.
+\itemize{
+\item Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. \emph{Bayesian Analysis}, \strong{14(3)}, 857-885.
+\item Katzfuss, M., Guinness, J., & Lawrence, E. (2022). Scaled Vecchia approximation for fast computer-model emulation. \emph{SIAM/ASA Journal on Uncertainty Quantification}, \strong{10(2)}, 537-554.
+}
 }
