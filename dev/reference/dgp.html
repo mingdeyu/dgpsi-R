@@ -88,6 +88,7 @@
 <span>  check_rep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  vecchia <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  ord <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">vecchia</span>, <span class="fl">200</span>, <span class="fl">500</span><span class="op">)</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  blocked_gibbs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -233,6 +234,13 @@ position has multiple outputs. Defaults to <code>TRUE</code>.</p></dd>
 
 <dt>M</dt>
 <dd><p>the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to <code>25</code>.</p></dd>
+
+
+<dt>ord</dt>
+<dd><p>an R function that returns the ordering of the input to each GP node contained in the DGP emulator for the Vecchia approximation. The
+function must satisfy the following basic rules:</p><ul><li><p>the first argument represents the input to a GP node scaled by its lengthscales.</p></li>
+<li><p>the output of the function is a vector of indices that gives the ordering of the input to the GP node.</p></li>
+</ul><p>If <code>ord = NULL</code>, the default random ordering is used. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>N</dt>

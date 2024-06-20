@@ -82,6 +82,7 @@
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  vecchia <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  ord <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  id <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -170,6 +171,12 @@ The Vecchia approximation implemented for the GP emulation largely follows Katzf
 
 <dt>M</dt>
 <dd><p>the size of the conditioning set for the Vecchia approximation in the GP emulator training. Defaults to <code>25</code>.</p></dd>
+
+
+<dt>ord</dt>
+<dd><p>an R function that returns the ordering of the input to the GP emulator for the Vecchia approximation. The function must satisfy the following basic rules:</p><ul><li><p>the first argument represents the input scaled by the lengthscales.</p></li>
+<li><p>the output of the function is a vector of indices that gives the ordering of the input to the GP emulator.</p></li>
+</ul><p>If <code>ord = NULL</code>, the default random ordering is used. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt>internal_input_idx</dt>
