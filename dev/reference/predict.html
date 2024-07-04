@@ -190,28 +190,29 @@ of size: <code>B * sample_size</code>, where <code>B</code> is the number of imp
 </ol></li>
 <li><p>If <code>object</code> is an instance of the <code>lgp</code> class:</p><ol><li><p>if <code>method = "mean_var"</code> and  <code>full_layer = FALSE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that
 contains two sub-lists named <code>mean</code> for the predictive means and <code>var</code> for the predictive variances respectively. Each sub-list
-contains <em>M</em> number (same number of emulators in the final layer of the system) of matrices named <code>emulator1, emulator2,..., emulatorM</code>.
+contains <em>K</em> number (same number of emulators in the final layer of the system) of matrices named <code>emulator1, emulator2,..., emulatorM</code>.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.</p></li>
 <li><p>if <code>method = "mean_var"</code> and  <code>full_layer = TRUE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains
 two sub-lists named <code>mean</code> for the predictive means and <code>var</code> for the predictive variances respectively. Each sub-list contains <em>L</em>
 (i.e., the number of layers in the emulated system) components named <code>layer1, layer2,..., layerL</code>. Each component represents a layer
-and contains <em>M</em> number (same number of emulators in the corresponding layer of the system) of matrices named <code>emulator1, emulator2,..., emulatorM</code>.
+and contains <em>K</em> number (same number of emulators in the corresponding layer of the system) of matrices named <code>emulator1, emulator2,..., emulatorM</code>.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 GP/DGP emulator in the corresponding layer.</p></li>
 <li><p>if <code>method = "sampling"</code> and  <code>full_layer = FALSE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains
-<em>M</em> number (same number of emulators in the final layer of the system) of sub-lists named <code>emulator1, emulator2,..., emulatorM</code>. Each
+<em>K</em> number (same number of emulators in the final layer of the system) of sub-lists named <code>emulator1, emulator2,..., emulatorM</code>. Each
 sub-list corresponds to an emulator in the final layer, and contains <em>D</em> matrices, named <code>output1, output2,..., outputD</code>, that correspond to the output
 dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 of size: <code>B * sample_size</code>, where <code>B</code> is the number of imputations specified in <code><a href="lgp.html">lgp()</a></code>.</p></li>
 <li><p>if <code>method = "sampling"</code> and  <code>full_layer = TRUE</code>: an updated <code>object</code> is returned with an additional slot called <code>results</code> that contains
 <em>L</em> (i.e., the number of layers of the emulated system) sub-lists named <code>layer1, layer2,..., layerL</code>. Each sub-list represents a layer
-and contains <em>M</em> number (same number of emulators in the corresponding layer of the system) of components named <code>emulator1, emulator2,..., emulatorM</code>.
+and contains <em>K</em> number (same number of emulators in the corresponding layer of the system) of components named <code>emulator1, emulator2,..., emulatorM</code>.
 Each component corresponds to an emulator in the associated layer, and contains <em>D</em> matrices, named <code>output1, output2,..., outputD</code>, that correspond to
 the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 samples of size: <code>B * sample_size</code>, where <code>B</code> is the number of imputations specified in <code><a href="lgp.html">lgp()</a></code>.</p></li>
 </ol></li>
-</ul></div>
+</ul><p>The <code>results</code> slot will also include the value of <code>M</code>, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
