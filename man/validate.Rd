@@ -122,6 +122,7 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 \item a numeric value called \code{rmse} that contains the root mean/median squared error of the GP emulator.
 \item a numeric value called \code{nrmse} that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
+\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
 }
 
 The rows of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions.
@@ -138,6 +139,7 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 dimensions.
 \item a vector called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
+\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
 }
 
 The rows and columns of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions and DGP emulator output
@@ -153,6 +155,7 @@ deviations above and below the predictive mean. If \code{method = "sampling"}, t
 \item a list called \code{rmse} that contains the root mean/median squared errors of the linked (D)GP emulator.
 \item a list called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_test}.
+\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
 }
 
 Each element in \code{mean}, \code{median}, \code{std}, \code{lower}, \code{upper}, \code{rmse}, and \code{nrmse} corresponds to a (D)GP emulator in the final layer of the linked (D)GP

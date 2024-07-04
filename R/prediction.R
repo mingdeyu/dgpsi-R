@@ -54,26 +54,28 @@
 #' * If `object` is an instance of the `lgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that
 #'      contains two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list
-#'      contains *M* number (same number of emulators in the final layer of the system) of matrices named `emulator1, emulator2,..., emulatorM`.
+#'      contains *K* number (same number of emulators in the final layer of the system) of matrices named `emulator1, emulator2,..., emulatorM`.
 #'      Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 #'      in the final layer.
 #'   2. if `method = "mean_var"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains
 #'      two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list contains *L*
 #'      (i.e., the number of layers in the emulated system) components named `layer1, layer2,..., layerL`. Each component represents a layer
-#'      and contains *M* number (same number of emulators in the corresponding layer of the system) of matrices named `emulator1, emulator2,..., emulatorM`.
+#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of matrices named `emulator1, emulator2,..., emulatorM`.
 #'      Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 #'      GP/DGP emulator in the corresponding layer.
 #'   3. if `method = "sampling"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that contains
-#'      *M* number (same number of emulators in the final layer of the system) of sub-lists named `emulator1, emulator2,..., emulatorM`. Each
+#'      *K* number (same number of emulators in the final layer of the system) of sub-lists named `emulator1, emulator2,..., emulatorM`. Each
 #'      sub-list corresponds to an emulator in the final layer, and contains *D* matrices, named `output1, output2,..., outputD`, that correspond to the output
 #'      dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 #'      of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
 #'   4. if `method = "sampling"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains
 #'      *L* (i.e., the number of layers of the emulated system) sub-lists named `layer1, layer2,..., layerL`. Each sub-list represents a layer
-#'      and contains *M* number (same number of emulators in the corresponding layer of the system) of components named `emulator1, emulator2,..., emulatorM`.
+#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of components named `emulator1, emulator2,..., emulatorM`.
 #'      Each component corresponds to an emulator in the associated layer, and contains *D* matrices, named `output1, output2,..., outputD`, that correspond to
 #'      the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 #'      samples of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
+#'
+#' The `results` slot will also include the value of `M`, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @note Any R vector detected in `x` will be treated as a column vector and automatically converted into a single-column R matrix.
@@ -145,6 +147,7 @@ predict.dgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
   }
 
   object$results <- named_res
+  object$results[["M"]] <- M
   return(object)
 }
 
@@ -248,6 +251,7 @@ predict.lgp <- function(object, x, method = 'mean_var', full_layer = FALSE, samp
   }
 
   object$results <- named_res
+  object$results[["M"]] <- M
   return(object)
 }
 
@@ -286,7 +290,7 @@ predict.gp <- function(object, x, method = 'mean_var', sample_size = 50, M = 50,
   } else if (method == 'sampling'){
     object$results <- res
   }
-
+  object$results[["M"]] <- M
   return(object)
 }
 

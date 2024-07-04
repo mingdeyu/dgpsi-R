@@ -59,6 +59,7 @@
 #'   - a numeric value called `rmse` that contains the root mean/median squared error of the GP emulator.
 #'   - a numeric value called `nrmse` that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
+#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
 #'
 #'   The rows of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions.
 #' * If `object` is an instance of the `dgp` class, an updated `object` is returned with an additional slot called `loo` (for LOO cross validation) or
@@ -73,6 +74,7 @@
 #'     dimensions.
 #'   - a vector called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 #'     dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
+#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
 #'
 #'   The rows and columns of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions and DGP emulator output
 #' dimensions, respectively.
@@ -86,6 +88,7 @@
 #'   - a list called `rmse` that contains the root mean/median squared errors of the linked (D)GP emulator.
 #'   - a list called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_test`.
+#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
 #'
 #'   Each element in `mean`, `median`, `std`, `lower`, `upper`, `rmse`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 #' emulator.
@@ -138,7 +141,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
         if ( isTRUE(verb) ) message(" LOO results found in the gp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( ((method == 'mean_var')&("mean" %in% names(object$loo)))|((method == 'sampling')&("median" %in% names(object$loo))) ){
+        if ( (((method == 'mean_var')&("mean" %in% names(object$loo)))|((method == 'sampling')&("median" %in% names(object$loo)))) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -180,6 +183,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["rmse"]] <- sqrt(mean((dat$median-dat$y_train)^2))
       dat[["nrmse"]] <- dat$rmse/(max(dat$y_train)-min(dat$y_train))
     }
+    dat[["M"]] <- M
     object$loo <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -203,7 +207,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
         if ( isTRUE(verb) ) message(" OOS results found in the gp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -251,6 +255,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["rmse"]] <- sqrt(mean((dat$median-dat$y_test)^2))
       dat[["nrmse"]] <- dat$rmse/(max(dat$y_test)-min(dat$y_test))
     }
+    dat[["M"]] <- M
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -291,7 +296,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         if ( isTRUE(verb) ) message(" LOO results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( ((method == 'mean_var')&("mean" %in% names(object$loo)))|((method == 'sampling')&("median" %in% names(object$loo))) ){
+        if ( ( ((method == 'mean_var')&("mean" %in% names(object$loo)))|((method == 'sampling')&("median" %in% names(object$loo))) ) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -343,6 +348,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["rmse"]] <- sqrt(colMeans((dat$mean-dat$y_train)^2))
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
     }
+    dat[["M"]] <- M
     object$loo <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -366,7 +372,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         if ( isTRUE(verb) ) message(" OOS results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -415,6 +421,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["rmse"]] <- sqrt(colMeans((dat$mean-dat$y_test)^2))
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
     }
+    dat[["M"]] <- M
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -513,7 +520,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         if ( isTRUE(verb) ) message(" OOS results found in the lgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -586,6 +593,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["rmse"]] <- rmse_lst
       dat[["nrmse"]] <- nrmse_lst
     }
+    dat[["M"]] <- M
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")

@@ -113,28 +113,30 @@ of size: \code{B * sample_size}, where \code{B} is the number of imputations spe
 \enumerate{
 \item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that
 contains two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list
-contains \emph{M} number (same number of emulators in the final layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
+contains \emph{K} number (same number of emulators in the final layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.
 \item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
 two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L}
 (i.e., the number of layers in the emulated system) components named \verb{layer1, layer2,..., layerL}. Each component represents a layer
-and contains \emph{M} number (same number of emulators in the corresponding layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
+and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 GP/DGP emulator in the corresponding layer.
 \item if \code{method = "sampling"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
-\emph{M} number (same number of emulators in the final layer of the system) of sub-lists named \verb{emulator1, emulator2,..., emulatorM}. Each
+\emph{K} number (same number of emulators in the final layer of the system) of sub-lists named \verb{emulator1, emulator2,..., emulatorM}. Each
 sub-list corresponds to an emulator in the final layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to the output
 dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 \item if \code{method = "sampling"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
 \emph{L} (i.e., the number of layers of the emulated system) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents a layer
-and contains \emph{M} number (same number of emulators in the corresponding layer of the system) of components named \verb{emulator1, emulator2,..., emulatorM}.
+and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of components named \verb{emulator1, emulator2,..., emulatorM}.
 Each component corresponds to an emulator in the associated layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to
 the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 samples of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 }
 }
+
+The \code{results} slot will also include the value of \code{M}, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.
 }
 \description{
 This function implements single-core or multi-core predictions (with or without multi-threading)
