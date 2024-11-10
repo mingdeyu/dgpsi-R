@@ -49,7 +49,7 @@ set_seed(9999)
 and generate `3000` training data points:
 
 ```{r}
-X <- lhs::randomLHS(3000, 2)
+X <- randomLHS(3000, 2)
 Y <- f(X)
 ```
 

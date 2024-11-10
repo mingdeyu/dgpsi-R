@@ -90,7 +90,7 @@ We choose a heteroskedastic Gaussian likelihood by setting `likelihood = "Hetero
 summary(m_dgp)
 ```
 
-<iframe src="https://github.com/mingdeyu/dgpsi-R/blob/master/vignettes/images/motor_dgp.html" width="100%" height="400" style="border: none;"></iframe>
+<iframe src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motor_dgp.html" width="100%" height="400" style="border: none;"></iframe>
 
 For comparison, we also build a GP emulator (by `gp()`) that incorporates homogeneous noises by setting `nugget_est = T` and the initial nugget value to $0.01$:
 
@@ -110,7 +110,7 @@ We can also summarize the trained GP emulator by `summary()`:
 summary(m_gp)
 ```
 
-<iframe src="https://github.com/mingdeyu/dgpsi-R/blob/master/vignettes/images/motor_gp.html" width="100%" height="400" style="border: none;"></iframe>
+<iframe src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motor_gp.html" width="100%" height="400" style="border: none;"></iframe>
 
 ## Validation
 
