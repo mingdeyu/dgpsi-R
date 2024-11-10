@@ -49,7 +49,7 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
   scale_fill_continuous(type = "viridis")
 ```
 
-![](images/seq_fct.png)
+![](images/seq_fct.png){width=90%}
 
 We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space while in the top-right part the simulator shows little variations. 
 
@@ -193,14 +193,14 @@ After the sequential design is done, we can inspect the enriched design by apply
 draw(m, 'design')
 ```
 
-![](images/seq_design.png)
+![](images/seq_design.png){width=90%}
 It can be seen from the figure above that most of the added design points concentrate at the bottom-left corner of the input space where the simulator `f` exhibits more variations and thus needs more data to be well-emulated. We can also visualize the changes of qualities (in terms of RMSEs wrt the validation dataset) of emulators constructed during the three waves of sequential designs:
 
 ```{r}
 draw(m, 'rmse')
 ```
 
-![](images/seq_rmse.png)
+![](images/seq_rmse.png){width=90%}
 
 ## Comparison to DGP emulators with space-filling designs
 
@@ -271,7 +271,7 @@ draw(m, 'rmse', log = T) +
   scale_shape_manual(values = c(2, 3, 4, 8, 15))
 ```
 
-![](images/seq_comparison.png)
+![](images/seq_comparison.png){width=90%}
 
 It can be seen from the plot above that with static space-filling designs, the quality of an emulator may not be improved as the design size increases. This is because increasing the size of a space-filling design may not capture regions where the simulator exhibits more variations, and thus cause DGP emulators with higher RMSEs than those constructed through the sequential design.
 

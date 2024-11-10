@@ -78,12 +78,12 @@ plot(m)
 ```
 
 ```
-## Initializing ... done
+## Validating and computing ... done
 ## Post-processing LOO results ... done
 ## Plotting ... done
 ```
 
-![](images/vecchia_loo.png)
+![](images/vecchia_loo.png){width=90%}
 
 or the Out-Of-Sample (OOS) validation plot over `1000` randomly generated testing locations:
 
@@ -94,12 +94,12 @@ plot(m, oos_x, oos_y)
 ```
 
 ```
-## Initializing ... done
+## Validating and computing ... done
 ## Post-processing OOS results ... done
 ## Plotting ... done
 ```
 
-![](images/vecchia_oos.png)
+![](images/vecchia_oos.png){width=90%}
 
 ### Performance tip
 
