@@ -39,8 +39,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
-    </a></li>
+<li><a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood</a></li>
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
@@ -133,19 +132,12 @@ information by setting <code>verb = FALSE</code>. Note that if we want
 to train the DGP emulator <code>m</code> for additional iterations, we
 can simply do <code>m &lt;- continue(m)</code> instead of rebuilding the
 DGP emulator.</p>
-<p>The trained DGP emulator can be viewed using the
+<p>The trained DGP emulator can be visualized using the
 <code><a href="../reference/summary.html">summary()</a></code> function:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |</span></span>
-<span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.385]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |</span></span>
-<span><span class="co">## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.183]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
-<span><span class="co">## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.745]     |     0.480     | 1.000e-06 (fixed) |    [1]     |        [1]        |</span></span>
-<span><span class="co">## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+</span></span>
-<span><span class="co">## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.</span></span>
-<span><span class="co">## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.</span></span></code></pre>
+<iframe src="https://mingdeyu.github.io/dgpsi-R/dgpsi_summary.html" width="100%" height="400" style="border: none;">
+</iframe>
 <p>The summary table gives key information about the trained DGP
 emulator. Note that in the auto-generated emulator we have nugget terms
 fixed to <code>1e-6</code> for all GP nodes because we are emulating a
@@ -169,25 +161,25 @@ installed.</p>
 validation plots. There are two types of validation plots provided by
 the package. The first one is the Leave-One-Out (LOO) cross validation
 plot:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
 <span><span class="co">## Post-processing LOO results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
-<p><img src="images%2Fstep_fct_loo.png"></p>
+<p><img src="images%2Fstep_fct_loo.png" style="width:90.0%"></p>
 <p>The second validation plot is the Out-Of-Sample (OOS) validation plot
 that requires an out-of-sample testing data set. Here we generate an OOS
 data set that contains 10 testing data points</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oos_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">oos_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">oos_x</span>, <span class="va">f</span><span class="op">)</span></span></code></pre></div>
 <p>for the validation:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m</span>,<span class="va">oos_x</span>,<span class="va">oos_y</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Initializing ... done</span></span>
+<pre><code><span><span class="co">## Validating and computing ... done</span></span>
 <span><span class="co">## Post-processing OOS results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
-<p><img src="images%2Fstep_fct_oos.png"></p>
+<p><img src="images%2Fstep_fct_oos.png" style="width:90.0%"></p>
 </div>
 <div class="section level2">
 <h2 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
@@ -195,18 +187,18 @@ data set that contains 10 testing data points</p>
 <p>Once the validation is done, we can make predictions from the DGP
 emulator. We generate 200 data points from the step function over
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f</span><span class="op">)</span></span></code></pre></div>
 <p>for predictions:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
 <p>The <code><a href="../reference/predict.html">predict()</a></code> function returns an updated DGP emulator
 <code>m</code> that contains a slot named <code>results</code> that
 gives the posterior predictive means and variances at testing positions.
 We can extract these information and plot the emulation results to check
 the predictive performance of our constructed DGP emulator:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span> <span class="co"># extract the predictive means </span></span>
 <span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">var</span><span class="op">)</span> <span class="co"># extract the predictive variance and compute the predictive standard deviations</span></span>
 <span><span class="co"># compute predictive bounds which are two predictive standard deviations above and below the predictive means</span></span>
@@ -218,7 +210,7 @@ the predictive performance of our constructed DGP emulator:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="st">"#D55E00"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="co"># Underlying truth</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">mu</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, col <span class="op">=</span> <span class="st">'black'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, type <span class="op">=</span> <span class="st">'p'</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"#0072B2"</span><span class="op">)</span> <span class="co"># Training data points</span></span></code></pre></div>
-<p><img src="images%2Fstep_fct_result.png"></p>
+<p><img src="images%2Fstep_fct_result.png" style="width:90.0%"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
