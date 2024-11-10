@@ -2,13 +2,14 @@ pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
+  classification: classification.html
   dgpsi: dgpsi.html
   large_scale_emulation: large_scale_emulation.html
   linked_DGP: linked_DGP.html
   motorcycle: motorcycle.html
   seq_design_2: seq_design_2.html
   seq_design: seq_design.html
-last_built: 2024-11-10T21:05Z
+last_built: 2024-11-10T22:22Z
 urls:
   reference: http://mingdeyu.github.io/dgpsi-R/reference
   article: http://mingdeyu.github.io/dgpsi-R/articles

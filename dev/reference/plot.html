@@ -25,6 +25,8 @@
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
     <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
     </a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -55,9 +57,11 @@
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
+<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  style <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_max <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  color <span class="op">=</span> <span class="st">"turbo"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"points"</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -73,7 +77,8 @@
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
+<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  style <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_max <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  color <span class="op">=</span> <span class="st">"turbo"</span>,</span>
@@ -91,7 +96,8 @@
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
+<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  style <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_max <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  color <span class="op">=</span> <span class="st">"turbo"</span>,</span>
@@ -138,13 +144,22 @@ system.</p></li>
 <dd><p>same as that of <code><a href="validate.html">validate()</a></code>.</p></dd>
 
 
+<dt id="arg-sample-size">sample_size<a class="anchor" aria-label="anchor" href="#arg-sample-size"></a></dt>
+<dd><p>same as that of <code><a href="validate.html">validate()</a></code>.</p></dd>
+
+
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>either <code>1</code> or <code>2</code>, indicating two different types of validation plots.</p></dd>
 
 
 <dt id="arg-min-max">min_max<a class="anchor" aria-label="anchor" href="#arg-min-max"></a></dt>
 <dd><p>a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
-emulator. Defaults to <code>TRUE</code>.</p></dd>
+emulator. Defaults to <code>TRUE</code>. This argument is not applicable to DGP emulators with categorical likelihoods.</p></dd>
+
+
+<dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> a bool indicating if normalization will be used to scale the counts in validation plots of DGP emulators with categorical
+likelihoods when <code>style = 2</code>.  Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-color">color<a class="anchor" aria-label="anchor" href="#arg-color"></a></dt>
@@ -161,7 +176,8 @@ emulator. Defaults to <code>TRUE</code>.</p></dd>
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>either <code>'line'</code> or <code>'points</code>, indicating whether to draw testing data in the OOS validation plot as a line or
-individual points when the input of the emulator is one-dimensional and <code>style = 1</code>. Defaults to <code>'points'</code></p></dd>
+individual points when the input of the emulator is one-dimensional and <code>style = 1</code>. This argument is not applicable to DGP emulators with
+categorical likelihoods. Defaults to <code>'points'</code></p></dd>
 
 
 <dt id="arg-verb">verb<a class="anchor" aria-label="anchor" href="#arg-verb"></a></dt>
@@ -170,7 +186,7 @@ Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-m">M<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
-<dd><p>same as that of <code><a href="validate.html">validate()</a></code>.</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> same as that of <code><a href="validate.html">validate()</a></code>.</p></dd>
 
 
 <dt id="arg-force">force<a class="anchor" aria-label="anchor" href="#arg-force"></a></dt>

@@ -25,6 +25,8 @@
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
     <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
     </a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    </a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -44,13 +46,23 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.4.0-9000" id="dgpsi-240-9000-development-version">dgpsi 2.4.0-9000 (development version)<a class="anchor" aria-label="anchor" href="#dgpsi-240-9000-development-version"></a></h2>
-<ul><li>The computation of training for DGP emulators is now roughly 30%-40% faster.</li>
-<li>The computation of (D)GP prediction and LOO is now 6-7 times faster.</li>
-<li>The <code>nb_parallel</code> argument is removed from relevant functions as the multi-thread implementation is now integrated into the package by default.</li>
-<li>A Vecchia implementation under the SI framework is available for all functions of the package for large-scale emulations.</li>
-<li>Two new functions, <code><a href="../reference/get_thread_num.html">get_thread_num()</a></code> and <code><a href="../reference/set_thread_num.html">set_thread_num()</a></code>, are included to inspect and change the number of threads used for multi-thread computations in the package.</li>
-<li>A new function <code><a href="../reference/set_vecchia.html">set_vecchia()</a></code> is added to allow users to quickly add or remove the Vecchia approximation from an existing GP, DGP or linked (D)GP emulator.</li>
-<li>A new vignette showcasing large-scale DGP emulation has been added.</li>
+<ul><li>Training times for DGP emulators are now approximately 30%-40% faster.</li>
+<li>The computation of (D)GP predictions and Leave-One-Out (LOO) evaluations is now 6-7 times faster.</li>
+<li>The <code>nb_parallel</code> argument has been removed from relevant functions, as multi-threading is now integrated by default.</li>
+<li>A Vecchia approximation, implemented under the SI framework, is now available across all functions to support large-scale emulations.</li>
+<li>Two new functions, <code><a href="../reference/get_thread_num.html">get_thread_num()</a></code> and <code><a href="../reference/set_thread_num.html">set_thread_num()</a></code>, allow users to inspect and adjust the number of threads used for multi-threaded computations.</li>
+<li>A new function, <code><a href="../reference/set_vecchia.html">set_vecchia()</a></code>, enables users to easily add or remove the Vecchia approximation for GP, DGP, or linked (D)GP emulators.</li>
+<li>Documentation now includes lifecycle status badges to highlight deprecated and newly introduced functions and arguments.</li>
+<li>The default value of the <code>nugget</code> parameter in DGP emulators with likelihood layers has been adjusted from <code>1e-6</code> to <code>1e-4</code>.</li>
+<li>A <code>Categorical</code> likelihood option has been added to the <code><a href="../reference/dgp.html">dgp()</a></code> function’s <code>likelihood</code> argument, enabling DGP-based classification.</li>
+<li>An issue related to the <code>LD_LIBRARY</code> environment variable on Linux systems has been resolved via the <code><a href="../reference/init_py.html">init_py()</a></code> function.</li>
+<li>The <code><a href="../reference/lgp.html">lgp()</a></code> function has been enhanced to accept connection information among emulators in the form of a data frame, streamlining linked emulation setup.</li>
+<li>A new function, <code><a href="../reference/set_id.html">set_id()</a></code>, allows users to assign unique IDs to emulators.</li>
+<li>A new function, <code><a href="../reference/Categorical.html">Categorical()</a></code>, enables the creation of categorical likelihood nodes for classification within a customized DGP hierarchy.</li>
+<li>The <code><a href="../reference/plot.html">plot()</a></code> function has been updated to generate validation plots for DGP classifiers (i.e., DGP emulators with categorical likelihoods).</li>
+<li>The <code><a href="../reference/summary.html">summary()</a></code> function has been redesigned to provide visualizations of structure and model specifications for (D)GP and linked (D)GP emulators.</li>
+<li>A <code>sample_size</code> argument has been added to the <code><a href="../reference/validate.html">validate()</a></code> and <code><a href="../reference/plot.html">plot()</a></code> functions, allowing users to adjust the number of samples used for validation when the validation method is set to <code>sampling</code>.</li>
+<li>Additional vignettes are available, showcasing large-scale DGP emulation and DGP classification.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.4.0" id="dgpsi-240">dgpsi 2.4.0<a class="anchor" aria-label="anchor" href="#dgpsi-240"></a></h2><p class="text-muted">CRAN release: 2024-01-14</p>

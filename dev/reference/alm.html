@@ -27,6 +27,8 @@ or a bundle of (D)GP emulators using the Active Learning MacKay (ALM), see the r
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
     <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
     </a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -93,7 +95,7 @@ Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-m">M<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
-<dd><p>the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator <code>object</code>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator <code>object</code>
 was constructed under the Vecchia approximation. Defaults to <code>50</code>.</p></dd>
 
 
@@ -123,7 +125,9 @@ is not <code>NULL</code>) or the output dimension (if <code>aggregate</code> is 
 to the DGP emulator across different outputs. If <code>object</code> is a DGP emulator with either <code>Hetero</code> or <code>NegBin</code> likelihood layer, the returned matrix has
 two columns with the first column giving positions of next design points from <code>x_cand</code> that correspond to the mean parameter of the normal or negative Binomial
 distribution, and the second column giving positions of next design points from <code>x_cand</code> that correspond to the variance parameter of the normal distribution or
-the dispersion parameter of the negative Binomial distribution.</p></li>
+the dispersion parameter of the negative Binomial distribution. If <code>object</code> is a DGP emulator with a <code>Categorical</code> likelihood layer, the returned matrix will
+have either one column (for binary output) or <code>K</code> columns (for multi-class output), giving the positions of the next design points from <code>x_cand</code> that correspond
+to the probabilities of different classes.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>bundle</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to the number of
 emulators in the bundle, giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added to individual emulators.</p></li>
 </ul></div>
