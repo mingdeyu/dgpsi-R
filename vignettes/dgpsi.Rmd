@@ -66,23 +66,13 @@ m <- dgp(X, Y, depth = 3)
 
 The progress bar displayed shows how long it takes to finish the training. We are able to switch off the progress bar and the trace information by setting `verb = FALSE`. Note that if we want to train the DGP emulator `m` for additional iterations, we can simply do `m <- continue(m)` instead of rebuilding the DGP emulator.
 
-The trained DGP emulator can be viewed using the `summary()` function:
+The trained DGP emulator can be visualized using the `summary()` function:
 
 ```{r}
 summary(m)
 ```
 
-```
-## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## | Layer No. | Node No. |       Type       | Length-scale(s) |   Variance    |      Nugget       | Input Dims | Global Connection |
-## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## |  Layer 1  |  Node 1  | GP (Squared-Exp) |     [0.385]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        No         |
-## |  Layer 2  |  Node 1  | GP (Squared-Exp) |     [1.183]     | 1.000 (fixed) | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## |  Layer 3  |  Node 1  | GP (Squared-Exp) |     [2.745]     |     0.480     | 1.000e-06 (fixed) |    [1]     |        [1]        |
-## +-----------+----------+------------------+-----------------+---------------+-------------------+------------+-------------------+
-## 1. 'Input Dims' presents the indices of GP nodes in the feeding layer whose outputs feed into the GP node referred by 'Layer No.' and 'Node No.'.
-## 2. 'Global Connection' indicates the dimensions (i.e., column indices) of the global input data that are used as additional input dimensions to the GP node referred by 'Layer No.' and 'Node No.'.
-```
+<iframe src="https://mingdeyu.github.io/dgpsi-R/dgpsi_summary.html" width="100%" height="400" style="border: none;"></iframe>
 
 The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating a deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
 
@@ -102,7 +92,7 @@ plot(m)
 ## Plotting ... done
 ```
 
-![](images/step_fct_loo.png) 
+![](images/step_fct_loo.png){width=90%} 
 
 The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points
 
@@ -118,12 +108,12 @@ plot(m,oos_x,oos_y)
 ```
 
 ```
-## Initializing ... done
+## Validating and computing ... done
 ## Post-processing OOS results ... done
 ## Plotting ... done
 ```
 
-![](images/step_fct_oos.png) 
+![](images/step_fct_oos.png){width=90%}
 
 ## Prediction
 
@@ -156,4 +146,4 @@ lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 lines(X, Y, type = 'p', pch = 16, cex = 1, col = "#0072B2") # Training data points
 ```
 
-![](images/step_fct_result.png) 
+![](images/step_fct_result.png){width=90%} 
