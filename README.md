@@ -3,11 +3,8 @@
   [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
   [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
   [![DOC](https://img.shields.io/badge/DOC-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
-  [![REF](https://img.shields.io/badge/REF-Linked%20GP-informational)](https://doi.org/10.1137/20M1323771)
-  [![REF](https://img.shields.io/badge/REF-Deep%20GP-informational)](https://doi.org/10.1080/00401706.2022.2124311)
-  [![REF](https://img.shields.io/badge/REF-Linked%20DGP-informational)](https://arxiv.org/abs/2306.01212)
-  [![python](https://img.shields.io/badge/Python-dgpsi%20v2.4.0-informational)](https://github.com/mingdeyu/DGP)
   ![CRAN_License](https://img.shields.io/cran/l/dgpsi?color=green)
+  [![python](https://img.shields.io/badge/Python-dgpsi%20v2.4.0-informational)](https://github.com/mingdeyu/DGP)
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations using stochastic imputation (SI). 
 
@@ -23,14 +20,14 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
     - multiple GP nodes;
     - separable or non-separable squared exponential and Mat&eacute;rn-2.5 kernels;
     - global input connections;
-    - non-Gaussian likelihoods (Poisson, Negative-Binomial, and heteroskedastic Gaussian).
+    - non-Gaussian likelihoods (Poisson, Negative-Binomial, heteroskedastic Gaussian, and Categorical).
 * Linked emulations of feed-forward systems of computer models by linking (D)GP emulators of deterministic individual computer models.
 * Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 * Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 * Automatic pruning of DGP emulators, both statically and dynamically.
-* ![Feature Badge](https://img.shields.io/badge/New-In%20Dev%20Version-orange.svg?style=for-the-badge&logo=wrench) Large-scale GP, DGP, and Linked (D)GP emulations.
-* ![Feature Badge](https://img.shields.io/badge/New-In%20Dev%20Version-orange.svg?style=for-the-badge&logo=wrench) Scalable DGP classification using Stochastic Imputation.
+* [![Feature Badge](https://img.shields.io/badge/New-In%20Dev%20Version-orange)](https://mingdeyu.github.io/dgpsi-R/dev/) [Large-scale GP, DGP, and Linked (D)GP emulations](https://mingdeyu.github.io/dgpsi-R/dev/articles/large_scale_emulation.html).
+* [![Feature Badge](https://img.shields.io/badge/New-In%20Dev%20Version-orange)](https://mingdeyu.github.io/dgpsi-R/dev/) [Scalable DGP classification using Stochastic Imputation](https://mingdeyu.github.io/dgpsi-R/dev/articles/classification.html).
 
 ## Getting started
 * Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
