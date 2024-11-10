@@ -65,7 +65,7 @@ emulator in the bundle. Defaults to \code{NULL}. When \code{\link[=pei]{pei()}} 
 \item{batch_size}{an integer that gives the number of design points to be chosen.
 Defaults to \code{1}.}
 
-\item{M}{the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
+\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{workers}{the number of processes to be used for the criterion calculation. If set to \code{NULL},

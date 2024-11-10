@@ -10,7 +10,7 @@ combine(...)
 \item{...}{a sequence of lists:
 \enumerate{
 \item For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by \code{\link[=kernel]{kernel()}}), or
-likelihood nodes (produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, or \code{\link[=NegBin]{NegBin()}}).
+likelihood nodes (produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, \code{\link[=NegBin]{NegBin()}}, or \code{\link[=Categorical]{Categorical()}}).
 \item For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by \code{\link[=gp]{gp()}} or
 \code{\link[=dgp]{dgp()}}) in that layer.
 }}
@@ -20,7 +20,12 @@ A list defining a DGP structure (for \code{struc} of \code{\link[=dgp]{dgp()}}) 
 (for \code{struc} for \code{\link[=lgp]{lgp()}}).
 }
 \description{
-This function combines customized layers into a DGP or linked (D)GP structure.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated and will be removed in the next release, as it is
+simply a wrapper for the \code{\link[=list]{list()}} function. To construct linked (D)GP structures,
+please use the updated \code{\link[=lgp]{lgp()}} function, which provides a simpler and more efficient
+approach to building (D)GP emulators.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
@@ -31,3 +36,4 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 # See lgp() for an example.
 }
 }
+\keyword{internal}

@@ -15,7 +15,7 @@
 #'     constructed, after the training input and output are updated. Defaults to `FALSE`.
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
-#' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. If set to `NULL`,
+#' @param N `r new_badge("updated")` number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. If set to `NULL`,
 #'     the number of iterations is set to `100` if the DGP emulator was constructed without the Vecchia approximation, and is set to `50`
 #'     if Vecchia approximation was used. Defaults to `NULL`.
 #' @param cores the number of processes to be used to re-fit GP components (in the same layer)

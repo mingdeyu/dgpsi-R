@@ -50,7 +50,7 @@ Defaults to \code{TRUE}.}
 
 \item{...}{N/A.}
 
-\item{N}{number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. If set to \code{NULL},
+\item{N}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. If set to \code{NULL},
 the number of iterations is set to \code{100} if the DGP emulator was constructed without the Vecchia approximation, and is set to \code{50}
 if Vecchia approximation was used. Defaults to \code{NULL}.}
 

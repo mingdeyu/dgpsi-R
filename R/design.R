@@ -100,7 +100,7 @@
 #'     the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
 #'     of the sequential designs in different executions of [design()] in [draw()] and can specify a different evaluation frequency in `freq`. However, it can be
 #'     beneficiary to turn this option off to restrict a large number of waves to be visualized in [draw()] that could run out of colors. Defaults to `TRUE`.
-#' @param M_val an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
+#' @param M_val `r new_badge("new")` an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param cores an integer that gives the number of processes to be used for emulator validations. If set to `NULL`, the number of processes is set to
 #'     `max physical cores available %/% 2`. Defaults to `1`. This argument is only used if `eval = NULL`.

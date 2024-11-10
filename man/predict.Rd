@@ -10,7 +10,8 @@
 \method{predict}{dgp}(
   object,
   x,
-  method = "mean_var",
+  method = NULL,
+  mode = "label",
   full_layer = FALSE,
   sample_size = 50,
   M = 50,
@@ -22,7 +23,7 @@
 \method{predict}{lgp}(
   object,
   x,
-  method = "mean_var",
+  method = NULL,
   full_layer = FALSE,
   sample_size = 50,
   M = 50,
@@ -34,7 +35,7 @@
 \method{predict}{gp}(
   object,
   x,
-  method = "mean_var",
+  method = NULL,
   sample_size = 50,
   M = 50,
   cores = 1,
@@ -48,7 +49,7 @@
 \item{x}{the testing input data:
 \itemize{
 \item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{x} is a matrix where each row is an input testing data point and each column is an input dimension.
-\item if \code{object} is an instance of the \code{lgp} class, \code{x} can be a matrix or a list:
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} if \code{object} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} without specifying argument \code{struc} in data frame form, \code{x} can be either a matrix or a list:
 \itemize{
 \item if \code{x} is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 The rows of \code{x} represent different input data points and the columns represent input dimensions across all emulators in
@@ -62,15 +63,26 @@ global testing input data to the emulators in the corresponding layer. The matri
 their corresponding emulators are placed in \code{struc} argument of \code{\link[=lgp]{lgp()}}. If there is no global input data to a certain emulator,
 set \code{NULL} in the corresponding sub-list of \code{x}.
 }
+
+\strong{This option for linked (D)GP emulators is deprecated and will be removed in the next release.}
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{object} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} with argument \code{struc} in data frame form,
+\code{x} must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
+The column indices in \code{x} must align with the indices specified in the \code{From_Output} column of the \code{struc} data frame (used in \code{\link[=lgp]{lgp()}}),
+corresponding to rows where the \code{From_Emulator} column is \code{"Global"}.
 }}
 
-\item{method}{the prediction approach: mean-variance (\code{"mean_var"}) or sampling (\code{"sampling"}) approach. Defaults to \code{"mean_var"}.}
+\item{method}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the prediction approach to use: either the mean-variance approach (\code{"mean_var"}) or the sampling approach (\code{"sampling"}).
+For DGP emulators with a categorical likelihood (\code{likelihood = "Categorical"} in \code{\link[=dgp]{dgp()}}), only the sampling approach is supported.
+By default, the method is set to \code{"sampling"} for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and \code{"mean_var"} otherwise.}
+
+\item{mode}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} whether to predict the classes (\code{"label"}) or probabilities (\code{"proba"}) of different classes when \code{object} is a DGP emulator with a categorical likelihood.
+Defaults to \code{"label"}.}
 
 \item{full_layer}{a bool indicating whether to output the predictions of all layers. Defaults to \code{FALSE}. Only used when \code{object} is a DGP and linked (D)GP emulator.}
 
 \item{sample_size}{the number of samples to draw for each given imputation if \code{method = "sampling"}. Defaults to \code{50}.}
 
-\item{M}{the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to \code{50}. This argument is only used if the emulator \code{object}
+\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to \code{50}. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation.}
 
 \item{cores}{the number of processes to be used for predictions. If set to \code{NULL}, the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
@@ -109,34 +121,60 @@ and contains \emph{D} (i.e., the number of GP/likelihood nodes in the correspond
 of the output from one of \emph{D} GP/likelihood nodes, and has its rows corresponding to testing positions and columns corresponding to samples
 of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=dgp]{dgp()}}.
 }
-\item If \code{object} is an instance of the \code{lgp} class:
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{object} is an instance of the \code{dgp} class with a categorical likelihood:
+\enumerate{
+\item if \code{full_layer = FALSE} and \code{mode = "label"}: an updated \code{object} is returned with an additional slot called \code{results} that contains one matrix named \code{label}.
+The matrix has its rows corresponding to testing positions and columns corresponding to label samples of size: \code{B * sample_size}, where \code{B} is the number
+of imputations specified in \code{\link[=dgp]{dgp()}}.
+\item if \code{full_layer = FALSE} and \code{mode = "proba"}, an updated \code{object} is returned with an additional slot called \code{results}. This slot contains \emph{D} matrices (where
+\emph{D} is the number of classes in the training output), where each matrix gives probability samples for the corresponding class with its rows corresponding to testing
+positions and columns containing probabilities. The number of columns of each matrix is \code{B * sample_size}, where \code{B} is the number of imputations
+specified in the \code{\link[=dgp]{dgp()}} function.
+\item if \code{full_layer = TRUE} and \code{mode = "label"}: an updated \code{object} is returned with an additional slot called \code{results} that contains \emph{L} (i.e., the number
+of layers) sub-lists named \verb{layer1, layer2,..., layerL}. Each of first \code{L-1} sub-lists represents samples drawn from the GP nodes in the
+corresponding layer, and contains \emph{D} (i.e., the number of GP nodes in the corresponding layer) matrices named \verb{output1, output2,..., outputD}. Each matrix
+gives samples of the output from one of \emph{D} GP nodes, and has its rows corresponding to testing positions and columns corresponding to samples
+of size: \code{B * sample_size}.The sub-list \code{LayerL} contains one matrix named \code{label}. The matrix has its rows corresponding to testing positions and columns
+corresponding to label samples of size: \code{B * sample_size}. \code{B} is the number of imputations specified in \code{\link[=dgp]{dgp()}}.
+\item if \code{full_layer = TRUE} and \code{mode = "proba"}: an updated \code{object} is returned with an additional slot called \code{results} that contains \emph{L} (i.e., the number
+of layers) sub-lists named \verb{layer1, layer2,..., layerL}. Each of first \code{L-1} sub-lists represents samples drawn from the GP nodes in the
+corresponding layer, and contains \emph{D} (i.e., the number of GP nodes in the corresponding layer) matrices named \verb{output1, output2,..., outputD}. The sub-list \code{LayerL}
+contains \emph{D} matrices (where \emph{D} is the number of classes in the training output), where each matrix gives probability samples for the corresponding class with its
+rows corresponding to testing positions and columns containing probabilities. The number of columns of each matrix is \code{B * sample_size}. \code{B} is the number of
+imputations specified in \code{\link[=dgp]{dgp()}}.
+}
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} If \code{object} is an instance of the \code{lgp} class:
 \enumerate{
 \item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that
 contains two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list
-contains \emph{K} number (same number of emulators in the final layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
+contains \emph{K} number (same number of emulators in the final layer of the system) of matrices named by the IDs of the corresponding emulators in the final layer.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.
 \item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
 two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L}
 (i.e., the number of layers in the emulated system) components named \verb{layer1, layer2,..., layerL}. Each component represents a layer
-and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of matrices named \verb{emulator1, emulator2,..., emulatorM}.
+and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of matrices named by the IDs of the corresponding emulators in that layer.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 GP/DGP emulator in the corresponding layer.
 \item if \code{method = "sampling"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
-\emph{K} number (same number of emulators in the final layer of the system) of sub-lists named \verb{emulator1, emulator2,..., emulatorM}. Each
-sub-list corresponds to an emulator in the final layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to the output
+\emph{K} number (same number of emulators in the final layer of the system) of sub-lists named by the IDs of the corresponding emulators in the final layer. Each
+sub-list contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to the output
 dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 \item if \code{method = "sampling"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
 \emph{L} (i.e., the number of layers of the emulated system) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents a layer
-and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of components named \verb{emulator1, emulator2,..., emulatorM}.
-Each component corresponds to an emulator in the associated layer, and contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to
+and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of components named by the IDs of the corresponding emulators in that layer.
+Each component contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to
 the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 samples of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 }
 }
 
-The \code{results} slot will also include the value of \code{M}, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.
+The \code{results} slot will also include:
+\itemize{
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the value of \code{M}, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.
+\item the value of \code{sample_size} if \code{method = "sampling"}.
+}
 }
 \description{
 This function implements single-core or multi-core predictions (with or without multi-threading)

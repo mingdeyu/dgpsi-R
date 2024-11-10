@@ -1,11 +1,21 @@
 # dgpsi 2.4.0-9000 (development version)
-- The computation of training for DGP emulators is now roughly 30%-40% faster.
-- The computation of (D)GP prediction and LOO is now 6-7 times faster.
-- The `nb_parallel` argument is removed from relevant functions as the multi-thread implementation is now integrated into the package by default.
-- A Vecchia implementation under the SI framework is available for all functions of the package for large-scale emulations.
-- Two new functions, `get_thread_num()` and `set_thread_num()`, are included to inspect and change the number of threads used for multi-thread computations in the package.
-- A new function `set_vecchia()` is added to allow users to quickly add or remove the Vecchia approximation from an existing GP, DGP or linked (D)GP emulator.
-- A new vignette showcasing large-scale DGP emulation has been added.
+- Training times for DGP emulators are now approximately 30%-40% faster.
+- The computation of (D)GP predictions and Leave-One-Out (LOO) evaluations is now 6-7 times faster.
+- The `nb_parallel` argument has been removed from relevant functions, as multi-threading is now integrated by default.
+- A Vecchia approximation, implemented under the SI framework, is now available across all functions to support large-scale emulations.
+- Two new functions, `get_thread_num()` and `set_thread_num()`, allow users to inspect and adjust the number of threads used for multi-threaded computations.
+- A new function, `set_vecchia()`, enables users to easily add or remove the Vecchia approximation for GP, DGP, or linked (D)GP emulators.
+- Documentation now includes lifecycle status badges to highlight deprecated and newly introduced functions and arguments.
+- The default value of the `nugget` parameter in DGP emulators with likelihood layers has been adjusted from `1e-6` to `1e-4`.
+- A `Categorical` likelihood option has been added to the `dgp()` function’s `likelihood` argument, enabling DGP-based classification.
+- An issue related to the `LD_LIBRARY` environment variable on Linux systems has been resolved via the `init_py()` function.
+- The `lgp()` function has been enhanced to accept connection information among emulators in the form of a data frame, streamlining linked emulation setup.
+- A new function, `set_id()`, allows users to assign unique IDs to emulators.
+- A new function, `Categorical()`, enables the creation of categorical likelihood nodes for classification within a customized DGP hierarchy.
+- The `plot()` function has been updated to generate validation plots for DGP classifiers (i.e., DGP emulators with categorical likelihoods).
+- The `summary()` function has been redesigned to provide visualizations of structure and model specifications for (D)GP and linked (D)GP emulators.
+- A `sample_size` argument has been added to the `validate()` and `plot()` functions, allowing users to adjust the number of samples used for validation when the validation method is set to `sampling`.
+- Additional vignettes are available, showcasing large-scale DGP emulation and DGP classification.
 
 # dgpsi 2.4.0
 - One can now use `design()` to implement sequential designs using `f` and a fixed candidate set passed to `x_cand` with `y_cand = NULL`.

@@ -7,13 +7,25 @@
 \alias{validate.lgp}
 \title{Validate a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
-validate(object, x_test, y_test, method, verb, M, force, cores, ...)
+validate(
+  object,
+  x_test,
+  y_test,
+  method,
+  sample_size,
+  verb,
+  M,
+  force,
+  cores,
+  ...
+)
 
 \method{validate}{gp}(
   object,
   x_test = NULL,
   y_test = NULL,
-  method = "mean_var",
+  method = NULL,
+  sample_size = 50,
   verb = TRUE,
   M = 50,
   force = FALSE,
@@ -25,7 +37,8 @@ validate(object, x_test, y_test, method, verb, M, force, cores, ...)
   object,
   x_test = NULL,
   y_test = NULL,
-  method = "mean_var",
+  method = NULL,
+  sample_size = 50,
   verb = TRUE,
   M = 50,
   force = FALSE,
@@ -37,7 +50,8 @@ validate(object, x_test, y_test, method, verb, M, force, cores, ...)
   object,
   x_test = NULL,
   y_test = NULL,
-  method = "mean_var",
+  method = NULL,
+  sample_size = 50,
   verb = TRUE,
   M = 50,
   force = FALSE,
@@ -91,12 +105,16 @@ in the final layer.
 
 \code{y_test} must be provided for the validation if \code{x} is an instance of the \code{lgp}. Defaults to \code{NULL}.}
 
-\item{method}{the prediction approach in validations: mean-variance (\code{"mean_var"}) or sampling (\code{"sampling"}) approach. Defaults to \code{"mean_var"}.}
+\item{method}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the prediction approach to use in validations: either the mean-variance approach (\code{"mean_var"}) or the sampling approach (\code{"sampling"}).
+For DGP emulators with a categorical likelihood (\code{likelihood = "Categorical"} in \code{\link[=dgp]{dgp()}}), only the sampling approach is supported.
+By default, the method is set to \code{"sampling"} for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and \code{"mean_var"} otherwise.}
+
+\item{sample_size}{the number of samples to draw for each given imputation if \code{method = "sampling"}. Defaults to \code{50}.}
 
 \item{verb}{a bool indicating if the trace information on validations will be printed during the function execution.
 Defaults to \code{TRUE}.}
 
-\item{M}{the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator \code{object}
+\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{force}{a bool indicating whether to force the LOO or OOS re-evaluation when \code{loo} or \code{oos} slot already exists in \code{object}. When \code{force = FALSE},
@@ -122,7 +140,8 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 \item a numeric value called \code{rmse} that contains the root mean/median squared error of the GP emulator.
 \item a numeric value called \code{nrmse} that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
-\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item an integer called \code{sample_size} that contains the number of samples used for the validation if \code{method = "sampling"}.
 }
 
 The rows of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions.
@@ -139,11 +158,26 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 dimensions.
 \item a vector called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
-\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item an integer called \code{sample_size} that contains the number of samples used for the validation if \code{method = "sampling"}.
 }
 
 The rows and columns of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions and DGP emulator output
 dimensions, respectively.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{object} is an instance of the \code{dgp} class with a categorical likelihood, an updated \code{object} is returned with an additional slot called \code{loo}
+(for LOO cross validation) or \code{oos} (for OOS validation) that contains:
+\itemize{
+\item two slots called \code{x_train} (or \code{x_test}) and \code{y_train} (or \code{y_test}) that contain the validation data points for LOO (or OOS).
+\item a matrix called \code{label} that contains predictive samples of labels from the DGP emulator at validation positions. The matrix has its rows
+corresponding to validation positions and columns corresponding to samples of labels.
+\item a list called \code{probability} that contains predictive samples of probabilities for each class from the DGP emulator at validation positions. The element in the list
+is a matrix that has its rows corresponding to validation positions and columns corresponding to samples of probabilities.
+\item a scalar called \code{log_loss} that represents the average log loss of the predicted labels in the DGP emulator across all validation positions. Log loss measures the
+accuracy of probabilistic predictions, with lower values indicating better classification performance. \code{log_loss} ranges from \code{0} to positive infinity, where a
+value closer to \code{0} suggests more confident and accurate predictions.
+\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item an integer called \code{sample_size} that contains the number of samples used for the validation.
+}
 \item If \code{object} is an instance of the \code{lgp} class, an updated \code{object} is returned with an additional slot called \code{oos} (for OOS validation) that contains:
 \itemize{
 \item two slots called \code{x_test} and \code{y_test} that contain the validation data points for OOS.
@@ -155,7 +189,8 @@ deviations above and below the predictive mean. If \code{method = "sampling"}, t
 \item a list called \code{rmse} that contains the root mean/median squared errors of the linked (D)GP emulator.
 \item a list called \code{nrmse} that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 is based on the maximum and minimum values of the validation outputs contained in \code{y_test}.
-\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+\item an integer called \code{sample_size} that contains the number of samples used for the validation if \code{method = "sampling"}.
 }
 
 Each element in \code{mean}, \code{median}, \code{std}, \code{lower}, \code{upper}, \code{rmse}, and \code{nrmse} corresponds to a (D)GP emulator in the final layer of the linked (D)GP

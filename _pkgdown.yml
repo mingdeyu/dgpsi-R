@@ -48,6 +48,12 @@ articles:
   contents:
   - large_scale_emulation
 
+- title: DGP Classification using Stochastic Imputation
+  desc: DGP classification of the iris data set.
+  navbar: ~
+  contents:
+  - classification
+
 reference:
 - title: "Initalization"
   desc: >
@@ -63,6 +69,7 @@ reference:
   - Hetero
   - Poisson
   - NegBin
+  - Categorical
 
 - title: "GP, DGP, and Linked (D)GP Emulations"
   desc: >
@@ -72,7 +79,6 @@ reference:
   - dgp
   - lgp
   - continue
-  - combine
   - predict
   - validate
   - plot
@@ -98,7 +104,6 @@ reference:
   - write
   - read
   - set_seed
-  - set_linked_idx
   - set_imp
   - window
   - trace_plot
@@ -106,6 +111,7 @@ reference:
   - set_thread_num
   - get_thread_num
   - set_vecchia
+  - set_id
 
 
 

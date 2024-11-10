@@ -4,9 +4,11 @@ CMD
 Challenor
 DGP
 ESS
+GPs
 Goodfellow
 Gu
 Guillas
+Heteroskedastic
 Katzfuss
 LHD
 MacKay
@@ -15,6 +17,8 @@ Mohammadi
 NRMSE
 NRMSEs
 OOS
+RStudio
+Scalable
 Technometrics
 UUID
 VIGF
@@ -31,8 +35,10 @@ ggplots
 heteroskedastic
 lengthscale
 lengthscales
+lifecycle
 maximin
 oos
 reproducibility
 suboptimal
 th
+’s

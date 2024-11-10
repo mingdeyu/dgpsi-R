@@ -13,7 +13,7 @@
 #'     that gives a candidate set for each emulator included in the bundle. See *Note* section below for further information.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
-#' @param M the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
+#' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param nugget_s the value of the smoothing nugget term used by MICE. Defaults to `1e-6`.
 #' @param workers  the number of processes to be used for the criterion calculation. If set to `NULL`,
@@ -39,7 +39,9 @@
 #'   to the DGP emulator across different outputs. If `object` is a DGP emulator with either `Hetero` or `NegBin` likelihood layer, the returned matrix has
 #'   two columns with the first column giving positions of next design points from `x_cand` that correspond to the mean parameter of the normal or negative Binomial
 #'   distribution, and the second column giving positions of next design points from `x_cand` that correspond to the variance parameter of the normal distribution or
-#'   the dispersion parameter of the negative Binomial distribution.
+#'   the dispersion parameter of the negative Binomial distribution. If `object` is a DGP emulator with a `Categorical` likelihood layer, the returned matrix will
+#'   have either one column (for binary output) or `K` columns (for multi-class output), giving the positions of the next design points from `x_cand` that correspond
+#'   to the probabilities of different classes.
 #' * If `object` is an instance of the `bundle` class, a matrix is returned with row number equal to `batch_size` and column number equal to the number of
 #'   emulators in the bundle, giving positions (i.e., row numbers) of next design points from `x_cand` to be added to individual emulators.
 #'

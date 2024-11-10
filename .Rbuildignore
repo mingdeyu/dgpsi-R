@@ -10,3 +10,4 @@
 ^CRAN-SUBMISSION$
 ^RESEARCH-NOTICE\.md$
 ^vignettes/images/.*\.html$
+^vignettes/motorcycle.Rmd$

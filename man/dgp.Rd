@@ -16,7 +16,7 @@ dgp(
   prior = "ga",
   share = TRUE,
   nugget_est = FALSE,
-  nugget = ifelse(all(nugget_est), 0.01, 1e-06),
+  nugget = NULL,
   scale_est = TRUE,
   scale = 1,
   connect = TRUE,
@@ -60,8 +60,10 @@ Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}
 
 \item{name}{a character or a vector of characters that indicates the kernel functions (either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel) used in the DGP emulator:
-1. if a single character is supplied, the corresponding kernel function will be used for all GP nodes in the DGP hierarchy.
-2. if a vector of characters is supplied, each character of the vector specifies the kernel function that will be applied to all GP nodes in the corresponding layer.
+\enumerate{
+\item if a single character is supplied, the corresponding kernel function will be used for all GP nodes in the DGP hierarchy.
+\item if a vector of characters is supplied, each character of the vector specifies the kernel function that will be applied to all GP nodes in the corresponding layer.
+}
 
 Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}
 
@@ -115,7 +117,8 @@ The vector should have a length of \code{depth} if \code{likelihood = NULL} or a
 Set \code{nugget} to a small value and the bools in \code{nugget_est} to \code{FASLE} for deterministic emulations where the emulator
 interpolates the training data points. Set \code{nugget} to a reasonable larger value and the bools in \code{nugget_est} to \code{TRUE} for stochastic emulations where
 the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6} if \code{nugget_est = FALSE} and
-\code{0.01} if \code{nugget_est = TRUE}. This argument is only used when \code{struc = NULL}.}
+\code{0.01} if \code{nugget_est = TRUE}. If \code{likelihood} is not \code{NULL} and \code{nugget_est = FALSE}, the nuggets of GPs that feed into the likelihood layer default to
+\code{1e-4}. This argument is only used when \code{struc = NULL}.}
 
 \item{scale_est}{a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each
@@ -141,6 +144,7 @@ the cost of slower training. Defaults to \code{TRUE}. This argument is only used
 (i.e., the computer model outputs have varying noises).
 \item \code{"Poisson"}: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.
 \item \code{"NegBin"}: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} \code{"Categorical"}: a categorical likelihood layer is added for stochastic emulation (i.e., classification), where the computer model outputs are assumed to follow a categorical distribution.
 }
 
 When \code{likelihood} is not \code{NULL}, the value of \code{nugget_est} is overridden by \code{FALSE}. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
@@ -155,11 +159,11 @@ Defaults to \code{TRUE}.}
 \item{check_rep}{a bool indicating whether to check the repetitions in the dataset, i.e., if one input
 position has multiple outputs. Defaults to \code{TRUE}.}
 
-\item{vecchia}{a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to \code{FALSE}.}
+\item{vecchia}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating whether to use Vecchia approximation for large-scale DGP emulator construction and prediction. Defaults to \code{FALSE}.}
 
-\item{M}{the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to \code{25}.}
+\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in the DGP emulator training. Defaults to \code{25}.}
 
-\item{ord}{an R function that returns the ordering of the input to each GP node contained in the DGP emulator for the Vecchia approximation. The
+\item{ord}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an R function that returns the ordering of the input to each GP node contained in the DGP emulator for the Vecchia approximation. The
 function must satisfy the following basic rules:
 \itemize{
 \item the first argument represents the input to a GP node scaled by its lengthscales.
@@ -189,11 +193,17 @@ are used. Defaults to \code{NULL}. This argument is only used when \code{trainin
 more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties but faster predictions.
 Defaults to \code{10}.}
 
-\item{internal_input_idx}{column indices of \code{X} that are generated by the linked emulators in the preceding layers.
+\item{internal_input_idx}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} The argument will be removed in the next release. To set up connections of emulators for linked emulations,
+please use the updated \code{\link[=lgp]{lgp()}} function instead.
+
+Column indices of \code{X} that are generated by the linked emulators in the preceding layers.
 Set \code{internal_input_idx = NULL} if the DGP emulator is in the first layer of a system or all columns in \code{X} are
 generated by the linked emulators in the preceding layers. Defaults to \code{NULL}. This argument is only used when \code{struc = NULL}.}
 
-\item{linked_idx}{either a vector or a list of vectors:
+\item{linked_idx}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} The argument will be removed in the next release. To set up connections of emulators for linked emulations,
+please use the updated \code{\link[=lgp]{lgp()}} function instead.
+
+Either a vector or a list of vectors:
 \itemize{
 \item If \code{linked_idx} is a vector, it gives indices of columns in the pooled output matrix (formed by column-combined outputs of all
 emulators in the feeding layer) that feed into the DGP emulator. The length of the vector shall equal to the length of \code{internal_input_idx}
@@ -227,7 +237,7 @@ An S3 class named \code{dgp} that contains five slots:
 \enumerate{
 \item \emph{L} (i.e., the number of layers in the DGP hierarchy) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list contains \emph{D}
 (i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named \verb{node1, node2,..., nodeD}. If a sub-list
-corresponds to a likelihood node, it contains one element called \code{type} that gives the name (\code{Hetero}, \code{Poisson}, or \code{NegBin}) of the likelihood node.
+corresponds to a likelihood node, it contains one element called \code{type} that gives the name (\code{Hetero}, \code{Poisson}, \code{NegBin}, or \code{Categorical}) of the likelihood node.
 If a sub-list corresponds to a GP node, it contains four elements:
 \itemize{
 \item \code{kernel}: the type of the kernel function used for the GP node.
@@ -235,14 +245,17 @@ If a sub-list corresponds to a GP node, it contains four elements:
 \item \code{scale}: the variance value in the kernel function.
 \item \code{nugget}: the nugget value in the kernel function.
 }
-\item \code{internal_dims}: the column indices of \code{X} that correspond to the linked emulators in the preceding layers of a linked system.
-\item \code{external_dims}: the column indices of \code{X} that correspond to global inputs to the linked system of emulators. It is shown as \code{FALSE} if \code{internal_input_idx = NULL}.
-\item \code{linked_idx}: the value passed to argument \code{linked_idx}. It is shown as \code{FALSE} if the argument \code{linked_idx} is \code{NULL}.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{internal_dims}: the column indices of \code{X} that correspond to the linked emulators in the preceding layers of a linked system.
+\strong{The slot will be removed in the next release}.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{external_dims}: the column indices of \code{X} that correspond to global inputs to the linked system of emulators. It is shown
+as \code{FALSE} if \code{internal_input_idx = NULL}. \strong{The slot will be removed in the next release}.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{linked_idx}: the value passed to argument \code{linked_idx}. It is shown as \code{FALSE} if the argument \code{linked_idx} is \code{NULL}.
+\strong{The slot will be removed in the next release}.
 \item \code{seed}: the random seed generated to produce the imputations. This information is stored for the reproducibility when the DGP emulator (that was saved by \code{\link[=write]{write()}}
 with the light option \code{light = TRUE}) is loaded back to R by \code{\link[=read]{read()}}.
 \item \code{B}: the number of imputations used to generate the emulator.
-\item \code{vecchia}: whether the Vecchia approximation is used for the GP emulator training.
-\item \code{M}: the size of the conditioning set for the Vecchia approximation in the DGP emulator training.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} \code{vecchia}: whether the Vecchia approximation is used for the GP emulator training.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} \code{M}: the size of the conditioning set for the Vecchia approximation in the DGP emulator training.
 }
 
 \code{internal_dims} and \code{external_dims} are generated only when \code{struc = NULL}. \code{M} is generated only when \code{vecchia = TRUE}.

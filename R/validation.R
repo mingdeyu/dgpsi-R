@@ -35,10 +35,13 @@
 #'     in the final layer.
 #'
 #' `y_test` must be provided for the validation if `x` is an instance of the `lgp`. Defaults to `NULL`.
-#' @param method the prediction approach in validations: mean-variance (`"mean_var"`) or sampling (`"sampling"`) approach. Defaults to `"mean_var"`.
+#' @param method `r new_badge("updated")` the prediction approach to use in validations: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`).
+#'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
+#'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
+#' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
 #' @param verb a bool indicating if the trace information on validations will be printed during the function execution.
 #'     Defaults to `TRUE`.
-#' @param M the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator `object`
+#' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param force a bool indicating whether to force the LOO or OOS re-evaluation when `loo` or `oos` slot already exists in `object`. When `force = FALSE`,
 #'     [validate()] will try to determine automatically if the LOO or OOS re-evaluation is needed. Set `force` to `TRUE` when LOO or OOS re-evaluation
@@ -59,7 +62,8 @@
 #'   - a numeric value called `rmse` that contains the root mean/median squared error of the GP emulator.
 #'   - a numeric value called `nrmse` that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
-#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for the validation if `method = "sampling"`.
 #'
 #'   The rows of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions.
 #' * If `object` is an instance of the `dgp` class, an updated `object` is returned with an additional slot called `loo` (for LOO cross validation) or
@@ -74,10 +78,23 @@
 #'     dimensions.
 #'   - a vector called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
 #'     dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
-#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for the validation if `method = "sampling"`.
 #'
 #'   The rows and columns of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions and DGP emulator output
 #' dimensions, respectively.
+#' * `r new_badge("new")` If `object` is an instance of the `dgp` class with a categorical likelihood, an updated `object` is returned with an additional slot called `loo`
+#'   (for LOO cross validation) or `oos` (for OOS validation) that contains:
+#'   - two slots called `x_train` (or `x_test`) and `y_train` (or `y_test`) that contain the validation data points for LOO (or OOS).
+#'   - a matrix called `label` that contains predictive samples of labels from the DGP emulator at validation positions. The matrix has its rows
+#'     corresponding to validation positions and columns corresponding to samples of labels.
+#'   - a list called `probability` that contains predictive samples of probabilities for each class from the DGP emulator at validation positions. The element in the list
+#'     is a matrix that has its rows corresponding to validation positions and columns corresponding to samples of probabilities.
+#'   - a scalar called `log_loss` that represents the average log loss of the predicted labels in the DGP emulator across all validation positions. Log loss measures the
+#'     accuracy of probabilistic predictions, with lower values indicating better classification performance. `log_loss` ranges from `0` to positive infinity, where a
+#'     value closer to `0` suggests more confident and accurate predictions.
+#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for the validation.
 #' * If `object` is an instance of the `lgp` class, an updated `object` is returned with an additional slot called `oos` (for OOS validation) that contains:
 #'   - two slots called `x_test` and `y_test` that contain the validation data points for OOS.
 #'   - a list called `mean`, if `method = "mean_var"`, or `median`, if `method = "sampling"`, that contains the predictive means or medians of
@@ -88,7 +105,8 @@
 #'   - a list called `rmse` that contains the root mean/median squared errors of the linked (D)GP emulator.
 #'   - a list called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
 #'     is based on the maximum and minimum values of the validation outputs contained in `y_test`.
-#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for the validation if `method = "sampling"`.
 #'
 #'   Each element in `mean`, `median`, `std`, `lower`, `upper`, `rmse`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 #' emulator.
@@ -109,14 +127,14 @@
 #' @md
 #' @name validate
 #' @export
-validate <- function(object, x_test, y_test, method, verb, M, force, cores, ...){
+validate <- function(object, x_test, y_test, method, sample_size, verb, M, force, cores, ...){
   UseMethod("validate")
 }
 
 #' @rdname validate
 #' @method validate gp
 #' @export
-validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -129,8 +147,13 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
   M <- as.integer(M)
-  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
+  if ( is.null(method) ){
+    method = 'mean_var'
+  } else {
+    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+  }
+  sample_size <- as.integer(sample_size)
   #For LOO
   if (is.null(x_test) & is.null(y_test)){
     #check existing LOO
@@ -141,12 +164,23 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
         if ( isTRUE(verb) ) message(" LOO results found in the gp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( (((method == 'mean_var')&("mean" %in% names(object$loo)))|((method == 'sampling')&("median" %in% names(object$loo)))) & (M == object$loo$M) ){
+        if ( (method == 'mean_var')&("mean" %in% names(object$loo)) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
+        } else if ( (method == 'sampling')&("median" %in% names(object$loo)) & (M == object$loo$M) ){
+          if (sample_size == object$loo$sample_size){
+            if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
+            if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
+            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) message(" done")
+            return(object)
+          } else {
+            if ( isTRUE(verb) ) message(" LOO re-evaluation needed.")
+            if ( isTRUE(verb) ) message("Start re-evaluation: ")
+          }
         } else {
           if ( isTRUE(verb) ) message(" LOO re-evaluation needed.")
           if ( isTRUE(verb) ) message("Start re-evaluation: ")
@@ -157,12 +191,12 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     if ( isTRUE(verb) ) message("Initializing the LOO ...", appendLF = FALSE)
     x_train <- object$constructor_obj$X
     y_train <- object$constructor_obj$Y
-    dat <- list('x_train' = x_train,'y_train' = y_train)
+    dat <- list('x_train' = x_train, 'y_train' = y_train)
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
-    res <- object$emulator_obj$loo(method = method, sample_size = 500L, m = M)
+    res <- object$emulator_obj$loo(method = method, sample_size = sample_size, m = M)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Saving results to the slot 'loo' in the gp object ...", appendLF = FALSE)
@@ -184,6 +218,9 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["nrmse"]] <- dat$rmse/(max(dat$y_train)-min(dat$y_train))
     }
     dat[["M"]] <- M
+    if (method == "sampling"){
+      dat[["sample_size"]] <- sample_size
+    }
     object$loo <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -207,12 +244,23 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
         if ( isTRUE(verb) ) message(" OOS results found in the gp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) & (M == object$oos$M) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
+        } else if ( ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&("median" %in% names(object$oos)) & (M == object$oos$M) ) ){
+          if ( sample_size == object$oos$sample_size ){
+            if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
+            if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
+            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) message(" done")
+            return(object)
+          } else {
+            if ( isTRUE(verb) ) message(" OOS re-evaluation needed.")
+            if ( isTRUE(verb) ) message("Start re-evaluation: ")
+          }
         } else {
           if ( isTRUE(verb) ) message(" OOS re-evaluation needed.")
           if ( isTRUE(verb) ) message("Start re-evaluation: ")
@@ -231,9 +279,9 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
     rep <- rep_x[[2]] + 1
 
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x_test_unique, method = method, sample_size = 500L, m = M)
+      res <- object$emulator_obj$predict(x_test_unique, method = method, sample_size = sample_size, m = M)
     } else {
-      res <- object$emulator_obj$ppredict(x_test_unique, method = method, sample_size = 500L, m = M, core_num = cores)
+      res <- object$emulator_obj$ppredict(x_test_unique, method = method, sample_size = sample_size, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
 
@@ -256,6 +304,9 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
       dat[["nrmse"]] <- dat$rmse/(max(dat$y_test)-min(dat$y_test))
     }
     dat[["M"]] <- M
+    if (method == "sampling"){
+      dat[["sample_size"]] <- sample_size
+    }
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -270,7 +321,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var
 #' @rdname validate
 #' @method validate dgp
 #' @export
-validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -284,8 +335,40 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
   }
   M <- as.integer(M)
 
-  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+  L = object$constructor_obj$n_layer
+  final_node <- object$specs[[paste('layer', L, sep="")]][['node1']]
+  if ("type" %in% names(final_node) && final_node$type == "Categorical") {
+    is.categorical <- TRUE
+    is.Poisson <- FALSE
+    is.NegBin <- FALSE
+  } else if ("type" %in% names(final_node) && final_node$type == "Poisson") {
+    is.categorical <- FALSE
+    is.Poisson <- TRUE
+    is.NegBin <- FALSE
+  } else if ("type" %in% names(final_node) && final_node$type == "NegBin") {
+    is.categorical <- FALSE
+    is.Poisson <- FALSE
+    is.NegBin <- TRUE
+  } else {
+    is.categorical <- FALSE
+    is.Poisson <- FALSE
+    is.NegBin <- FALSE
+  }
 
+  if ( is.null(method) ){
+    if (is.categorical|is.Poisson|is.NegBin) {
+      method = 'sampling'
+    } else {
+      method = 'mean_var'
+    }
+  } else {
+    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+    if ( method=='mean_var' && is.categorical){
+      stop("'method' can only be 'sampling' for DGP emulators with categorical likelihoods.", call. = FALSE)
+    }
+  }
+
+  sample_size <- as.integer(sample_size)
   #For LOO
   if (is.null(x_test) & is.null(y_test)){
     #check existing LOO
@@ -296,12 +379,23 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         if ( isTRUE(verb) ) message(" LOO results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( ( ((method == 'mean_var')&("mean" %in% names(object$loo)))|((method == 'sampling')&("median" %in% names(object$loo))) ) & (M == object$loo$M) ){
+        if ( (method == 'mean_var')&("mean" %in% names(object$loo)) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
+        } else if ( (method == 'sampling') & (any(c("median", "label") %in% names(object$loo)))  & (M == object$loo$M) ) {
+          if ( sample_size == object$loo$sample_size ) {
+            if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
+            if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
+            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) message(" done")
+            return(object)
+          } else {
+            if ( isTRUE(verb) ) message(" LOO re-evaluation needed.")
+            if ( isTRUE(verb) ) message("Start re-evaluation: ")
+          }
         } else {
           if ( isTRUE(verb) ) message(" LOO re-evaluation needed.")
           if ( isTRUE(verb) ) message("Start re-evaluation: ")
@@ -311,7 +405,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
     if ( isTRUE(verb) ) message("Initializing the LOO ...", appendLF = FALSE)
     x_train <- object$constructor_obj$X
-    y_train <- object$constructor_obj$Y
+    y_train <- object$data$Y
     rep <- object$constructor_obj$indices
     if ( !is.null(rep) ){
       rep <- rep + 1
@@ -323,23 +417,37 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$loo(X = x_train, method = method, m = M)
+      res <- object$emulator_obj$loo(X = reticulate::np_array(x_train), method = method, sample_size = sample_size, m = M)
     } else {
-      res <- object$emulator_obj$ploo(X = x_train, method = method, m = M, core_num = cores)
+      res <- object$emulator_obj$ploo(X = reticulate::np_array(x_train), method = method, sample_size = sample_size, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
-
     if ( isTRUE(verb) ) message("Saving results to the slot 'loo' in the dgp object ...", appendLF = FALSE)
     if ( method == 'sampling' ){
-      res_np <- pkg.env$np$array(res)
-      quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
-      std <- pkg.env$np$std(res_np, axis=2L)
-      dat[["median"]] <- as.matrix(quant[2,,])
-      dat[["std"]] <- t(std)
-      dat[["lower"]] <- as.matrix(quant[1,,])
-      dat[["upper"]] <- as.matrix(quant[3,,])
-      dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_train)^2))
-      dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
+      if ( is.categorical ) {
+        encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
+        prob_samp <- pkg.env$np$transpose(pkg.env$np$asarray(res), c(2L,1L,0L))
+        label_sample <- pkg.env$dgpsi$functions$categorical_sampler_3d(prob_samp)
+        original_label <- encoder$inverse_transform(pkg.env$np$ravel(label_sample))
+        original_label = pkg.env$np$reshape(original_label, pkg.env$np$shape(label_sample) )
+        dat[["label"]] <- original_label
+        index_to_label <- as.character(encoder$classes_)
+        names(res) <- index_to_label
+        dat[["probability"]] <- res
+        y_train_encode <- encoder$transform(pkg.env$np$ravel(dat$y_train))
+        dat[["log_loss"]] <- pkg.env$dgpsi$functions$logloss(prob_samp, as.integer(y_train_encode))
+        dat[["accuracy"]] <- mean(rowMeans(pkg.env$np$equal(original_label, dat$y_train)))
+      } else {
+        res_np <- pkg.env$np$array(res)
+        quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
+        std <- pkg.env$np$std(res_np, axis=2L)
+        dat[["median"]] <- as.matrix(quant[2,,])
+        dat[["std"]] <- t(std)
+        dat[["lower"]] <- as.matrix(quant[1,,])
+        dat[["upper"]] <- as.matrix(quant[3,,])
+        dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_train)^2))
+        dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
+      }
     } else if ( method == 'mean_var' ) {
       dat[["mean"]] <- res[[1]]
       dat[["std"]] <- sqrt(res[[2]])
@@ -349,6 +457,9 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
     }
     dat[["M"]] <- M
+    if (method == "sampling"){
+      dat[["sample_size"]] <- sample_size
+    }
     object$loo <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -372,12 +483,23 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         if ( isTRUE(verb) ) message(" OOS results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) & (M == object$oos$M) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
+        } else if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&(any(c("median", "label") %in% names(object$oos))) & (M == object$oos$M) ){
+          if ( sample_size == object$oos$sample_size ){
+            if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
+            if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
+            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) message(" done")
+            return(object)
+          } else {
+            if ( isTRUE(verb) ) message(" OOS re-evaluation needed.")
+            if ( isTRUE(verb) ) message("Start re-evaluation: ")
+          }
         } else {
           if ( isTRUE(verb) ) message(" OOS re-evaluation needed.")
           if ( isTRUE(verb) ) message("Start re-evaluation: ")
@@ -396,23 +518,49 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
     rep <- rep_x[[2]] + 1
 
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x = x_test_unique, method = method, m = M)
+      if (is.categorical) {
+        res <- object$emulator_obj$classify(x = reticulate::np_array(x_test_unique), mode = 'prob', sample_size = sample_size, m = M)
+      } else {
+        res <- object$emulator_obj$predict(x = x_test_unique, method = method, sample_size = sample_size, m = M)
+      }
     } else {
-      res <- object$emulator_obj$ppredict(x = x_test_unique, method = method, m = M, core_num = cores)
+      if (is.categorical) {
+        res <- object$emulator_obj$pclassify(x = reticulate::np_array(x_test_unique), mode = 'prob', sample_size = sample_size, m = M, core_num = cores)
+      } else {
+        res <- object$emulator_obj$ppredict(x = x_test_unique, method = method, sample_size = sample_size, m = M, core_num = cores)
+      }
     }
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Saving results to the slot 'oos' in the dgp object ...", appendLF = FALSE)
     if ( method == 'sampling' ){
-      res_np <- pkg.env$np$array(res)
-      quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
-      std <- pkg.env$np$std(res_np, axis=2L)
-      dat[["median"]] <- as.matrix(quant[2,,])[rep,,drop=F]
-      dat[["std"]] <- t(std)[rep,,drop=F]
-      dat[["lower"]] <- as.matrix(quant[1,,])[rep,,drop=F]
-      dat[["upper"]] <- as.matrix(quant[3,,])[rep,,drop=F]
-      dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_test)^2))
-      dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
+      if ( is.categorical ) {
+        encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
+        prob_samp <- pkg.env$np$transpose(pkg.env$np$asarray(res), c(2L,1L,0L))
+        label_sample <- pkg.env$dgpsi$functions$categorical_sampler_3d(prob_samp)
+        original_label <- encoder$inverse_transform(pkg.env$np$ravel(label_sample))
+        original_label = pkg.env$np$reshape(original_label, pkg.env$np$shape(label_sample) )
+        dat[["label"]] <- original_label[rep,,drop=F]
+        index_to_label <- as.character(encoder$classes_)
+        for (k in 1:length(res)){
+          res[[k]] <- res[[k]][rep,,drop=F]
+        }
+        names(res) <- index_to_label
+        dat[["probability"]] <- res
+        y_test_encode <- encoder$transform(pkg.env$np$ravel(dat$y_test))
+        dat[["log_loss"]] <- pkg.env$dgpsi$functions$logloss(prob_samp, as.integer(y_test_encode), as.integer(rep-1))
+        dat[["accuracy"]] <- mean(rowMeans(pkg.env$np$equal(dat[["label"]], dat$y_test)))
+      } else {
+        res_np <- pkg.env$np$array(res)
+        quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
+        std <- pkg.env$np$std(res_np, axis=2L)
+        dat[["median"]] <- as.matrix(quant[2,,])[rep,,drop=F]
+        dat[["std"]] <- t(std)[rep,,drop=F]
+        dat[["lower"]] <- as.matrix(quant[1,,])[rep,,drop=F]
+        dat[["upper"]] <- as.matrix(quant[3,,])[rep,,drop=F]
+        dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_test)^2))
+        dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
+      }
     } else if ( method == 'mean_var' ) {
       dat[["mean"]] <- res[[1]][rep,,drop=F]
       dat[["std"]] <- sqrt(res[[2]][rep,,drop=F])
@@ -422,6 +570,9 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
     }
     dat[["M"]] <- M
+    if (method == "sampling"){
+      dat[["sample_size"]] <- sample_size
+    }
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -437,7 +588,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 #' @rdname validate
 #' @method validate lgp
 #' @export
-validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_var', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -451,8 +602,12 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
   }
   M <- as.integer(M)
 
-  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-
+  if ( is.null(method) ){
+    method = 'mean_var'
+  } else {
+    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+  }
+  sample_size <- as.integer(sample_size)
   #For OOS
   if (!is.null(x_test) & !is.null(y_test)) {
     #check testing input
@@ -520,12 +675,23 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
         if ( isTRUE(verb) ) message(" OOS results found in the lgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (((method == 'mean_var')&("mean" %in% names(object$oos)))|((method == 'sampling')&("median" %in% names(object$oos)))) & (M == object$oos$M) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
+        } else if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&("median" %in% names(object$oos)) & (M == object$oos$M) ){
+          if ( sample_size == object$oos$sample_size ) {
+            if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
+            if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
+            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) message(" done")
+            return(object)
+          } else {
+            if ( isTRUE(verb) ) message(" OOS re-evaluation needed.")
+            if ( isTRUE(verb) ) message("Start re-evaluation: ")
+          }
         } else {
           if ( isTRUE(verb) ) message(" OOS re-evaluation needed.")
           if ( isTRUE(verb) ) message("Start re-evaluation: ")
@@ -541,9 +707,9 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
 
     if ( isTRUE(verb) ) message("Calculating the OOS ...", appendLF = FALSE)
     if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x = x_test, method = method, m = M)
+      res <- object$emulator_obj$predict(x = x_test, method = method, sample_size = sample_size, m = M)
     } else {
-      res <- object$emulator_obj$ppredict(x = x_test, method = method, m = M, core_num = cores)
+      res <- object$emulator_obj$ppredict(x = x_test, method = method, sample_size = sample_size, m = M, core_num = cores)
     }
     if ( isTRUE(verb) ) message(" done")
 
@@ -594,6 +760,9 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = 'mean_va
       dat[["nrmse"]] <- nrmse_lst
     }
     dat[["M"]] <- M
+    if (method == "sampling"){
+      dat[["sample_size"]] <- sample_size
+    }
     object$oos <- dat
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")

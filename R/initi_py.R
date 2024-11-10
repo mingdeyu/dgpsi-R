@@ -165,19 +165,77 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
       reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps'))
     }
   }
-  if (Sys.info()[["sysname"]] == 'Linux' & !any(grepl("libstdc++.so.6.0.3",list.files("/usr/lib/x86_64-linux-gnu/"), fixed = TRUE))){
-    cat("The required file 'libstdc++.so.6.0.30' or above is missing from /usr/lib/x86_64-linux-gnu/.")
-    ans <- readline(prompt="To proceed, would you like to grant sudo permissions to resolve the issue? (Y/N) ")
-    if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
-      libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.3*', sep='')
-      system(paste("sudo cp", libstdc_path, "/usr/lib/x86_64-linux-gnu/"))
-      libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
-      system(paste("sudo rm",libstdc_sys_path))
-      system(paste("sudo ln -s", "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.3*", libstdc_sys_path))
+  #if (Sys.info()[["sysname"]] == 'Linux' & !any(grepl("libstdc++.so.6.0.3",list.files("/usr/lib/x86_64-linux-gnu/"), fixed = TRUE))){
+  #  cat("The required file 'libstdc++.so.6.0.30' or above is missing from /usr/lib/x86_64-linux-gnu/.")
+  #  ans <- readline(prompt="To proceed, would you like to grant sudo permissions to resolve the issue? (Y/N) ")
+  #  if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
+  #    libstdc_path <- paste(gsub("bin.*$", "", conda_path), 'envs/', env_name, '/lib/libstdc++.so.6.0.3*', sep='')
+  #    system(paste("sudo cp", libstdc_path, "/usr/lib/x86_64-linux-gnu/"))
+  #    libstdc_sys_path <- "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+  #    system(paste("sudo rm",libstdc_sys_path))
+  #    system(paste("sudo ln -s", "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.3*", libstdc_sys_path))
+  #  } else {
+  #    stop("Please link /usr/lib/x86_64-linux-gnu/libstdc++.so.6 to 'libstdc++.so.6.0.30' or above and run init_py(reinstall = T).", call. = FALSE)
+  #  }
+  #}
+
+  if (Sys.info()[["sysname"]] == 'Linux') {
+    # Retrieve conda environment information
+    conda_env_path <- reticulate::conda_list(conda = conda_path)
+    conda_dgpsi_path <- conda_env_path$python[conda_env_path$name == env_name]
+    libstdc_path <- paste(gsub("bin.*$", "", conda_dgpsi_path), 'lib', sep = '')
+
+    # Construct the export command
+    export_command <- paste0("export LD_LIBRARY_PATH=", libstdc_path, ":$LD_LIBRARY_PATH")
+
+    # Detect the user's shell
+    shell <- Sys.getenv("SHELL")
+    if (grepl("bash", shell)) {
+      rc_file <- "~/.bashrc"
+    } else if (grepl("zsh", shell)) {
+      rc_file <- "~/.zshrc"
     } else {
-      stop("Please link /usr/lib/x86_64-linux-gnu/libstdc++.so.6 to 'libstdc++.so.6.0.30' or above and run init_py(reinstall = T).", call. = FALSE)
+      # Default to ~/.bashrc if the shell is unrecognized
+      rc_file <- "~/.bashrc"
+    }
+
+    # Inform the user
+    message("To use the package properly, we need to update your LD_LIBRARY_PATH.")
+    permission <- readline(prompt = "Can we automatically update this in your shell configuration file? (Y/N) ")
+
+    if (tolower(permission) == 'y' || tolower(permission) == 'yes') {
+      rc_file_path <- path.expand(rc_file)
+
+      # Check if the rc file exists, if not create it
+      if (!file.exists(rc_file_path)) {
+        #message(paste0(rc_file, " does not exist. Creating a new ", rc_file, " file."))
+        is.create <- file.create(rc_file_path)
+      } else {
+        # Read the content of the rc file
+        rc_content <- readLines(rc_file_path)
+
+        # Identify lines that match the existing LD_LIBRARY_PATH export command
+        matching_lines <- grepl("LD_LIBRARY_PATH=.*dgp_si_R", rc_content)
+
+        # Remove any existing export commands with the pattern "dgp_si_R"
+        rc_content_cleaned <- rc_content[!matching_lines]
+
+        # Write back the cleaned content (without the old export commands)
+        writeLines(rc_content_cleaned, rc_file_path)
+      }
+
+      # Append the new export command
+      cat(export_command, file = rc_file_path, append = TRUE, sep = "\n")
+
+      message(paste0("The path has been updated in your ", rc_file, "."))
+      message(paste0("You may need to restart your terminal or run 'source ", rc_file, "' to apply the updates."))
+    } else {
+      # Print the command for manual addition
+      message("Please manually add the following line to your ", rc_file, ":")
+      cat(export_command, "\n")
     }
   }
+
   message("Installation finished. Please restart R.")
 }
 

@@ -40,6 +40,8 @@ If \code{ord = NULL}, the default random ordering is used. Defaults to \code{NUL
 An updated \code{object} with the Vecchia approximation either added or removed.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}}
+
 This function adds or removes the Vecchia approximation from a GP, DGP or linked (D)GP emulator
 constructed by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}} or \code{\link[=lgp]{lgp()}}.
 }

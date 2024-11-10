@@ -5,7 +5,7 @@
 \alias{summary.gp}
 \alias{summary.dgp}
 \alias{summary.lgp}
-\title{Summary of a constructed GP, DGP, or linked (D)GP emulator}
+\title{Visual summary of a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
 \method{summary}{gp}(object, ...)
 
@@ -24,10 +24,13 @@
 \item{...}{N/A.}
 }
 \value{
-A table summarizing key information contained in \code{object}.
+An interactive visualization of the emulator as a \code{visNetwork} object.
+This visualization is compatible with R Markdown documents and the RStudio Viewer.
+The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}}.
 }
 \description{
-This function summarizes key information of a GP, DGP or linked (D)GP emulator.
+This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
+by generating an interactive visualization of the emulator’s structure.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.

@@ -14,6 +14,8 @@ number of threads will be set to the maximum value.}
 No return value.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}}
+
 This function sets the number of threads for parallel computations involved
 in the package.
 }

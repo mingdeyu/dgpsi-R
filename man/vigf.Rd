@@ -50,7 +50,7 @@ can be passed here.}
 \item{batch_size}{an integer that gives the number of design points to be chosen.
 Defaults to \code{1}.}
 
-\item{M}{the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
+\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{workers}{the number of processes to be used for the criterion calculation. If set to \code{NULL},
@@ -80,7 +80,9 @@ is not \code{NULL}) or the output dimension (if \code{aggregate} is \code{NULL})
 to the DGP emulator across different outputs. If \code{object} is a DGP emulator with either \code{Hetero} or \code{NegBin} likelihood layer, the returned matrix has
 two columns with the first column giving positions of next design points from \code{x_cand} that correspond to the mean parameter of the normal or negative Binomial
 distribution, and the second column giving positions of next design points from \code{x_cand} that correspond to the variance parameter of the normal distribution or
-the dispersion parameter of the negative Binomial distribution.
+the dispersion parameter of the negative Binomial distribution. If \code{object} is a DGP emulator with a \code{Categorical} likelihood layer, the returned matrix will
+have either one column (for binary output) or \code{K} columns (for multi-class output), giving the positions of the next design points from \code{x_cand} that correspond
+to the probabilities of different classes.
 \item If \code{object} is an instance of the \code{bundle} class, a matrix is returned with row number equal to \code{batch_size} and column number equal to the number of
 emulators in the bundle, giving positions (i.e., row numbers) of next design points from \code{x_cand} to be added to individual emulators.
 }

@@ -15,8 +15,11 @@ set_linked_idx(object, idx)
 An updated \code{object} with the information of \code{idx} incorporated.
 }
 \description{
-This function adds the linked information to a GP or DGP emulator if the information is not provided
-when the emulator is constructed by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated and will be removed in the next release. The updated
+\code{\link[=lgp]{lgp()}} function now offers a simpler, more efficient way to specify linked information
+for (D)GP emulators.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
@@ -33,3 +36,4 @@ individual emulators with this function.
 # See lgp() for an example.
 }
 }
+\keyword{internal}

@@ -10,6 +10,8 @@ get_thread_num()
 the number of threads.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}}
+
 This function gets the number of threads used for parallel computations involved
 in the package.
 }

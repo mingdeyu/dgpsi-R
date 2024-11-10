@@ -12,9 +12,11 @@
   x_test = NULL,
   y_test = NULL,
   dim = NULL,
-  method = "mean_var",
+  method = NULL,
+  sample_size = 50,
   style = 1,
   min_max = TRUE,
+  normalize = TRUE,
   color = "turbo",
   type = "points",
   verb = TRUE,
@@ -29,7 +31,8 @@
   x_test = NULL,
   y_test = NULL,
   dim = NULL,
-  method = "mean_var",
+  method = NULL,
+  sample_size = 50,
   style = 1,
   min_max = TRUE,
   color = "turbo",
@@ -46,7 +49,8 @@
   x_test = NULL,
   y_test = NULL,
   dim = NULL,
-  method = "mean_var",
+  method = NULL,
+  sample_size = 50,
   style = 1,
   min_max = TRUE,
   color = "turbo",
@@ -87,10 +91,15 @@ This argument is only used when \code{style = 1} and the emulator input is at le
 
 \item{method}{same as that of \code{\link[=validate]{validate()}}.}
 
+\item{sample_size}{same as that of \code{\link[=validate]{validate()}}.}
+
 \item{style}{either \code{1} or \code{2}, indicating two different types of validation plots.}
 
 \item{min_max}{a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
-emulator. Defaults to \code{TRUE}.}
+emulator. Defaults to \code{TRUE}. This argument is not applicable to DGP emulators with categorical likelihoods.}
+
+\item{normalize}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating if normalization will be used to scale the counts in validation plots of DGP emulators with categorical
+likelihoods when \code{style = 2}.  Defaults to \code{TRUE}.}
 
 \item{color}{a character string indicating the color map to use when \code{style = 2}:
 \itemize{
@@ -107,12 +116,13 @@ emulator. Defaults to \code{TRUE}.}
 Defaults to \code{'turbo'} (or \code{'H'}).}
 
 \item{type}{either \code{'line'} or \verb{'points}, indicating whether to draw testing data in the OOS validation plot as a line or
-individual points when the input of the emulator is one-dimensional and \code{style = 1}. Defaults to \code{'points'}}
+individual points when the input of the emulator is one-dimensional and \code{style = 1}. This argument is not applicable to DGP emulators with
+categorical likelihoods. Defaults to \code{'points'}}
 
 \item{verb}{a bool indicating if the trace information on plotting will be printed during the function execution.
 Defaults to \code{TRUE}.}
 
-\item{M}{same as that of \code{\link[=validate]{validate()}}.}
+\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} same as that of \code{\link[=validate]{validate()}}.}
 
 \item{force}{same as that of \code{\link[=validate]{validate()}}.}
 

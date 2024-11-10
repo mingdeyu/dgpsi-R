@@ -30,7 +30,7 @@ library(dgpsi)
 
 We consider the following synthetic system
 
-![](images/linked_model.png){width=60%}
+![](images/linked_model.png){width="60%"}
 
 that involves three models defined by:
 
@@ -75,13 +75,13 @@ Y3 <- apply(X3, f3, MARGIN = 1)
 
 ## Emulation of Model 1
 
-We construct and train a GP emulator with Matérn-2.5 kernel:
+We construct and train a GP emulator with Matérn-2.5 kernel with ID `gp1`:
 
 ```{r}
-m1 <- gp(X1, Y1, name = "matern2.5")
+m1 <- gp(X1, Y1, name = "matern2.5", id = "gp1")
 ```
 
-```
+```         
 ## Auto-generating a GP structure ... done
 ## Initializing the GP emulator ... done
 ## Training the GP emulator ... done
@@ -93,29 +93,23 @@ We now validate the trained GP emulator by `plot()` by LOO (alternatively, one c
 plot(m1)
 ```
 
-```
-## Initializing ... done
+```         
+## Validating and computing ... done
 ## Post-processing LOO results ... done
 ## Plotting ... done
 ```
 
-![](images/model_1_loo.png)
-
-Since we will use `m1` later for linked emulation, we must specify how it links to the emulators in the feeding layer through `linked_idx` in `dgp()`. Since `m1` is in the first layer of the system, `linked_idx` refers to the column indices of the global input `X` that will feed into `m1`, and therefore we should have set `linked_idx = c(1)` in `dgp()` when we first constructed the emulator. Instead of re-training the emulator to provide this information, we can simply use `set_linked_idx()` to add this information to `m1`:
-
-```{r}
-m1 <- set_linked_idx(m1, c(1))
-```
+![](images/model_1_loo.png){width=90%}
 
 ## Emulation of Model 2
 
 We construct a two-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 2:
 
 ```{r}
-m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
+m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5")
 ```
 
-```
+```         
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
@@ -123,7 +117,11 @@ m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5", linked_idx = c(1))
 ## Imputing ... done
 ```
 
-Since all outputs of emulators in the first layer is from `m1` and `m2` uses the output from `m1` as its input, we set `linked_idx = c(1)` in `dgp()` above. 
+and set its ID to `gp2` using the `set_id()` function:
+
+```{r}
+m2 <- set_id(m2, "gp2")
+```
 
 The following plot visualizes the LOO of the trained DGP emulator `m2`:
 
@@ -131,23 +129,23 @@ The following plot visualizes the LOO of the trained DGP emulator `m2`:
 plot(m2)
 ```
 
-```
-Initializing ... done
+```         
+Validating and computing ... done
 Post-processing LOO results ... done
 Plotting ... done
 ```
 
-![](images/model_2_loo.png)
+![](images/model_2_loo.png){width=90%}
 
 ## Emulation of Model 3
 
 We now construct a three-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 3:
 
 ```{r}
-m3 <- dgp( X3, Y3, depth = 3, name = "matern2.5", linked_idx = list( c(1), c(1) ) )
+m3 <- dgp( X3, Y3, depth = 3, name = "matern2.5", id = "gp3" )
 ```
 
-```
+```         
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator:
@@ -155,52 +153,72 @@ m3 <- dgp( X3, Y3, depth = 3, name = "matern2.5", linked_idx = list( c(1), c(1) 
 ## Imputing ... done
 ```
 
-Since `m3` takes both outputs from `m1` in layer 1 and `m2` in layer 2, we set `linked_idx = list( c(1), c(1) )`. The first vector in the list says that the output dimension 1 from all emulators (i.e., `m1`) in the first layer feeds into `m3` and the second vector in the list says that the output dimension 1 from all emulators (i.e., `m2`) in the second layer feeds into `m3`. Note that the dimensions in `X3` is ordered in consistent with `linked_idx`, i.e., the first and second columns of `X3` correspond to the output of `m1` and `m2` respectively.
-
 The following plot visualizes the LOO of the trained DGP emulator `m3`:
 
 ```{r}
 plot(m3)
 ```
 
-```
-Initializing ... done
+```         
+Validating and computing ... done
 Post-processing LOO results ... done
 Plotting ... done
 ```
 
-![](images/model_3_loo.png)
-
-
+![](images/model_3_loo.png){width=90%}
 
 ## Emulation of Linked Model
 
-With the GP emulator `m1` (for Model 1), the DGP emulator `m2` (for Model 2), and the DGP emulator `m3` (for Model 3) at hand, we are now ready to build the linked emulator by first using `combine()` to construct the system hierarchy `struc` and then applying `lgp()` for the linked emulator.  
+With the GP emulator `m1` (for Model 1), the DGP emulator `m2` (for Model 2), and the DGP emulator `m3` (for Model 3) at hand, we are now ready to build the linked emulator by first defining a data frame `struc`:
 
-```{r}
-struc <- combine(list(m1), list(m2), list(m3))
-m_link <- lgp(struc)
+```{r, eval = TRUE}
+struc <- data.frame(From_Emulator = c("Global", "gp1", "gp1", "gp2"),
+                    To_Emulator = c("gp1", "gp2", "gp3", "gp3"),
+                    From_Output = c(1, 1, 1, 1),
+                    To_Input = c(1, 1, 1, 2))
+struc
 ```
 
-Note that each layer of an emulator system is represented by a list. In our case, each layer contains a single emulator. Therefore, we need to put the corresponding emulator in a list using `list()`.
+The `struc` data frame above defines the feed-forward connection structure between the three emulators in the linked system. Each row represents a one-to-one connection between an output dimension (`From_Output`) of a source emulator (`From_Emulator`) and an input dimension (`To_Input`) of a target emulator (`To_Emulator`).
 
-We can check the relations between emulators in different layers by applying `summary()` to `m_link`:
+For example: - The first row specifies that the global input (denoted by `Global`)’s first dimension (column) is connected to the first input dimension of emulator `gp1`. - The second row indicates that the first output dimension of emulator `gp1` is connected to the first input dimension of emulator `gp2`.
+
+Finally, we can pass `struc` and a list of the three trained emulators to `lgp()` to create the linked emulator. The order of the emulators in the list does not matter:
+
+```{r}
+emulators <- list(m1, m2, m3)
+```
+
+Before activating the linked emulator for predictions, it's good practice to first set it to validation mode:
+
+```{r}
+m_link <- lgp(struc, emulators, mode = "validate")
+```
+
+```         
+Processing emulators ... done
+Linking and synchronizing emulators ... done
+Validating the linked emulator ... done
+```
+
+and visually check the relationships between emulators by applying `summary()` to `m_link`:
 
 ```{r}
 summary(m_link)
 ```
 
+<iframe src="https://mingdeyu.github.io/dgpsi-R/linked_emu.html" width="100%" height="400" style="border: none;"></iframe>
+
+If everything looks correct, we can then construct the linked emulator in activation mode for prediction:
+
+```{r}
+m_link <- lgp(struc, emulators, mode = "activate")
 ```
-## +-----------+--------------+------+----------------------------+-----------------+
-## | Layer No. | Emulator No. | Type |         Connection         | External Inputs |
-## +-----------+--------------+------+----------------------------+-----------------+
-## |  Layer 1  |    Emu 1     |  GP  |     Global input: [1]      |       No        |
-## |  Layer 2  |    Emu 1     | DGP  | Emu 1 in Layer 1: output 1 |       No        |
-## |  Layer 3  |    Emu 1     | DGP  | Emu 1 in Layer 1: output 1 |       No        |
-## |           |              |      | Emu 1 in Layer 2: output 1 |                 |
-## +-----------+--------------+------+----------------------------+-----------------+
-## 1. 'Connection' gives the indices of emulators and the associated output dimensions that are linked to the emulator referred by 'Layer No.' and 'Emulator No.'.
-## 2. 'External Inputs' indicates if the emulator (referred by 'Layer No.' and 'Emulator No.') has external inputs that are not provided by the feeding emulators.
+
+```         
+Processing emulators ... done
+Linking and synchronizing emulators ... done
+Activating the linked emulator ... done
 ```
 
 For comparison, we construct a GP emulator for the whole system by generating 15 training data points from Model 1 and Model 2:
@@ -211,7 +229,7 @@ Y_gp <- sapply(X_gp, f123)
 m_gp <- gp(X_gp, Y_gp, name = 'matern2.5')
 ```
 
-```
+```         
 ## Auto-generating a GP structure ... done
 ## Initializing the GP emulator ... done
 ## Training the GP emulator ... done
@@ -237,7 +255,8 @@ and plot them to compare their emulation performances:
 plot(m_gp, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
   plot_annotation(title = 'GP Emulator', theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
-![](images/linked_result.png)
+
+![](images/linked_result.png){width=90%}
 
 ```{r}
 # Linked emulator
@@ -245,7 +264,8 @@ plot(m_link, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
   plot_annotation(title = 'Linked Emulator', theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-![](images/linked_result_new.png)
+![](images/linked_result_new.png){width=90%}
+
 It can be seen from the above plots that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.
 
 In real-life applications, we are rarely able to generate this many testing data points from the underlying computer simulators to evaluate the emulators over the whole input space. However, we are still able to retain some available realizations from the computer simulators for the linked emulator validation. Say we were able to afford 20 runs of the above linked computer system:
@@ -263,13 +283,13 @@ Then, we can conduct OOS validations for the GP emulator:
 plot(m_gp, test_x_oos, test_y_oos, style = 2)
 ```
 
-```
-## Initializing ... done
+```         
+## Validating and computing ... done
 ## Post-processing OOS results ... done
 ## Plotting ... done
 ```
 
-![](images/gp_oos.png)
+![](images/gp_oos.png){width=90%}
 
 and the linked emulator:
 
@@ -277,11 +297,12 @@ and the linked emulator:
 plot(m_link, test_x_oos, test_y_oos, style = 2)
 ```
 
-```
-## Initializing ... done
+```         
+## Validating and computing ... done
 ## Post-processing OOS results ... done
 ## Plotting ... done
 ```
 
-![](images/linked_oos.png)
+![](images/linked_oos.png){width=90%}
+
 which show that the linked emulator outperforms the GP emulator with significantly better predictive accuracy and lower NRMSE.

@@ -35,7 +35,12 @@ Imports:
     bitops,
     clhs,
     dplyr,
-    uuid
+    uuid,
+    tidyr,
+    rlang,
+    lifecycle,
+    magrittr,
+    visNetwork
 Suggests:
     knitr,
     rmarkdown,
@@ -45,5 +50,6 @@ Suggests:
 LazyData: false
 VignetteBuilder:
     knitr
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2
 Language: en-US
+Roxygen: list(markdown = TRUE)

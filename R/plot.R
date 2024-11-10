@@ -19,9 +19,12 @@
 #'
 #' This argument is only used when `style = 1` and the emulator input is at least two-dimensional. Defaults to `NULL`.
 #' @param method same as that of [validate()].
+#' @param sample_size same as that of [validate()].
 #' @param style either `1` or `2`, indicating two different types of validation plots.
 #' @param min_max a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
-#'     emulator. Defaults to `TRUE`.
+#'     emulator. Defaults to `TRUE`. This argument is not applicable to DGP emulators with categorical likelihoods.
+#' @param normalize `r new_badge("new")` a bool indicating if normalization will be used to scale the counts in validation plots of DGP emulators with categorical
+#'    likelihoods when `style = 2`.  Defaults to `TRUE`.
 #' @param color a character string indicating the color map to use when `style = 2`:
 #' * `'magma'` (or `'A'`)
 #' * `'inferno'` (or `'B'`)
@@ -34,10 +37,11 @@
 #'
 #' Defaults to `'turbo'` (or `'H'`).
 #' @param type either `'line'` or `'points`, indicating whether to draw testing data in the OOS validation plot as a line or
-#'     individual points when the input of the emulator is one-dimensional and `style = 1`. Defaults to `'points'`
+#'     individual points when the input of the emulator is one-dimensional and `style = 1`. This argument is not applicable to DGP emulators with
+#'     categorical likelihoods. Defaults to `'points'`
 #' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
 #'     Defaults to `TRUE`.
-#' @param M same as that of [validate()].
+#' @param M `r new_badge("new")` same as that of [validate()].
 #' @param force same as that of [validate()].
 #' @param cores same as that of [validate()].
 #' @param ... N/A.
@@ -67,12 +71,12 @@
 #' @md
 #' @name plot
 NULL
-
+#' @importFrom rlang .data
 
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, sample_size = 50, style = 1, min_max = TRUE, normalize = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -83,22 +87,27 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
-  M <- as.integer(M)
 
-  if ( isTRUE(verb) ) message("Initializing ...", appendLF = FALSE)
-  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, M = M, force = force, cores = cores)
+  if ( isTRUE(verb) ) message("Validating and computing ...", appendLF = FALSE)
+  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, sample_size = sample_size, verb = FALSE, M = M, force = force, cores = cores)
   if ( isTRUE(verb) ) message(" done")
 
   # For LOO
   if ( is.null(x_test) & is.null(y_test) ){
     if ( isTRUE(verb) ) message("Post-processing LOO results ...", appendLF = FALSE)
     loo_res <- results$loo
+    if ( "label" %in% names(loo_res) ){
+      is.categorical <- TRUE
+    } else {
+      is.categorical <- FALSE
+    }
     p_list <- list()
     if ( style==1 ){
       # create indices
       if ( ncol(loo_res$x_train)==1 ){
         idx <- loo_res$x_train[,1]
         isdup <- TRUE
+        if (!is.null(dim)) dim <- 1
       } else {
         if ( is.null(dim) ) {
           rep1 <- pkg.env$np$unique(loo_res$x_train, return_index=TRUE, axis=0L)
@@ -110,53 +119,74 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
           isdup <- FALSE
         }
       }
-      for (l in 1:ncol(loo_res$y_train) ) {
-        dat <- list()
-        dat[["idx"]] <- idx
-        # extract mean or median
-        if ( "mean" %in% names(loo_res) ){
-          dat[["mean"]] <- loo_res$mean[,l]
-          method <- "mean_var"
-        } else if ( "median" %in% names(loo_res) ){
-          dat[["median"]] <- loo_res$median[,l]
-          method <- "sampling"
-        }
-        # extract other attributes
-        dat[["lower"]] <- loo_res$lower[,l]
-        dat[["upper"]] <- loo_res$upper[,l]
-        dat[["y_validate"]] <- loo_res$y_train[,l]
-        dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
-        if ( min_max ){
-          p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
-        } else {
-          p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
-            ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      if (is.categorical){
+        samples_df <- as.data.frame(loo_res$label)
+        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
+        dat <- cbind(data.frame(idx = idx, y_validate = loo_res$y_train[,1]), samples_df)
+        p_list[[1]] <- plot_style_1_classify(dat, dim, isdup) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f", loo_res$log_loss)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
+        for (l in 1:ncol(loo_res$y_train) ) {
+          dat <- list()
+          dat[["idx"]] <- idx
+          # extract mean or median
+          if ( "mean" %in% names(loo_res) ){
+            dat[["mean"]] <- loo_res$mean[,l]
+            method <- "mean_var"
+          } else if ( "median" %in% names(loo_res) ){
+            dat[["median"]] <- loo_res$median[,l]
+            method <- "sampling"
+          }
+          # extract other attributes
+          dat[["lower"]] <- loo_res$lower[,l]
+          dat[["upper"]] <- loo_res$upper[,l]
+          dat[["y_validate"]] <- loo_res$y_train[,l]
+          dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
+          if ( min_max ){
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          } else {
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          }
         }
       }
     } else if ( style==2 ) {
-      for (l in 1:ncol(loo_res$y_train) ) {
-        dat <- list()
-        # extract mean or median
-        if ( "mean" %in% names(loo_res) ){
-          dat[["mean"]] <- loo_res$mean[,l]
-          method <- "mean_var"
-        } else if ( "median" %in% names(loo_res) ){
-          dat[["median"]] <- loo_res$median[,l]
-          method <- "sampling"
-        }
-        dat[["y_validate"]] <- loo_res$y_train[,l]
-        dat[["std"]] <- loo_res$std[,l]
-        if ( min_max ){
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
-            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
-        } else {
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
-            ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      if (is.categorical){
+        rep1 <- pkg.env$np$unique(loo_res$x_train, return_index=TRUE, axis=0L)
+        rep2 <- pkg.env$np$unique(loo_res$x_train, return_inverse=TRUE, axis=0L)
+        idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+        samples_df <- as.data.frame(loo_res$label)
+        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
+        dat <- cbind(data.frame(idx = idx, y_validate = loo_res$y_train[,1]), samples_df)
+        p_list[[1]] <- plot_style_2_classify(dat, color, normalize) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f", loo_res$log_loss)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
+        for (l in 1:ncol(loo_res$y_train) ) {
+          dat <- list()
+          # extract mean or median
+          if ( "mean" %in% names(loo_res) ){
+            dat[["mean"]] <- loo_res$mean[,l]
+            method <- "mean_var"
+          } else if ( "median" %in% names(loo_res) ){
+            dat[["median"]] <- loo_res$median[,l]
+            method <- "sampling"
+          }
+          dat[["y_validate"]] <- loo_res$y_train[,l]
+          dat[["std"]] <- loo_res$std[,l]
+          if ( min_max ){
+            p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
+              ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          } else {
+            p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
+              ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
+              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+          }
         }
       }
     }
@@ -164,56 +194,64 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
-    if ( method == "mean_var" ){
+    if (is.categorical){
       p_patch <- patchwork::wrap_plots(p_list) +
         patchwork::plot_annotation(
-          title = 'Leave-One-Out (LOO) Cross Validation',
-          caption = if ( style== 1) {
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
+          title = 'Leave-One-Out (LOO) Cross Validation'
+        ) +
+        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+    } else {
+      if ( method == "mean_var" ){
+        p_patch <- patchwork::wrap_plots(p_list) +
+          patchwork::plot_annotation(
+            title = 'Leave-One-Out (LOO) Cross Validation',
+            caption = if ( style== 1) {
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
                NRMSE = Normalized Root Mean Squared Error
                CI = Credible Interval'
-            } else {
-              'Oi = Output i of the DGP emulator
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Mean Squared Error
                CI = Credible Interval'
-            }
-          } else {
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
-               NRMSE = Normalized Root Mean Squared Error'
+              }
             } else {
-              'Oi = Output i of the DGP emulator
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Mean Squared Error'
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Mean Squared Error'
+              }
             }
-            }
-        ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
-    } else if ( method == "sampling" ){
-      p_patch <- patchwork::wrap_plots(p_list) +
-        patchwork::plot_annotation(
-          title = 'Leave-One-Out (LOO) Cross Validation',
-          caption = if ( style== 1) {
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
+          ) +
+          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      } else if ( method == "sampling" ){
+        p_patch <- patchwork::wrap_plots(p_list) +
+          patchwork::plot_annotation(
+            title = 'Leave-One-Out (LOO) Cross Validation',
+            caption = if ( style== 1) {
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
                NRMSE = Normalized Root Median Squared Error
                CI = Credible Interval'
-            } else {
-              'Oi = Output i of the DGP emulator
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Median Squared Error
                CI = Credible Interval'
-            }
-          } else {
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
-               NRMSE = Normalized Root Median Squared Error'
+              }
             } else {
-              'Oi = Output i of the DGP emulator
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Median Squared Error'
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Median Squared Error'
+              }
             }
-          }
-        ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+          ) +
+          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      }
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -222,78 +260,146 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
   } else if (!is.null(x_test) & !is.null(y_test)) {
     if ( isTRUE(verb) ) message("Post-processing OOS results ...", appendLF = FALSE)
     oos_res <- results$oos
+    if ( "label" %in% names(oos_res) ){
+      is.categorical <- TRUE
+    } else {
+      is.categorical <- FALSE
+    }
     p_list <- list()
     if ( style==1 ){
-      # If input is 1d
-      if ( ncol(oos_res$x_test)==1 ){
-        if ( "mean" %in% names(oos_res) ){
-          method <- "mean_var"
-        } else if ( "median" %in% names(oos_res) ){
-          method <- "sampling"
-        }
-        # Extract training data points
-        x_train <- results$constructor_obj$X[,1]
-        y_train <- results$constructor_obj$Y
-        rep <- results$constructor_obj$indices
-        if ( !is.null(rep) ){
-          rep <- rep + 1
-          x_train <- x_train[rep]
-        }
-        # create a range for predictions
-        x_min <- min(min(oos_res$x_test[,1]),min(x_train))
-        x_max <- max(max(oos_res$x_test[,1]),max(x_train))
-        x_range <- as.matrix(seq(x_min, x_max, length=500))
-        if ( identical(cores,as.integer(1)) ){
-          res <- results$emulator_obj$predict(x_range, method = method, m = M)
-        } else {
-          res <- results$emulator_obj$ppredict(x_range, method = method, m = M, core_num = cores)
-        }
-        if ( method=='sampling' ) {
-          res_np <- pkg.env$np$array(res)
-          quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
-        }
-
-        for (l in 1:ncol(oos_res$y_test) ) {
-          dat <- list()
-          dat[["x_test"]] <- oos_res$x_test[,1]
-          dat[["y_test"]] <- oos_res$y_test[,l]
-          dat_train <- list('x_train' = x_train,'y_train' = y_train[,l])
-          dat_range <- list()
-          dat_range[["range"]] <- x_range[,1]
-          if ( method == 'mean_var' ){
-            dat_range[["mean"]] <- res[[1]][,l]
-            std <- sqrt(res[[2]][,l])
-            dat_range[["lower"]] <- dat_range$mean-2*std
-            dat_range[["upper"]] <- dat_range$mean+2*std
-          } else if ( method == 'sampling' ){
-            dat_range[["median"]] <- quant[2,,l]
-            dat_range[["lower"]] <- quant[1,,l]
-            dat_range[["upper"]] <- quant[3,,l]
-          }
-          if ( min_max ) {
-            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
-              ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
-              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
-          } else {
-            p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
-              ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
-              ggplot2::theme(plot.title = ggplot2::element_text(size=10))
-          }
-        }
-        # If input is at least 2d
-      } else {
-        if ( is.null(dim) ){
-          rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
-          rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
-          idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+      if (is.categorical){
+        if ( ncol(oos_res$x_test)==1 ){
+          idx <- oos_res$x_test[,1]
           isdup <- TRUE
+          if (!is.null(dim)) dim <- 1
         } else {
-          idx <- oos_res$x_test[,dim]
-          isdup <- FALSE
+          if ( is.null(dim) ){
+            rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
+            rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
+            idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+            isdup <- TRUE
+          } else {
+            idx <- oos_res$x_test[,dim]
+            isdup <- FALSE
+          }
         }
+        samples_df <- as.data.frame(oos_res$label)
+        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
+        dat <- cbind(data.frame(idx = idx, y_validate = oos_res$y_test[,1]), samples_df)
+        p_list[[1]] <- plot_style_1_classify(dat, dim, isdup) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f", oos_res$log_loss)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
+        # If input is 1d
+        if ( ncol(oos_res$x_test)==1 ){
+          if ( "mean" %in% names(oos_res) ){
+            method <- "mean_var"
+          } else if ( "median" %in% names(oos_res) ){
+            method <- "sampling"
+          }
+          if (!is.null(dim)) dim <- 1
+          # Extract training data points
+          x_train <- results$constructor_obj$X[,1]
+          y_train <- results$constructor_obj$Y
+          rep <- results$constructor_obj$indices
+          if ( !is.null(rep) ){
+            rep <- rep + 1
+            x_train <- x_train[rep]
+          }
+          # create a range for predictions
+          x_min <- min(min(oos_res$x_test[,1]),min(x_train))
+          x_max <- max(max(oos_res$x_test[,1]),max(x_train))
+          x_range <- as.matrix(seq(x_min, x_max, length=500))
+          if ( identical(cores,as.integer(1)) ){
+            res <- results$emulator_obj$predict(x_range, method = method, m = M)
+          } else {
+            res <- results$emulator_obj$ppredict(x_range, method = method, m = M, core_num = cores)
+          }
+          if ( method=='sampling' ) {
+            res_np <- pkg.env$np$array(res)
+            quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
+          }
+
+          for (l in 1:ncol(oos_res$y_test) ) {
+            dat <- list()
+            dat[["x_test"]] <- oos_res$x_test[,1]
+            dat[["y_test"]] <- oos_res$y_test[,l]
+            dat_train <- list('x_train' = x_train,'y_train' = y_train[,l])
+            dat_range <- list()
+            dat_range[["range"]] <- x_range[,1]
+            if ( method == 'mean_var' ){
+              dat_range[["mean"]] <- res[[1]][,l]
+              std <- sqrt(res[[2]][,l])
+              dat_range[["lower"]] <- dat_range$mean-2*std
+              dat_range[["upper"]] <- dat_range$mean+2*std
+            } else if ( method == 'sampling' ){
+              dat_range[["median"]] <- quant[2,,l]
+              dat_range[["lower"]] <- quant[1,,l]
+              dat_range[["upper"]] <- quant[3,,l]
+            }
+            if ( min_max ) {
+              p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
+                ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
+                ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+            } else {
+              p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
+                ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
+                ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+            }
+          }
+          # If input is at least 2d
+        } else {
+          if ( is.null(dim) ){
+            rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
+            rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
+            idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+            isdup <- TRUE
+          } else {
+            idx <- oos_res$x_test[,dim]
+            isdup <- FALSE
+          }
+          for (l in 1:ncol(oos_res$y_test) ) {
+            dat <- list()
+            dat[["idx"]] <- idx
+            # extract mean or median
+            if ( "mean" %in% names(oos_res) ){
+              dat[["mean"]] <- oos_res$mean[,l]
+              method <- "mean_var"
+            } else if ( "median" %in% names(oos_res) ){
+              dat[["median"]] <- oos_res$median[,l]
+              method <- "sampling"
+            }
+            # extract other attributes
+            dat[["lower"]] <- oos_res$lower[,l]
+            dat[["upper"]] <- oos_res$upper[,l]
+            dat[["y_validate"]] <- oos_res$y_test[,l]
+            dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
+            if ( min_max ) {
+              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+                ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
+                ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+            } else {
+              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+                ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
+                ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+            }
+          }
+        }
+      }
+    } else if ( style==2 ) {
+      if (is.categorical){
+        rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
+        rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
+        idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
+        samples_df <- as.data.frame(oos_res$label)
+        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
+        dat <- cbind(data.frame(idx = idx, y_validate = oos_res$y_test[,1]), samples_df)
+        p_list[[1]] <- plot_style_2_classify(dat, color, normalize) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f", oos_res$log_loss)) +
+          ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      } else {
         for (l in 1:ncol(oos_res$y_test) ) {
           dat <- list()
-          dat[["idx"]] <- idx
           # extract mean or median
           if ( "mean" %in% names(oos_res) ){
             dat[["mean"]] <- oos_res$mean[,l]
@@ -302,43 +408,17 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
             dat[["median"]] <- oos_res$median[,l]
             method <- "sampling"
           }
-          # extract other attributes
-          dat[["lower"]] <- oos_res$lower[,l]
-          dat[["upper"]] <- oos_res$upper[,l]
           dat[["y_validate"]] <- oos_res$y_test[,l]
-          dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
+          dat[["std"]] <- oos_res$std[,l]
           if ( min_max ) {
-            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
               ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
               ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
-        }
-      }
-    } else if ( style==2 ) {
-      for (l in 1:ncol(oos_res$y_test) ) {
-        dat <- list()
-        # extract mean or median
-        if ( "mean" %in% names(oos_res) ){
-          dat[["mean"]] <- oos_res$mean[,l]
-          method <- "mean_var"
-        } else if ( "median" %in% names(oos_res) ){
-          dat[["median"]] <- oos_res$median[,l]
-          method <- "sampling"
-        }
-        dat[["y_validate"]] <- oos_res$y_test[,l]
-        dat[["std"]] <- oos_res$std[,l]
-        if ( min_max ) {
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
-            ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
-        } else {
-          p_list[[l]] <- plot_style_2(as.data.frame(dat), method, min_max, color) +
-            ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
-            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
       }
     }
@@ -346,57 +426,66 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
-    if ( method == "mean_var" ){
+    if (is.categorical){
       p_patch <- patchwork::wrap_plots(p_list) +
         patchwork::plot_annotation(
-          title = 'Out-Of-Sample (OOS) Validation',
-          caption = if ( style==1 ){
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
+          title = 'Out-Of-Sample (OOS) Cross Validation'
+        ) +
+        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+    } else {
+      if ( method == "mean_var" ){
+        p_patch <- patchwork::wrap_plots(p_list) +
+          patchwork::plot_annotation(
+            title = 'Out-Of-Sample (OOS) Validation',
+            caption = if ( style==1 ){
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
                NRMSE = Normalized Root Mean Squared Error
                CI = Credible Interval'
-            } else {
-              'Oi = Output i of the DGP emulator
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Mean Squared Error
                CI = Credible Interval'
-            }
-          } else {
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
-               NRMSE = Normalized Root Mean Squared Error'
+              }
             } else {
-              'Oi = Output i of the DGP emulator
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Mean Squared Error'
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Mean Squared Error'
+              }
             }
-          }
-        ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
-    } else if ( method == "sampling" ){
-      p_patch <- patchwork::wrap_plots(p_list) +
-        patchwork::plot_annotation(
-          title = 'Out-Of-Sample (OOS) Validation',
-          caption = if ( style==1 ){
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
+          ) +
+          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      } else if ( method == "sampling" ){
+        p_patch <- patchwork::wrap_plots(p_list) +
+          patchwork::plot_annotation(
+            title = 'Out-Of-Sample (OOS) Validation',
+            caption = if ( style==1 ){
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
                NRMSE = Normalized Root Median Squared Error
                CI = Credible Interval'
-            } else {
-              'Oi = Output i of the DGP emulator
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Median Squared Error
                CI = Credible Interval'
-            }
-          } else {
-            if ( min_max ) {
-              'Oi = Output i of the DGP emulator
-               NRMSE = Normalized Root Median Squared Error'
+              }
             } else {
-              'Oi = Output i of the DGP emulator
+              if ( min_max ) {
+                'Oi = Output i of the DGP emulator
+               NRMSE = Normalized Root Median Squared Error'
+              } else {
+                'Oi = Output i of the DGP emulator
                RMSE = Root Median Squared Error'
+              }
             }
-          }
-        ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+          ) +
+          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      }
     }
+
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
     p_patch
@@ -406,7 +495,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', M = 50, verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, sample_size = 50, style = 1, min_max = TRUE, color = 'turbo', type = 'points', M = 50, verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -417,9 +506,9 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
-  M <- as.integer(M)
-  if ( isTRUE(verb) ) message("Initializing ...", appendLF = FALSE)
-  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, M = M, force = force, cores = cores)
+
+  if ( isTRUE(verb) ) message("Validating and computing ...", appendLF = FALSE)
+  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, sample_size = sample_size, verb = FALSE, M = M, force = force, cores = cores)
   if ( isTRUE(verb) ) message(" done")
 
   if ( isTRUE(verb) ) message("Post-processing OOS results ...", appendLF = FALSE)
@@ -464,7 +553,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
       } else if ( "median" %in% names(oos_res) ){
         method <- "sampling"
       }
-
+      if (!is.null(dim)) dim <- 1
       # extract training input for range construction
       if ( results$emulator_obj$all_layer[[1]][[1]]$type == 'gp' ){
         x_train <- results$emulator_obj$all_layer[[1]][[1]]$structure$input[,1]
@@ -674,7 +763,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_var', style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, sample_size = 50, style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -685,10 +774,9 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
     cores <- as.integer(cores)
     if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
   }
-  M <- as.integer(M)
 
-  if ( isTRUE(verb) ) message("Initializing ...", appendLF = FALSE)
-  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, verb = FALSE, M = M, force = force, cores = cores)
+  if ( isTRUE(verb) ) message("Validating and computing ...", appendLF = FALSE)
+  results <- validate(object = x, x_test = x_test, y_test = y_test, method = method, sample_size = sample_size, verb = FALSE, M = M, force = force, cores = cores)
   if ( isTRUE(verb) ) message(" done")
 
   dat <- list()
@@ -701,6 +789,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
       if ( ncol(loo_res$x_train)==1 ){
         dat[["idx"]] <- loo_res$x_train[,1]
         isdup <- TRUE
+        if (!is.null(dim)) dim <- 1
       } else {
         if ( is.null(dim) ){
           rep1 <- pkg.env$np$unique(loo_res$x_train, return_index=TRUE, axis=0L)
@@ -813,6 +902,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
     if ( style==1 ){
       # If input is 1d
       if ( ncol(oos_res$x_test)==1 ){
+        if (!is.null(dim)) dim <- 1
         dat[["x_test"]] <- oos_res$x_test[,1]
         dat[["y_test"]] <- oos_res$y_test[,1]
         # extract training data points
@@ -963,6 +1053,160 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = 'mean_
   }
 }
 
+plot_style_1_classify <- function(dat, dim, isdup) {
+  # Handle duplication logic
+  if (isTRUE(isdup)) {
+    dup <- duplicated(dat$idx)
+  } else {
+    dup <- as.logical(rep(0, length(dat$idx)))
+  }
+
+  # Set x-axis label based on dim input
+  if (is.null(dim)) {
+    x_lab <- "Input position"
+  } else {
+    x_lab <- sprintf("Input dimension %i", dim)
+  }
+
+  # Reshape the dataframe to long format (excluding duplicates)
+  df_long <- reshape2::melt(dat[!dup, ], id.vars = c("idx", "y_validate"),
+                            variable.name = "sample",
+                            value.name = "predicted_value")
+
+  if (is.character(dat$y_validate)) {
+    dat$y_validate <- as.factor(dat$y_validate)
+  }
+
+  if (is.character(df_long$predicted_value)) {
+    df_long$predicted_value <- as.factor(df_long$predicted_value)
+  }
+
+  prop_df <- dplyr::group_by(df_long, .data$idx, .data$predicted_value)
+  prop_df <- dplyr::summarize(prop_df, count = dplyr::n(), .groups = 'drop')
+  prop_df <- dplyr::group_by(prop_df, .data$idx)
+  prop_df <- dplyr::mutate(prop_df, proportion = .data$count / sum(.data$count))
+  prop_df <- dplyr::ungroup(prop_df)
+
+  # Create the ggplot
+  ggplot2::ggplot() +
+
+    # Plot predicted value proportions from prop_df
+    ggplot2::geom_tile(data = prop_df,
+                       ggplot2::aes(x = .data$idx, y = .data$predicted_value, fill = .data$proportion),
+                       height = 0.1,
+                       alpha = 0.95) +   # Keep the height fixed
+
+    #ggplot2::geom_point(data = prop_df,
+    #                    ggplot2::aes(x = .data$idx, y = .data$predicted_value, color = .data$proportion), size = 2.5,
+    #                    shape = 15, alpha = 0.85) +
+
+    # Use a gradient color scale for proportions (continuous)
+    ggplot2::scale_fill_viridis_c("Predicted Label Proportion", option = 'G',
+                                   direction = -1,
+                                   breaks=seq(0,1,0.2),
+                                   labels=c('0.0','0.2','0.4','0.6','0.8','1.0'),
+                                   limits = c(0, 1)) +
+
+    # Plot true values (y_validate) from the original dataset 'dat'
+    ggplot2::geom_point(data = dat,
+                        ggplot2::aes(x = .data$idx, y = .data$y_validate, shape = "True labels"),
+                        color = "#FFD700", size = 1.1) +
+
+    # Use manual shape scale to differentiate true labels
+    ggplot2::scale_shape_manual(values = c("True labels" = 16), name = "True Labels") +
+
+    # Labels, axis, and theme settings
+    ggplot2::labs(x = x_lab, y = "Model output") +
+
+    ggplot2::theme(
+      legend.position = "bottom",
+      legend.key.width = ggplot2::unit(1, "cm"),
+      legend.text = ggplot2::element_text(size = 7),
+      legend.title = ggplot2::element_text(size = 7, hjust = 0.5)
+    ) +
+
+    # Use guides() for color and shape, hide the item text for True Labels
+    ggplot2::guides(
+      fill = ggplot2::guide_colorbar(title.position = "top"),
+      shape = ggplot2::guide_legend(override.aes = list(size = 3),
+                                    title.position = "top",
+                                    title = "True Labels",
+                                    label = FALSE)  # Hide the item label
+    )
+}
+
+plot_style_2_classify <- function(dat, color, normalize) {
+  df_long <- reshape2::melt(dat, id.vars = c("idx", "y_validate"), variable.name = "sample", value.name = "predicted_value")
+
+  # Group by idx to collect true labels and predicted values
+  df_grouped <-
+    dplyr::summarize(dplyr::group_by(df_long, .data$idx),
+                     true_labels = list(unique(.data$y_validate)),          # Collect all true labels for each idx
+                     predicted_values = list(.data$predicted_value) # Collect all predicted values for each idx
+    )
+
+  # Unnest the predicted values and compare each predicted value to the true labels
+  df_expanded <-
+    dplyr::mutate(dplyr::rowwise(tidyr::unnest(df_grouped, "predicted_values")), match = ifelse(.data$predicted_values %in% unlist(.data$true_labels), "Match", "No Match"))  # Compare each predicted value
+
+  # Unnest the true labels so that we can attribute mismatches to all true labels of the idx
+  df_confusion <-
+    dplyr::mutate(tidyr::unnest(df_expanded, "true_labels"), final_label = ifelse(match == "No Match", .data$true_labels, .data$predicted_values))  # Mismatches contribute to all true labels
+
+  # Filter out rows where match is marked as "Match" but true and predicted values are not identical
+  df_confusion_filtered <-
+    dplyr::filter( df_confusion, !(.data$match == "Match" & .data$predicted_values != .data$true_labels))
+
+  # Create confusion matrix by counting how often each predicted value contributes to each true label
+  conf_matrix <-
+    dplyr::count(df_confusion_filtered, .data$true_labels, .data$predicted_values)
+
+  # Get all unique true labels and predicted values to ensure zero-counts are included
+  all_combinations <- expand.grid(
+    true_labels = unique(df_confusion_filtered$true_labels),
+    predicted_values = unique(df_confusion_filtered$predicted_values)
+  )
+
+  # Merge the actual confusion matrix with all possible combinations to include zero counts
+  conf_matrix_complete <-
+    tidyr::replace_na(dplyr::left_join(all_combinations, conf_matrix, by = c("true_labels", "predicted_values")), list(n = 0))  # Replace NA with 0 for missing counts
+
+  if (normalize){
+    conf_matrix_complete$n <- conf_matrix_complete$n / sum(conf_matrix_complete$n)
+  }
+  # Plot the confusion matrix using ggplot2
+  p <- ggplot2::ggplot(conf_matrix_complete, ggplot2::aes_(x =~predicted_values, y =~true_labels, fill =~n)) +
+    ggplot2::geom_tile(color = "black") +  # Add black border to each tile
+    ggplot2::geom_text(ggplot2::aes_(
+      label = ifelse(conf_matrix_complete$n %% 1 == 0,  # Check if the value is an integer
+                     as.character(conf_matrix_complete$n),  # If integer, show as is
+                     sprintf("%.2f", conf_matrix_complete$n)  # Otherwise, format to 2 decimal places
+      )
+    ), color = "white", show.legend = FALSE)+  # Add count labels
+    ggplot2::labs(x = "Predicted label", y = "True label")
+
+  if (normalize){
+    p <- p + ggplot2::scale_fill_viridis_c("Normalized Count", option = color, breaks=seq(0,1,0.2), labels=c('0.0','0.2','0.4','0.6','0.8','1.0'), limits = c(0, 1))
+  } else {
+    p <- p + ggplot2::scale_fill_viridis_c("Count", option = color)
+  }
+
+  p <- p +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 0, vjust = 0.5),  # Rotate x-axis labels for better readability
+      axis.text.y = ggplot2::element_text(angle = 0, hjust = 0.5),  # Keep y-axis labels aligned
+      axis.ticks = ggplot2::element_line(color = "black"),  # Add ticks to boundaries of cells
+      panel.grid = ggplot2::element_blank(),
+      legend.position = "bottom",
+      legend.key.width = ggplot2::unit(1, "cm"),
+      legend.text = ggplot2::element_text(size = 7),
+      legend.title = ggplot2::element_text(size = 7),
+      legend.title.align=0.5
+    ) +
+    ggplot2::guides(fill = ggplot2::guide_colourbar(title.position="top"))
+
+  return(p)
+}
 
 plot_style_1 <- function(dat, method, dim, isdup) {
   if ( isTRUE(isdup) ){
