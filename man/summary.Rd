@@ -29,6 +29,8 @@ This visualization is compatible with R Markdown documents and the RStudio Viewe
 The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}}.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
 by generating an interactive visualization of the emulator’s structure.
 }

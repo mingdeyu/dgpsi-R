@@ -560,7 +560,11 @@ read <- function(pkl_file) {
 
 #' @title Visual summary of a constructed GP, DGP, or linked (D)GP emulator
 #'
-#' @description This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
 #' by generating an interactive visualization of the emulator’s structure.
 #'
 #' @param object can be one of the following:
