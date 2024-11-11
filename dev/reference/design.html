@@ -321,8 +321,10 @@ was constructed under the Vecchia approximation. Defaults to <code>50</code>.</p
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>any arguments (with names different from those of arguments used in <code>design()</code>) that are used by <code>f</code>, <code>method</code>, and <code>eval</code>
-can be passed here. <code>design()</code> will pass relevant arguments to <code>f</code>, <code>method</code>, and <code>eval</code> based on the names of additional arguments provided.</p></dd>
+<dd><p>Any arguments with names that differ from those used in <code>design()</code> but are required by <code>f</code>, <code>method</code>, or <code>eval</code> can be passed here.
+<code>design()</code> will forward relevant arguments to <code>f</code>, <code>method</code>, and <code>eval</code> based on the names of the additional arguments provided.</p>
+<p>If you are using package-provided methods such as <code><a href="vigf.html">vigf()</a></code>, <code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, or <code><a href="pei.html">pei()</a></code> for <code>method</code>, you can pass <code>batch_size</code> to <code>design()</code>
+to select multiple design points at each iteration. For other arguments that control the behavior of these four methods, please refer to their documentation.</p></dd>
 
 
 <dt id="arg-train-n">train_N<a class="anchor" aria-label="anchor" href="#arg-train-n"></a></dt>
