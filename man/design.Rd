@@ -261,8 +261,11 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 \item{cores}{an integer that gives the number of processes to be used for emulator validations. If set to \code{NULL}, the number of processes is set to
 \verb{max physical cores available \%/\% 2}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
 
-\item{...}{any arguments (with names different from those of arguments used in \code{\link[=design]{design()}}) that are used by \code{f}, \code{method}, and \code{eval}
-can be passed here. \code{\link[=design]{design()}} will pass relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of additional arguments provided.}
+\item{...}{Any arguments with names that differ from those used in \code{\link[=design]{design()}} but are required by \code{f}, \code{method}, or \code{eval} can be passed here.
+\code{\link[=design]{design()}} will forward relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of the additional arguments provided.
+
+If you are using package-provided methods such as \code{\link[=vigf]{vigf()}}, \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, or \code{\link[=pei]{pei()}} for \code{method}, you can pass \code{batch_size} to \code{design()}
+to select multiple design points at each iteration. For other arguments that control the behavior of these four methods, please refer to their documentation.}
 
 \item{train_N}{the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:
 \itemize{

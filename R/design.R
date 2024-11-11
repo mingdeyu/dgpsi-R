@@ -126,8 +126,11 @@
 #'   the DGP structure. Defaults to `3`.
 #'
 #' The argument is only used when `pruning = TRUE`.
-#' @param ... any arguments (with names different from those of arguments used in [design()]) that are used by `f`, `method`, and `eval`
-#'     can be passed here. [design()] will pass relevant arguments to `f`, `method`, and `eval` based on the names of additional arguments provided.
+#' @param ... Any arguments with names that differ from those used in [design()] but are required by `f`, `method`, or `eval` can be passed here.
+#'     [design()] will forward relevant arguments to `f`, `method`, and `eval` based on the names of the additional arguments provided.
+#'
+#' If you are using package-provided methods such as [vigf()], [alm()], [mice()], or [pei()] for `method`, you can pass `batch_size` to `design()`
+#' to select multiple design points at each iteration. For other arguments that control the behavior of these four methods, please refer to their documentation.
 #'
 #' @return
 #' An updated `object` is returned with a slot called `design` that contains:
