@@ -35,7 +35,7 @@ We now load the iris data set,
 data(iris)
 ```
 
-do a min-max normalization on its four input variables.
+and do a min-max normalization on its four input variables.
 
 ```{r}
 iris <- iris %>%

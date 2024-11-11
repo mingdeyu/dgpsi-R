@@ -142,7 +142,7 @@ Plotting ... done
 We now construct a three-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 3:
 
 ```{r}
-m3 <- dgp( X3, Y3, depth = 3, name = "matern2.5", id = "gp3" )
+m3 <- dgp(X3, Y3, depth = 3, name = "matern2.5", id = "gp3" )
 ```
 
 ```         

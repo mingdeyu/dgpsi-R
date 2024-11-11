@@ -74,7 +74,7 @@ summary(m)
 
 <iframe src="https://mingdeyu.github.io/dgpsi-R/dgpsi_summary.html" width="100%" height="400" style="border: none;"></iframe>
 
-The summary table gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating a deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
+The visualization also gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating a deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
 
 At this point, you could use `write()` to save the emulator `m` to a local file and then load it using `read()` when you would like to make predictions from the emulator, e.g., on another laptop that also has the package installed.
 
