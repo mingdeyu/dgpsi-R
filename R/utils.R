@@ -616,19 +616,19 @@ summary.gp <- function(object, type = "plot", ...) {
       "rgba(255, 233, 100, 1)",   # lighter gold1
       "rgba(180, 225, 245, 1)",   # lighter skyblue2
       "rgba(255, 190, 190, 1)",   # lighter #FB9A99
-      "rgba(180, 255, 180, 1)",   # lighter palegreen2
+      #"rgba(180, 255, 180, 1)",   # lighter palegreen2
       "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
       "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
-      "rgba(245, 240, 190, 1)",   # lighter khaki2
+      #"rgba(245, 240, 190, 1)",   # lighter khaki2
       "rgba(160, 60, 60, 1)",     # lighter maroon
       "rgba(240, 150, 240, 1)",   # lighter orchid1
       "rgba(255, 130, 185, 1)",   # lighter deeppink1
       "rgba(100, 100, 255, 1)",   # lighter blue1
       "rgba(120, 150, 180, 1)",   # lighter steelblue4
       "rgba(100, 230, 230, 1)",   # lighter darkturquoise
-      "rgba(170, 255, 170, 1)",   # lighter green1
+      #"rgba(170, 255, 170, 1)",   # lighter green1
       "rgba(200, 200, 100, 1)",   # lighter yellow4
-      "rgba(255, 255, 150, 1)",   # lighter yellow3
+      #"rgba(255, 255, 150, 1)",   # lighter yellow3
       "rgba(210, 130, 100, 1)",   # lighter darkorange4
       "rgba(200, 110, 110, 1)"    # lighter brown
     )
@@ -643,19 +643,19 @@ summary.gp <- function(object, type = "plot", ...) {
       "rgba(255, 215, 0, 1)",     # gold1
       "rgba(135, 206, 235, 1)",   # skyblue2
       "rgba(251, 154, 153, 1)",   # #FB9A99
-      "rgba(144, 238, 144, 1)",   # palegreen2
+      #"rgba(144, 238, 144, 1)",   # palegreen2
       "rgba(202, 178, 214, 1)",   # #CAB2D6
       "rgba(253, 191, 111, 1)",   # #FDBF6F
-      "rgba(240, 230, 140, 1)",   # khaki2
+      #"rgba(240, 230, 140, 1)",   # khaki2
       "rgba(128, 0, 0, 1)",       # maroon
       "rgba(218, 112, 214, 1)",   # orchid1
       "rgba(255, 20, 147, 1)",    # deeppink1
       "rgba(0, 0, 255, 1)",       # blue1
       "rgba(54, 100, 139, 1)",    # steelblue4
       "rgba(0, 206, 209, 1)",     # darkturquoise
-      "rgba(0, 255, 0, 1)",       # green1
+      #"rgba(0, 255, 0, 1)",       # green1
       "rgba(139, 139, 0, 1)",     # yellow4
-      "rgba(255, 255, 0, 1)",     # yellow3
+      #"rgba(255, 255, 0, 1)",     # yellow3
       "rgba(139, 69, 19, 1)",     # darkorange4
       "rgba(165, 42, 42, 1)"      # brown
     )
@@ -777,19 +777,19 @@ summary.dgp <- function(object, type = "plot", ...) {
       "rgba(255, 233, 100, 1)",   # lighter gold1
       "rgba(180, 225, 245, 1)",   # lighter skyblue2
       "rgba(255, 190, 190, 1)",   # lighter #FB9A99
-      "rgba(180, 255, 180, 1)",   # lighter palegreen2
+      #"rgba(180, 255, 180, 1)",   # lighter palegreen2
       "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
       "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
-      "rgba(245, 240, 190, 1)",   # lighter khaki2
+      #"rgba(245, 240, 190, 1)",   # lighter khaki2
       "rgba(160, 60, 60, 1)",     # lighter maroon
       "rgba(240, 150, 240, 1)",   # lighter orchid1
       "rgba(255, 130, 185, 1)",   # lighter deeppink1
       "rgba(100, 100, 255, 1)",   # lighter blue1
       "rgba(120, 150, 180, 1)",   # lighter steelblue4
       "rgba(100, 230, 230, 1)",   # lighter darkturquoise
-      "rgba(170, 255, 170, 1)",   # lighter green1
+      #"rgba(170, 255, 170, 1)",   # lighter green1
       "rgba(200, 200, 100, 1)",   # lighter yellow4
-      "rgba(255, 255, 150, 1)",   # lighter yellow3
+      #"rgba(255, 255, 150, 1)",   # lighter yellow3
       "rgba(210, 130, 100, 1)",   # lighter darkorange4
       "rgba(200, 110, 110, 1)"    # lighter brown
     )
@@ -804,19 +804,19 @@ summary.dgp <- function(object, type = "plot", ...) {
       "rgba(255, 215, 0, 1)",     # gold1
       "rgba(135, 206, 235, 1)",   # skyblue2
       "rgba(251, 154, 153, 1)",   # #FB9A99
-      "rgba(144, 238, 144, 1)",   # palegreen2
+      #"rgba(144, 238, 144, 1)",   # palegreen2
       "rgba(202, 178, 214, 1)",   # #CAB2D6
       "rgba(253, 191, 111, 1)",   # #FDBF6F
-      "rgba(240, 230, 140, 1)",   # khaki2
+      #"rgba(240, 230, 140, 1)",   # khaki2
       "rgba(128, 0, 0, 1)",       # maroon
       "rgba(218, 112, 214, 1)",   # orchid1
       "rgba(255, 20, 147, 1)",    # deeppink1
       "rgba(0, 0, 255, 1)",       # blue1
       "rgba(54, 100, 139, 1)",    # steelblue4
       "rgba(0, 206, 209, 1)",     # darkturquoise
-      "rgba(0, 255, 0, 1)",       # green1
+      #"rgba(0, 255, 0, 1)",       # green1
       "rgba(139, 139, 0, 1)",     # yellow4
-      "rgba(255, 255, 0, 1)",     # yellow3
+      #"rgba(255, 255, 0, 1)",     # yellow3
       "rgba(139, 69, 19, 1)",     # darkorange4
       "rgba(165, 42, 42, 1)"      # brown
     )
@@ -864,27 +864,27 @@ summary.dgp <- function(object, type = "plot", ...) {
           title = if (is.null(node_id[["type"]])){
             paste0(
               "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; white-space: normal; max-width: 200px;'>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Node Type:</b> ", "GP", "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", total_input_dim, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Kernel Type:</b> ", ifelse(node_id$kernel=='sexp', "Squared Exp", "Mat&eacute;rn-2.5"), "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Length-scales:</b> ", formatted_lengthscales, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Scale (Prior Variance):</b> ",format(node_id$scale, digits = 3, nsmall = 3), "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Nugget:</b> ", format(node_id$nugget, digits = 3, nsmall = 3, scientific = TRUE), "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Position in Layer:</b> ", j, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Node Type:</b> ", "GP", "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Input Dim(s):</b> ", total_input_dim, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Kernel Type:</b> ", ifelse(node_id$kernel=='sexp', "Squared Exp", "Mat&eacute;rn-2.5"), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Length-scales:</b> ", formatted_lengthscales, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Scale (Prior Variance):</b> ",format(node_id$scale, digits = 3, nsmall = 3), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Nugget:</b> ", format(node_id$nugget, digits = 3, nsmall = 3, scientific = TRUE), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Position in Layer:</b> ", j, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
               "</div>"
             )
           } else {
             paste0(
               "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Node Type:</b> ", node_id$type, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Position in Layer:</b> ", j, "<br>",
-              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Node Type:</b> ", node_id$type, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Input Dim(s):</b> ", length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Position in Layer:</b> ", j, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% length(c24_rgba[-1]) + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
               "</div>"
             )
           },
@@ -1042,19 +1042,19 @@ summary.lgp <- function(object, type = "plot", ...) {
         "rgba(255, 233, 100, 1)",   # lighter gold1
         "rgba(180, 225, 245, 1)",   # lighter skyblue2
         "rgba(255, 190, 190, 1)",   # lighter #FB9A99
-        "rgba(180, 255, 180, 1)",   # lighter palegreen2
+        #"rgba(180, 255, 180, 1)",   # lighter palegreen2
         "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
         "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
-        "rgba(245, 240, 190, 1)",   # lighter khaki2
+        #"rgba(245, 240, 190, 1)",   # lighter khaki2
         "rgba(160, 60, 60, 1)",     # lighter maroon
         "rgba(240, 150, 240, 1)",   # lighter orchid1
         "rgba(255, 130, 185, 1)",   # lighter deeppink1
         "rgba(100, 100, 255, 1)",   # lighter blue1
         "rgba(120, 150, 180, 1)",   # lighter steelblue4
         "rgba(100, 230, 230, 1)",   # lighter darkturquoise
-        "rgba(170, 255, 170, 1)",   # lighter green1
+        #"rgba(170, 255, 170, 1)",   # lighter green1
         "rgba(200, 200, 100, 1)",   # lighter yellow4
-        "rgba(255, 255, 150, 1)",   # lighter yellow3
+        #"rgba(255, 255, 150, 1)",   # lighter yellow3
         "rgba(210, 130, 100, 1)",   # lighter darkorange4
         "rgba(200, 110, 110, 1)"    # lighter brown
       )
@@ -1069,19 +1069,19 @@ summary.lgp <- function(object, type = "plot", ...) {
         "rgba(255, 215, 0, 1)",     # gold1
         "rgba(135, 206, 235, 1)",   # skyblue2
         "rgba(251, 154, 153, 1)",   # #FB9A99
-        "rgba(144, 238, 144, 1)",   # palegreen2
+        #"rgba(144, 238, 144, 1)",   # palegreen2
         "rgba(202, 178, 214, 1)",   # #CAB2D6
         "rgba(253, 191, 111, 1)",   # #FDBF6F
-        "rgba(240, 230, 140, 1)",   # khaki2
+        #"rgba(240, 230, 140, 1)",   # khaki2
         "rgba(128, 0, 0, 1)",       # maroon
         "rgba(218, 112, 214, 1)",   # orchid1
         "rgba(255, 20, 147, 1)",    # deeppink1
         "rgba(0, 0, 255, 1)",       # blue1
         "rgba(54, 100, 139, 1)",    # steelblue4
         "rgba(0, 206, 209, 1)",     # darkturquoise
-        "rgba(0, 255, 0, 1)",       # green1
+        #"rgba(0, 255, 0, 1)",       # green1
         "rgba(139, 139, 0, 1)",     # yellow4
-        "rgba(255, 255, 0, 1)",     # yellow3
+        #"rgba(255, 255, 0, 1)",     # yellow3
         "rgba(139, 69, 19, 1)",     # darkorange4
         "rgba(165, 42, 42, 1)"      # brown
       )
@@ -1119,14 +1119,14 @@ summary.lgp <- function(object, type = "plot", ...) {
         label = toupper(metadata$Type), # Leave the label empty to avoid duplication with the hover title
         title = paste0(
           "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Emulator ID:</b> ", metadata$Emulator, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Emulator Type:</b> ", toupper(metadata$Type), "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", metadata$Total_Input_Dims, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Total Output Dim(s):</b> ", metadata$Total_Output_Dims, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Global Output Indices:</b> ", ifelse(is.na(metadata$Global_Output_Dims), "NA", metadata$Global_Output_Dims), "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Layer in Network:</b> ", metadata$Layer, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Position in Layer:</b> ", metadata$Pos_in_Layer, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(metadata$Vecchia, "ON", "OFF"),
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Emulator ID:</b> ", metadata$Emulator, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Emulator Type:</b> ", toupper(metadata$Type), "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Input Dim(s):</b> ", metadata$Total_Input_Dims, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Output Dim(s):</b> ", metadata$Total_Output_Dims, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Global Output Indices:</b> ", ifelse(is.na(metadata$Global_Output_Dims), "NA", metadata$Global_Output_Dims), "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Layer in Network:</b> ", metadata$Layer, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Position in Layer:</b> ", metadata$Pos_in_Layer, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Vecchia Mode:</b> ", ifelse(metadata$Vecchia, "ON", "OFF"),
           "</div>"
         ),
         level = metadata$Layer,
