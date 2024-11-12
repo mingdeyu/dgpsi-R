@@ -558,23 +558,27 @@ read <- function(pkl_file) {
 }
 
 
-#' @title Visual summary of a constructed GP, DGP, or linked (D)GP emulator
+#' @title Summary of a constructed GP, DGP, or linked (D)GP emulator
 #'
 #' @description
 #'
 #' `r new_badge("updated")`
 #'
 #' This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
-#' by generating an interactive visualization of the emulator’s structure.
+#' by generating either a table or an interactive plot of the emulator’s structure.
 #'
 #' @param object can be one of the following:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `lgp`.
+#' @param type a character string, either `"table"` or `"plot"`, indicating the format of the output.
+#'     If set to `"table"`, the function returns a summary in table. If set to `"plot"`, the function
+#'     returns an interactive visualization. Defaults to `"plot"`. If the `object` was created with
+#'     `lgp()` where `struc` is not a data frame, `type` will automatically default to `"table"`.
 #' @param ... N/A.
 #'
-#' @return An interactive visualization of the emulator as a `visNetwork` object.
-#' This visualization is compatible with R Markdown documents and the RStudio Viewer.
+#' @return Either a table or an interactive visualization of the emulator, returned as a `visNetwork` object.
+#' The visualization is compatible with R Markdown documents and the RStudio Viewer.
 #' The resulting `visNetwork` object can be saved as an HTML file using [visNetwork::visSave()].
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -590,411 +594,424 @@ NULL
 #' @rdname summary
 #' @method summary gp
 #' @export
-summary.gp <- function(object, ...) {
+summary.gp <- function(object, type = "plot", ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
 
-  c24_rgba_lighter <- c(
-    "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
-    "rgba(240, 115, 115, 1)",   # lighter #E31A1C
-    "rgba(102, 180, 102, 1)",   # lighter green4
-    "rgba(161, 115, 186, 1)",   # lighter #6A3D9A
-    "rgba(255, 180, 100, 1)",   # lighter #FF7F00
-    "rgba(128, 128, 128, 1)",   # lighter black
-    "rgba(255, 233, 100, 1)",   # lighter gold1
-    "rgba(180, 225, 245, 1)",   # lighter skyblue2
-    "rgba(255, 190, 190, 1)",   # lighter #FB9A99
-    "rgba(180, 255, 180, 1)",   # lighter palegreen2
-    "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
-    "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
-    "rgba(245, 240, 190, 1)",   # lighter khaki2
-    "rgba(160, 60, 60, 1)",     # lighter maroon
-    "rgba(240, 150, 240, 1)",   # lighter orchid1
-    "rgba(255, 130, 185, 1)",   # lighter deeppink1
-    "rgba(100, 100, 255, 1)",   # lighter blue1
-    "rgba(120, 150, 180, 1)",   # lighter steelblue4
-    "rgba(100, 230, 230, 1)",   # lighter darkturquoise
-    "rgba(170, 255, 170, 1)",   # lighter green1
-    "rgba(200, 200, 100, 1)",   # lighter yellow4
-    "rgba(255, 255, 150, 1)",   # lighter yellow3
-    "rgba(210, 130, 100, 1)",   # lighter darkorange4
-    "rgba(200, 110, 110, 1)"    # lighter brown
-  )
+  if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
-  c24_rgba <- c(
-    "rgba(30, 144, 255, 1)",    # dodgerblue2
-    "rgba(227, 26, 28, 1)",     # #E31A1C
-    "rgba(0, 139, 0, 1)",       # green4
-    "rgba(106, 61, 154, 1)",    # #6A3D9A
-    "rgba(255, 127, 0, 1)",     # #FF7F00
-    "rgba(0, 0, 0, 1)",         # black
-    "rgba(255, 215, 0, 1)",     # gold1
-    "rgba(135, 206, 235, 1)",   # skyblue2
-    "rgba(251, 154, 153, 1)",   # #FB9A99
-    "rgba(144, 238, 144, 1)",   # palegreen2
-    "rgba(202, 178, 214, 1)",   # #CAB2D6
-    "rgba(253, 191, 111, 1)",   # #FDBF6F
-    "rgba(240, 230, 140, 1)",   # khaki2
-    "rgba(128, 0, 0, 1)",       # maroon
-    "rgba(218, 112, 214, 1)",   # orchid1
-    "rgba(255, 20, 147, 1)",    # deeppink1
-    "rgba(0, 0, 255, 1)",       # blue1
-    "rgba(54, 100, 139, 1)",    # steelblue4
-    "rgba(0, 206, 209, 1)",     # darkturquoise
-    "rgba(0, 255, 0, 1)",       # green1
-    "rgba(139, 139, 0, 1)",     # yellow4
-    "rgba(255, 255, 0, 1)",     # yellow3
-    "rgba(139, 69, 19, 1)",     # darkorange4
-    "rgba(165, 42, 42, 1)"      # brown
-  )
+  if (type == "table"){
+    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+  } else {
 
-  nodes <- data.frame(
-    id = c("Global", "gp"),
-    label = c("", "GP"),
-    title = c(paste0(
-      "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; text-align: center;'>",
-      "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ", "<br>",
-      "<span style='font-size: 12px; color:", c24_rgba[1] ,";'>Total Dim(s):</span> ", ncol(object$data$X),
-      "</div>"
-    ),
-    paste0(
-      "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; white-space: normal; max-width: 200px;'>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Total Input Dim(s):</b> ", length(object$emulator_obj$kernel$input_dim), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Total Output Dim:</b> ", 1, "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Kernel Type:</b> ", ifelse(object$specs$kernel=='sexp', "Squared Exp", "Mat&eacute;rn-2.5"), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Length-scales:</b> ", paste(format(object$specs$lengthscales, digits = 3, nsmall = 3), collapse = ", "), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Scale (Prior Variance):</b> ",format(object$specs$scale, digits = 3, nsmall = 3), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Nugget:</b> ", format(object$specs$nugget, digits = 3, nsmall = 3, scientific = TRUE), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
-      "</div>"
-    )
-    ),
-    level = c(0, 1),
-    group = c(as.character(0), as.character(1)),
-    stringsAsFactors = FALSE,
-    shape = c('database', "circle")
-  )
-
-  edge <- data.frame(
-    from = "Global",
-    to = "gp",
-    label = "",
-    title = paste0(
-      "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-      "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(object$emulator_obj$kernel$input_dim + 1, collapse=", "), "<br>",
-      "<b style='font-size: 12px;'>To Dim(s):</b> ", paste(1:length(object$emulator_obj$kernel$input_dim), collapse=", "),
-      "</div>"
-    ),
-    arrows = "to",
-    stringsAsFactors = FALSE
-  )
-
-
-  network <- visNetwork::visNetwork(nodes, edge, width = "100%", height = "300px",
-                                    main = "Gaussian Process Emulator",
-                                    submain = "Graphical Summary") %>%
-    visNetwork::visEdges(
-      arrows = list(to = list(enable = T, scaleFactor = 0.5)),
-      color = list(color = "darkgrey", highlight = "black", hover = "black"),
-      selectionWidth = 0.8,
-      hoverWidt = 0.5
+    c24_rgba_lighter <- c(
+      "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
+      "rgba(240, 115, 115, 1)",   # lighter #E31A1C
+      "rgba(102, 180, 102, 1)",   # lighter green4
+      "rgba(161, 115, 186, 1)",   # lighter #6A3D9A
+      "rgba(255, 180, 100, 1)",   # lighter #FF7F00
+      "rgba(128, 128, 128, 1)",   # lighter black
+      "rgba(255, 233, 100, 1)",   # lighter gold1
+      "rgba(180, 225, 245, 1)",   # lighter skyblue2
+      "rgba(255, 190, 190, 1)",   # lighter #FB9A99
+      "rgba(180, 255, 180, 1)",   # lighter palegreen2
+      "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
+      "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
+      "rgba(245, 240, 190, 1)",   # lighter khaki2
+      "rgba(160, 60, 60, 1)",     # lighter maroon
+      "rgba(240, 150, 240, 1)",   # lighter orchid1
+      "rgba(255, 130, 185, 1)",   # lighter deeppink1
+      "rgba(100, 100, 255, 1)",   # lighter blue1
+      "rgba(120, 150, 180, 1)",   # lighter steelblue4
+      "rgba(100, 230, 230, 1)",   # lighter darkturquoise
+      "rgba(170, 255, 170, 1)",   # lighter green1
+      "rgba(200, 200, 100, 1)",   # lighter yellow4
+      "rgba(255, 255, 150, 1)",   # lighter yellow3
+      "rgba(210, 130, 100, 1)",   # lighter darkorange4
+      "rgba(200, 110, 110, 1)"    # lighter brown
     )
 
-  # Apply color for the first layer explicitly if needed
-  network <- network %>%
-    visNetwork::visGroups(
-      groupname = as.character(0),
-      borderWidthSelected = 1.5,
-      color = list(
-        background = c24_rgba_lighter[1],
-        border = c24_rgba[1],
-        hover = list(background = c24_rgba[1], border = c24_rgba_lighter[1]),
-        highlight = list(background = c24_rgba[1], border = c24_rgba_lighter[1])
+    c24_rgba <- c(
+      "rgba(30, 144, 255, 1)",    # dodgerblue2
+      "rgba(227, 26, 28, 1)",     # #E31A1C
+      "rgba(0, 139, 0, 1)",       # green4
+      "rgba(106, 61, 154, 1)",    # #6A3D9A
+      "rgba(255, 127, 0, 1)",     # #FF7F00
+      "rgba(0, 0, 0, 1)",         # black
+      "rgba(255, 215, 0, 1)",     # gold1
+      "rgba(135, 206, 235, 1)",   # skyblue2
+      "rgba(251, 154, 153, 1)",   # #FB9A99
+      "rgba(144, 238, 144, 1)",   # palegreen2
+      "rgba(202, 178, 214, 1)",   # #CAB2D6
+      "rgba(253, 191, 111, 1)",   # #FDBF6F
+      "rgba(240, 230, 140, 1)",   # khaki2
+      "rgba(128, 0, 0, 1)",       # maroon
+      "rgba(218, 112, 214, 1)",   # orchid1
+      "rgba(255, 20, 147, 1)",    # deeppink1
+      "rgba(0, 0, 255, 1)",       # blue1
+      "rgba(54, 100, 139, 1)",    # steelblue4
+      "rgba(0, 206, 209, 1)",     # darkturquoise
+      "rgba(0, 255, 0, 1)",       # green1
+      "rgba(139, 139, 0, 1)",     # yellow4
+      "rgba(255, 255, 0, 1)",     # yellow3
+      "rgba(139, 69, 19, 1)",     # darkorange4
+      "rgba(165, 42, 42, 1)"      # brown
+    )
+
+    nodes <- data.frame(
+      id = c("Global", "gp"),
+      label = c("", "GP"),
+      title = c(paste0(
+        "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; text-align: center;'>",
+        "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ", "<br>",
+        "<span style='font-size: 12px; color:", c24_rgba[1] ,";'>Total Dim(s):</span> ", ncol(object$data$X),
+        "</div>"
+      ),
+      paste0(
+        "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; white-space: normal; max-width: 200px;'>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Total Input Dim(s):</b> ", length(object$emulator_obj$kernel$input_dim), "<br>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Total Output Dim:</b> ", 1, "<br>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Kernel Type:</b> ", ifelse(object$specs$kernel=='sexp', "Squared Exp", "Mat&eacute;rn-2.5"), "<br>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Length-scales:</b> ", paste(format(object$specs$lengthscales, digits = 3, nsmall = 3), collapse = ", "), "<br>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Scale (Prior Variance):</b> ",format(object$specs$scale, digits = 3, nsmall = 3), "<br>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Nugget:</b> ", format(object$specs$nugget, digits = 3, nsmall = 3, scientific = TRUE), "<br>",
+        "<b style='font-size: 12px; color: ", c24_rgba[-1][1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
+        "</div>"
       )
-    ) %>%
-    visNetwork::visGroups(
-      groupname = as.character(1),
-      borderWidthSelected = 3,
-      color = list(
-        background = c24_rgba_lighter[-1][1],
-        border = c24_rgba_lighter[-1][1],
-        hover = list(background = c24_rgba[-1][1], border = c24_rgba[-1][1]),
-        highlight = list(background = c24_rgba[-1][1], border = c24_rgba[-1][1])
-      )
+      ),
+      level = c(0, 1),
+      group = c(as.character(0), as.character(1)),
+      stringsAsFactors = FALSE,
+      shape = c('database', "circle")
+    )
+
+    edge <- data.frame(
+      from = "Global",
+      to = "gp",
+      label = "",
+      title = paste0(
+        "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
+        "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(object$emulator_obj$kernel$input_dim + 1, collapse=", "), "<br>",
+        "<b style='font-size: 12px;'>To Dim(s):</b> ", paste(1:length(object$emulator_obj$kernel$input_dim), collapse=", "),
+        "</div>"
+      ),
+      arrows = "to",
+      stringsAsFactors = FALSE
     )
 
 
-  network %>%
-    visNetwork::visNodes(size=15,
-                         font = list(
-                           size = 14,              # Font size
-                           color = "white",     # Font color
-                           face = "helvetica",
-                           ital = TRUE
-                         )) %>%
-    visNetwork::visOptions(
-      highlightNearest = list(enabled = FALSE),
-      nodesIdSelection = FALSE) %>%
-    visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
-    visNetwork::visHierarchicalLayout(direction = "LR")
+    network <- visNetwork::visNetwork(nodes, edge, width = "100%", height = "300px",
+                                      main = "Gaussian Process Emulator",
+                                      submain = "Graphical Summary") %>%
+      visNetwork::visEdges(
+        arrows = list(to = list(enable = T, scaleFactor = 0.5)),
+        color = list(color = "darkgrey", highlight = "black", hover = "black"),
+        selectionWidth = 0.8,
+        hoverWidt = 0.5
+      )
+
+    # Apply color for the first layer explicitly if needed
+    network <- network %>%
+      visNetwork::visGroups(
+        groupname = as.character(0),
+        borderWidthSelected = 1.5,
+        color = list(
+          background = c24_rgba_lighter[1],
+          border = c24_rgba[1],
+          hover = list(background = c24_rgba[1], border = c24_rgba_lighter[1]),
+          highlight = list(background = c24_rgba[1], border = c24_rgba_lighter[1])
+        )
+      ) %>%
+      visNetwork::visGroups(
+        groupname = as.character(1),
+        borderWidthSelected = 3,
+        color = list(
+          background = c24_rgba_lighter[-1][1],
+          border = c24_rgba_lighter[-1][1],
+          hover = list(background = c24_rgba[-1][1], border = c24_rgba[-1][1]),
+          highlight = list(background = c24_rgba[-1][1], border = c24_rgba[-1][1])
+        )
+      )
+
+
+    network %>%
+      visNetwork::visNodes(size=15,
+                           font = list(
+                             size = 14,              # Font size
+                             color = "white",     # Font color
+                             face = "helvetica",
+                             ital = TRUE
+                           )) %>%
+      visNetwork::visOptions(
+        highlightNearest = list(enabled = FALSE),
+        nodesIdSelection = FALSE) %>%
+      visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
+      visNetwork::visHierarchicalLayout(direction = "LR")
+  }
 }
 
 #' @rdname summary
 #' @method summary dgp
 #' @importFrom magrittr %>%
 #' @export
-summary.dgp <- function(object, ...) {
+summary.dgp <- function(object, type = "plot", ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
 
-  c24_rgba_lighter <- c(
-    "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
-    "rgba(240, 115, 115, 1)",   # lighter #E31A1C
-    "rgba(102, 180, 102, 1)",   # lighter green4
-    "rgba(161, 115, 186, 1)",   # lighter #6A3D9A
-    "rgba(255, 180, 100, 1)",   # lighter #FF7F00
-    "rgba(128, 128, 128, 1)",   # lighter black
-    "rgba(255, 233, 100, 1)",   # lighter gold1
-    "rgba(180, 225, 245, 1)",   # lighter skyblue2
-    "rgba(255, 190, 190, 1)",   # lighter #FB9A99
-    "rgba(180, 255, 180, 1)",   # lighter palegreen2
-    "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
-    "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
-    "rgba(245, 240, 190, 1)",   # lighter khaki2
-    "rgba(160, 60, 60, 1)",     # lighter maroon
-    "rgba(240, 150, 240, 1)",   # lighter orchid1
-    "rgba(255, 130, 185, 1)",   # lighter deeppink1
-    "rgba(100, 100, 255, 1)",   # lighter blue1
-    "rgba(120, 150, 180, 1)",   # lighter steelblue4
-    "rgba(100, 230, 230, 1)",   # lighter darkturquoise
-    "rgba(170, 255, 170, 1)",   # lighter green1
-    "rgba(200, 200, 100, 1)",   # lighter yellow4
-    "rgba(255, 255, 150, 1)",   # lighter yellow3
-    "rgba(210, 130, 100, 1)",   # lighter darkorange4
-    "rgba(200, 110, 110, 1)"    # lighter brown
-  )
+  if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
-  c24_rgba <- c(
-    "rgba(30, 144, 255, 1)",    # dodgerblue2
-    "rgba(227, 26, 28, 1)",     # #E31A1C
-    "rgba(0, 139, 0, 1)",       # green4
-    "rgba(106, 61, 154, 1)",    # #6A3D9A
-    "rgba(255, 127, 0, 1)",     # #FF7F00
-    "rgba(0, 0, 0, 1)",         # black
-    "rgba(255, 215, 0, 1)",     # gold1
-    "rgba(135, 206, 235, 1)",   # skyblue2
-    "rgba(251, 154, 153, 1)",   # #FB9A99
-    "rgba(144, 238, 144, 1)",   # palegreen2
-    "rgba(202, 178, 214, 1)",   # #CAB2D6
-    "rgba(253, 191, 111, 1)",   # #FDBF6F
-    "rgba(240, 230, 140, 1)",   # khaki2
-    "rgba(128, 0, 0, 1)",       # maroon
-    "rgba(218, 112, 214, 1)",   # orchid1
-    "rgba(255, 20, 147, 1)",    # deeppink1
-    "rgba(0, 0, 255, 1)",       # blue1
-    "rgba(54, 100, 139, 1)",    # steelblue4
-    "rgba(0, 206, 209, 1)",     # darkturquoise
-    "rgba(0, 255, 0, 1)",       # green1
-    "rgba(139, 139, 0, 1)",     # yellow4
-    "rgba(255, 255, 0, 1)",     # yellow3
-    "rgba(139, 69, 19, 1)",     # darkorange4
-    "rgba(165, 42, 42, 1)"      # brown
-  )
+  if (type == "table"){
+    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+  } else {
+    c24_rgba_lighter <- c(
+      "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
+      "rgba(240, 115, 115, 1)",   # lighter #E31A1C
+      "rgba(102, 180, 102, 1)",   # lighter green4
+      "rgba(161, 115, 186, 1)",   # lighter #6A3D9A
+      "rgba(255, 180, 100, 1)",   # lighter #FF7F00
+      "rgba(128, 128, 128, 1)",   # lighter black
+      "rgba(255, 233, 100, 1)",   # lighter gold1
+      "rgba(180, 225, 245, 1)",   # lighter skyblue2
+      "rgba(255, 190, 190, 1)",   # lighter #FB9A99
+      "rgba(180, 255, 180, 1)",   # lighter palegreen2
+      "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
+      "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
+      "rgba(245, 240, 190, 1)",   # lighter khaki2
+      "rgba(160, 60, 60, 1)",     # lighter maroon
+      "rgba(240, 150, 240, 1)",   # lighter orchid1
+      "rgba(255, 130, 185, 1)",   # lighter deeppink1
+      "rgba(100, 100, 255, 1)",   # lighter blue1
+      "rgba(120, 150, 180, 1)",   # lighter steelblue4
+      "rgba(100, 230, 230, 1)",   # lighter darkturquoise
+      "rgba(170, 255, 170, 1)",   # lighter green1
+      "rgba(200, 200, 100, 1)",   # lighter yellow4
+      "rgba(255, 255, 150, 1)",   # lighter yellow3
+      "rgba(210, 130, 100, 1)",   # lighter darkorange4
+      "rgba(200, 110, 110, 1)"    # lighter brown
+    )
 
-  nodes <- data.frame(
-    id = "Global",
-    label = "",
-    title = paste0(
-      "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; text-align: center;'>",
-      "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ", "<br>",
-      "<span style='font-size: 12px; color:", c24_rgba[1] ,";'>Total Dim(s):</span> ", ncol(object$data$X),
-      "</div>"
-    ),
-    level = 0,
-    group = as.character(0),
-    stringsAsFactors = FALSE,
-    shape = 'database'
-  )
+    c24_rgba <- c(
+      "rgba(30, 144, 255, 1)",    # dodgerblue2
+      "rgba(227, 26, 28, 1)",     # #E31A1C
+      "rgba(0, 139, 0, 1)",       # green4
+      "rgba(106, 61, 154, 1)",    # #6A3D9A
+      "rgba(255, 127, 0, 1)",     # #FF7F00
+      "rgba(0, 0, 0, 1)",         # black
+      "rgba(255, 215, 0, 1)",     # gold1
+      "rgba(135, 206, 235, 1)",   # skyblue2
+      "rgba(251, 154, 153, 1)",   # #FB9A99
+      "rgba(144, 238, 144, 1)",   # palegreen2
+      "rgba(202, 178, 214, 1)",   # #CAB2D6
+      "rgba(253, 191, 111, 1)",   # #FDBF6F
+      "rgba(240, 230, 140, 1)",   # khaki2
+      "rgba(128, 0, 0, 1)",       # maroon
+      "rgba(218, 112, 214, 1)",   # orchid1
+      "rgba(255, 20, 147, 1)",    # deeppink1
+      "rgba(0, 0, 255, 1)",       # blue1
+      "rgba(54, 100, 139, 1)",    # steelblue4
+      "rgba(0, 206, 209, 1)",     # darkturquoise
+      "rgba(0, 255, 0, 1)",       # green1
+      "rgba(139, 139, 0, 1)",     # yellow4
+      "rgba(255, 255, 0, 1)",     # yellow3
+      "rgba(139, 69, 19, 1)",     # darkorange4
+      "rgba(165, 42, 42, 1)"      # brown
+    )
 
-  edge <- data.frame(
-    from = character(),
-    to = character(),
-    label = character(),
-    title = character(),
-    arrows = character(),
-    stringsAsFactors = FALSE
-  )
+    nodes <- data.frame(
+      id = "Global",
+      label = "",
+      title = paste0(
+        "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; text-align: center;'>",
+        "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ", "<br>",
+        "<span style='font-size: 12px; color:", c24_rgba[1] ,";'>Total Dim(s):</span> ", ncol(object$data$X),
+        "</div>"
+      ),
+      level = 0,
+      group = as.character(0),
+      stringsAsFactors = FALSE,
+      shape = 'database'
+    )
 
-  n_layer <- object$constructor_obj$n_layer
-  for (i in 1:n_layer){
-    layer_id <- object$specs[[paste0("layer",i)]]
-    for (j in 1:length(layer_id)){
-      node_id <- layer_id[[paste0("node",j)]]
+    edge <- data.frame(
+      from = character(),
+      to = character(),
+      label = character(),
+      title = character(),
+      arrows = character(),
+      stringsAsFactors = FALSE
+    )
 
-      if (is.null(node_id[["type"]])){
-        formatted_lengthscales <- paste(format(node_id$lengthscales, digits = 3, nsmall = 3), collapse = ", ")
-        total_input_dim <- length(object$emulator_obj$all_layer[[i]][[j]]$input_dim)
-        global_connect_dim <- object$emulator_obj$all_layer[[i]][[j]]$connect
-        if (!is.null(global_connect_dim)) total_input_dim <- total_input_dim + length(global_connect_dim)
-      }
+    n_layer <- object$constructor_obj$n_layer
+    for (i in 1:n_layer){
+      layer_id <- object$specs[[paste0("layer",i)]]
+      for (j in 1:length(layer_id)){
+        node_id <- layer_id[[paste0("node",j)]]
 
-      nodes <- rbind(nodes, data.frame(
-        id = paste0("e",i,j),
-        label = ifelse(is.null(node_id[["type"]]), "GP", "LH"), # Leave the label empty to avoid duplication with the hover title
-        title = if (is.null(node_id[["type"]])){
-          paste0(
-            "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; white-space: normal; max-width: 200px;'>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Node Type:</b> ", "GP", "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", total_input_dim, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Kernel Type:</b> ", ifelse(node_id$kernel=='sexp', "Squared Exp", "Mat&eacute;rn-2.5"), "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Length-scales:</b> ", formatted_lengthscales, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Scale (Prior Variance):</b> ",format(node_id$scale, digits = 3, nsmall = 3), "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Nugget:</b> ", format(node_id$nugget, digits = 3, nsmall = 3, scientific = TRUE), "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Position in Layer:</b> ", j, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
-            "</div>"
-          )
-        } else {
-          paste0(
-            "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Node Type:</b> ", node_id$type, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Position in Layer:</b> ", j, "<br>",
-            "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
-            "</div>"
-          )
-        },
-        level = i,
-        group = as.character(i),
-        stringsAsFactors = FALSE,
-        shape = ifelse(is.null(node_id[["type"]]), 'circle', 'box')
-      )
-      )
-
-      if (i==1){
-        edge <- rbind(edge, data.frame(
-          from = "Global",
-          to = paste0("e",i,j),
-          label = "",
-          title = paste0(
-            "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-            "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(object$emulator_obj$all_layer[[i]][[j]]$input_dim + 1, collapse=", "), "<br>",
-            "<b style='font-size: 12px;'>To Dim(s):</b> ", paste(1:length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), collapse=", "),
-            "</div>"
-          ),
-          arrows = "to",
-          stringsAsFactors = FALSE
-        )
-        )
-      } else {
-        connection <- object$emulator_obj$all_layer[[i]][[j]]$input_dim + 1
         if (is.null(node_id[["type"]])){
-          global_connection <- object$emulator_obj$all_layer[[i]][[j]]$connect
-        } else {
-          global_connection <- NULL
-        }
-        for (k in 1:length(connection)){
-          edge <- rbind(edge, data.frame(
-            from = paste0("e",i-1,connection[k]),
-            to = paste0("e",i,j),
-            label = "",
-            title = paste0(
-              "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-              "<b style='font-size: 12px;'>From Ouput Dim:</b> ", 1, "<br>",
-              "<b style='font-size: 12px;'>To Input Dim:</b> ", k,
-              "</div>"
-            ),
-            arrows = "to",
-            stringsAsFactors = FALSE
-          )
-          )
+          formatted_lengthscales <- paste(format(node_id$lengthscales, digits = 3, nsmall = 3), collapse = ", ")
+          total_input_dim <- length(object$emulator_obj$all_layer[[i]][[j]]$input_dim)
+          global_connect_dim <- object$emulator_obj$all_layer[[i]][[j]]$connect
+          if (!is.null(global_connect_dim)) total_input_dim <- total_input_dim + length(global_connect_dim)
         }
 
-        if (!is.null(global_connection)){
+        nodes <- rbind(nodes, data.frame(
+          id = paste0("e",i,j),
+          label = ifelse(is.null(node_id[["type"]]), "GP", "LH"), # Leave the label empty to avoid duplication with the hover title
+          title = if (is.null(node_id[["type"]])){
+            paste0(
+              "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333; white-space: normal; max-width: 200px;'>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Node Type:</b> ", "GP", "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", total_input_dim, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Kernel Type:</b> ", ifelse(node_id$kernel=='sexp', "Squared Exp", "Mat&eacute;rn-2.5"), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Length-scales:</b> ", formatted_lengthscales, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Scale (Prior Variance):</b> ",format(node_id$scale, digits = 3, nsmall = 3), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Nugget:</b> ", format(node_id$nugget, digits = 3, nsmall = 3, scientific = TRUE), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Position in Layer:</b> ", j, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
+              "</div>"
+            )
+          } else {
+            paste0(
+              "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Node Type:</b> ", node_id$type, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Total Output Dim:</b> ", 1, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Layer in Hierarchy:</b> ", i, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Position in Layer:</b> ", j, "<br>",
+              "<b style='font-size: 12px; color: ", c24_rgba[-1][(i - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(object$specs$vecchia, "ON", "OFF"),
+              "</div>"
+            )
+          },
+          level = i,
+          group = as.character(i),
+          stringsAsFactors = FALSE,
+          shape = ifelse(is.null(node_id[["type"]]), 'circle', 'box')
+        )
+        )
+
+        if (i==1){
           edge <- rbind(edge, data.frame(
             from = "Global",
             to = paste0("e",i,j),
             label = "",
             title = paste0(
               "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-              "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(global_connection + 1, collapse=", "), "<br>",
-              "<b style='font-size: 12px;'>To Dim(s):</b> ", paste((1:length(global_connection)) + length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), collapse=", "),
+              "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(object$emulator_obj$all_layer[[i]][[j]]$input_dim + 1, collapse=", "), "<br>",
+              "<b style='font-size: 12px;'>To Dim(s):</b> ", paste(1:length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), collapse=", "),
               "</div>"
             ),
             arrows = "to",
             stringsAsFactors = FALSE
           )
           )
+        } else {
+          connection <- object$emulator_obj$all_layer[[i]][[j]]$input_dim + 1
+          if (is.null(node_id[["type"]])){
+            global_connection <- object$emulator_obj$all_layer[[i]][[j]]$connect
+          } else {
+            global_connection <- NULL
+          }
+          for (k in 1:length(connection)){
+            edge <- rbind(edge, data.frame(
+              from = paste0("e",i-1,connection[k]),
+              to = paste0("e",i,j),
+              label = "",
+              title = paste0(
+                "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
+                "<b style='font-size: 12px;'>From Ouput Dim:</b> ", 1, "<br>",
+                "<b style='font-size: 12px;'>To Input Dim:</b> ", k,
+                "</div>"
+              ),
+              arrows = "to",
+              stringsAsFactors = FALSE
+            )
+            )
+          }
+
+          if (!is.null(global_connection)){
+            edge <- rbind(edge, data.frame(
+              from = "Global",
+              to = paste0("e",i,j),
+              label = "",
+              title = paste0(
+                "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
+                "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(global_connection + 1, collapse=", "), "<br>",
+                "<b style='font-size: 12px;'>To Dim(s):</b> ", paste((1:length(global_connection)) + length(object$emulator_obj$all_layer[[i]][[j]]$input_dim), collapse=", "),
+                "</div>"
+              ),
+              arrows = "to",
+              stringsAsFactors = FALSE
+            )
+            )
+          }
         }
       }
     }
-  }
 
-  network <- visNetwork::visNetwork(nodes, edge, , width = "100%", height = "300px",
-                                    main = "Deep Gaussian Process Emulator",
-                                    submain = "Graphical Summary",
-                                    footer = paste0(
-                                      "<b>GP</b> = Gaussian Process Node &nbsp;&nbsp;&nbsp;&nbsp; <b>LH</b> = Likelihood Node"
-                                    )) %>%
-    visNetwork::visEdges(
-      arrows = list(to = list(enable = T, scaleFactor = 0.5)),
-      color = list(color = "darkgrey", highlight = "black", hover = "black"),
-      smooth = list(enabled = TRUE, type = "curvedCW", roundness = 0.3),
-      selectionWidth = 0.8,
-      hoverWidt = 0.5
-    )
-
-  # Apply color for the first layer explicitly if needed
-  network <- network %>%
-    visNetwork::visGroups(
-      groupname = as.character(0),
-      borderWidthSelected = 1.5,
-      color = list(
-        background = c24_rgba_lighter[1],
-        border = c24_rgba[1],
-        hover = list(background = c24_rgba[1], border = c24_rgba_lighter[1]),
-        highlight = list(background = c24_rgba[1], border = c24_rgba_lighter[1])
+    network <- visNetwork::visNetwork(nodes, edge, , width = "100%", height = "300px",
+                                      main = "Deep Gaussian Process Emulator",
+                                      submain = "Graphical Summary",
+                                      footer = paste0(
+                                        "<b>GP</b> = Gaussian Process Node &nbsp;&nbsp;&nbsp;&nbsp; <b>LH</b> = Likelihood Node"
+                                      )) %>%
+      visNetwork::visEdges(
+        arrows = list(to = list(enable = T, scaleFactor = 0.5)),
+        color = list(color = "darkgrey", highlight = "black", hover = "black"),
+        smooth = list(enabled = TRUE, type = "curvedCW", roundness = 0.3),
+        selectionWidth = 0.8,
+        hoverWidt = 0.5
       )
-    )
 
-  # Loop over remaining layers, cycling through colors if needed
-  for (i in 1:max(unique(nodes$group))) {
-    color_index <- (i - 1) %% (length(c24_rgba) - 1) + 1  # Cycle through color indices
-
+    # Apply color for the first layer explicitly if needed
     network <- network %>%
       visNetwork::visGroups(
-        groupname = as.character(i),
-        borderWidthSelected = 3,
+        groupname = as.character(0),
+        borderWidthSelected = 1.5,
         color = list(
-          background = c24_rgba_lighter[-1][color_index],
-          border = c24_rgba_lighter[-1][color_index],
-          hover = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index]),
-          highlight = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index])
+          background = c24_rgba_lighter[1],
+          border = c24_rgba[1],
+          hover = list(background = c24_rgba[1], border = c24_rgba_lighter[1]),
+          highlight = list(background = c24_rgba[1], border = c24_rgba_lighter[1])
         )
       )
-  }
 
-  network %>%
-    visNetwork::visNodes(size=15,
-                         font = list(
-                           size = 14,              # Font size
-                           color = "white",     # Font color
-                           face = "helvetica",
-                           ital = TRUE
-                         )) %>%
-    visNetwork::visOptions(
-      highlightNearest = list(enabled = FALSE),
-      nodesIdSelection = FALSE) %>%
-    visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
-    visNetwork::visHierarchicalLayout(direction = "LR")
+    # Loop over remaining layers, cycling through colors if needed
+    for (i in 1:max(unique(nodes$group))) {
+      color_index <- (i - 1) %% (length(c24_rgba) - 1) + 1  # Cycle through color indices
+
+      network <- network %>%
+        visNetwork::visGroups(
+          groupname = as.character(i),
+          borderWidthSelected = 3,
+          color = list(
+            background = c24_rgba_lighter[-1][color_index],
+            border = c24_rgba_lighter[-1][color_index],
+            hover = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index]),
+            highlight = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index])
+          )
+        )
+    }
+
+    network %>%
+      visNetwork::visNodes(size=15,
+                           font = list(
+                             size = 14,              # Font size
+                             color = "white",     # Font color
+                             face = "helvetica",
+                             ital = TRUE
+                           )) %>%
+      visNetwork::visOptions(
+        highlightNearest = list(enabled = FALSE),
+        nodesIdSelection = FALSE) %>%
+      visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
+      visNetwork::visHierarchicalLayout(direction = "LR")
+  }
 }
 
 #' @rdname summary
@@ -1002,203 +1019,217 @@ summary.dgp <- function(object, ...) {
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @export
-summary.lgp <- function(object, ...) {
+summary.lgp <- function(object, type = "plot", ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
 
-  c24_rgba_lighter <- c(
-    "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
-    "rgba(240, 115, 115, 1)",   # lighter #E31A1C
-    "rgba(102, 180, 102, 1)",   # lighter green4
-    "rgba(161, 115, 186, 1)",   # lighter #6A3D9A
-    "rgba(255, 180, 100, 1)",   # lighter #FF7F00
-    "rgba(128, 128, 128, 1)",   # lighter black
-    "rgba(255, 233, 100, 1)",   # lighter gold1
-    "rgba(180, 225, 245, 1)",   # lighter skyblue2
-    "rgba(255, 190, 190, 1)",   # lighter #FB9A99
-    "rgba(180, 255, 180, 1)",   # lighter palegreen2
-    "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
-    "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
-    "rgba(245, 240, 190, 1)",   # lighter khaki2
-    "rgba(160, 60, 60, 1)",     # lighter maroon
-    "rgba(240, 150, 240, 1)",   # lighter orchid1
-    "rgba(255, 130, 185, 1)",   # lighter deeppink1
-    "rgba(100, 100, 255, 1)",   # lighter blue1
-    "rgba(120, 150, 180, 1)",   # lighter steelblue4
-    "rgba(100, 230, 230, 1)",   # lighter darkturquoise
-    "rgba(170, 255, 170, 1)",   # lighter green1
-    "rgba(200, 200, 100, 1)",   # lighter yellow4
-    "rgba(255, 255, 150, 1)",   # lighter yellow3
-    "rgba(210, 130, 100, 1)",   # lighter darkorange4
-    "rgba(200, 110, 110, 1)"    # lighter brown
-  )
+  if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
-  c24_rgba <- c(
-    "rgba(30, 144, 255, 1)",    # dodgerblue2
-    "rgba(227, 26, 28, 1)",     # #E31A1C
-    "rgba(0, 139, 0, 1)",       # green4
-    "rgba(106, 61, 154, 1)",    # #6A3D9A
-    "rgba(255, 127, 0, 1)",     # #FF7F00
-    "rgba(0, 0, 0, 1)",         # black
-    "rgba(255, 215, 0, 1)",     # gold1
-    "rgba(135, 206, 235, 1)",   # skyblue2
-    "rgba(251, 154, 153, 1)",   # #FB9A99
-    "rgba(144, 238, 144, 1)",   # palegreen2
-    "rgba(202, 178, 214, 1)",   # #CAB2D6
-    "rgba(253, 191, 111, 1)",   # #FDBF6F
-    "rgba(240, 230, 140, 1)",   # khaki2
-    "rgba(128, 0, 0, 1)",       # maroon
-    "rgba(218, 112, 214, 1)",   # orchid1
-    "rgba(255, 20, 147, 1)",    # deeppink1
-    "rgba(0, 0, 255, 1)",       # blue1
-    "rgba(54, 100, 139, 1)",    # steelblue4
-    "rgba(0, 206, 209, 1)",     # darkturquoise
-    "rgba(0, 255, 0, 1)",       # green1
-    "rgba(139, 139, 0, 1)",     # yellow4
-    "rgba(255, 255, 0, 1)",     # yellow3
-    "rgba(139, 69, 19, 1)",     # darkorange4
-    "rgba(165, 42, 42, 1)"      # brown
-  )
-
-  struc <- object$specs$struc
-  metadata <- object$specs$metadata
-  metadata$Global_Output_Dims <- sapply(metadata$Emulator, function(emulator_id) {
-    # Get the total output dimensions for this emulator
-    total_out_dim <- metadata$Total_Output_Dims[metadata$Emulator == emulator_id]
-
-    # Full set of output dimensions for this emulator
-    all_output_dims <- 1:total_out_dim
-
-    # Find connected output dims in struc
-    connected_outputs <- struc$From_Output[struc$From_Emulator == emulator_id]
-
-    # Global output dims are those not in connected outputs
-    global_outputs <- setdiff(all_output_dims, connected_outputs)
-
-    # Convert to string if there are multiple or no global outputs
-    if (length(global_outputs) == 0) {
-      return(NA)  # No global outputs
+  if ( "metadata" %in% names(object$specs) ){
+    if (type == 'table') {
+      if ( isFALSE("emulator_obj" %in% names(object)) ) stop("Table summary is only available when 'object' is built with `mode = 'activate'` in lgp(). Use `type = 'plot'` instead for graphical summary.", call. = FALSE)
+      pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
     } else {
-      return(paste(global_outputs, collapse = ", "))
-    }
-  })
-  metadata <- rbind(
-    data.frame(Emulator = "Global", Layer = 0, Pos_in_Layer = NA,
-               Total_Input_Dims = NA, Total_Output_Dims = NA, Global_Output_Dims = NA,
-               Type = NA, Vecchia = FALSE),
-    metadata
-  )
-  nodes <- data.frame(
-    id = metadata$Emulator,
-    label = toupper(metadata$Type), # Leave the label empty to avoid duplication with the hover title
-    title = paste0(
-      "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Emulator ID:</b> ", metadata$Emulator, "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Emulator Type:</b> ", toupper(metadata$Type), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", metadata$Total_Input_Dims, "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Total Output Dim(s):</b> ", metadata$Total_Output_Dims, "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Global Output Indices:</b> ", ifelse(is.na(metadata$Global_Output_Dims), "NA", metadata$Global_Output_Dims), "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Layer in Network:</b> ", metadata$Layer, "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Position in Layer:</b> ", metadata$Pos_in_Layer, "<br>",
-      "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(metadata$Vecchia, "ON", "OFF"),
-      "</div>"
-    ),
-    level = metadata$Layer,
-    group = as.character(metadata$Layer),
-    stringsAsFactors = FALSE,
-    shape = 'circle'
-  )
+      c24_rgba_lighter <- c(
+        "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
+        "rgba(240, 115, 115, 1)",   # lighter #E31A1C
+        "rgba(102, 180, 102, 1)",   # lighter green4
+        "rgba(161, 115, 186, 1)",   # lighter #6A3D9A
+        "rgba(255, 180, 100, 1)",   # lighter #FF7F00
+        "rgba(128, 128, 128, 1)",   # lighter black
+        "rgba(255, 233, 100, 1)",   # lighter gold1
+        "rgba(180, 225, 245, 1)",   # lighter skyblue2
+        "rgba(255, 190, 190, 1)",   # lighter #FB9A99
+        "rgba(180, 255, 180, 1)",   # lighter palegreen2
+        "rgba(225, 205, 235, 1)",   # lighter #CAB2D6
+        "rgba(255, 220, 170, 1)",   # lighter #FDBF6F
+        "rgba(245, 240, 190, 1)",   # lighter khaki2
+        "rgba(160, 60, 60, 1)",     # lighter maroon
+        "rgba(240, 150, 240, 1)",   # lighter orchid1
+        "rgba(255, 130, 185, 1)",   # lighter deeppink1
+        "rgba(100, 100, 255, 1)",   # lighter blue1
+        "rgba(120, 150, 180, 1)",   # lighter steelblue4
+        "rgba(100, 230, 230, 1)",   # lighter darkturquoise
+        "rgba(170, 255, 170, 1)",   # lighter green1
+        "rgba(200, 200, 100, 1)",   # lighter yellow4
+        "rgba(255, 255, 150, 1)",   # lighter yellow3
+        "rgba(210, 130, 100, 1)",   # lighter darkorange4
+        "rgba(200, 110, 110, 1)"    # lighter brown
+      )
 
-  nodes[nodes$level == 0,]$shape <- "database"
-  nodes[nodes$level == 0,]$title <- paste0(
-    "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-    "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ",
-    "</div>"
-  )
+      c24_rgba <- c(
+        "rgba(30, 144, 255, 1)",    # dodgerblue2
+        "rgba(227, 26, 28, 1)",     # #E31A1C
+        "rgba(0, 139, 0, 1)",       # green4
+        "rgba(106, 61, 154, 1)",    # #6A3D9A
+        "rgba(255, 127, 0, 1)",     # #FF7F00
+        "rgba(0, 0, 0, 1)",         # black
+        "rgba(255, 215, 0, 1)",     # gold1
+        "rgba(135, 206, 235, 1)",   # skyblue2
+        "rgba(251, 154, 153, 1)",   # #FB9A99
+        "rgba(144, 238, 144, 1)",   # palegreen2
+        "rgba(202, 178, 214, 1)",   # #CAB2D6
+        "rgba(253, 191, 111, 1)",   # #FDBF6F
+        "rgba(240, 230, 140, 1)",   # khaki2
+        "rgba(128, 0, 0, 1)",       # maroon
+        "rgba(218, 112, 214, 1)",   # orchid1
+        "rgba(255, 20, 147, 1)",    # deeppink1
+        "rgba(0, 0, 255, 1)",       # blue1
+        "rgba(54, 100, 139, 1)",    # steelblue4
+        "rgba(0, 206, 209, 1)",     # darkturquoise
+        "rgba(0, 255, 0, 1)",       # green1
+        "rgba(139, 139, 0, 1)",     # yellow4
+        "rgba(255, 255, 0, 1)",     # yellow3
+        "rgba(139, 69, 19, 1)",     # darkorange4
+        "rgba(165, 42, 42, 1)"      # brown
+      )
 
-  #edges <- data.frame(
-  #  from = struc$From_Emulator,
-  #  to = struc$To_Emulator,
-  #  label = paste(struc$From_Output, "to", struc$To_Input),
-  #  arrows = "to",
-  #  stringsAsFactors = FALSE
-  #)
+      struc <- object$specs$struc
+      metadata <- object$specs$metadata
+      metadata$Global_Output_Dims <- sapply(metadata$Emulator, function(emulator_id) {
+        # Get the total output dimensions for this emulator
+        total_out_dim <- metadata$Total_Output_Dims[metadata$Emulator == emulator_id]
 
-  edges <- struc %>%
-    dplyr::group_by(.data$From_Emulator, .data$To_Emulator) %>%
-    dplyr::summarize(
-      title = paste0(
+        # Full set of output dimensions for this emulator
+        all_output_dims <- 1:total_out_dim
+
+        # Find connected output dims in struc
+        connected_outputs <- struc$From_Output[struc$From_Emulator == emulator_id]
+
+        # Global output dims are those not in connected outputs
+        global_outputs <- setdiff(all_output_dims, connected_outputs)
+
+        # Convert to string if there are multiple or no global outputs
+        if (length(global_outputs) == 0) {
+          return(NA)  # No global outputs
+        } else {
+          return(paste(global_outputs, collapse = ", "))
+        }
+      })
+      metadata <- rbind(
+        data.frame(Emulator = "Global", Layer = 0, Pos_in_Layer = NA,
+                   Total_Input_Dims = NA, Total_Output_Dims = NA, Global_Output_Dims = NA,
+                   Type = NA, Vecchia = FALSE),
+        metadata
+      )
+      nodes <- data.frame(
+        id = metadata$Emulator,
+        label = toupper(metadata$Type), # Leave the label empty to avoid duplication with the hover title
+        title = paste0(
+          "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Emulator ID:</b> ", metadata$Emulator, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Emulator Type:</b> ", toupper(metadata$Type), "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Total Input Dim(s):</b> ", metadata$Total_Input_Dims, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Total Output Dim(s):</b> ", metadata$Total_Output_Dims, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Global Output Indices:</b> ", ifelse(is.na(metadata$Global_Output_Dims), "NA", metadata$Global_Output_Dims), "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Layer in Network:</b> ", metadata$Layer, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Position in Layer:</b> ", metadata$Pos_in_Layer, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% 23 + 1], ";'>Vecchia Mode:</b> ", ifelse(metadata$Vecchia, "ON", "OFF"),
+          "</div>"
+        ),
+        level = metadata$Layer,
+        group = as.character(metadata$Layer),
+        stringsAsFactors = FALSE,
+        shape = 'circle'
+      )
+
+      nodes[nodes$level == 0,]$shape <- "database"
+      nodes[nodes$level == 0,]$title <- paste0(
         "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-        "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(.data$From_Output, collapse = ", "), "<br>",
-        "<b style='font-size: 12px;'>To Dim(s):</b> ", paste(.data$To_Input, collapse = ", "),
+        "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ",
         "</div>"
-      ),
-      arrows = "to",
-      .groups = 'drop'  # This ensures that the result is ungrouped
-    ) %>%
-    dplyr::rename(from = .data$From_Emulator, to = .data$To_Emulator)  # Rename columns after summarizing
-
-  edges <- as.data.frame(edges, stringsAsFactors = FALSE)
-
-  network <- visNetwork::visNetwork(nodes, edges, , width = "100%", height = "300px",
-                        main = "Network of Linked Emulators",
-                        submain = "Graphical Summary",
-                        footer = paste0(
-                          "<b>GP</b> = Gaussian Process Emulator &nbsp;&nbsp;&nbsp; <b>DGP</b> = Deep Gaussian Process Emulator"
-                        )) %>%
-    visNetwork::visEdges(
-      arrows = list(to = list(enable = T, scaleFactor = 0.5)),
-      color = list(color = "darkgrey", highlight = "black", hover = "black"),
-      smooth = list(enabled = TRUE, type = "curvedCW", roundness = 0.3),
-      selectionWidth = 0.8,
-      hoverWidt = 0.5
-    )
-
-  # Apply color for the first layer explicitly if needed
-  network <- network %>%
-    visNetwork::visGroups(
-      groupname = as.character(0),
-      borderWidthSelected = 1.5,
-      color = list(
-        background = c24_rgba_lighter[1],
-        border = c24_rgba[1],
-        hover = list(background = c24_rgba[1], border = c24_rgba_lighter[1]),
-        highlight = list(background = c24_rgba[1], border = c24_rgba_lighter[1])
       )
-    )
 
-  # Loop over remaining layers, cycling through colors if needed
-  for (i in 1:max(unique(nodes$group))) {
-    color_index <- (i - 1) %% (length(c24_rgba) - 1) + 1  # Cycle through color indices
+      #edges <- data.frame(
+      #  from = struc$From_Emulator,
+      #  to = struc$To_Emulator,
+      #  label = paste(struc$From_Output, "to", struc$To_Input),
+      #  arrows = "to",
+      #  stringsAsFactors = FALSE
+      #)
 
-    network <- network %>%
-      visNetwork::visGroups(
-        groupname = as.character(i),
-        borderWidthSelected = 3,
-        color = list(
-          background = c24_rgba_lighter[-1][color_index],
-          border = c24_rgba_lighter[-1][color_index],
-          hover = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index]),
-          highlight = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index])
+      edges <- struc %>%
+        dplyr::group_by(.data$From_Emulator, .data$To_Emulator) %>%
+        dplyr::summarize(
+          title = paste0(
+            "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
+            "<b style='font-size: 12px;'>From Dim(s):</b> ", paste(.data$From_Output, collapse = ", "), "<br>",
+            "<b style='font-size: 12px;'>To Dim(s):</b> ", paste(.data$To_Input, collapse = ", "),
+            "</div>"
+          ),
+          arrows = "to",
+          .groups = 'drop'  # This ensures that the result is ungrouped
+        ) %>%
+        dplyr::rename(from = .data$From_Emulator, to = .data$To_Emulator)  # Rename columns after summarizing
+
+      edges <- as.data.frame(edges, stringsAsFactors = FALSE)
+
+      network <- visNetwork::visNetwork(nodes, edges, , width = "100%", height = "300px",
+                                        main = "Network of Linked Emulators",
+                                        submain = "Graphical Summary",
+                                        footer = paste0(
+                                          "<b>GP</b> = Gaussian Process Emulator &nbsp;&nbsp;&nbsp; <b>DGP</b> = Deep Gaussian Process Emulator"
+                                        )) %>%
+        visNetwork::visEdges(
+          arrows = list(to = list(enable = T, scaleFactor = 0.5)),
+          color = list(color = "darkgrey", highlight = "black", hover = "black"),
+          smooth = list(enabled = TRUE, type = "curvedCW", roundness = 0.3),
+          selectionWidth = 0.8,
+          hoverWidt = 0.5
         )
-      )
-  }
 
-  network %>%
-    visNetwork::visNodes(size=15,
-                         font = list(
-                           size = 14,              # Font size
-                           color = "white",     # Font color
-                           face = "helvetica",
-                           ital = TRUE
-                         )) %>%
-    visNetwork::visOptions(
-      highlightNearest = list(enabled = FALSE),
-      nodesIdSelection = TRUE) %>%
-    visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
-    visNetwork::visHierarchicalLayout(direction = "LR")
+      # Apply color for the first layer explicitly if needed
+      network <- network %>%
+        visNetwork::visGroups(
+          groupname = as.character(0),
+          borderWidthSelected = 1.5,
+          color = list(
+            background = c24_rgba_lighter[1],
+            border = c24_rgba[1],
+            hover = list(background = c24_rgba[1], border = c24_rgba_lighter[1]),
+            highlight = list(background = c24_rgba[1], border = c24_rgba_lighter[1])
+          )
+        )
+
+      # Loop over remaining layers, cycling through colors if needed
+      for (i in 1:max(unique(nodes$group))) {
+        color_index <- (i - 1) %% (length(c24_rgba) - 1) + 1  # Cycle through color indices
+
+        network <- network %>%
+          visNetwork::visGroups(
+            groupname = as.character(i),
+            borderWidthSelected = 3,
+            color = list(
+              background = c24_rgba_lighter[-1][color_index],
+              border = c24_rgba_lighter[-1][color_index],
+              hover = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index]),
+              highlight = list(background = c24_rgba[-1][color_index], border = c24_rgba[-1][color_index])
+            )
+          )
+      }
+
+      network %>%
+        visNetwork::visNodes(size=15,
+                             font = list(
+                               size = 14,              # Font size
+                               color = "white",     # Font color
+                               face = "helvetica",
+                               ital = TRUE
+                             )) %>%
+        visNetwork::visOptions(
+          highlightNearest = list(enabled = FALSE),
+          nodesIdSelection = TRUE) %>%
+        visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
+        visNetwork::visHierarchicalLayout(direction = "LR")
+    }
+  } else {
+    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+    if (type == 'plot') {
+      warning("'type' has been automatically set to 'table' because 'object' was created by lgp() with 'struc' not in data frame format.", call. = FALSE)
+    }
+  }
 }
 
 #' @title Add or remove the Vecchia approximation

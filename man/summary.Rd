@@ -5,13 +5,13 @@
 \alias{summary.gp}
 \alias{summary.dgp}
 \alias{summary.lgp}
-\title{Visual summary of a constructed GP, DGP, or linked (D)GP emulator}
+\title{Summary of a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
-\method{summary}{gp}(object, ...)
+\method{summary}{gp}(object, type = "plot", ...)
 
-\method{summary}{dgp}(object, ...)
+\method{summary}{dgp}(object, type = "plot", ...)
 
-\method{summary}{lgp}(object, ...)
+\method{summary}{lgp}(object, type = "plot", ...)
 }
 \arguments{
 \item{object}{can be one of the following:
@@ -21,18 +21,23 @@
 \item the S3 class \code{lgp}.
 }}
 
+\item{type}{a character string, either \code{"table"} or \code{"plot"}, indicating the format of the output.
+If set to \code{"table"}, the function returns a summary in table. If set to \code{"plot"}, the function
+returns an interactive visualization. Defaults to \code{"plot"}. If the \code{object} was created with
+\code{lgp()} where \code{struc} is not a data frame, \code{type} will automatically default to \code{"table"}.}
+
 \item{...}{N/A.}
 }
 \value{
-An interactive visualization of the emulator as a \code{visNetwork} object.
-This visualization is compatible with R Markdown documents and the RStudio Viewer.
+Either a table or an interactive visualization of the emulator, returned as a \code{visNetwork} object.
+The visualization is compatible with R Markdown documents and the RStudio Viewer.
 The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
 
 This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
-by generating an interactive visualization of the emulator’s structure.
+by generating either a table or an interactive plot of the emulator’s structure.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
