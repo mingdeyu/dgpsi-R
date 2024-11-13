@@ -122,8 +122,8 @@ cross validation or Out-Of-Sample (OOS) validation.</p>
 
 
 <dt id="arg-x-test">x_test<a class="anchor" aria-label="anchor" href="#arg-x-test"></a></dt>
-<dd><p>the OOS testing input data:</p><ul><li><p>if <code>x</code> is an instance of the <code>gp</code> or <code>dgp</code> class, <code>x_test</code> is a matrix where each row is an input testing data point and each column is an input dimension.</p></li>
-<li><p>if <code>x</code> is an instance of the <code>lgp</code> class, <code>x_test</code> can be a matrix or a list:</p><ul><li><p>if <code>x_test</code> is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
+<dd><p>the OOS testing input data:</p><ul><li><p>if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class, <code>x_test</code> is a matrix where each row is an input testing data point and each column is an input dimension.</p></li>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> if <code>object</code> is an instance of the <code>lgp</code> class, <code>x_test</code> can be a matrix or a list:</p><ul><li><p>if <code>x_test</code> is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 The rows of <code>x_test</code> represent different input data points and the columns represent input dimensions across all emulators in
 the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
 emulators in the first layer and there is no global input to emulators in other layers.</p></li>
@@ -134,21 +134,25 @@ the corresponding layer) of matrices (rows being testing input data points and c
 global testing input data to the emulators in the corresponding layer. The matrices must be placed in the sub-lists based on how
 their corresponding emulators are placed in <code>struc</code> argument of <code><a href="lgp.html">lgp()</a></code>. If there is no global input data to a certain emulator,
 set <code>NULL</code> in the corresponding sub-list of <code>x_test</code>.</p></li>
-</ul></li>
-</ul><p><code>x_test</code> must be provided for the validation if <code>x</code> is an instance of the <code>lgp</code>. Defaults to <code>NULL</code>.</p></dd>
+</ul><p><strong>This option for linked (D)GP emulators is deprecated and will be removed in the next release.</strong></p></li>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> If <code>object</code> is an instance of the <code>lgp</code> class created by <code><a href="lgp.html">lgp()</a></code> with argument <code>struc</code> in data frame form,
+<code>x_test</code> must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
+The column indices in <code>x_test</code> must align with the indices specified in the <code>From_Output</code> column of the <code>struc</code> data frame (used in <code><a href="lgp.html">lgp()</a></code>),
+corresponding to rows where the <code>From_Emulator</code> column is <code>"Global"</code>.</p></li>
+</ul><p><code>x_test</code> must be provided for the validation if <code>object</code> is an instance of the <code>lgp</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-y-test">y_test<a class="anchor" aria-label="anchor" href="#arg-y-test"></a></dt>
-<dd><p>the OOS testing output data that correspond to <code>x_test</code>:</p><ul><li><p>if <code>x</code> is an instance of the <code>gp</code> class, <code>y_test</code> is a matrix with only one column and each row being an testing output data point.</p></li>
-<li><p>if <code>x</code> is an instance of the <code>dgp</code> class, <code>y_test</code> is a matrix with its rows being testing output data points and columns being
+<dd><p>the OOS testing output data that correspond to <code>x_test</code>:</p><ul><li><p>if <code>object</code> is an instance of the <code>gp</code> class, <code>y_test</code> is a matrix with only one column and each row being an testing output data point.</p></li>
+<li><p>if <code>object</code> is an instance of the <code>dgp</code> class, <code>y_test</code> is a matrix with its rows being testing output data points and columns being
 output dimensions.</p></li>
-<li><p>if <code>x</code> is an instance of the <code>lgp</code> class, <code>y_test</code> can be a single matrix or a list of matrices:</p><ul><li><p>if <code>y_test</code> is a single matrix, then there is only one emulator in the final layer of the linked emulator system and <code>y_test</code>
+<li><p>if <code>object</code> is an instance of the <code>lgp</code> class, <code>y_test</code> can be a single matrix or a list of matrices:</p><ul><li><p>if <code>y_test</code> is a single matrix, then there is only one emulator in the final layer of the linked emulator system and <code>y_test</code>
 represents the emulator's output with rows being testing positions and columns being output dimensions.</p></li>
 <li><p>if <code>y_test</code> is a list, then <code>y_test</code> should have <em>M</em> number (the same number of emulators in the final layer of the system) of matrices.
 Each matrix has its rows corresponding to testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.</p></li>
 </ul></li>
-</ul><p><code>y_test</code> must be provided for the validation if <code>x</code> is an instance of the <code>lgp</code>. Defaults to <code>NULL</code>.</p></dd>
+</ul><p><code>y_test</code> must be provided for the validation if <code>object</code> is an instance of the <code>lgp</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -251,11 +255,9 @@ emulator.</p></li>
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
 
 <ul><li><p>When both <code>x_test</code> and <code>y_test</code> are <code>NULL</code>, the LOO cross validation will be implemented. Otherwise, OOS validation will
-be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., <code>x</code> is an instance of the <code>gp</code> or <code>dgp</code>
-class). If a linked (D)GP emulator (i.e., <code>x</code> is an instance of the <code>lgp</code> class) is provided, <code>x_test</code> and <code>y_test</code> must
+be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code>
+class). If a linked (D)GP emulator (i.e., <code>object</code> is an instance of the <code>lgp</code> class) is provided, <code>x_test</code> and <code>y_test</code> must
 also be provided for OOS validation.</p></li>
-<li><p>Any R vector detected in <code>x_test</code> and <code>y_test</code> will be treated as a column vector and automatically converted into a single-column
-R matrix. Thus, if <code>x_test</code> or <code>y_test</code> is a single testing data point with multiple dimensions, it must be given as a matrix.</p></li>
 </ul></div>
 
     <div class="section level2">
