@@ -85,8 +85,6 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 
 in \code{object} will be removed and not contained in the returned object.
-\item Any R vector detected in \code{X} and \code{Y} will be treated as a column vector and automatically converted into a single-column
-R matrix. Thus, if \code{X} is a single data point with multiple dimensions, it must be given as a matrix.
 }
 }
 \examples{

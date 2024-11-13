@@ -1576,8 +1576,6 @@ window <- function(object, start, end = NULL, thin = 1) {
 #'     log-likelihood for each testing data point.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note Any R vector detected in `x` and `y` will be treated as a column vector and automatically converted into a single-column
-#'     R matrix. Thus, if `x` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @examples
 #' \dontrun{
 #'
@@ -1595,8 +1593,20 @@ nllik <- function(object, x, y) {
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(y)&!is.vector(y) ) stop("'y' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x) ) x <- as.matrix(x)
-  if ( is.vector(y) ) y <- as.matrix(y)
+  if ( is.vector(x) ) {
+    if ( ncol(object$data$X)!=1 ){
+      x <- matrix(x, nrow = 1)
+    } else {
+      x <- as.matrix(x)
+    }
+  }
+  if ( is.vector(y) ) {
+    if ( ncol(object$data$Y)!=1 ){
+      y <- matrix(y, nrow = 1)
+    } else {
+      y <- as.matrix(y)
+    }
+  }
 
   if ( nrow(x)!=nrow(y) ) stop("'x' and 'y' have different number of data points.", call. = FALSE)
   n_dim_y <- ncol(y)

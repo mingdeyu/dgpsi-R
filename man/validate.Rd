@@ -69,8 +69,8 @@ validate(
 
 \item{x_test}{the OOS testing input data:
 \itemize{
-\item if \code{x} is an instance of the \code{gp} or \code{dgp} class, \code{x_test} is a matrix where each row is an input testing data point and each column is an input dimension.
-\item if \code{x} is an instance of the \code{lgp} class, \code{x_test} can be a matrix or a list:
+\item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{x_test} is a matrix where each row is an input testing data point and each column is an input dimension.
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} if \code{object} is an instance of the \code{lgp} class, \code{x_test} can be a matrix or a list:
 \itemize{
 \item if \code{x_test} is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 The rows of \code{x_test} represent different input data points and the columns represent input dimensions across all emulators in
@@ -84,16 +84,22 @@ global testing input data to the emulators in the corresponding layer. The matri
 their corresponding emulators are placed in \code{struc} argument of \code{\link[=lgp]{lgp()}}. If there is no global input data to a certain emulator,
 set \code{NULL} in the corresponding sub-list of \code{x_test}.
 }
+
+\strong{This option for linked (D)GP emulators is deprecated and will be removed in the next release.}
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{object} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} with argument \code{struc} in data frame form,
+\code{x_test} must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
+The column indices in \code{x_test} must align with the indices specified in the \code{From_Output} column of the \code{struc} data frame (used in \code{\link[=lgp]{lgp()}}),
+corresponding to rows where the \code{From_Emulator} column is \code{"Global"}.
 }
 
-\code{x_test} must be provided for the validation if \code{x} is an instance of the \code{lgp}. Defaults to \code{NULL}.}
+\code{x_test} must be provided for the validation if \code{object} is an instance of the \code{lgp}. Defaults to \code{NULL}.}
 
 \item{y_test}{the OOS testing output data that correspond to \code{x_test}:
 \itemize{
-\item if \code{x} is an instance of the \code{gp} class, \code{y_test} is a matrix with only one column and each row being an testing output data point.
-\item if \code{x} is an instance of the \code{dgp} class, \code{y_test} is a matrix with its rows being testing output data points and columns being
+\item if \code{object} is an instance of the \code{gp} class, \code{y_test} is a matrix with only one column and each row being an testing output data point.
+\item if \code{object} is an instance of the \code{dgp} class, \code{y_test} is a matrix with its rows being testing output data points and columns being
 output dimensions.
-\item if \code{x} is an instance of the \code{lgp} class, \code{y_test} can be a single matrix or a list of matrices:
+\item if \code{object} is an instance of the \code{lgp} class, \code{y_test} can be a single matrix or a list of matrices:
 \itemize{
 \item if \code{y_test} is a single matrix, then there is only one emulator in the final layer of the linked emulator system and \code{y_test}
 represents the emulator's output with rows being testing positions and columns being output dimensions.
@@ -103,7 +109,7 @@ in the final layer.
 }
 }
 
-\code{y_test} must be provided for the validation if \code{x} is an instance of the \code{lgp}. Defaults to \code{NULL}.}
+\code{y_test} must be provided for the validation if \code{object} is an instance of the \code{lgp}. Defaults to \code{NULL}.}
 
 \item{method}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the prediction approach to use in validations: either the mean-variance approach (\code{"mean_var"}) or the sampling approach (\code{"sampling"}).
 For DGP emulators with a categorical likelihood (\code{likelihood = "Categorical"} in \code{\link[=dgp]{dgp()}}), only the sampling approach is supported.
@@ -207,11 +213,9 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \note{
 \itemize{
 \item When both \code{x_test} and \code{y_test} are \code{NULL}, the LOO cross validation will be implemented. Otherwise, OOS validation will
-be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., \code{x} is an instance of the \code{gp} or \code{dgp}
-class). If a linked (D)GP emulator (i.e., \code{x} is an instance of the \code{lgp} class) is provided, \code{x_test} and \code{y_test} must
+be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., \code{object} is an instance of the \code{gp} or \code{dgp}
+class). If a linked (D)GP emulator (i.e., \code{object} is an instance of the \code{lgp} class) is provided, \code{x_test} and \code{y_test} must
 also be provided for OOS validation.
-\item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
-R matrix. Thus, if \code{x_test} or \code{y_test} is a single testing data point with multiple dimensions, it must be given as a matrix.
 }
 }
 \examples{

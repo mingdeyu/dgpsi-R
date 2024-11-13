@@ -50,8 +50,6 @@
 #'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
 #' * If `x_cand` is supplied as a list when `object` is an instance of `bundle` class and a `aggregate` function is provided, the matrices in `x_cand` must have
 #'   common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the `aggregate` function can be applied.
-#' * Any R vector detected in `x_cand` will be treated as a column vector and automatically converted into a single-column
-#'   R matrix.
 #' @references
 #' Beck, J., & Guillas, S. (2016). Sequential design with mutual information for computer experiments (MICE): emulation of a tsunami model.
 #' *SIAM/ASA Journal on Uncertainty Quantification*, **4(1)**, 739-766.
@@ -118,7 +116,13 @@ mice.gp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wor
   n_dim_X <- ncol(training_input)
   #check x_cand
   if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
+  if ( is.vector(x_cand) ) {
+    if ( ncol(object$data$X)!=1 ){
+      x_cand <- matrix(x_cand, nrow = 1)
+    } else {
+      x_cand <- as.matrix(x_cand)
+    }
+  }
   if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   #check core number
   if( !is.null(workers) ) {
@@ -184,7 +188,13 @@ mice.dgp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wo
   n_dim_Y <- ncol(training_output)
   #check x_cand
   if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
+  if ( is.vector(x_cand) ) {
+    if ( ncol(object$data$X)!=1 ){
+      x_cand <- matrix(x_cand, nrow = 1)
+    } else {
+      x_cand <- as.matrix(x_cand)
+    }
+  }
   if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   #check core number
   if( !is.null(workers) ) {
@@ -307,12 +317,24 @@ mice.bundle <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6,
   if ( is.list(x_cand) ){
     if (length(x_cand) != n_emulators) stop("When 'x_cand' is a list, the number of elements in it should match the number of emulators in the bundle.", call. = FALSE)
     for ( i in 1:n_emulators ){
-      if ( is.vector(x_cand[[i]]) ) x_cand[[i]] <- as.matrix(x_cand[[i]])
+      if ( is.vector(x_cand[[i]]) ) {
+        if ( n_dim_X!=1 ){
+          x_cand[[i]] <- matrix(x_cand[[i]], nrow = 1)
+        } else {
+          x_cand[[i]] <- as.matrix(x_cand[[i]])
+        }
+      }
       if ( ncol(x_cand[[i]])!=n_dim_X ) stop("Elements in 'x_cand' have different number of dimensions with the training input.", call. = FALSE)
     }
     islist <- TRUE
   } else {
-    if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
+    if ( is.vector(x_cand) ) {
+      if ( n_dim_X!=1 ){
+        x_cand <- matrix(x_cand, nrow = 1)
+      } else {
+        x_cand <- as.matrix(x_cand)
+      }
+    }
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
     islist <- FALSE
   }

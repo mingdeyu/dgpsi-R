@@ -190,8 +190,6 @@
 #'   within `f` by appropriately returning `NA`s.
 #' * When defining `eval`, the output metric needs to be positive if [draw()] is used with `log = T`. And one needs to ensure that a lower metric value indicates
 #'   a better emulation performance if `target` is set.
-#' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
-#'   R matrix. Thus, if `x_test` or `y_test` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #'
 #' @examples
@@ -267,8 +265,14 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   freq <- check_freq(freq)
   reset <- check_reset(reset, N)
   n_cand <- check_n_cand(n_cand)
+
+  X <- object$data$X
+  Y <- object$data$Y
+  n_dim_X <- ncol(X)
+  n_dim_Y <- ncol(Y)
+
   if (!is.null(x_test) & !is.null(y_test)) {
-    xy_test <- check_xy_test(x_test, y_test)
+    xy_test <- check_xy_test(x_test, y_test, n_dim_X, n_dim_Y)
     x_test <- xy_test[[1]]
     y_test <- xy_test[[2]]
   }
@@ -318,11 +322,6 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     start_point <- 0
   }
 
-  X <- object$data$X
-  Y <- object$data$Y
-  n_dim_X <- ncol(X)
-  n_dim_Y <- ncol(Y)
-
   N_acq <- c()
   mnames <- methods::formalArgs(method)
   if ( !is.null(eval) ){
@@ -359,7 +358,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
       int <- check_int(int, n_dim_X)
     } else {
       add_arg <- list(...)
-      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_X, n_dim_Y)
       xy_cand_list <- remove_dup(xy_cand_list, rbind(X, target_points))
       x_cand_origin <- xy_cand_list[[1]]
       x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
@@ -623,7 +622,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     }
   } else {
     add_arg <- list(...)
-    xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+    xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_X, n_dim_Y)
     xy_cand_list <- remove_dup(xy_cand_list, X)
     x_cand_origin <- xy_cand_list[[1]]
     x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
@@ -874,8 +873,14 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     if ( refit_cores < 1 ) stop("'refit_cores' must be >= 1.", call. = FALSE)
   }
   n_cand <- check_n_cand(n_cand)
+
+  X <- object$data$X
+  Y <- object$data$Y
+  n_dim_X <- ncol(X)
+  n_dim_Y <- ncol(Y)
+
   if (!is.null(x_test) & !is.null(y_test)) {
-    xy_test <- check_xy_test(x_test, y_test)
+    xy_test <- check_xy_test(x_test, y_test, n_dim_X, n_dim_Y)
     x_test <- xy_test[[1]]
     y_test <- xy_test[[2]]
   }
@@ -925,11 +930,6 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   } else {
     start_point <- 0
   }
-
-  X <- object$data$X
-  Y <- object$data$Y
-  n_dim_X <- ncol(X)
-  n_dim_Y <- ncol(Y)
 
   if (pruning){
     pruning <- check_auto(object)
@@ -991,7 +991,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
       int <- check_int(int, n_dim_X)
     } else {
       add_arg <- list(...)
-      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_X, n_dim_Y)
       xy_cand_list <- remove_dup(xy_cand_list, rbind(X, target_points))
       x_cand_origin <- xy_cand_list[[1]]
       x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
@@ -1330,7 +1330,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     }
   } else {
     add_arg <- list(...)
-    xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_Y)
+    xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_X, n_dim_Y)
     xy_cand_list <- remove_dup(xy_cand_list, X)
     x_cand_origin <- xy_cand_list[[1]]
     x_cand_rep <- pkg.env$np$unique(x_cand_origin, return_inverse=TRUE, axis=0L)
@@ -1664,8 +1664,16 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     if ( refit_cores < 1 ) stop("'refit_cores' must be >= 1.", call. = FALSE)
   }
   n_cand <- check_n_cand(n_cand)
+
+  X <- object$data$X
+  Y <- object$data$Y
+  n_dim_X <- ncol(X[[1]])
+  n_emulators <- length(object) - 1
+  if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
+  if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
+
   if (!is.null(x_test) & !is.null(y_test)) {
-    xy_test <- check_xy_test(x_test, y_test)
+    xy_test <- check_xy_test(x_test, y_test, n_dim_X, n_emulators)
     x_test <- xy_test[[1]]
     y_test <- xy_test[[2]]
   }
@@ -1714,13 +1722,6 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   } else {
     start_point <- 0
   }
-
-  X <- object$data$X
-  Y <- object$data$Y
-  n_dim_X <- ncol(X[[1]])
-  n_emulators <- length(object) - 1
-  if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
-  if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
 
   for ( k in 1:n_emulators ){
     object[[paste('emulator',k,sep='')]] <- copy_in_design(object[[paste('emulator',k,sep='')]])
@@ -1776,7 +1777,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
       int <- check_int(int, n_dim_X)
     } else {
       add_arg <- list(...)
-      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
+      xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_X, n_emulators)
       x_cand <- vector('list', n_emulators)
       for (j in 1:n_emulators){
         xy_cand_list_j <- remove_dup( xy_cand_list, rbind(X[[paste('emulator',j,sep="")]], target_points[[paste('emulator',j,sep="")]]) )
@@ -2264,7 +2265,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     }
   } else {
     add_arg <- list(...)
-    xy_cand_list <- check_xy_cand(x_cand, y_cand, n_emulators)
+    xy_cand_list <- check_xy_cand(x_cand, y_cand, n_dim_X, n_emulators)
 
     x_cand <- vector('list', n_emulators)
     x_cand_origin <- vector('list', n_emulators)
@@ -2695,13 +2696,25 @@ find_matching_indices <- function(mat1, mat2) {
 }
 
 #check argument x_cand and y_cand
-check_xy_cand <- function(x_cand, y_cand, n_dim_Y){
+check_xy_cand <- function(x_cand, y_cand, n_dim_X, n_dim_Y){
   # if ( is.null(y_cand) ) stop("'y_cand' must be provided if 'x_cand' is not NULL.", call. = FALSE)
   if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_cand) ) x_cand <- as.matrix(x_cand)
+  if ( is.vector(x_cand) ) {
+    if ( n_dim_X!=1 ){
+      x_cand <- matrix(x_cand, nrow = 1)
+    } else {
+      x_cand <- as.matrix(x_cand)
+    }
+  }
   if ( !is.null(y_cand) ) {
     if ( !is.matrix(y_cand)&!is.vector(y_cand) ) stop("'y_cand' must be a vector or a matrix.", call. = FALSE)
-    if ( is.vector(y_cand) ) y_cand <- as.matrix(y_cand)
+    if ( is.vector(y_cand) ) {
+      if ( n_dim_Y!=1 ){
+        y_cand <- matrix(y_cand, nrow = 1)
+      } else {
+        y_cand <- as.matrix(y_cand)
+      }
+    }
     if ( nrow(x_cand)!=nrow(y_cand) ) stop("'x_cand' and 'y_cand' have different number of data points.", call. = FALSE)
     if ( ncol(y_cand)!=n_dim_Y ) stop(sprintf("The dimension of 'y_cand' must be %i.", n_dim_Y), call. = FALSE)
   }
@@ -2734,13 +2747,25 @@ extract_all <- function(X ,x_cand){
 }
 
 #check argument x_test and y_test
-check_xy_test <- function(x_test, y_test){
+check_xy_test <- function(x_test, y_test, n_dim_X, n_dim_Y){
   x_test <- unname(x_test)
   y_test <- unname(y_test)
   if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
-  if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
+  if ( is.vector(x_test) ) {
+    if ( n_dim_X!=1 ){
+      x_test <- matrix(x_test, nrow = 1)
+    } else {
+      x_test <- as.matrix(x_test)
+    }
+  }
+  if ( is.vector(y_test) ) {
+    if ( n_dim_Y!=1 ){
+      y_test <- matrix(y_test, nrow = 1)
+    } else {
+      y_test <- as.matrix(y_test)
+    }
+  }
   if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
   return(list(x_test, y_test))
 }

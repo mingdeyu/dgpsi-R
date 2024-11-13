@@ -84,8 +84,6 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \code{dgp} class), or the order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
 \item If \code{x_cand} is supplied as a list when \code{object} is an instance of \code{bundle} class and a \code{aggregate} function is provided, the matrices in \code{x_cand} must have
 common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the \code{aggregate} function can be applied.
-\item Any R vector detected in \code{x_cand} will be treated as a column vector and automatically converted into a single-column
-R matrix.
 }
 }
 \examples{

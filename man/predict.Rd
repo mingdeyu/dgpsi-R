@@ -147,27 +147,30 @@ imputations specified in \code{\link[=dgp]{dgp()}}.
 \enumerate{
 \item if \code{method = "mean_var"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that
 contains two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list
-contains \emph{K} number (same number of emulators in the final layer of the system) of matrices named by the IDs of the corresponding emulators in the final layer.
+contains \emph{K} number (same number of emulators in the final layer of the system) of matrices named by the \code{ID}s of the corresponding emulators in the final layer.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 in the final layer.
 \item if \code{method = "mean_var"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
 two sub-lists named \code{mean} for the predictive means and \code{var} for the predictive variances respectively. Each sub-list contains \emph{L}
 (i.e., the number of layers in the emulated system) components named \verb{layer1, layer2,..., layerL}. Each component represents a layer
-and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of matrices named by the IDs of the corresponding emulators in that layer.
+and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of matrices named by the \code{ID}s of the corresponding emulators in that layer.
 Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 GP/DGP emulator in the corresponding layer.
 \item if \code{method = "sampling"} and  \code{full_layer = FALSE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
-\emph{K} number (same number of emulators in the final layer of the system) of sub-lists named by the IDs of the corresponding emulators in the final layer. Each
+\emph{K} number (same number of emulators in the final layer of the system) of sub-lists named by the \code{ID}s of the corresponding emulators in the final layer. Each
 sub-list contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to the output
 dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 \item if \code{method = "sampling"} and  \code{full_layer = TRUE}: an updated \code{object} is returned with an additional slot called \code{results} that contains
 \emph{L} (i.e., the number of layers of the emulated system) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list represents a layer
-and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of components named by the IDs of the corresponding emulators in that layer.
+and contains \emph{K} number (same number of emulators in the corresponding layer of the system) of components named by the \code{ID}s of the corresponding emulators in that layer.
 Each component contains \emph{D} matrices, named \verb{output1, output2,..., outputD}, that correspond to
 the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 samples of size: \code{B * sample_size}, where \code{B} is the number of imputations specified in \code{\link[=lgp]{lgp()}}.
 }
+
+If \code{object} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} without specifying the \code{struc} argument in data frame form, the \code{ID}s, that are used as names of sub-lists or
+matrices within \code{results}, will be replaced by \code{emulator1}, \code{emulator2}, and so on.
 }
 
 The \code{results} slot will also include:
@@ -182,10 +185,6 @@ from GP, DGP, or linked (D)GP emulators.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
-}
-\note{
-Any R vector detected in \code{x} will be treated as a column vector and automatically converted into a single-column R matrix.
-Thus, if \code{x} is a single testing data point with multiple dimensions, it must be given as a matrix.
 }
 \examples{
 \dontrun{

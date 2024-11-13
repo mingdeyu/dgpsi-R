@@ -84,34 +84,35 @@
 #' * `r new_badge("updated")` If `object` is an instance of the `lgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that
 #'      contains two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list
-#'      contains *K* number (same number of emulators in the final layer of the system) of matrices named by the IDs of the corresponding emulators in the final layer.
+#'      contains *K* number (same number of emulators in the final layer of the system) of matrices named by the `ID`s of the corresponding emulators in the final layer.
 #'      Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 #'      in the final layer.
 #'   2. if `method = "mean_var"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains
 #'      two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list contains *L*
 #'      (i.e., the number of layers in the emulated system) components named `layer1, layer2,..., layerL`. Each component represents a layer
-#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of matrices named by the IDs of the corresponding emulators in that layer.
+#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of matrices named by the `ID`s of the corresponding emulators in that layer.
 #'      Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 #'      GP/DGP emulator in the corresponding layer.
 #'   3. if `method = "sampling"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that contains
-#'      *K* number (same number of emulators in the final layer of the system) of sub-lists named by the IDs of the corresponding emulators in the final layer. Each
+#'      *K* number (same number of emulators in the final layer of the system) of sub-lists named by the `ID`s of the corresponding emulators in the final layer. Each
 #'      sub-list contains *D* matrices, named `output1, output2,..., outputD`, that correspond to the output
 #'      dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 #'      of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
 #'   4. if `method = "sampling"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains
 #'      *L* (i.e., the number of layers of the emulated system) sub-lists named `layer1, layer2,..., layerL`. Each sub-list represents a layer
-#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of components named by the IDs of the corresponding emulators in that layer.
+#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of components named by the `ID`s of the corresponding emulators in that layer.
 #'      Each component contains *D* matrices, named `output1, output2,..., outputD`, that correspond to
 #'      the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 #'      samples of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
+#'
+#'   If `object` is an instance of the `lgp` class created by [lgp()] without specifying the `struc` argument in data frame form, the `ID`s, that are used as names of sub-lists or
+#'   matrices within `results`, will be replaced by `emulator1`, `emulator2`, and so on.
 #'
 #' The `results` slot will also include:
 #' * `r new_badge("new")` the value of `M`, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.
 #' * the value of `sample_size` if `method = "sampling"`.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note Any R vector detected in `x` will be treated as a column vector and automatically converted into a single-column R matrix.
-#'     Thus, if `x` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @examples
 #' \dontrun{
 #'
@@ -132,7 +133,13 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
   }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x) ) x <- as.matrix(x)
+  if ( is.vector(x) ) {
+    if ( ncol(object$data$X)!=1 ){
+      x <- matrix(x, nrow = 1)
+    } else {
+      x <- as.matrix(x)
+    }
+  }
   if ( ncol(x) != ncol(object$data$X) ) stop("'x' must have the same number of dimensions as the training input.", call. = FALSE)
 
   L = object$constructor_obj$n_layer
@@ -267,7 +274,16 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
   if ( "metadata" %in% names(object$specs) ){
     if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
     x <- unname(x)
-    if ( is.vector(x) ) x <- as.matrix(x)
+    global_dim <- unique(subset(object$specs$struc, object$specs$struc[["From_Emulator"]] == "Global")$From_Output)
+    if ( is.vector(x) ) {
+      if ( global_dim!=1 ){
+        x <- matrix(x, nrow = 1)
+        if ( ncol(x)<global_dim ) stop(sprintf("'x' has missing dimensions. Expected %d, found %d in 'x'.",
+                                                global_dim, ncol(x)), call. = FALSE)
+      } else {
+        x <- as.matrix(x)
+      }
+    }
     num_layers <- length(object$constructor)
     x_list <- vector("list", num_layers)
     x_list[[1]] <- x
@@ -299,7 +315,30 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
     if ( !is.list(x) ) {
       if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
       x <- unname(x)
-      if ( is.vector(x) ) x <- as.matrix(x)
+      if ( is.vector(x) ) {
+        is.1d <- TRUE
+        for (item in object$constructor_obj[[1]]){
+          if (item$type == 'gp'){
+            if (length(item$structure$input_dim) != 1){
+              is.1d <- FALSE
+              break
+            }
+          } else {
+            for (ker in item$structure[[1]]){
+              if (length(ker$input_dim) != 1){
+                is.1d <- FALSE
+                break
+              }
+            }
+            if (isFALSE(is.1d)) break
+          }
+        }
+        if ( is.1d ){
+          x <- as.matrix(x)
+        } else {
+          x <- matrix(x, nrow = 1)
+        }
+      }
     } else {
       for ( l in 1:length(x) ){
         if ( l==1 ){
@@ -307,7 +346,30 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
             stop("The first element of 'x' must be a vector or a matrix.", call. = FALSE)
           } else {
             x[[l]] <- unname(x[[l]])
-            if ( is.vector(x[[l]]) ) x[[l]] <- as.matrix(x[[l]])
+            if ( is.vector(x[[l]]) ) {
+              is.1d <- TRUE
+              for (item in object$constructor_obj[[l]]){
+                if (item$type == 'gp'){
+                  if (length(item$structure$input_dim) != 1){
+                    is.1d <- FALSE
+                    break
+                  }
+                } else {
+                  for (ker in item$structure[[1]]){
+                    if (length(ker$input_dim) != 1){
+                      is.1d <- FALSE
+                      break
+                    }
+                  }
+                  if (isFALSE(is.1d)) break
+                }
+              }
+              if ( is.1d ){
+                x[[l]] <- as.matrix(x[[l]])
+              } else {
+                x[[l]] <- matrix(x[[l]], nrow = 1)
+              }
+            }
             nrow_x <- nrow(x[[l]])
           }
         } else {
@@ -315,7 +377,27 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
             if ( !is.matrix(x[[l]][[k]])&!is.null(x[[l]][[k]])&!is.vector(x[[l]][[k]]) ) stop(sprintf("The element %i in the sublist %i of 'x' must be a vector, a matrix, or 'NULL'.", k, l), call. = FALSE)
             if ( is.matrix(x[[l]][[k]])|is.vector(x[[l]][[k]]) ){
               x[[l]][[k]] <- unname(x[[l]][[k]])
-              if (is.vector(x[[l]][[k]])) x[[l]][[k]] <- as.matrix(x[[l]][[k]])
+              if (is.vector(x[[l]][[k]])) {
+                is.1d <- TRUE
+                item_cont <- object$constructor_obj[[l]][[k]]
+                if (item_cont$type == 'gp'){
+                  if (length(item_cont$structure$input_dim) != 1){
+                    is.1d <- FALSE
+                  }
+                } else {
+                  for (ker in item_cont$structure[[1]]){
+                    if (length(ker$input_dim) != 1){
+                      is.1d <- FALSE
+                      break
+                    }
+                  }
+                }
+                if ( is.1d ){
+                  x[[l]][[k]] <- as.matrix(x[[l]][[k]])
+                } else {
+                  x[[l]][[k]] <- matrix(x[[l]][[k]], nrow = 1)
+                }
+              }
               if ( nrow(x[[l]][[k]])!=nrow_x ) {
                 stop(sprintf("The element %i in the sublist %i of 'x' has inconsistent number of data points with the first element of 'x'.", k, l), call. = FALSE)
               }
@@ -434,7 +516,13 @@ predict.gp <- function(object, x, method = NULL, sample_size = 50, M = 50, cores
   }
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x) ) x <- as.matrix(x)
+  if ( is.vector(x) ) {
+    if ( ncol(object$data$X)!=1 ){
+      x <- matrix(x, nrow = 1)
+    } else {
+      x <- as.matrix(x)
+    }
+  }
   if ( ncol(x) != ncol(object$data$X) ) stop("'x' must have the same number of dimensions as the training input.", call. = FALSE)
 
   if ( is.null(method) ){

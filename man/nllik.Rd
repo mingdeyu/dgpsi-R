@@ -31,10 +31,6 @@ DGP emulator with a likelihood layer.
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
-\note{
-Any R vector detected in \code{x} and \code{y} will be treated as a column vector and automatically converted into a single-column
-R matrix. Thus, if \code{x} is a single testing data point with multiple dimensions, it must be given as a matrix.
-}
 \examples{
 \dontrun{
 

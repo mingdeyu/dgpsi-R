@@ -375,8 +375,6 @@ even if errors or \code{NA} outputs are encountered from \code{f} at certain inp
 within \code{f} by appropriately returning \code{NA}s.
 \item When defining \code{eval}, the output metric needs to be positive if \code{\link[=draw]{draw()}} is used with \code{log = T}. And one needs to ensure that a lower metric value indicates
 a better emulation performance if \code{target} is set.
-\item Any R vector detected in \code{x_test} and \code{y_test} will be treated as a column vector and automatically converted into a single-column
-R matrix. Thus, if \code{x_test} or \code{y_test} is a single testing data point with multiple dimensions, it must be given as a matrix.
 }
 }
 \examples{

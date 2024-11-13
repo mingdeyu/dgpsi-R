@@ -8,8 +8,8 @@
 #' * the S3 class `dgp`.
 #' * the S3 class `lgp`.
 #' @param x_test the OOS testing input data:
-#' * if `x` is an instance of the `gp` or `dgp` class, `x_test` is a matrix where each row is an input testing data point and each column is an input dimension.
-#' * if `x` is an instance of the `lgp` class, `x_test` can be a matrix or a list:
+#' * if `object` is an instance of the `gp` or `dgp` class, `x_test` is a matrix where each row is an input testing data point and each column is an input dimension.
+#' * `r lifecycle::badge("deprecated")` if `object` is an instance of the `lgp` class, `x_test` can be a matrix or a list:
 #'    - if `x_test` is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 #'      The rows of `x_test` represent different input data points and the columns represent input dimensions across all emulators in
 #'      the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
@@ -22,19 +22,25 @@
 #'      their corresponding emulators are placed in `struc` argument of [lgp()]. If there is no global input data to a certain emulator,
 #'      set `NULL` in the corresponding sub-list of `x_test`.
 #'
-#' `x_test` must be provided for the validation if `x` is an instance of the `lgp`. Defaults to `NULL`.
+#'    **This option for linked (D)GP emulators is deprecated and will be removed in the next release.**
+#' * `r new_badge("new")` If `object` is an instance of the `lgp` class created by [lgp()] with argument `struc` in data frame form,
+#'   `x_test` must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
+#'   The column indices in `x_test` must align with the indices specified in the `From_Output` column of the `struc` data frame (used in [lgp()]),
+#'   corresponding to rows where the `From_Emulator` column is `"Global"`.
+#'
+#' `x_test` must be provided for the validation if `object` is an instance of the `lgp`. Defaults to `NULL`.
 #' @param y_test the OOS testing output data that correspond to `x_test`:
-#' * if `x` is an instance of the `gp` class, `y_test` is a matrix with only one column and each row being an testing output data point.
-#' * if `x` is an instance of the `dgp` class, `y_test` is a matrix with its rows being testing output data points and columns being
+#' * if `object` is an instance of the `gp` class, `y_test` is a matrix with only one column and each row being an testing output data point.
+#' * if `object` is an instance of the `dgp` class, `y_test` is a matrix with its rows being testing output data points and columns being
 #'   output dimensions.
-#' * if `x` is an instance of the `lgp` class, `y_test` can be a single matrix or a list of matrices:
+#' * if `object` is an instance of the `lgp` class, `y_test` can be a single matrix or a list of matrices:
 #'   - if `y_test` is a single matrix, then there is only one emulator in the final layer of the linked emulator system and `y_test`
 #'     represents the emulator's output with rows being testing positions and columns being output dimensions.
 #'   - if `y_test` is a list, then `y_test` should have *M* number (the same number of emulators in the final layer of the system) of matrices.
 #'     Each matrix has its rows corresponding to testing positions and columns corresponding to output dimensions of the associated emulator
 #'     in the final layer.
 #'
-#' `y_test` must be provided for the validation if `x` is an instance of the `lgp`. Defaults to `NULL`.
+#' `y_test` must be provided for the validation if `object` is an instance of the `lgp`. Defaults to `NULL`.
 #' @param method `r new_badge("updated")` the prediction approach to use in validations: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`).
 #'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
 #'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
@@ -113,11 +119,9 @@
 #'
 #' @note
 #' * When both `x_test` and `y_test` are `NULL`, the LOO cross validation will be implemented. Otherwise, OOS validation will
-#'   be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., `x` is an instance of the `gp` or `dgp`
-#'   class). If a linked (D)GP emulator (i.e., `x` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
+#'   be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., `object` is an instance of the `gp` or `dgp`
+#'   class). If a linked (D)GP emulator (i.e., `object` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
 #'   also be provided for OOS validation.
-#' * Any R vector detected in `x_test` and `y_test` will be treated as a column vector and automatically converted into a single-column
-#'   R matrix. Thus, if `x_test` or `y_test` is a single testing data point with multiple dimensions, it must be given as a matrix.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
 #' \dontrun{
@@ -232,7 +236,13 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
     y_test <- unname(y_test)
     if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
     if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
-    if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
+    if ( is.vector(x_test) ) {
+      if ( ncol(object$data$X)!=1 ){
+        x_test <- matrix(x_test, nrow = 1)
+      } else {
+        x_test <- as.matrix(x_test)
+      }
+    }
     if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
     if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
     if ( ncol(x_test) != ncol(object$data$X) ) stop("'x_test' must have the same number of dimensions as the training input.", call. = FALSE)
@@ -471,8 +481,20 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     y_test <- unname(y_test)
     if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
     if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
-    if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
-    if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
+    if ( is.vector(x_test) ) {
+      if ( ncol(object$data$X)!=1 ){
+        x_test <- matrix(x_test, nrow = 1)
+      } else {
+        x_test <- as.matrix(x_test)
+      }
+    }
+    if ( is.vector(y_test) ) {
+      if ( ncol(object$data$Y)!=1 ){
+        y_test <- matrix(y_test, nrow = 1)
+      } else {
+        y_test <- as.matrix(y_test)
+      }
+    }
     if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
     if ( ncol(x_test) != ncol(object$data$X) ) stop("'x_test' must have the same number of dimensions as the training input.", call. = FALSE)
     #check existing OOS
@@ -611,32 +633,141 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   #For OOS
   if (!is.null(x_test) & !is.null(y_test)) {
     #check testing input
-    if ( !is.list(x_test) ) {
-      if ( !is.matrix(x_test)&!is.vector(x_test) ) {
-        stop("'x_test' must be a vector or a matrix.", call. = FALSE)
-      } else {
-        x_test <- unname(x_test)
-        if ( is.vector(x_test) ) x_test <- as.matrix(x_test)
-        nrow_x <- nrow(x_test)
-      }
-    } else {
-      for ( l in 1:length(x_test) ){
-        if ( l==1 ){
-          if ( !is.matrix(x_test[[l]])&!is.vector(x_test[[l]]) ) {
-            stop("The first element of 'x_test' must be a vector or a matrix.", call. = FALSE)
-          } else {
-            x_test[[l]] <- unname(x_test[[l]])
-            if ( is.vector(x_test[[l]]) ) x_test[[l]] <- as.matrix(x_test[[l]])
-            nrow_x <- nrow(x_test[[l]])
-          }
+    if ( "metadata" %in% names(object$specs) ){
+      if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
+      x_test <- unname(x_test)
+      global_dim <- unique(subset(object$specs$struc, object$specs$struc[["From_Emulator"]] == "Global")$From_Output)
+      if ( is.vector(x_test) ) {
+        if ( global_dim!=1 ){
+          x_test <- matrix(x_test, nrow = 1)
+          if ( ncol(x_test)<global_dim ) stop(sprintf("'x_test' has missing dimensions. Expected %d, found %d in 'x'.",
+                                                 global_dim, ncol(x_test)), call. = FALSE)
         } else {
-          for ( k in 1:length(x_test[[l]]) ){
-            if ( !is.matrix(x_test[[l]][[k]])&!is.null(x_test[[l]][[k]])&!is.vector(x_test[[l]][[k]]) ) stop(sprintf("The element %i in the sublist %i of 'x_test' must be a vector, a matrix, or 'NULL'.", k, l), call. = FALSE)
-            if ( is.matrix(x_test[[l]][[k]])|is.vector(x_test[[l]][[k]]) ){
-              x_test[[l]][[k]] <- unname(x_test[[l]][[k]])
-              if (is.vector(x_test[[l]][[k]])) x_test[[l]][[k]] <- as.matrix(x_test[[l]][[k]])
-              if ( nrow(x_test[[l]][[k]])!=nrow_x ) {
-                stop(sprintf("The element %i in the sublist %i of 'x_test' has inconsistent number of data points with the first element of 'x_test'.", k, l), call. = FALSE)
+          x_test <- as.matrix(x_test)
+        }
+      }
+      nrow_x <- nrow(x_test)
+      num_layers <- length(object$constructor)
+      x_list <- vector("list", num_layers)
+      x_list[[1]] <- x_test
+      for (l in 2:num_layers) {
+        layer_metadata <- subset(object$specs$metadata, object$specs$metadata[["Layer"]] == l)
+        layer_metadata <- layer_metadata[order(layer_metadata$Pos_in_Layer), ]
+        layer_matrices <- vector("list", nrow(layer_metadata))
+        for (k in seq_len(nrow(layer_metadata))) {
+          emulator_id <- layer_metadata$Emulator[k]
+          input_connections <- subset(object$specs$struc, object$specs$struc[["To_Emulator"]] == emulator_id)
+          global_outputs <- input_connections$From_Output[input_connections$From_Emulator == "Global"]
+          if ( length(global_outputs)>0 ) {
+            layer_matrices[[k]] <- x_test[,global_outputs,drop=F]
+          }
+        }
+        x_list[[l]] <- layer_matrices
+      }
+      x_test <- x_list
+    } else {
+      lifecycle::deprecate_warn(
+        when = "3.0.0",
+        what = I("The `object` created by `lgp()` without specifying `struc` as a data frame"),
+        details = c(
+          i = "Support for `object` structures created without `struc` specified as a data frame will be removed in the next release.",
+          i = "To ensure compatibility with future versions, please recreate the `object` by calling the updated `lgp()` with `struc` provided as a data frame."
+        )
+      )
+      # To be deprecated
+      if ( !is.list(x_test) ) {
+        if ( !is.matrix(x_test)&!is.vector(x_test) ) {
+          stop("'x_test' must be a vector or a matrix.", call. = FALSE)
+        } else {
+          x_test <- unname(x_test)
+          if ( is.vector(x_test) ) {
+            is.1d <- TRUE
+            for (item in object$constructor_obj[[1]]){
+              if (item$type == 'gp'){
+                if (length(item$structure$input_dim) != 1){
+                  is.1d <- FALSE
+                  break
+                }
+              } else {
+                for (ker in item$structure[[1]]){
+                  if (length(ker$input_dim) != 1){
+                    is.1d <- FALSE
+                    break
+                  }
+                }
+                if (isFALSE(is.1d)) break
+              }
+            }
+            if ( is.1d ){
+              x_test <- as.matrix(x_test)
+            } else {
+              x_test <- matrix(x_test, nrow = 1)
+            }
+          }
+          nrow_x <- nrow(x_test)
+        }
+      } else {
+        for ( l in 1:length(x_test) ){
+          if ( l==1 ){
+            if ( !is.matrix(x_test[[l]])&!is.vector(x_test[[l]]) ) {
+              stop("The first element of 'x_test' must be a vector or a matrix.", call. = FALSE)
+            } else {
+              x_test[[l]] <- unname(x_test[[l]])
+              if ( is.vector(x_test[[l]]) ) {
+                is.1d <- TRUE
+                for (item in object$constructor_obj[[l]]){
+                  if (item$type == 'gp'){
+                    if (length(item$structure$input_dim) != 1){
+                      is.1d <- FALSE
+                      break
+                    }
+                  } else {
+                    for (ker in item$structure[[1]]){
+                      if (length(ker$input_dim) != 1){
+                        is.1d <- FALSE
+                        break
+                      }
+                    }
+                    if (isFALSE(is.1d)) break
+                  }
+                }
+                if ( is.1d ){
+                  x_test[[l]] <- as.matrix(x_test[[l]])
+                } else {
+                  x_test[[l]] <- matrix(x_test[[l]], nrow = 1)
+                }
+              }
+              nrow_x <- nrow(x_test[[l]])
+            }
+          } else {
+            for ( k in 1:length(x_test[[l]]) ){
+              if ( !is.matrix(x_test[[l]][[k]])&!is.null(x_test[[l]][[k]])&!is.vector(x_test[[l]][[k]]) ) stop(sprintf("The element %i in the sublist %i of 'x_test' must be a vector, a matrix, or 'NULL'.", k, l), call. = FALSE)
+              if ( is.matrix(x_test[[l]][[k]])|is.vector(x_test[[l]][[k]]) ){
+                x_test[[l]][[k]] <- unname(x_test[[l]][[k]])
+                if (is.vector(x_test[[l]][[k]])) {
+                  is.1d <- TRUE
+                  item_cont <- object$constructor_obj[[l]][[k]]
+                  if (item_cont$type == 'gp'){
+                    if (length(item_cont$structure$input_dim) != 1){
+                      is.1d <- FALSE
+                    }
+                  } else {
+                    for (ker in item_cont$structure[[1]]){
+                      if (length(ker$input_dim) != 1){
+                        is.1d <- FALSE
+                        break
+                      }
+                    }
+                  }
+                  if ( is.1d ){
+                    x_test[[l]][[k]] <- as.matrix(x_test[[l]][[k]])
+                  } else {
+                    x_test[[l]][[k]] <- matrix(x_test[[l]][[k]], nrow = 1)
+                  }
+                }
+                if ( nrow(x_test[[l]][[k]])!=nrow_x ) {
+                  stop(sprintf("The element %i in the sublist %i of 'x_test' has inconsistent number of data points with the first element of 'x_test'.", k, l), call. = FALSE)
+                }
               }
             }
           }
@@ -645,25 +776,108 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     }
 
     #check testing output
-    if ( !is.list(y_test) ) {
-      if ( !is.matrix(y_test)&!is.vector(y_test) ) {
-        stop("'y_test' must be a vector or a matrix.", call. = FALSE)
-      } else {
-        y_test <- unname(y_test)
-        if ( is.vector(y_test) ) y_test <- as.matrix(y_test)
+    if ( "metadata" %in% names(object$specs) ){
+      if ( !is.list(y_test) ) {
+        if ( !is.matrix(y_test)&!is.vector(y_test) ) {
+          stop("'y_test' must be a vector or a matrix.", call. = FALSE)
+        } else {
+          final_layer <- max(object$specs$metadata$Layer)
+          # Filter metadata to get emulators in the final layer
+          final_layer_emulators <- subset(object$specs$metadata, object$specs$metadata[["Layer"]] == final_layer)
+          emu_num <- nrow(final_layer_emulators)
+          if ( emu_num!=1 ) stop(sprintf("The linked system contains %d emulators in its final layer. 'y_test' must be a list of %d vectors or matrices.",
+                                         emu_num, emu_num), call. = FALSE)
+          y_test <- unname(y_test)
+          if ( is.vector(y_test) ) {
+            output_dim <- final_layer_emulators$Total_Output_Dims
+            if (output_dim==1){
+              y_test <- as.matrix(y_test)
+            } else {
+              y_test <- matrix(y_test, nrow = 1)
+            }
+          }
+        }
         nrow_y <- nrow(y_test)
         if ( nrow_y!=nrow_x ) stop("The number of data points are inconsistent between 'x_test' and 'y_test'.", call. = FALSE)
-        }
-    } else {
-      for ( l in 1:length(y_test) ){
+      } else {
+        final_layer <- max(object$specs$metadata$Layer)
+        # Filter metadata to get emulators in the final layer
+        final_layer_emulators <- subset(object$specs$metadata, object$specs$metadata[["Layer"]] == final_layer)
+        emu_num <- nrow(final_layer_emulators)
+        if ( emu_num!=length(y_test) ) stop(sprintf("The linked system's final layer contains %d emulators. 'y_test' should contain %d vectors or matrices, but found %d.",
+                                                    emu_num, emu_num, length(y_test)), call. = FALSE)
+        for ( l in 1:length(y_test) ){
           if ( !is.matrix(y_test[[l]])&!is.vector(y_test[[l]]) ) {
             stop(sprintf("The element %i of 'y_test' must be a vector or a matrix.", l), call. = FALSE)
           } else {
             y_test[[l]] <- unname(y_test[[l]])
-            if ( is.vector(y_test[[l]]) ) y_test[[l]] <- as.matrix(y_test[[l]])
+            if ( is.vector(y_test[[l]]) ) {
+              emu_cont <- subset(final_layer_emulators, final_layer_emulators[["Pos_in_Layer"]] == l)
+              emu_cont_output_dim <- emu_cont$Total_Output_Dims
+              if (emu_cont_output_dim==1){
+                y_test[[l]] <- as.matrix(y_test[[l]])
+              } else {
+                y_test[[l]] <- matrix(y_test[[l]], nrow = 1)
+              }
+            }
             nrow_y <- nrow(y_test[[l]])
             if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points are inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
           }
+        }
+      }
+    } else {
+      if ( !is.list(y_test) ) {
+        if ( !is.matrix(y_test)&!is.vector(y_test) ) {
+          stop("'y_test' must be a vector or a matrix.", call. = FALSE)
+        } else {
+          total_layer <- length(object$constructor_obj)
+          emu_num <- length(object$constructor_obj[[total_layer]])
+          if ( emu_num!=1 ) stop(sprintf("The linked system contains %d emulators in its final layer. 'y_test' must be a list of %d vectors or matrices.",
+                                          emu_num, emu_num), call. = FALSE)
+          y_test <- unname(y_test)
+          if ( is.vector(y_test) ) {
+            emu_cont <- object$constructor_obj[[total_layer]][[emu_num]]
+            if (emu_cont$type == 'gp'){
+              y_test <- as.matrix(y_test)
+            } else {
+              dgp_layer <- length(emu_cont$structure)
+              if (length(emu_cont$structure[[dgp_layer]])==1){
+                y_test <- as.matrix(y_test)
+              } else {
+                y_test <- matrix(y_test, nrow = 1)
+              }
+            }
+          }
+          nrow_y <- nrow(y_test)
+          if ( nrow_y!=nrow_x ) stop("The number of data points are inconsistent between 'x_test' and 'y_test'.", call. = FALSE)
+        }
+      } else {
+        total_layer <- length(object$constructor_obj)
+        emu_num <- length(object$constructor_obj[[total_layer]])
+        if ( emu_num!=length(y_test) ) stop(sprintf("The linked system's final layer contains %d emulators. 'y_test' should contain %d vectors or matrices, but found %d.",
+                                                    emu_num, emu_num, length(y_test)), call. = FALSE)
+        for ( l in 1:length(y_test) ){
+          if ( !is.matrix(y_test[[l]])&!is.vector(y_test[[l]]) ) {
+            stop(sprintf("The element %i of 'y_test' must be a vector or a matrix.", l), call. = FALSE)
+          } else {
+            y_test[[l]] <- unname(y_test[[l]])
+            if ( is.vector(y_test[[l]]) ) {
+              emu_cont <- object$constructor_obj[[total_layer]][[l]]
+              if (emu_cont$type == 'gp'){
+                y_test[[l]] <- as.matrix(y_test[[l]])
+              } else {
+                dgp_layer <- length(emu_cont$structure)
+                if (length(emu_cont$structure[[dgp_layer]])==1){
+                  y_test[[l]] <- as.matrix(y_test[[l]])
+                } else {
+                  y_test[[l]] <- matrix(y_test[[l]], nrow = 1)
+                }
+              }
+            }
+            nrow_y <- nrow(y_test[[l]])
+            if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points are inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
+          }
+        }
       }
     }
 
@@ -675,13 +889,13 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         if ( isTRUE(verb) ) message(" OOS results found in the lgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
+        if ( identical(object$oos$x_test, if ( "metadata" %in% names(object$specs) ){x_test[[1]]} else {x_test} ) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
-        } else if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&("median" %in% names(object$oos)) & (M == object$oos$M) ){
+        } else if ( identical(object$oos$x_test, if ( "metadata" %in% names(object$specs) ){x_test[[1]]} else {x_test}) & identical(object$oos$y_test, y_test) & (method == 'sampling')&("median" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( sample_size == object$oos$sample_size ) {
             if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
@@ -700,7 +914,11 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     }
 
     if ( isTRUE(verb) ) message("Initializing the OOS ...", appendLF = FALSE)
-    dat <- list('x_test' = x_test,'y_test' = y_test)
+    if ( "metadata" %in% names(object$specs) ){
+      dat <- list('x_test' = x_test[[1]],'y_test' = y_test)
+    } else {
+      dat <- list('x_test' = x_test,'y_test' = y_test)
+    }
     if ( !is.list(y_test) ) y_test <- list(y_test)
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")

@@ -38,8 +38,6 @@
 #'   - `design` created by [design()]
 #'
 #'   in `object` will be removed and not contained in the returned object.
-#' * Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
-#'   R matrix. Thus, if `X` is a single data point with multiple dimensions, it must be given as a matrix.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
 #' \dontrun{
@@ -86,8 +84,21 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
 
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(X) ) X <- as.matrix(X)
-  if ( is.vector(Y) ) Y <- as.matrix(Y)
+
+  if ( is.vector(X) ) {
+    if ( ncol(object$data$X)!=1 ){
+      X <- matrix(X, nrow = 1)
+    } else {
+      X <- as.matrix(X)
+    }
+  }
+  if ( is.vector(Y) ) {
+    if ( ncol(object$data$Y)!=1 ){
+      Y <- matrix(Y, nrow = 1)
+    } else {
+      Y <- as.matrix(Y)
+    }
+  }
 
   if ( nrow(X)!=nrow(Y) ) stop("'X' and 'Y' have different number of data points.", call. = FALSE)
   if ( isFALSE(reset)&ncol(X)!=ncol(object$data$X) ) stop("'X' and the training input of the DGP emulator must have same number of dimensions when 'reset = FALSE'.", call. = FALSE)
@@ -171,7 +182,13 @@ update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, .
   }
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(Y)&!is.vector(Y) ) stop("'Y' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(X) ) X <- as.matrix(X)
+  if ( is.vector(X) ) {
+    if ( ncol(object$data$X)!=1 ){
+      X <- matrix(X, nrow = 1)
+    } else {
+      X <- as.matrix(X)
+    }
+  }
   if ( is.vector(Y) ) Y <- as.matrix(Y)
 
   if ( nrow(X)!=nrow(Y) ) stop("'X' and 'Y' have different number of data points.", call. = FALSE)
