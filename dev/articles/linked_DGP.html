@@ -92,7 +92,7 @@ system of three synthetic computer models.</p>
 <h2 id="construct-a-synthetic-system">Construct a synthetic system<a class="anchor" aria-label="anchor" href="#construct-a-synthetic-system"></a>
 </h2>
 <p>We consider the following synthetic system</p>
-<p><img src="images%2Flinked_model.png" style="width:60.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_model.png" style="width:60.0%"></p>
 <p>that involves three models defined by:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Model 1</span></span>
@@ -146,7 +146,7 @@ LOO results before plotting with <code><a href="../reference/plot.html">plot()</
 <pre><code><span><span class="co">## Validating and computing ... done</span></span>
 <span><span class="co">## Post-processing LOO results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
-<p><img src="images%2Fmodel_1_loo.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/model_1_loo.png" style="width:90.0%"></p>
 </div>
 <div class="section level2">
 <h2 id="emulation-of-model-2">Emulation of Model 2<a class="anchor" aria-label="anchor" href="#emulation-of-model-2"></a>
@@ -171,7 +171,7 @@ function:</p>
 <pre><code>Validating and computing ... done
 Post-processing LOO results ... done
 Plotting ... done</code></pre>
-<p><img src="images%2Fmodel_2_loo.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/model_2_loo.png" style="width:90.0%"></p>
 </div>
 <div class="section level2">
 <h2 id="emulation-of-model-3">Emulation of Model 3<a class="anchor" aria-label="anchor" href="#emulation-of-model-3"></a>
@@ -192,7 +192,7 @@ to emulate the Model 3:</p>
 <pre><code>Validating and computing ... done
 Post-processing LOO results ... done
 Plotting ... done</code></pre>
-<p><img src="images%2Fmodel_3_loo.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/model_3_loo.png" style="width:90.0%"></p>
 </div>
 <div class="section level2">
 <h2 id="emulation-of-linked-model">Emulation of Linked Model<a class="anchor" aria-label="anchor" href="#emulation-of-linked-model"></a>
@@ -276,12 +276,12 @@ generating 15 training data points from Model 1 and Model 2:</p>
 <code class="sourceCode R"><span><span class="co"># GP emulator</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_gp</span>, x_test <span class="op">=</span> <span class="va">test_x</span>, y_test <span class="op">=</span> <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'line'</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html" class="external-link">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">'GP Emulator'</span>, theme <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images%2Flinked_result.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_result.png" style="width:90.0%"></p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Linked emulator</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_link</span>, x_test <span class="op">=</span> <span class="va">test_x</span>, y_test <span class="op">=</span> <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'line'</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html" class="external-link">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">'Linked Emulator'</span>, theme <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images%2Flinked_result_new.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_result_new.png" style="width:90.0%"></p>
 <p>It can be seen from the above plots that the linked emulator
 outperforms the GP emulator with significantly better mean predictions
 and predictive uncertainties.</p>
@@ -302,14 +302,14 @@ above linked computer system:</p>
 <pre><code><span><span class="co">## Validating and computing ... done</span></span>
 <span><span class="co">## Post-processing OOS results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
-<p><img src="images%2Fgp_oos.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/gp_oos.png" style="width:90.0%"></p>
 <p>and the linked emulator:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_link</span>, <span class="va">test_x_oos</span>, <span class="va">test_y_oos</span>, style <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Validating and computing ... done</span></span>
 <span><span class="co">## Post-processing OOS results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
-<p><img src="images%2Flinked_oos.png" style="width:90.0%"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_oos.png" style="width:90.0%"></p>
 <p>which show that the linked emulator outperforms the GP emulator with
 significantly better predictive accuracy and lower NRMSE.</p>
 </div>
