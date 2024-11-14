@@ -64,7 +64,7 @@ by generating either a table or an interactive plot of the emulator’s structur
 <span><span class="fu">summary</span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="st">"plot"</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'lgp'</span></span>
-<span><span class="fu">summary</span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="st">"plot"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">summary</span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="st">"plot"</span>, group_size <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,6 +87,13 @@ returns an interactive visualization. Defaults to <code>"plot"</code>. If the <c
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>N/A.</p></dd>
+
+
+<dt id="arg-group-size">group_size<a class="anchor" aria-label="anchor" href="#arg-group-size"></a></dt>
+<dd><p>an integer secifying the number of consecutive layers to be grouped together
+in the interactive visualization of linked emulators when <code>type = "plot"</code>.
+This argument is only applicable if <code>object</code> is an instance of the <code>lgp</code> class.
+Defaults to <code>1</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
