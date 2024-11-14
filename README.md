@@ -1,4 +1,4 @@
-# dgpsi <img src="man/figures/dgpsi-logo.png" align="right" height="139" />
+# dgpsi <img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/man/figures/dgpsi_logo.png" align="right" height="139" />
 
   [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dgpsi)](https://CRAN.R-project.org/package=dgpsi)
   [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)

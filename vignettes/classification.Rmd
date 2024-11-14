@@ -107,7 +107,7 @@ plot(m_dgp, X_test, Y_test)
 ## Plotting ... done
 ```
 
-![](images/classifier_oos_1.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/classifier_oos_1.png){width=90%}
 
 By default, `plot()` displays true labels against predicted label proportions at each input position. Alternatively, setting `style = 2` in `plot()` generates a confusion matrix:
 
@@ -121,7 +121,7 @@ plot(m_dgp, X_test, Y_test, style = 2)
 ## Plotting ... done
 ```
 
-![](images/classifier_oos_2.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/classifier_oos_2.png){width=90%}
 
 ### References
 

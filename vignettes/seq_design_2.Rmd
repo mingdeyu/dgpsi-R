@@ -54,7 +54,7 @@ p3 <- ggplot(data = output3, aes(x = x, y = y)) + geom_line(color = 'green4') + 
 wrap_plots(list(p1, p2, p3)) + plot_annotation(title = 'Synthetic Simulator')
 ```
 
-![](images/seq2_fct.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_fct.png){width=90%}
 
 We now specify a seed with `set_seed()` from the package for reproducibility
 
@@ -241,7 +241,7 @@ draw(m, 1, 'design') + draw(m, 2, 'design') + draw(m, 3, 'design') +
   plot_layout() & theme(legend.position = 'bottom')
 ```
 
-![](images/seq2_design.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_design.png){width=90%}
 
 The figure above shows that for the first emulator most of the design points are added below 0.5 whilst for the second emulator most of the design points concentrate around 0.5. For the third emulator, the resulting design is space-filling. It can be seen that these design point distributions are consistent with the functional complexities of the three outputs. 
 
@@ -311,7 +311,7 @@ p3 <- draw(m, emulator = 3, type = 'rmse', log = T) +
 p1 + p2 + p3 + plot_layout(guides = 'collect') & theme(legend.position = 'bottom')
 ```
 
-![](images/seq2_rmse.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_rmse.png){width=90%}
 
 It can be seen from the plot above that with the sequential design, emulators in the bundle can achieve higher or similar accuracy with smaller number of design points. 
 

@@ -28,7 +28,7 @@ returns an interactive visualization. Defaults to \code{"plot"}. If the \code{ob
 
 \item{...}{N/A.}
 
-\item{group_size}{an integer secifying the number of consecutive layers to be grouped together
+\item{group_size}{an integer specifying the number of consecutive layers to be grouped together
 in the interactive visualization of linked emulators when \code{type = "plot"}.
 This argument is only applicable if \code{object} is an instance of the \code{lgp} class.
 Defaults to \code{1}.}

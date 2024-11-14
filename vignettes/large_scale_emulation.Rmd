@@ -83,7 +83,7 @@ plot(m)
 ## Plotting ... done
 ```
 
-![](images/vecchia_loo.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/vecchia_loo.png){width=90%}
 
 or the Out-Of-Sample (OOS) validation plot over `1000` randomly generated testing locations:
 
@@ -99,7 +99,7 @@ plot(m, oos_x, oos_y)
 ## Plotting ... done
 ```
 
-![](images/vecchia_oos.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/vecchia_oos.png){width=90%}
 
 ### Performance tip
 

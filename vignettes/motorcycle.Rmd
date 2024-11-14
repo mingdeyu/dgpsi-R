@@ -49,7 +49,7 @@ and plot them:
 plot(X, Y, pch = 16, cex = 1, xlab = 'Time', ylab = 'Acceleration', cex.axis = 1.3, cex.lab = 1.3)
 ```
 
-![](images/motorcycle_data.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_data.png){width=90%}
 
 Before constructing an emulator, we first specify a seed with `set_seed()` from the package for reproducibility
 
@@ -147,7 +147,7 @@ plot(m_gp, test_x, test_y)
 ## Plotting ... done
 ```
 
-![](images/motorcycle_gp_oos.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_gp_oos.png){width=90%}
 
 and for the DGP emulator:
 
@@ -161,7 +161,7 @@ plot(m_dgp, test_x, test_y)
 ## Plotting ... done
 ```
 
-![](images/motorcycle_dgp_oos.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_dgp_oos.png){width=90%}
 
 Note that we still need to provide `test_x` and `test_y` to `plot()` even they have already been provided to `validate()`. Otherwise, `plot()` will draw the LOO cross validation plot. The visualizations above show that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noises embedded in the underlying data set, even though they have quite similar NRMSEs.
 

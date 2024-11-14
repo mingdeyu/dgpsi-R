@@ -575,7 +575,7 @@ read <- function(pkl_file) {
 #'     If set to `"table"`, the function returns a summary in table. If set to `"plot"`, the function
 #'     returns an interactive visualization. Defaults to `"plot"`. If the `object` was created with
 #'     `lgp()` where `struc` is not a data frame, `type` will automatically default to `"table"`.
-#' @param group_size an integer secifying the number of consecutive layers to be grouped together
+#' @param group_size an integer specifying the number of consecutive layers to be grouped together
 #'     in the interactive visualization of linked emulators when `type = "plot"`.
 #'     This argument is only applicable if `object` is an instance of the `lgp` class.
 #'     Defaults to `1`.
