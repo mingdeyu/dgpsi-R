@@ -575,6 +575,10 @@ read <- function(pkl_file) {
 #'     If set to `"table"`, the function returns a summary in table. If set to `"plot"`, the function
 #'     returns an interactive visualization. Defaults to `"plot"`. If the `object` was created with
 #'     `lgp()` where `struc` is not a data frame, `type` will automatically default to `"table"`.
+#' @param group_size an integer secifying the number of consecutive layers to be grouped together
+#'     in the interactive visualization of linked emulators when `type = "plot"`.
+#'     This argument is only applicable if `object` is an instance of the `lgp` class.
+#'     Defaults to `1`.
 #' @param ... N/A.
 #'
 #' @return Either a table or an interactive visualization of the emulator, returned as a `visNetwork` object.
@@ -1019,7 +1023,7 @@ summary.dgp <- function(object, type = "plot", ...) {
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @export
-summary.lgp <- function(object, type = "plot", ...) {
+summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1032,6 +1036,7 @@ summary.lgp <- function(object, type = "plot", ...) {
       if ( isFALSE("emulator_obj" %in% names(object)) ) stop("Table summary is only available when 'object' is built with `mode = 'activate'` in lgp(). Use `type = 'plot'` instead for graphical summary.", call. = FALSE)
       pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
     } else {
+      N <- as.integer(group_size)
       c24_rgba_lighter <- c(
         "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
         "rgba(240, 115, 115, 1)",   # lighter #E31A1C
@@ -1114,23 +1119,30 @@ summary.lgp <- function(object, type = "plot", ...) {
                    Type = NA, Vecchia = FALSE),
         metadata
       )
+
+      max_layer <- max(metadata$Layer)
+
       nodes <- data.frame(
         id = metadata$Emulator,
         label = toupper(metadata$Type), # Leave the label empty to avoid duplication with the hover title
         title = paste0(
           "<div style='font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5em; color: #333;'>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Emulator ID:</b> ", metadata$Emulator, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Emulator Type:</b> ", toupper(metadata$Type), "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Input Dim(s):</b> ", metadata$Total_Input_Dims, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Total Output Dim(s):</b> ", metadata$Total_Output_Dims, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Global Output Indices:</b> ", ifelse(is.na(metadata$Global_Output_Dims), "NA", metadata$Global_Output_Dims), "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Layer in Network:</b> ", metadata$Layer, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Position in Layer:</b> ", metadata$Pos_in_Layer, "<br>",
-          "<b style='font-size: 12px; color: ", c24_rgba[-1][(metadata$Layer - 1) %% length(c24_rgba[-1]) + 1], ";'>Vecchia Mode:</b> ", ifelse(metadata$Vecchia, "ON", "OFF"),
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Emulator ID:</b> ", metadata$Emulator, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Emulator Type:</b> ", toupper(metadata$Type), "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Total Input Dim(s):</b> ", metadata$Total_Input_Dims, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Total Output Dim(s):</b> ", metadata$Total_Output_Dims, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Global Output Indices:</b> ", ifelse(is.na(metadata$Global_Output_Dims), "NA", metadata$Global_Output_Dims), "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Layer in Network:</b> ", metadata$Layer, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Position in Layer:</b> ", metadata$Pos_in_Layer, "<br>",
+          "<b style='font-size: 12px; color: ", c24_rgba[-1][((metadata$Layer - 1) %/% N) %% length(c24_rgba[-1]) + 1], ";'>Vecchia Mode:</b> ", ifelse(metadata$Vecchia, "ON", "OFF"),
           "</div>"
         ),
         level = metadata$Layer,
-        group = as.character(metadata$Layer),
+        group = paste0(
+          ((metadata$Layer - 1) %/% N) * N + 1,
+          "-",
+          pmin(((metadata$Layer - 1) %/% N + 1) * N, max_layer)
+        ),
         stringsAsFactors = FALSE,
         shape = 'circle'
       )
@@ -1141,6 +1153,7 @@ summary.lgp <- function(object, type = "plot", ...) {
         "<b style='font-size: 12px; color:", c24_rgba[1] ,";'>Global Input</b> ",
         "</div>"
       )
+      nodes[nodes$level == 0,]$group <- as.character(0)
 
       #edges <- data.frame(
       #  from = struc$From_Emulator,
@@ -1194,12 +1207,17 @@ summary.lgp <- function(object, type = "plot", ...) {
         )
 
       # Loop over remaining layers, cycling through colors if needed
-      for (i in 1:max(unique(nodes$group))) {
+      unique_groups <- unique(nodes$group[nodes$group != "0"])
+
+      # Sort unique groups in the correct numeric order
+      unique_groups <- unique_groups[order(as.numeric(sub("-.*", "", unique_groups)))]
+
+      for (i in 1:length(unique_groups)) {
         color_index <- (i - 1) %% (length(c24_rgba) - 1) + 1  # Cycle through color indices
 
         network <- network %>%
           visNetwork::visGroups(
-            groupname = as.character(i),
+            groupname = unique_groups[i],
             borderWidthSelected = 3,
             color = list(
               background = c24_rgba_lighter[-1][color_index],
@@ -1210,7 +1228,7 @@ summary.lgp <- function(object, type = "plot", ...) {
           )
       }
 
-      network %>%
+      network <- network %>%
         visNetwork::visNodes(size=15,
                              font = list(
                                size = 14,              # Font size
@@ -1220,9 +1238,14 @@ summary.lgp <- function(object, type = "plot", ...) {
                              )) %>%
         visNetwork::visOptions(
           highlightNearest = list(enabled = FALSE),
-          nodesIdSelection = TRUE) %>%
-        visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE)%>%
+          nodesIdSelection = list(enabled = TRUE, useLabels = FALSE, main = "Select by ID")) %>%
+        visNetwork::visInteraction(hover = TRUE, hideEdgesOnDrag = FALSE) %>%
         visNetwork::visHierarchicalLayout(direction = "LR")
+      if (N!=1){
+        network <- network %>%
+        visNetwork::visClusteringByGroup(groups = unique(nodes$group), label = "Layer ")
+      }
+      network
     }
   } else {
     pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')

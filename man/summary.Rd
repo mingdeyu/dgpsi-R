@@ -11,7 +11,7 @@
 
 \method{summary}{dgp}(object, type = "plot", ...)
 
-\method{summary}{lgp}(object, type = "plot", ...)
+\method{summary}{lgp}(object, type = "plot", group_size = 1, ...)
 }
 \arguments{
 \item{object}{can be one of the following:
@@ -27,6 +27,11 @@ returns an interactive visualization. Defaults to \code{"plot"}. If the \code{ob
 \code{lgp()} where \code{struc} is not a data frame, \code{type} will automatically default to \code{"table"}.}
 
 \item{...}{N/A.}
+
+\item{group_size}{an integer secifying the number of consecutive layers to be grouped together
+in the interactive visualization of linked emulators when \code{type = "plot"}.
+This argument is only applicable if \code{object} is an instance of the \code{lgp} class.
+Defaults to \code{1}.}
 }
 \value{
 Either a table or an interactive visualization of the emulator, returned as a \code{visNetwork} object.
