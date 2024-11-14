@@ -272,6 +272,9 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
   }
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   if ( "metadata" %in% names(object$specs) ){
+    if ( !("emulator_obj" %in% names(object)) ){
+      stop("'object' is not in activation mode for predictions. Please set `mode = 'activate'` in `lgp()` to build the emulator.", call. = FALSE)
+    }
     if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
     x <- unname(x)
     global_dim <- unique(subset(object$specs$struc, object$specs$struc[["From_Emulator"]] == "Global")$From_Output)

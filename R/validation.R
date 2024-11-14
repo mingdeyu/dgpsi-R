@@ -617,6 +617,12 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   }
   #check class
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
+
+  if ( "metadata" %in% names(object$specs) ){
+    if ( !("emulator_obj" %in% names(object)) ){
+      stop("'object' is not in activation mode for validations. Please set `mode = 'activate'` in `lgp()` to build the emulator.", call. = FALSE)
+    }
+  }
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
