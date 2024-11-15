@@ -87,7 +87,7 @@ plot(m)
 ```
 
 ```
-## Initializing ... done
+## Validating and computing ... done
 ## Post-processing LOO results ... done
 ## Plotting ... done
 ```

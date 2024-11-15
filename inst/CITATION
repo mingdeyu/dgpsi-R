@@ -43,5 +43,19 @@ bibentry(bibtype = "Unpublished",
   textVersion  =
   paste("Ming, D. and Williamson, D. (2023)",
         "Linked deep Gaussian process emulation for model networks,",
-        "arXiv:2306.01212")
+        "arXiv:2306.01212.")
+)
+
+bibentry(bibtype = "Manual",
+  title        = "dgpsi: An R package powered by Python for modelling linked deep Gaussian processes",
+  author       = c(as.person("Deyu Ming"),
+                   as.person("Daniel Williamson")),
+  note         = "R package version 2.4.0",
+  url          = "https://CRAN.R-project.org/package=dgpsi",
+  year         = "2024",
+
+  textVersion  =
+  paste("Ming, D. and Williamson, D. (2024)",
+        "dgpsi: An R package powered by Python for modelling linked deep Gaussian processes,",
+        "R package version 2.4.0. https://CRAN.R-project.org/package=dgpsi.")
 )
