@@ -72,7 +72,7 @@ The trained DGP emulator can be visualized using the `summary()` function:
 summary(m)
 ```
 
-<iframe src="https://mingdeyu.github.io/dgpsi-R/dgpsi_summary.html" width="100%" height="400" style="border: none;"></iframe>
+<iframe src="https://mingdeyu.github.io/dgpsi-R/dgpsi_summary.html" width="100%" height="410" style="border: none;"></iframe>
 
 The visualization also gives key information about the trained DGP emulator. Note that in the auto-generated emulator we have nugget terms fixed to `1e-6` for all GP nodes because we are emulating a deterministic step function (i.e., we would like our emulator to interpolate training data points). The prior scales (i.e., variances) for GP nodes in the first and second layers are fixed to `1.0` while that for the GP node in the final layer is estimated due to its attachment to the output. For further information on how to change the default settings to construct and train a DGP emulator, see `?dgp`.
 
@@ -92,7 +92,7 @@ plot(m)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_loo.png){width=90%} 
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_loo.png){width=100%} 
 
 The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points
 
@@ -113,7 +113,7 @@ plot(m,oos_x,oos_y)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_oos.png){width=90%}
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_oos.png){width=100%}
 
 ## Prediction
 
@@ -146,4 +146,4 @@ lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 lines(X, Y, type = 'p', pch = 16, cex = 1, col = "#0072B2") # Training data points
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_result.png){width=90%} 
+![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_result.png){width=100%} 
