@@ -1,11 +1,13 @@
-# dgpsi <img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/man/figures/dgpsi_logo.png" align="right" height="139" />
+# dgpsi <img src="man/figures/logo.png" align="right" width="120" />
 
-  [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dgpsi)](https://CRAN.R-project.org/package=dgpsi)
-  [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
-  [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
-  [![DOC](https://img.shields.io/badge/DOC-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
-  ![CRAN_License](https://img.shields.io/cran/l/dgpsi?color=green)
-  [![python](https://img.shields.io/badge/Python-dgpsi%20v2.4.0-informational)](https://github.com/mingdeyu/DGP)
+<!-- badges: start -->
+
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dgpsi)](https://CRAN.R-project.org/package=dgpsi)
+[![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
+[![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
+[![DOC](https://img.shields.io/badge/DOC-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
+[![python](https://img.shields.io/badge/Python-dgpsi%20v2.4.0-informational)](https://github.com/mingdeyu/DGP)
+<!-- badges: end -->
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations using stochastic imputation (SI). 
 

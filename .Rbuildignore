@@ -9,6 +9,5 @@
 ^\.gitignore$
 ^CRAN-SUBMISSION$
 ^RESEARCH-NOTICE\.md$
-^vignettes/images/
+^vignettes/images
 ^vignettes/motorcycle.Rmd$
-^man/figures/dgpsi_logo.png$
