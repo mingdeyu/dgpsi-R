@@ -446,12 +446,20 @@ read <- function(pkl_file) {
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"
       } else {
-        B <- res$specs$B
-        extracted_struc <- res$constructor_obj
-        set_seed(res$specs$seed)
-        obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
-        res[['emulator_obj']] <- obj
-        if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+        if ('seed' %in% names(res$specs)){
+          B <- res$specs$B
+          extracted_struc <- res$constructor_obj
+          set_seed(res$specs$seed)
+          obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
+          res[['emulator_obj']] <- obj
+          if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+        } else {
+          if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+        }
+        if ('metadata' %in% names(res$specs)){
+          res$specs$metadata <- as.data.frame(res$specs$metadata)
+          res$specs$struc <- as.data.frame(res$specs$struc)
+        }
         class(res) <- "lgp"
       }
     } else if (label == 'bundle'){
