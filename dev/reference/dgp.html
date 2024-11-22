@@ -105,13 +105,14 @@ output dimensions. When <code>likelihood</code> (see below) is not <code>NULL</c
 
 
 <dt id="arg-struc">struc<a class="anchor" aria-label="anchor" href="#arg-struc"></a></dt>
-<dd><p>a list that specifies a user-defined DGP structure. It should contain <em>L</em> (the number of DGP layers) sub-lists,
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> a list that specifies a user-defined DGP structure. It should contain <em>L</em> (the number of DGP layers) sub-lists,
 each of which represents a layer and contains a number of GP nodes (defined by <code><a href="kernel.html">kernel()</a></code>) in the corresponding layer.
 The final layer of the DGP structure (i.e., the final sub-list in <code>struc</code>) can be a likelihood
 layer that contains a likelihood function (e.g., <code><a href="Poisson.html">Poisson()</a></code>). When <code>struc = NULL</code>,
 the DGP structure is automatically generated and can be checked by applying <code><a href="summary.html">summary()</a></code> to the output from <code>dgp()</code> with <code>training = FALSE</code>.
 If this argument is used (i.e., user provides a customized DGP structure), arguments <code>depth</code>, <code>node</code>, <code>name</code>, <code>lengthscale</code>, <code>bounds</code>, <code>prior</code>,
-<code>share</code>, <code>nugget_est</code>, <code>nugget</code>, <code>scale_est</code>, <code>scale</code>, <code>connect</code>, <code>likelihood</code>, and <code>internal_input_idx</code> will NOT be used. Defaults to <code>NULL</code>.</p></dd>
+<code>share</code>, <code>nugget_est</code>, <code>nugget</code>, <code>scale_est</code>, <code>scale</code>, <code>connect</code>, <code>likelihood</code>, and <code>internal_input_idx</code> will NOT be used. Defaults to <code>NULL</code>.</p>
+<p><strong>The argument will be removed in the next release. To customize DGP specifications, please adjust the other arguments in the <code>dgp()</code> function.</strong></p></dd>
 
 
 <dt id="arg-depth">depth<a class="anchor" aria-label="anchor" href="#arg-depth"></a></dt>
@@ -340,7 +341,6 @@ with the light option <code>light = TRUE</code>) is loaded back to R by <code><a
 <li><p><code><a href="summary.html">summary()</a></code> to summarize the trained DGP emulator.</p></li>
 <li><p><code><a href="write.html">write()</a></code> to save the DGP emulator to a <code>.pkl</code> file.</p></li>
 <li><p><code><a href="set_imp.html">set_imp()</a></code> to change the number of imputations.</p></li>
-<li><p><code><a href="set_linked_idx.html">set_linked_idx()</a></code> to add the linking information to the DGP emulator for linked emulations.</p></li>
 <li><p><code><a href="design.html">design()</a></code> for sequential designs.</p></li>
 <li><p><code><a href="update.html">update()</a></code> to update the DGP emulator with new inputs and outputs.</p></li>
 <li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>

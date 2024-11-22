@@ -92,9 +92,10 @@
 
 
 <dt id="arg-struc">struc<a class="anchor" aria-label="anchor" href="#arg-struc"></a></dt>
-<dd><p>an object produced by <code><a href="kernel.html">kernel()</a></code> that gives a user-defined GP specifications. When <code>struc = NULL</code>,
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> an object produced by <code><a href="kernel.html">kernel()</a></code> that gives a user-defined GP specifications. When <code>struc = NULL</code>,
 the GP specifications are automatically generated using information provided in <code>name</code>, <code>lengthscale</code>,
-<code>nugget_est</code>, <code>nugget</code>, <code>scale_est</code>, <code>scale</code>,and <code>internal_input_idx</code>. Defaults to <code>NULL</code>.</p></dd>
+<code>nugget_est</code>, <code>nugget</code>, <code>scale_est</code>, <code>scale</code>,and <code>internal_input_idx</code>. Defaults to <code>NULL</code>.</p>
+<p><strong>The argument will be removed in the next release. To customize GP specifications, please adjust the other arguments in the <code>gp()</code> function.</strong></p></dd>
 
 
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
@@ -228,7 +229,6 @@ It is shown as <code>FALSE</code> if <code>internal_input_idx = NULL</code>. <st
 <li><p><code><a href="lgp.html">lgp()</a></code> for linked (D)GP emulator constructions.</p></li>
 <li><p><code><a href="summary.html">summary()</a></code> to summarize the trained GP emulator.</p></li>
 <li><p><code><a href="write.html">write()</a></code> to save the GP emulator to a <code>.pkl</code> file.</p></li>
-<li><p><code><a href="set_linked_idx.html">set_linked_idx()</a></code> to add the linking information to the GP emulator for linked emulations.</p></li>
 <li><p><code><a href="design.html">design()</a></code> for sequential designs.</p></li>
 <li><p><code><a href="update.html">update()</a></code> to update the GP emulator with new inputs and outputs.</p></li>
 <li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
