@@ -72,16 +72,6 @@ reference:
   contents:
   - init_py
 
-- title: "Basic Nodes"
-  desc: >
-    Functions to customize stuctures of GP and DGP emulators.
-  contents:
-  - kernel
-  - Hetero
-  - Poisson
-  - NegBin
-  - Categorical
-
 - title: "GP, DGP, and Linked (D)GP Emulations"
   desc: >
     Functions to train, validate, and make predictions from GP, DGP, and Linked (D)GP emulators.

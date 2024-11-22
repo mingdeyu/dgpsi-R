@@ -10,7 +10,7 @@ combine(...)
 \item{...}{a sequence of lists:
 \enumerate{
 \item For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by \code{\link[=kernel]{kernel()}}), or
-likelihood nodes (produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, \code{\link[=NegBin]{NegBin()}}, or \code{\link[=Categorical]{Categorical()}}).
+likelihood nodes (produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, or \code{\link[=NegBin]{NegBin()}}.
 \item For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by \code{\link[=gp]{gp()}} or
 \code{\link[=dgp]{dgp()}}) in that layer.
 }}

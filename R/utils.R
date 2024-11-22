@@ -1,6 +1,7 @@
 #' @title Combine layers
 #'
 #' @description
+#'
 #' `r lifecycle::badge("deprecated")`
 #'
 #' This function is deprecated and will be removed in the next release, as it is
@@ -10,7 +11,7 @@
 #'
 #' @param ... a sequence of lists:
 #' 1. For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by [kernel()]), or
-#'    likelihood nodes (produced by [Poisson()], [Hetero()], [NegBin()], or [Categorical()]).
+#'    likelihood nodes (produced by [Poisson()], [Hetero()], or [NegBin()].
 #' 2. For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by [gp()] or
 #'    [dgp()]) in that layer.
 #'
@@ -1594,10 +1595,7 @@ window <- function(object, start, end = NULL, thin = 1) {
 #' @description This function computes the negative predicted log-likelihood from a
 #'     DGP emulator with a likelihood layer.
 #'
-#' @param object an instance of the `dgp` class and it should be produced by [dgp()] with one of the following two settings:
-#' 1. if `struc = NULL`, `likelihood` is not `NULL`;
-#' 2. if a customized structure is provided to `struc`, the final layer must be likelihood layer containing only one
-#'    likelihood node produced by [Poisson()], [Hetero()], [NegBin()] or [Categorical()].
+#' @param object an instance of the `dgp` class and it should be produced by [dgp()] with `likelihood` not being `NULL`;
 #' @param x a matrix where each row is an input testing data point and each column is an input dimension.
 #' @param y a matrix with only one column where each row is a scalar-valued testing output data point.
 #'

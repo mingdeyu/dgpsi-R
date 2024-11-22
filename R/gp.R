@@ -4,9 +4,11 @@
 #'
 #' @param X a matrix where each row is an input data point and each column is an input dimension.
 #' @param Y a matrix with only one column and each row being an output data point.
-#' @param struc an object produced by [kernel()] that gives a user-defined GP specifications. When `struc = NULL`,
+#' @param struc `r lifecycle::badge("deprecated")` an object produced by [kernel()] that gives a user-defined GP specifications. When `struc = NULL`,
 #'     the GP specifications are automatically generated using information provided in `name`, `lengthscale`,
 #'     `nugget_est`, `nugget`, `scale_est`, `scale`,and `internal_input_idx`. Defaults to `NULL`.
+#'
+#' **The argument will be removed in the next release. To customize GP specifications, please adjust the other arguments in the [gp()] function.**
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
 #' @param lengthscale initial values of lengthscales in the kernel function. It can be a single numeric value or a vector:
@@ -106,7 +108,6 @@
 #' * [lgp()] for linked (D)GP emulator constructions.
 #' * [summary()] to summarize the trained GP emulator.
 #' * [write()] to save the GP emulator to a `.pkl` file.
-#' * [set_linked_idx()] to add the linking information to the GP emulator for linked emulations.
 #' * [design()] for sequential designs.
 #' * [update()] to update the GP emulator with new inputs and outputs.
 #' * [alm()], [mice()], [pei()], and [vigf()] to locate next design points.
@@ -162,6 +163,17 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
+  }
+
+  if (!is.null(struc)) {
+    # Display a combined warning message
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "gp(struc)",
+      details = c(i = "The argument will be dropped in the next release.",
+                  i = "To customize GP specifications, please adjust the other arguments in the `gp()` function."
+      )
+    )
   }
 
   if (!is.null(internal_input_idx)) {

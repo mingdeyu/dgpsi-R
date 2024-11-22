@@ -86,8 +86,10 @@ the remaining input dimensions that are connected to the feeding emulators.}
 A 'python' object to represent a GP node.
 }
 \description{
-This function constructs a kernel object to represent properties of a
-Gaussian process node.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated and will be removed in the next release. To customize
+DGP specifications, adjust the other arguments in the \code{dgp()} function instead.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
@@ -102,3 +104,4 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \references{
 Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. \emph{Bayesian Analysis}, \strong{14(3)}, 857-885.
 }
+\keyword{internal}

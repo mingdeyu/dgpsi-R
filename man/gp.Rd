@@ -31,9 +31,11 @@ gp(
 
 \item{Y}{a matrix with only one column and each row being an output data point.}
 
-\item{struc}{an object produced by \code{\link[=kernel]{kernel()}} that gives a user-defined GP specifications. When \code{struc = NULL},
+\item{struc}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} an object produced by \code{\link[=kernel]{kernel()}} that gives a user-defined GP specifications. When \code{struc = NULL},
 the GP specifications are automatically generated using information provided in \code{name}, \code{lengthscale},
-\code{nugget_est}, \code{nugget}, \code{scale_est}, \code{scale},and \code{internal_input_idx}. Defaults to \code{NULL}.}
+\code{nugget_est}, \code{nugget}, \code{scale_est}, \code{scale},and \code{internal_input_idx}. Defaults to \code{NULL}.
+
+\strong{The argument will be removed in the next release. To customize GP specifications, please adjust the other arguments in the \code{\link[=gp]{gp()}} function.}}
 
 \item{name}{kernel function to be used. Either \code{"sexp"} for squared exponential kernel or
 \code{"matern2.5"} for Matérn-2.5 kernel. Defaults to \code{"sexp"}. This argument is only used when \code{struc = NULL}.}
@@ -165,7 +167,6 @@ The returned \code{gp} object can be used by
 \item \code{\link[=lgp]{lgp()}} for linked (D)GP emulator constructions.
 \item \code{\link[=summary]{summary()}} to summarize the trained GP emulator.
 \item \code{\link[=write]{write()}} to save the GP emulator to a \code{.pkl} file.
-\item \code{\link[=set_linked_idx]{set_linked_idx()}} to add the linking information to the GP emulator for linked emulations.
 \item \code{\link[=design]{design()}} for sequential designs.
 \item \code{\link[=update]{update()}} to update the GP emulator with new inputs and outputs.
 \item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.

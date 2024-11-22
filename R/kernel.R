@@ -1,7 +1,11 @@
 #' @title Initialize a Gaussian process node
 #'
-#' @description This function constructs a kernel object to represent properties of a
-#'     Gaussian process node.
+#' @description
+#'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated and will be removed in the next release. To customize
+#'     DGP specifications, adjust the other arguments in the `dgp()` function instead.
 #'
 #' @param length a vector of lengthscales. The length of the vector equals to:
 #' 1. either one if the lengthscales in the kernel function are assumed same across input dimensions; or
@@ -59,12 +63,23 @@
 #' # on how to customize DGP structures using kernel().
 #' }
 #' @md
+#' @keywords internal
 #' @export
 kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name = 'ga', prior_coef = NULL, bounds = NULL, nugget_est = FALSE, scale_est = FALSE, input_dim = NULL, connect = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
+
+  lifecycle::deprecate_warn(
+    when = "3.0.0",
+    what = "kernel()",
+    details = c(i = "The function will be removed in the next release.",
+                i=  "It may not be compatible with other functions in this version.",
+                i = "Please adjust the other arguments in `dgp()` function to customize DGP specifications."
+    )
+  )
+
   if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
   if ( !is.null(prior_name) & prior_name!='ga' & prior_name!='inv_ga' ) stop("The provided 'prior_name' is not supported.", call. = FALSE)
 

@@ -44,13 +44,15 @@ dgp(
 \item{Y}{a matrix containing observed training output data. The matrix has its rows being output data points and columns being
 output dimensions. When \code{likelihood} (see below) is not \code{NULL}, \code{Y} must be a matrix with only one column.}
 
-\item{struc}{a list that specifies a user-defined DGP structure. It should contain \emph{L} (the number of DGP layers) sub-lists,
+\item{struc}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} a list that specifies a user-defined DGP structure. It should contain \emph{L} (the number of DGP layers) sub-lists,
 each of which represents a layer and contains a number of GP nodes (defined by \code{\link[=kernel]{kernel()}}) in the corresponding layer.
 The final layer of the DGP structure (i.e., the final sub-list in \code{struc}) can be a likelihood
 layer that contains a likelihood function (e.g., \code{\link[=Poisson]{Poisson()}}). When \code{struc = NULL},
 the DGP structure is automatically generated and can be checked by applying \code{\link[=summary]{summary()}} to the output from \code{\link[=dgp]{dgp()}} with \code{training = FALSE}.
 If this argument is used (i.e., user provides a customized DGP structure), arguments \code{depth}, \code{node}, \code{name}, \code{lengthscale}, \code{bounds}, \code{prior},
-\code{share}, \code{nugget_est}, \code{nugget}, \code{scale_est}, \code{scale}, \code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.}
+\code{share}, \code{nugget_est}, \code{nugget}, \code{scale_est}, \code{scale}, \code{connect}, \code{likelihood}, and \code{internal_input_idx} will NOT be used. Defaults to \code{NULL}.
+
+\strong{The argument will be removed in the next release. To customize DGP specifications, please adjust the other arguments in the \code{\link[=dgp]{dgp()}} function.}}
 
 \item{depth}{number of layers (including the likelihood layer) for a DGP structure. \code{depth} must be at least \code{2}.
 Defaults to \code{2}. This argument is only used when \code{struc = NULL}.}
@@ -275,7 +277,6 @@ The returned \code{dgp} object can be used by
 \item \code{\link[=summary]{summary()}} to summarize the trained DGP emulator.
 \item \code{\link[=write]{write()}} to save the DGP emulator to a \code{.pkl} file.
 \item \code{\link[=set_imp]{set_imp()}} to change the number of imputations.
-\item \code{\link[=set_linked_idx]{set_linked_idx()}} to add the linking information to the DGP emulator for linked emulations.
 \item \code{\link[=design]{design()}} for sequential designs.
 \item \code{\link[=update]{update()}} to update the DGP emulator with new inputs and outputs.
 \item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.

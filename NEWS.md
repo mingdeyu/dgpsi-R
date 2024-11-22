@@ -11,10 +11,11 @@
 - An issue related to the `LD_LIBRARY` environment variable on Linux systems has been resolved via the `init_py()` function.
 - The `lgp()` function has been enhanced to accept connection information among emulators in the form of a data frame, streamlining linked emulation setup.
 - A new function, `set_id()`, allows users to assign unique IDs to emulators.
-- A new function, `Categorical()`, enables the creation of categorical likelihood nodes for classification within a customized DGP hierarchy.
 - The `plot()` function has been updated to generate validation plots for DGP classifiers (i.e., DGP emulators with categorical likelihoods).
 - The `summary()` function has been redesigned to provide visualizations of structure and model specifications for (D)GP and linked (D)GP emulators.
 - A `sample_size` argument has been added to the `validate()` and `plot()` functions, allowing users to adjust the number of samples used for validation when the validation method is set to `sampling`.
+- The following functions are deprecated as of this version and will be removed in the next release: `combine()`, `set_linked_idx()`, `kernel()`, `Poisson()`, `Hetero()`, and `NegBin()`. These functions are no longer maintained. Please refer to the updated package documentation for alternative workflows.
+- The basic node functions `kernel()`, `Hetero()`, `Poisson()`, and `NegBin()`, along with the `struc` argument in the `gp()` and `dgp()` functions, have been deprecated as of this version and will be removed in the next release. Customization of (D)GP specifications can be achieved by modifying the other arguments in `gp()` and `dgp()`.
 - Additional vignettes are available, showcasing large-scale DGP emulation and DGP classification.
 
 # dgpsi 2.4.0

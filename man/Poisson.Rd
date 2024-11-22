@@ -17,7 +17,11 @@ Defaults to \code{NULL}.}
 A 'python' object to represent a Poisson likelihood node.
 }
 \description{
-This function constructs a likelihood object to represent a Poisson likelihood node.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated and will be removed in the next release.
+To incorporate a Poisson likelihood node into a DGP structure,
+use the \code{likelihood} argument in the \code{dgp()} function instead.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
@@ -32,3 +36,4 @@ The Poisson likelihood node can only be linked to one feeding GP node.
 # on how to customize DGP structures using Poisson().
 }
 }
+\keyword{internal}

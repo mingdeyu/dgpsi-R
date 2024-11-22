@@ -5,13 +5,15 @@
 #' @param X a matrix where each row is an input training data point and each column is an input dimension.
 #' @param Y a matrix containing observed training output data. The matrix has its rows being output data points and columns being
 #'     output dimensions. When `likelihood` (see below) is not `NULL`, `Y` must be a matrix with only one column.
-#' @param struc a list that specifies a user-defined DGP structure. It should contain *L* (the number of DGP layers) sub-lists,
+#' @param struc `r lifecycle::badge("deprecated")` a list that specifies a user-defined DGP structure. It should contain *L* (the number of DGP layers) sub-lists,
 #'     each of which represents a layer and contains a number of GP nodes (defined by [kernel()]) in the corresponding layer.
 #'     The final layer of the DGP structure (i.e., the final sub-list in `struc`) can be a likelihood
 #'     layer that contains a likelihood function (e.g., [Poisson()]). When `struc = NULL`,
 #'     the DGP structure is automatically generated and can be checked by applying [summary()] to the output from [dgp()] with `training = FALSE`.
 #'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `node`, `name`, `lengthscale`, `bounds`, `prior`,
 #'     `share`, `nugget_est`, `nugget`, `scale_est`, `scale`, `connect`, `likelihood`, and `internal_input_idx` will NOT be used. Defaults to `NULL`.
+#'
+#' **The argument will be removed in the next release. To customize DGP specifications, please adjust the other arguments in the [dgp()] function.**
 #' @param depth number of layers (including the likelihood layer) for a DGP structure. `depth` must be at least `2`.
 #'     Defaults to `2`. This argument is only used when `struc = NULL`.
 #' @param node number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
@@ -180,7 +182,6 @@
 #' * [summary()] to summarize the trained DGP emulator.
 #' * [write()] to save the DGP emulator to a `.pkl` file.
 #' * [set_imp()] to change the number of imputations.
-#' * [set_linked_idx()] to add the linking information to the DGP emulator for linked emulations.
 #' * [design()] for sequential designs.
 #' * [update()] to update the DGP emulator with new inputs and outputs.
 #' * [alm()], [mice()], [pei()], and [vigf()] to locate next design points.
@@ -248,6 +249,17 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
+  }
+
+  if (!is.null(struc)) {
+    # Display a combined warning message
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "dgp(struc)",
+      details = c(i = "The argument will be dropped in the next release.",
+                  i = "To customize DGP specifications, please adjust the other arguments in the `dgp()` function."
+      )
+    )
   }
 
   if (!is.null(internal_input_idx)) {

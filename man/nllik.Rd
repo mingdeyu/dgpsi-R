@@ -7,12 +7,7 @@
 nllik(object, x, y)
 }
 \arguments{
-\item{object}{an instance of the \code{dgp} class and it should be produced by \code{\link[=dgp]{dgp()}} with one of the following two settings:
-\enumerate{
-\item if \code{struc = NULL}, \code{likelihood} is not \code{NULL};
-\item if a customized structure is provided to \code{struc}, the final layer must be likelihood layer containing only one
-likelihood node produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, \code{\link[=NegBin]{NegBin()}} or \code{\link[=Categorical]{Categorical()}}.
-}}
+\item{object}{an instance of the \code{dgp} class and it should be produced by \code{\link[=dgp]{dgp()}} with \code{likelihood} not being \code{NULL};}
 
 \item{x}{a matrix where each row is an input testing data point and each column is an input dimension.}
 
