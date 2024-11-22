@@ -1,17 +1,17 @@
-#' @title Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using ALM
+#' @title Locate the next design point(s) for a (D)GP emulator or a bundle of (D)GP emulators using Active Learning MacKay (ALM)
 #'
 #' @description This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
-#'     or a bundle of (D)GP emulators using the Active Learning MacKay (ALM), see the reference below.
+#'     or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 #'
 #' @param object can be one of the following:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
+#' @param x_cand a matrix (with each row containing a design point and column representing an input dimension) that gives a candidate set
 #'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class, `x_cand` could also
-#'     be a list with the length equal to the number of emulators contained in the `object`. Each slot in `x_cand` is a matrix
-#'     that gives a candidate set for each emulator included in the bundle. See *Note* section below for further information.
-#' @param batch_size an integer that gives the number of design points to be chosen.
+#'     be a list with length equal to the number of emulators contained in `object`. In this case, each slot in `x_cand` should be a candidate set  matrix
+#'  for each emulator included in the bundle. See *Note* section below for further information.
+#' @param batch_size an integer that gives the number of design points to be chosen in a single iteration.
 #'     Defaults to `1`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
@@ -21,17 +21,17 @@
 #'     of the `dgp` class) or across different emulators (if `object` is an instance of the `bundle` class). The function should be specified in the
 #'     following basic form:
 #' * the first argument is a matrix representing scores. The rows of the matrix correspond to different design points. The number of columns
-#'   of the matrix equals to:
+#'   of the matrix is equal to:
 #'   - the emulator output dimension if `object` is an instance of the `dgp` class; or
 #'   - the number of emulators contained in `object` if `object` is an instance of the `bundle` class.
-#' * the output should be a vector that gives aggregations of scores at different design points.
+#' * the output should be a vector that aggregates scores across outputs or emulators at different design points.
 #'
 #' Set to `NULL` to disable the aggregation. Defaults to `NULL`.
 #' @param ... any arguments (with names different from those of arguments used in [alm()]) that are used by `aggregate`
 #'     can be passed here.
 #'
 #' @return
-#' * If `object` is an instance of the `gp` class, a vector is returned with the length equal to `batch_size`, giving the positions (i.e., row numbers)
+#' * If `object` is an instance of the `gp` class, a vector is returned with length equal to `batch_size`, giving the positions (i.e., row numbers)
 #'   of next design points from `x_cand`.
 #' * If `object` is an instance of the `dgp` class, a matrix is returned with row number equal to `batch_size` and column number equal to one (if `aggregate`
 #'   is not `NULL`) or the output dimension (if `aggregate` is `NULL`), giving positions (i.e., row numbers) of next design points from `x_cand` to be added
@@ -39,7 +39,7 @@
 #'   two columns with the first column giving positions of next design points from `x_cand` that correspond to the mean parameter of the normal or negative Binomial
 #'   distribution, and the second column giving positions of next design points from `x_cand` that correspond to the variance parameter of the normal distribution or
 #'   the dispersion parameter of the negative Binomial distribution. If `object` is a DGP emulator with a `Categorical` likelihood layer, the returned matrix will
-#'   have either one column (for binary output) or `K` columns (for multi-class output), giving the positions of the next design points from `x_cand` that correspond
+#'   have either one column (for binary output) or `K` columns (for multi-class output with K classes), giving the positions of the next design points from `x_cand` that correspond
 #'   to the probabilities of different classes.
 #' * If `object` is an instance of the `bundle` class, a matrix is returned with row number equal to `batch_size` and column number equal to the number of
 #'   emulators in the bundle, giving positions (i.e., row numbers) of next design points from `x_cand` to be added to individual emulators.
