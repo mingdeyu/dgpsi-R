@@ -5,7 +5,7 @@
 \alias{alm.gp}
 \alias{alm.dgp}
 \alias{alm.bundle}
-\title{Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using ALM}
+\title{Locate the next design point(s) for a (D)GP emulator or a bundle of (D)GP emulators using Active Learning MacKay (ALM)}
 \usage{
 alm(object, x_cand, ...)
 
@@ -23,15 +23,15 @@ alm(object, x_cand, ...)
 \item the S3 class \code{bundle}.
 }}
 
-\item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
+\item{x_cand}{a matrix (with each row containing a design point and column representing an input dimension) that gives a candidate set
 from which the next design point(s) are determined. If \code{object} is an instance of the \code{bundle} class, \code{x_cand} could also
-be a list with the length equal to the number of emulators contained in the \code{object}. Each slot in \code{x_cand} is a matrix
-that gives a candidate set for each emulator included in the bundle. See \emph{Note} section below for further information.}
+be a list with length equal to the number of emulators contained in \code{object}. In this case, each slot in \code{x_cand} should be a candidate set matrix
+for each emulator included in the bundle. See \emph{Note} section below for further information.}
 
 \item{...}{any arguments (with names different from those of arguments used in \code{\link[=alm]{alm()}}) that are used by \code{aggregate}
 can be passed here.}
 
-\item{batch_size}{an integer that gives the number of design points to be chosen.
+\item{batch_size}{an integer that gives the number of design points to be chosen in a single iteration.
 Defaults to \code{1}.}
 
 \item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
@@ -45,19 +45,19 @@ of the \code{dgp} class) or across different emulators (if \code{object} is an i
 following basic form:
 \itemize{
 \item the first argument is a matrix representing scores. The rows of the matrix correspond to different design points. The number of columns
-of the matrix equals to:
+of the matrix is equal to:
 \itemize{
 \item the emulator output dimension if \code{object} is an instance of the \code{dgp} class; or
 \item the number of emulators contained in \code{object} if \code{object} is an instance of the \code{bundle} class.
 }
-\item the output should be a vector that gives aggregations of scores at different design points.
+\item the output should be a vector that aggregates scores across outputs or emulators at different design points.
 }
 
 Set to \code{NULL} to disable the aggregation. Defaults to \code{NULL}.}
 }
 \value{
 \itemize{
-\item If \code{object} is an instance of the \code{gp} class, a vector is returned with the length equal to \code{batch_size}, giving the positions (i.e., row numbers)
+\item If \code{object} is an instance of the \code{gp} class, a vector is returned with length equal to \code{batch_size}, giving the positions (i.e., row numbers)
 of next design points from \code{x_cand}.
 \item If \code{object} is an instance of the \code{dgp} class, a matrix is returned with row number equal to \code{batch_size} and column number equal to one (if \code{aggregate}
 is not \code{NULL}) or the output dimension (if \code{aggregate} is \code{NULL}), giving positions (i.e., row numbers) of next design points from \code{x_cand} to be added
@@ -65,7 +65,7 @@ to the DGP emulator across different outputs. If \code{object} is a DGP emulator
 two columns with the first column giving positions of next design points from \code{x_cand} that correspond to the mean parameter of the normal or negative Binomial
 distribution, and the second column giving positions of next design points from \code{x_cand} that correspond to the variance parameter of the normal distribution or
 the dispersion parameter of the negative Binomial distribution. If \code{object} is a DGP emulator with a \code{Categorical} likelihood layer, the returned matrix will
-have either one column (for binary output) or \code{K} columns (for multi-class output), giving the positions of the next design points from \code{x_cand} that correspond
+have either one column (for binary output) or \code{K} columns (for multi-class output with K classes), giving the positions of the next design points from \code{x_cand} that correspond
 to the probabilities of different classes.
 \item If \code{object} is an instance of the \code{bundle} class, a matrix is returned with row number equal to \code{batch_size} and column number equal to the number of
 emulators in the bundle, giving positions (i.e., row numbers) of next design points from \code{x_cand} to be added to individual emulators.
@@ -73,7 +73,7 @@ emulators in the bundle, giving positions (i.e., row numbers) of next design poi
 }
 \description{
 This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
-or a bundle of (D)GP emulators using the Active Learning MacKay (ALM), see the reference below.
+or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.

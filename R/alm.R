@@ -9,8 +9,8 @@
 #' * the S3 class `bundle`.
 #' @param x_cand a matrix (with each row containing a design point and column representing an input dimension) that gives a candidate set
 #'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class, `x_cand` could also
-#'     be a list with length equal to the number of emulators contained in `object`. In this case, each slot in `x_cand` should be a candidate set  matrix
-#'  for each emulator included in the bundle. See *Note* section below for further information.
+#'     be a list with length equal to the number of emulators contained in `object`. In this case, each slot in `x_cand` should be a candidate set matrix
+#'     for each emulator included in the bundle. See *Note* section below for further information.
 #' @param batch_size an integer that gives the number of design points to be chosen in a single iteration.
 #'     Defaults to `1`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
