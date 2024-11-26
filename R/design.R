@@ -1,12 +1,13 @@
 #' @title Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
 #'
-#' @description This function implements the sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+#' @description This function implements sequential design/active learning for a (D)GP emulator or a bundle of (D)GP emulators for an array of popular methods and for any user-specified method. Can be used as a wrapper for Bayesian optimization methods (see examples).
 #'
 #' @param object can be one of the following:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param N the number of steps for the sequential design.
+#' @param N the number of steps of size `batch_size` for the sequential design.
+#' @param batch_size number of design points to choose to run the function at for each step of the sequential design. Defaults to `1`.
 #' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
 #'     in which the next design point is determined. If `x_cand = NULL`, the candidate set will be generated using `n_cand`,
 #'     `limits`, and `int`. Defaults to `NULL`.
@@ -27,36 +28,35 @@
 #'     input dimensions. Defaults to `FALSE`.
 #' @param f an R function that represents the simulator. `f` needs to be specified with the following basic rules:
 #' * the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.
-#' * the output of the function can either
-#'   - a matrix with rows being different outputs (corresponding to the input design points) and columns being output dimensions. If there is
-#'     only one output dimension, the matrix still needs to be returned with a single column.
+#' * the output of the function can either be:
+#'   - a matrix with rows representing different outputs (corresponding to the input design points) and columns representing output dimensions. If there is
+#'     only one output dimension, a matrix with a single column should be returned.
 #'   - a list with the first element being the output matrix described above and, optionally, additional named elements which will update values
-#'     of any arguments with the same names passed via `...`. The list output can be useful if some additional arguments of `f` and `aggregate`
-#'     need to be updated after each step of the sequential design.
+#'     of any arguments with the same names passed via `...`. The list output can be useful if additional arguments to `f` or `aggregate`
+#'     need to be updated after each sequential design step.
 #'
 #' See *Note* section below for further information. This argument is used when `y_cand = NULL`. Defaults to `NULL`.
 #' @param reps an integer that gives the number of repetitions of the located design points to be created and used for evaluations of `f`. Set the
-#'     argument to an integer greater than `1` if `f` is a stochastic function that can generate different responses given a same input and the
+#'     argument to an integer greater than `1` only if `f` is a stochastic function that can generate different responses given for the same input and the
 #'     supplied emulator `object` can deal with stochastic responses, e.g., a (D)GP emulator with `nugget_est = TRUE` or a DGP emulator with a
 #'     likelihood layer. The argument is only used when `f` is supplied. Defaults to `1`.
-#' @param freq a vector of two integers with the first element giving the frequency (in number of steps) to re-fit the
-#'     emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to `c(1, 1)`.
+#' @param freq a vector of two integers with the first element indicating the number of steps taken between re-estimating the emulator hyperparameters, and the second element defining the number of steps to take between recalculation of RMSE on the validation set (see `x_test` below). Defaults to `c(1, 1)`.
 #' @param x_test a matrix (with each row being an input testing data point and each column being an input dimension) that gives the testing
-#'     input data to evaluate the emulator after each step of the sequential design. Set to `NULL` for the LOO-based emulator validation.
+#'     input data to evaluate the emulator after each `freq[2]` steps of the sequential design. Set to `NULL` for LOO-based emulator validation.
 #'     Defaults to `NULL`. This argument is only used if `eval = NULL`.
-#' @param y_test the testing output data that correspond to `x_test` for the emulator validation after each step of the sequential design:
-#' * if `object` is an instance of the `gp` class, `y_test` is a matrix with only one column and each row being an testing output data point.
-#' * if `object` is an instance of the `dgp` class, `y_test` is a matrix with its rows being testing output data points and columns being
+#' @param y_test the testing output data corresponding to `x_test` for emulator validation after each `freq[2]` steps of the sequential design:
+#' * if `object` is an instance of the `gp` class, `y_test` is a matrix with only one column and each row contains a testing output data point from the corresponding row of `x_test`.
+#' * if `object` is an instance of the `dgp` class, `y_test` is a matrix with its rows containing testing output data points corresponding to the same rows of `x_test` and columns representing the
 #'   output dimensions.
+#' * if `object` is an instance of the `bundle` class, `y_test` is a matrix with each row representing the outputs for the corresponding row of `x_test` and each column representing the output of the different emulators in the bundle.
 #'
-#' Set to `NULL` for the LOO-based emulator validation. Defaults to `NULL`. This argument is only used if `eval = NULL`.
-#' @param reset a bool or a vector of bools indicating whether to reset hyperparameters of the emulator to their initial values when it was initially
-#'     constructed after the input-output update and before the re-fit. If a bool is given, it will be applied to
+#' Set to `NULL` for LOO-based emulator validation. Defaults to `NULL`. This argument is only used if `eval = NULL`.
+#' @param reset a bool or a vector of bools indicating whether to reset the hyperparameters of the emulator(s) to their initial values (prior to updates made during sequential design) prior to re-fitting at points determined at `freq=1`. This can be used if hyperparameters are suspected of converging to a local optimum that provides poor validation. If a bool is given, it will be applied to
 #'     every step of the sequential design. If a vector is provided, its length should be equal to `N` and will be applied to individual
 #'     steps of the sequential design. Defaults to `FALSE`.
-#' @param target a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to `NULL`, in which
+#' @param target a number or a vector that gives the target RMSE(s) at which the sequential design should be terminated. Defaults to `NULL`, in which
 #'     case the sequential design stops after `N` steps. See *Note* section below for further information about `target`.
-#' @param method an R function that give indices of designs points in a candidate set. The function must satisfy the following basic rules:
+#' @param method an R function that returns the indices of design points selected from a candidate set. The function must satisfy the following basic rules:
 #' * the first argument is an emulator object that can be either an instance of
 #'   - the `gp` class (produced by [gp()]);
 #'   - the `dgp` class (produced by [dgp()]);
@@ -65,48 +65,48 @@
 #' * the output of the function
 #'   - is a vector of indices if the first argument is an instance of the `gp` class;
 #'   - is a matrix of indices if the first argument is an instance of the `dgp` class. If there are different design points to be added with
-#'     respect to different outputs of the DGP emulator, the column number of the matrix should equal to the number of the outputs. If design
-#'     points are common to all outputs of the DGP emulator, the matrix should be single-columned. If more than one design points are determined
+#'     respect to different outputs of the DGP emulator, the number of columns of the matrix should be equal to the number of the outputs. If design
+#'     points are common to all outputs of the DGP emulator, the matrix should be single-columned. If more than one design point is required
 #'     for a given output or for all outputs, the indices of these design points are placed in the matrix with extra rows.
 #'   - is a matrix of indices if the first argument is an instance of the `bundle` class. Each row of the matrix gives the indices of the design
 #'     points to be added to individual emulators in the bundle.
 #'
 #' See [alm()], [mice()], [pei()], and [vigf()] for examples on customizing `method`. Defaults to [vigf()].
-#' @param eval an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:
+#' @param eval an R function that calculates a customized metric for evaluating emulator performance. The function must satisfy the following basic rules:
 #' * the first argument is an emulator object that can be either an instance of
 #'   - the `gp` class (produced by [gp()]);
 #'   - the `dgp` class (produced by [dgp()]);
 #'   - the `bundle` class (produced by [pack()]).
 #' * the output of the function can be
 #'   - a single metric value, if the first argument is an instance of the `gp` class;
-#'   - a single metric value or a vector of metric values with the length equal to the number of output dimensions, if the first argument is an
+#'   - a single metric value or a vector of metric values with length equal to the number of output dimensions, if the first argument is an
 #'     instance of the `dgp` class;
-#'   - a single metric value metric or a vector of metric values with the length equal to the number of emulators in the bundle, if the first
+#'   - a single metric value metric or a vector of metric values with length equal to the number of emulators in the bundle, if the first
 #'     argument is an instance of the `bundle` class.
 #'
 #' If no customized function is provided, the built-in evaluation metric, RMSE, will be calculated. Defaults to `NULL`. See *Note* section below for further information.
-#' @param verb a bool indicating if the trace information will be printed during the sequential design.
+#' @param verb a bool indicating if trace information will be printed during the sequential design.
 #'     Defaults to `TRUE`.
 #' @param autosave a list that contains configuration settings for the automatic saving of the emulator:
-#' * `switch`: a bool indicating whether to enable the automatic saving of the emulator during the sequential design. When set to `TRUE`,
+#' * `switch`: a bool indicating whether to enable automatic saving of the emulator during sequential design. When set to `TRUE`,
 #'   the emulator in the final iteration is always saved. Defaults to `FALSE`.
 #' * `directory`: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
 #'   of `directory` named 'emulator-`id`'. Defaults to './check_points'.
 #' * `fname`: a string representing the base name for the saved emulator files. Defaults to 'check_point'.
-#' * `freq`: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to `5`.
-#' * `overwrite`: a bool value controlling the file saving behavior. When set to `TRUE`, each new automatic saving overwrites the previous one,
-#'   keeping only the latest version. If `FALSE`, each automatic saving creates a new file, preserving all previous versions. Defaults to `FALSE`.
-#' @param new_wave a bool indicating if the current execution of [design()] will create a new wave of sequential designs or add the sequential designs to
-#'     the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
-#'     of the sequential designs in different executions of [design()] in [draw()] and can specify a different evaluation frequency in `freq`. However, it can be
-#'     beneficiary to turn this option off to restrict a large number of waves to be visualized in [draw()] that could run out of colors. Defaults to `TRUE`.
+#' * `freq`: an integer indicating the frequency of automatic saves, measured in the number of iterations. Defaults to `5`.
+#' * `overwrite`: a bool value controlling the file saving behavior. When set to `TRUE`, each new automatic save overwrites the previous one,
+#'   keeping only the latest version. If `FALSE`, each automatic save creates a new file, preserving all previous versions. Defaults to `FALSE`.
+#' @param new_wave a bool indicating if the current execution of [design()] will create a new wave of sequential design or add the next sequence of designs to
+#'     the most recent wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize sequential design performance
+#'    in different executions of [design()] in [draw()] and can specify a different evaluation frequency in `freq`. However, it can be
+#'     beneficial to turn this option off in order to ensure only a handful of waves can be visualized in [draw()]. Defaults to `TRUE`.
 #' @param M_val `r new_badge("new")` an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
-#' @param cores an integer that gives the number of processes to be used for emulator validations. If set to `NULL`, the number of processes is set to
+#' @param cores an integer that gives the number of processes to be used for emulator validation. If set to `NULL`, the number of processes is set to
 #'     `max physical cores available %/% 2`. Defaults to `1`. This argument is only used if `eval = NULL`.
 #' @param train_N the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:
 #' * If `train_N` is an integer, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in `freq`) with `train_N` iterations.
-#' * If `train_N` is a vector, then its size must be `N` even the re-fit frequency specified in `freq` is not one.
+#' * If `train_N` is a vector, then its size must be `N` even if the re-fit frequency specified in `freq` is not one.
 #' * If `train_N` is `NULL`, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in `freq`) with `100` iterations
 #'   if the DGP emulator was constructed without the Vecchia approximation, and with `50` iterations if Vecchia approximation was used.
 #'
@@ -120,9 +120,9 @@
 #'     design points exceeds `min_size` in `control`. The argument is only applicable to DGP emulators (i.e., `object` is an instance of `dgp` class)
 #'     produced by `dgp()` with `struc = NULL`. Defaults to `TRUE`.
 #' @param control a list that can supply any of the following components to control the dynamic pruning of the DGP emulator:
-#' * `min_size`, the minimum number of design points required to trigger the dynamic pruning. Defaults to 10 times of the input dimensions.
-#' * `threshold`, the R2 value above which a GP node is considered redundant. Defaults to `0.97`.
-#' * `nexceed`, the minimum number of consecutive iterations that the R2 value of a GP node must exceed `threshold` to trigger the removal of that node from
+#' * `min_size`, the minimum number of design points required to trigger dynamic pruning. Defaults to 10 times the number of input dimensions.
+#' * `threshold`, the R^2 value above which a GP node is considered redundant. Defaults to `0.97`.
+#' * `nexceed`, the minimum number of consecutive iterations that the R^2 value of a GP node must exceed `threshold` to trigger the removal of that node from
 #'   the DGP structure. Defaults to `3`.
 #'
 #' The argument is only used when `pruning = TRUE`.
@@ -134,11 +134,11 @@
 #'
 #' @return
 #' An updated `object` is returned with a slot called `design` that contains:
-#'   - *S* slots, named `wave1, wave2,..., waveS`, that contain information of *S* waves of sequential designs that have been applied to the emulator.
+#'   - *S* slots, named `wave1, wave2,..., waveS`, that contain information of *S* waves of sequential design that have been applied to the emulator.
 #'     Each slot contains the following elements:
 #'     - `N`, an integer that gives the numbers of steps implemented in the corresponding wave;
 #'     - `rmse`, a matrix that gives the RMSEs of emulators constructed during the corresponding wave, if `eval = NULL`;
-#'     - `metric`, a matrix that gives the customized evaluating metric values of emulators constructed during the corresponding wave,
+#'     - `metric`, a matrix that gives the customized evaluation metric values of emulators constructed during the corresponding wave,
 #'        if a customized function is supplied to `eval`;
 #'     - `freq`, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.
 #'     - `enrichment`, a vector of size `N` that gives the number of new design points added after each step of the sequential design (if `object` is
@@ -149,7 +149,7 @@
 #'     - `target`, the target RMSE(s) to stop the sequential design.
 #'     - `reached`, a bool (if `object` is an instance of the `gp` or `dgp` class) or a vector of bools (if `object` is an instance of the `bundle`
 #'       class) that indicate if the target RMSEs are reached at the end of the sequential design.
-#'   - a slot called `type` that gives the type of validations:
+#'   - a slot called `type` that gives the type of validation:
 #'     - either LOO ('loo') or OOS ('oos') if `eval = NULL`. See [validate()] for more information about LOO and OOS.
 #'     - 'customized' if a customized R function is provided to `eval`.
 #'   - two slots called `x_test` and `y_test` that contain the data points for the OOS validation if the `type` slot is 'oos'.
@@ -159,11 +159,11 @@
 #'
 #' See *Note* section below for further information.
 #' @note
-#' * The validation of an emulator is forced after the final step of a sequential design even `N` is not multiples of the second element in `freq`.
+#' * Validation of an emulator is forced after the final step of a sequential design even if `N` is not a multiple of the second element in `freq`.
 #' * Any `loo` or `oos` slot that already exists in `object` will be cleaned, and a new slot called `loo` or `oos` will be created in the returned object
 #'   depending on whether `x_test` and `y_test` are provided. The new slot gives the validation information of the emulator constructed in the final step of
 #'   the sequential design. See [validate()] for more information about the slots `loo` and `oos`.
-#' * If `object` has previously been used by [design()] for sequential designs, the information of the current wave of the sequential design will replace
+#' * If `object` has previously been used by [design()] for sequential design, the information of the current wave of the sequential design will replace
 #'   those of old waves and be contained in the returned object, unless
 #'   - the validation type (LOO or OOS depending on whether `x_test` and `y_test` are supplied or not) of the current wave of the sequential design is the
 #'     same as the validation types (shown in the `type` of the `design` slot of `object`) in previous waves, and if the validation type is OOS,
@@ -172,7 +172,7 @@
 #'     functions are consistent among different waves. Otherwise, the trace plot of RMSEs produced by [draw()] will show values of different evaluation metrics in
 #'     different waves.
 #'
-#'   In above two cases, the information of the current wave of the sequential design will be added to the `design` slot of the returned object under the name `waveS`.
+#'   For the above two cases, the information of the current wave of the sequential design will be added to the `design` slot of the returned object under the name `waveS`.
 #' * If `object` is an instance of the `gp` class and `eval = NULL`, the matrix in the `rmse` slot is single-columned. If `object` is an instance of
 #'   the `dgp` or `bundle` class and `eval = NULL`, the matrix in the `rmse` slot can have multiple columns that correspond to different output dimensions
 #'   or different emulators in the bundle.
@@ -186,8 +186,8 @@
 #'   - the column order of the output matrix of `f` is consistent with the order of emulator output dimensions (if `object` is an instance of the `dgp` class),
 #'     or the order of emulators placed in `object` (if `object` is an instance of the `bundle` class).
 #' * The output matrix produced by `f` may include `NA`s. This is especially beneficial as it allows the sequential design process to continue without interruption,
-#'   even if errors or `NA` outputs are encountered from `f` at certain input locations identified by the sequential designs. Users should ensure to handle any errors
-#'   within `f` by appropriately returning `NA`s.
+#'   even if errors or `NA` outputs are encountered from `f` at certain input locations identified by the sequential design. Users should ensure that any errors
+#'   within `f` are handled by appropriately returning `NA`s.
 #' * When defining `eval`, the output metric needs to be positive if [draw()] is used with `log = T`. And one needs to ensure that a lower metric value indicates
 #'   a better emulation performance if `target` is set.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -317,7 +317,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
   if (!first_time & !new_wave){
     start_point <- object[["design"]][[paste('wave', n_wave, sep="")]][["N"]]
     N <- N + start_point
-    if ( object[["design"]][[paste('wave', n_wave, sep="")]][["freq"]] != freq[2] ) stop("The frequency to implement the emulator validation must match to that in the last wave if 'new_wave = FALSE'.", call. = FALSE)
+    if ( object[["design"]][[paste('wave', n_wave, sep="")]][["freq"]] != freq[2] ) stop("The frequency of emulator validation calls must match that in the last wave if 'new_wave = FALSE'.", call. = FALSE)
   } else {
     start_point <- 0
   }
@@ -591,7 +591,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 
         if( !is.null(target) ) {
           if ( rmse<=target ) {
-            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            message(sprintf("Target reached! The sequential design stopped at step %i.", i))
             istarget <- TRUE
             N <- i
             break
@@ -789,7 +789,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
 
         if( !is.null(target) ) {
           if ( rmse<=target ) {
-            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            message(sprintf("Target reached! The sequential design stopped at step %i.", i))
             istarget <- TRUE
             N <- i
             break
@@ -842,10 +842,10 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, lim
     }
 
     if( !is.null(target) ) {
-      if ( !istarget ) message("The target is not reached at the end of the sequential design.")
+      if ( !istarget ) message("The target was not reached at the end of the sequential design.")
     }
   } else {
-    message("Target already reached. The sequential design is not performed.")
+    message("Target already reached. Sequential design not performed.")
   }
 
   return(object)
@@ -926,7 +926,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
   if (!first_time & !new_wave){
     start_point <- object[["design"]][[paste('wave', n_wave, sep="")]][["N"]]
     N <- N + start_point
-    if ( object[["design"]][[paste('wave', n_wave, sep="")]][["freq"]] != freq[2] ) stop("The frequency to implement the emulator validation must match to that in the last wave if 'new_wave = FALSE'.", call. = FALSE)
+    if ( object[["design"]][[paste('wave', n_wave, sep="")]][["freq"]] != freq[2] ) stop("The frequency of emulator validation must match to that in the last wave if 'new_wave = FALSE'.", call. = FALSE)
   } else {
     start_point <- 0
   }
@@ -949,7 +949,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
       required_step <- con$nexceed + ifelse((nrow(X)>con$min_size), 0, con$min_size-nrow(X) )
       if (required_step > N){
-        warning("'N' needs to be greater than ", paste(required_step), " to trigger the dynamic pruning of the DGP emulator.", call. = FALSE, immediate. = TRUE)
+        warning("'N' needs to be greater than ", paste(required_step), " to trigger dynamic pruning of the DGP emulator.", call. = FALSE, immediate. = TRUE)
       }
     }
   }
@@ -1281,7 +1281,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
         if( !is.null(target) ) {
           if ( all(rmse<=target) ) {
-            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            message(sprintf("Target reached! Sequential design stopped at step %i.", i))
             if ( inherits(object,"bundle") ) {
               istarget <- rep(TRUE, n_emulators)
             } else {
@@ -1554,7 +1554,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
 
         if( !is.null(target) ) {
           if ( all(rmse<=target) ) {
-            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            message(sprintf("Target reached! Sequential design stopped at step %i.", i))
             if ( inherits(object,"bundle") ) {
               istarget <- rep(TRUE, n_emulators)
             } else {
@@ -1634,10 +1634,10 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200, li
     }
 
     if( !is.null(target) ) {
-      if ( !all(istarget) ) message("The target is not reached at the end of the sequential design.")
+      if ( !all(istarget) ) message("Target not reached at the end of the sequential design.")
     }
   } else {
-    message("Target already reached. The sequential design is not performed.")
+    message("Target already reached. Sequential design not performed.")
   }
 
   return(object)
@@ -1718,7 +1718,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
   if (!first_time & !new_wave){
     start_point <- object[["design"]][[paste('wave', n_wave, sep="")]][["N"]]
     N <- N + start_point
-    if ( object[["design"]][[paste('wave', n_wave, sep="")]][["freq"]] != freq[2] ) stop("The frequency to implement the emulator validation must match to that in the last wave if 'new_wave = FALSE'.", call. = FALSE)
+    if ( object[["design"]][[paste('wave', n_wave, sep="")]][["freq"]] != freq[2] ) stop("The frequency of emulator validation must match to that in the last wave if 'new_wave = FALSE'.", call. = FALSE)
   } else {
     start_point <- 0
   }
@@ -2230,7 +2230,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
 
         if( !is.null(target) ) {
           if ( all(rmse<=target) ) {
-            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            message(sprintf("Target reached! Sequential design stopped at step %i.", i))
             istarget <- rep(TRUE, n_emulators)
             N <- i
             break
@@ -2592,7 +2592,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
 
         if( !is.null(target) ) {
           if ( all(rmse<=target) ) {
-            message(sprintf("Target reached! The sequential design stops at step %i.", i))
+            message(sprintf("Target reached! Sequential design stopped at step %i.", i))
             istarget <- rep(TRUE, n_emulators)
             N <- i
             break
@@ -2649,10 +2649,10 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_cand = 200,
     }
 
     if( !is.null(target) ) {
-      if ( !all(istarget) ) message("Targets are not reached for all emulators at the end of the sequential design.")
+      if ( !all(istarget) ) message("Targets not reached for all emulators at the end of the sequential design.")
     }
   } else {
-    message("Target already reached. The sequential design is not performed.")
+    message("Target already reached. Sequential design not performed.")
   }
 
   return(object)
@@ -2818,7 +2818,7 @@ check_int <- function(int, n_dim_X){
       int <- rep(int, n_dim_X)
     }
   } else {
-    if ( length(int)!=n_dim_X ) stop("The length of 'int' should equal to the number of input dimensions.", call. = FALSE)
+    if ( length(int)!=n_dim_X ) stop("The length of 'int' should be equal to the number of input dimensions.", call. = FALSE)
   }
   return(int)
 }
@@ -2827,7 +2827,7 @@ check_reset <- function(reset, N){
   if ( length(reset)==1 ) {
     reset <- rep(reset, N)
   } else {
-    if ( length(reset)!=N ) stop("The length of 'reset' should equal to the number of steps of the sequential design.", call. = FALSE)
+    if ( length(reset)!=N ) stop("The length of 'reset' should be equal to the number of steps of the sequential design.", call. = FALSE)
   }
   return(reset)
 }
