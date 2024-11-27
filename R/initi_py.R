@@ -23,7 +23,7 @@ pkg.env$thread_num <- NULL
 #' @param uninstall a bool that indicates whether to uninstall the 'python' version of 'dgpsi' specified
 #'    in `dgpsi_ver` if it has already been installed. This argument is useful when the 'python' environment
 #'    is corrupted and one wants to completely uninstall and reinstall it. Defaults to `FALSE`.
-#' @param verb a bool indicating if the trace information will be printed during the function execution.
+#' @param verb a bool indicating if trace information will be printed during function execution.
 #'     Defaults to `TRUE`.
 #'
 #' @return No return value, called to install required 'python' environment.

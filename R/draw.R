@@ -1,22 +1,21 @@
-#' @title Validation plots of a sequential design
+#' @title Validation and diagnostic plots for a sequential design
 #'
-#' @description This function draws validation plots of the sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+#' @description This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
 #'
 #' @param object can be one of the following emulator classes:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param emulator the index of the emulator packed in `object` if `object` is an instance of the `bundle` class.
-#' @param type either `"rmse"`, for the trace plot of RMSEs or customized evaluating metrics of emulators constructed during the sequential designs,
-#'     or `"design"`, for visualizations of input designs created by the sequential design procedure. Defaults to `"rmse"`.
+#' @param emulator an index or vector of indices of the emulators packed in `object` only used if `object` is an instance of the `bundle` class. Defaults to `1:m` where `m` is the number of emulators in the `bundle`.
+#' @param type either `"rmse"`, for the trace plot of RMSEs or customized evaluating metrics of emulators passed via the `"eval"` argument to the `"design"` function. Defaults to `"rmse"`.
 #' @param log a bool that indicates whether to plot RMSEs or customized evaluating metrics in log-scale if `type = "rmse"`. Defaults to `FALSE`.
 #' @param ... N/A.
 #'
 #' @return A `patchwork` object.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note If a customized evaluating function is provided to [design()] and the function returns a single evaluating metric value when `object` is
-#'     an instance of the `bundle` class, the value of `emulator` has no effects on the plot when `type = "rmse"`.
+#' @note If a customized evaluating function is provided to [design()] via its `eval` argument and the function returns a single evaluating metric value when `object` is
+#'     an instance of the `bundle` class, the value of `emulator` has no effect on the plot when `type = "rmse"`.
 #' @examples
 #' \dontrun{
 #'
@@ -68,7 +67,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
-      title = 'Sequential Designs',
+      title = 'Sequential Design',
       caption =
         'Xi = Input dimension i of the GP emulator'
     )
@@ -189,7 +188,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
-        title = 'Sequential Designs',
+        title = 'Sequential Design',
         caption =
           'Xi = Input dimension i of the DGP emulator'
       )
@@ -332,7 +331,7 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
-        title = 'Sequential Designs',
+        title = 'Sequential Design',
         caption =
           'Xi = Input dimension i'
       )
