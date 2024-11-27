@@ -109,8 +109,7 @@
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates of model parameters. Must be smaller than the training iterations `N`. If this is not specified, only the last 25% of iterations
 #'     are used. Defaults to `NULL`. This argument is only used when `training = TRUE`.
-#' @param B the number of imputations used to produce predictions. Increase the value to account for
-#'     more imputation uncertainty with impact on prediction speed. Decrease the value for lower imputation uncertainty but faster predictions.
+#' @param B the number of imputations used to produce predictions. Increase the value to refine the representation of imputation uncertainty. 
 #'     Defaults to `10`.
 #' @param internal_input_idx `r lifecycle::badge("deprecated")` The argument will be removed in the next release. To set up connections of emulators for linked emulations,
 #'     please use the updated [lgp()] function instead.
@@ -194,7 +193,6 @@
 #'
 #' # load the package and the Python env
 #' library(dgpsi)
-#' init_py()
 #'
 #' # construct a step function
 #' f <- function(x) {
