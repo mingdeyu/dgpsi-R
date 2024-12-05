@@ -105,7 +105,7 @@ plot(m1)
 
 ## Emulation of Model 2
 
-We construct a two-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 2:
+We construct a two-layered DGP emulator with Matérn-2.5 kernels to emulate Model 2:
 
 ```{r}
 m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5")
@@ -141,7 +141,7 @@ Plotting ... done
 
 ## Emulation of Model 3
 
-We now construct a three-layered DGP emulator with Matérn-2.5 kernels to emulate the Model 3:
+We now construct a three-layered DGP emulator with Matérn-2.5 kernels to emulate Model 3:
 
 ```{r}
 m3 <- dgp(X3, Y3, depth = 3, name = "matern2.5", id = "gp3" )
@@ -191,7 +191,7 @@ Finally, we can pass `struc` and a list of the three trained emulators to `lgp()
 emulators <- list(m1, m2, m3)
 ```
 
-Before activating the linked emulator for predictions, it's good practice to first set it to validation mode:
+Before activating the linked emulator for prediction, it's good practice to first set it to validation mode:
 
 ```{r}
 m_link <- lgp(struc, emulators, mode = "validate")
@@ -250,7 +250,7 @@ m_gp <- validate(m_gp, x_test = test_x, y_test = test_y, verb = F)
 m_link <- validate(m_link, x_test = test_x, y_test = test_y, verb = F)
 ```
 
-and plot them to compare their emulation performances:
+and plot them to compare their performance:
 
 ```{r}
 # GP emulator
@@ -268,9 +268,9 @@ plot(m_link, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_result_new.png){width=100%}
 
-It can be seen from the above plots that the linked emulator outperforms the GP emulator with significantly better mean predictions and predictive uncertainties.
+We see that the linked emulator outperforms the GP emulator with significantly better mean prediction and uncertainty quantification.
 
-In real-life applications, we are rarely able to generate this many testing data points from the underlying computer simulators to evaluate the emulators over the whole input space. However, we are still able to retain some available realizations from the computer simulators for the linked emulator validation. Say we were able to afford 20 runs of the above linked computer system:
+In real-life applications, we are rarely able to generate this many testing data points from the underlying computer simulators to evaluate the emulators over the whole input space. However, we are still able to retain some available realizations from the computer simulators for validation. Say we were able to afford 20 runs of the above linked computer system:
 
 ```{r}
 # OOS testing input
@@ -279,7 +279,7 @@ test_x_oos <- sample(seq(0, 1, length = 300), 20)
 test_y_oos <- sapply(test_x_oos, f123)
 ```
 
-Then, we can conduct OOS validations for the GP emulator:
+Then, we can conduct OOS validation for the GP emulator:
 
 ```{r}
 plot(m_gp, test_x_oos, test_y_oos, style = 2)
