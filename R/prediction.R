@@ -1,15 +1,13 @@
-#' @title Predictions from GP, DGP, or linked (D)GP emulators
+#' @title Prediction from GP, DGP, or linked (D)GP emulators
 #'
-#' @description This function implements single-core or multi-core predictions (with or without multi-threading)
+#' @description This function implements single-core or multi-core prediction (with or without multi-threading)
 #'     from GP, DGP, or linked (D)GP emulators.
 #'
 #' @param object an instance of the `gp`, `dgp`, or `lgp` class.
 #' @param x the testing input data:
 #' * if `object` is an instance of the `gp` or `dgp` class, `x` is a matrix where each row is an input testing data point and each column is an input dimension.
 #' * `r lifecycle::badge("deprecated")` if `object` is an instance of the `lgp` class created by [lgp()] without specifying argument `struc` in data frame form, `x` can be either a matrix or a list:
-#'    - if `x` is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
-#'      The rows of `x` represent different input data points and the columns represent input dimensions across all emulators in
-#'      the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
+#'    - if `x` is a matrix, its rows are treated as instances of the `Global` inputs. In this case, it is assumed that the only global input to the system is the input to the
 #'      emulators in the first layer and there is no global input to emulators in other layers.
 #'    - if `x` is a list, it should have *L* (the number of layers in an emulator system) elements. The first element
 #'      is a matrix that represents the global testing input data that feed into the emulators in the first layer of the system. The
@@ -24,16 +22,16 @@
 #'   `x` must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
 #'   The column indices in `x` must align with the indices specified in the `From_Output` column of the `struc` data frame (used in [lgp()]),
 #'   corresponding to rows where the `From_Emulator` column is `"Global"`.
-#' @param method `r new_badge("updated")` the prediction approach to use: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`).
-#'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
+#' @param method `r new_badge("updated")` the prediction approach to use: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). The mean-variance approach provides the mean and variance of the predictive distribution. The sampling approach provides samples from the Normal distribution with the derived mean and variance.
+#'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), the sampling approach first samples the Normal distribution with derived mean and variance for the hidden layers and propagates these samples through the categorical likelihood. Only the sampling approach is supported in this case.
 #'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
 #' @param mode `r new_badge("new")` whether to predict the classes (`"label"`) or probabilities (`"proba"`) of different classes when `object` is a DGP emulator with a categorical likelihood.
 #'      Defaults to `"label"`.
-#' @param full_layer a bool indicating whether to output the predictions of all layers. Defaults to `FALSE`. Only used when `object` is a DGP and linked (D)GP emulator.
+#' @param full_layer a bool indicating whether to output the predictions of all layers. Defaults to `FALSE`. Only used when `object` is a DGP or a linked (D)GP emulator.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to `50`. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation.
-#' @param cores the number of processes to be used for predictions. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`.
+#' @param cores the number of processes to be used for prediction. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`.
 #' @param chunks the number of chunks that the testing input matrix `x` will be divided into for multi-cores to work on.
 #'     Only used when `cores` is not `1`. If not specified (i.e., `chunks = NULL`), the number of chunks is set to the value of `cores`.
 #'     Defaults to `NULL`.
@@ -63,7 +61,7 @@
 #'      of size: `B * sample_size`, where `B` is the number of imputations specified in [dgp()].
 #' * `r new_badge("new")` If `object` is an instance of the `dgp` class with a categorical likelihood:
 #'   1. if `full_layer = FALSE` and `mode = "label"`: an updated `object` is returned with an additional slot called `results` that contains one matrix named `label`.
-#'      The matrix has its rows corresponding to testing positions and columns corresponding to label samples of size: `B * sample_size`, where `B` is the number
+#'      The matrix has rows corresponding to testing positions and columns corresponding to sample labels of size: `B * sample_size`, where `B` is the number
 #'      of imputations specified in [dgp()].
 #'   2. if `full_layer = FALSE` and `mode = "proba"`, an updated `object` is returned with an additional slot called `results`. This slot contains *D* matrices (where
 #'      *D* is the number of classes in the training output), where each matrix gives probability samples for the corresponding class with its rows corresponding to testing
@@ -84,23 +82,23 @@
 #' * `r new_badge("updated")` If `object` is an instance of the `lgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that
 #'      contains two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list
-#'      contains *K* number (same number of emulators in the final layer of the system) of matrices named by the `ID`s of the corresponding emulators in the final layer.
-#'      Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
+#'      contains *K* (same number of emulators in the final layer of the system) matrices named using the `ID`s of the corresponding emulators in the final layer.
+#'      Each matrix has rows corresponding to global testing positions and columns corresponding to output dimensions of the associated emulator
 #'      in the final layer.
 #'   2. if `method = "mean_var"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains
 #'      two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list contains *L*
 #'      (i.e., the number of layers in the emulated system) components named `layer1, layer2,..., layerL`. Each component represents a layer
-#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of matrices named by the `ID`s of the corresponding emulators in that layer.
+#'      and contains *K* (same number of emulators in the corresponding layer of the system) matrices named using the `ID`s of the corresponding emulators in that layer.
 #'      Each matrix has its rows corresponding to global testing positions and columns corresponding to output dimensions of the associated
 #'      GP/DGP emulator in the corresponding layer.
 #'   3. if `method = "sampling"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that contains
-#'      *K* number (same number of emulators in the final layer of the system) of sub-lists named by the `ID`s of the corresponding emulators in the final layer. Each
+#'      *K* (same number of emulators in the final layer of the system) sub-lists named using the `ID`s of the corresponding emulators in the final layer. Each
 #'      sub-list contains *D* matrices, named `output1, output2,..., outputD`, that correspond to the output
-#'      dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
+#'      dimensions of the GP/DGP emulator. Each matrix has rows corresponding to testing positions and columns corresponding to samples
 #'      of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
 #'   4. if `method = "sampling"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains
 #'      *L* (i.e., the number of layers of the emulated system) sub-lists named `layer1, layer2,..., layerL`. Each sub-list represents a layer
-#'      and contains *K* number (same number of emulators in the corresponding layer of the system) of components named by the `ID`s of the corresponding emulators in that layer.
+#'      and contains *K* (same number of emulators in the corresponding layer of the system) components named using the `ID`s of the corresponding emulators in that layer.
 #'      Each component contains *D* matrices, named `output1, output2,..., outputD`, that correspond to
 #'      the output dimensions of the GP/DGP emulator. Each matrix has its rows corresponding to testing positions and columns corresponding to
 #'      samples of size: `B * sample_size`, where `B` is the number of imputations specified in [lgp()].
@@ -181,11 +179,11 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
   M <- as.integer(M)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
-    if ( chunks < 1 ) stop("The chunk number must be >= 1.", call. = FALSE)
+    if ( chunks < 1 ) stop("chunks must be >= 1.", call. = FALSE)
   }
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
   }
 
   rep_x <- pkg.env$np$unique(x, return_inverse=TRUE, axis=0L)
@@ -422,11 +420,11 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
   M <- as.integer(M)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
-    if ( chunks < 1 ) stop("The chunk number must be >= 1.", call. = FALSE)
+    if ( chunks < 1 ) stop("chunks must be >= 1.", call. = FALSE)
   }
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
   }
 
   if ( identical(cores,as.integer(1)) ){
@@ -538,11 +536,11 @@ predict.gp <- function(object, x, method = NULL, sample_size = 50, M = 50, cores
   M <- as.integer(M)
   if( !is.null(chunks) ) {
     chunks <- as.integer(chunks)
-    if ( chunks < 1 ) stop("The chunk number must be >= 1.", call. = FALSE)
+    if ( chunks < 1 ) stop("chunks must be >= 1.", call. = FALSE)
   }
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
   }
 
   rep_x <- pkg.env$np$unique(x, return_inverse=TRUE, axis=0L)

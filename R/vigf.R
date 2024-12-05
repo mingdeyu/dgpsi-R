@@ -24,14 +24,14 @@
 #'   of the matrix equals to:
 #'   - the emulator output dimension if `object` is an instance of the `dgp` class; or
 #'   - the number of emulators contained in `object` if `object` is an instance of the `bundle` class.
-#' * the output should be a vector that gives aggregations of scores at different design points.
+#' * the output should be a vector that gives aggregate scores at different design points.
 #'
-#' Set to `NULL` to disable the aggregation. Defaults to `NULL`.
+#' Set to `NULL` to disable aggregation. Defaults to `NULL`.
 #' @param ... any arguments (with names different from those of arguments used in [vigf()]) that are used by `aggregate`
 #'     can be passed here.
 #'
 #' @return
-#' * If `object` is an instance of the `gp` class, a vector is returned with the length equal to `batch_size`, giving the positions (i.e., row numbers)
+#' * If `object` is an instance of the `gp` class, a vector is returned with length equal to `batch_size`, giving the positions (i.e., row numbers)
 #'   of next design points from `x_cand`.
 #' * If `object` is an instance of the `dgp` class, a matrix is returned with row number equal to `batch_size` and column number equal to one (if `aggregate`
 #'   is not `NULL`) or the output dimension (if `aggregate` is `NULL`), giving positions (i.e., row numbers) of next design points from `x_cand` to be added

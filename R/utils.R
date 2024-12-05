@@ -163,8 +163,8 @@ pack <- function(..., id = NULL) {
 
 #' @title Unpack a bundle of (D)GP emulators
 #'
-#' @description This function unpacks a bundle of (D)GP emulators safely so any further manipulations of unpacked individual emulators
-#'     will not impact the ones in the bundle.
+#' @description This function unpacks a bundle of (D)GP emulators safely so that any further manipulations of unpacked individual emulators
+#'     will not impact those in the bundle.
 #'
 #' @param object an instance of the class `bundle`.
 #'
@@ -210,16 +210,15 @@ unpack <- function(object) {
 #' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
-#' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be saved.
-#'     This argument has no effects on GP or bundles of GP emulators. Defaults to `TRUE`.
+#' @param light a bool indicating if a light version of the constructed emulator (that requires less memory to store) will be saved.
+#'     This argument has no effect on GP or bundles of GP emulators. Defaults to `TRUE`.
 #'
-#' @return No return value. `object` will be save to a local `.pkl` file specified by `pkl_file`.
+#' @return No return value. `object` will be saved to a local `.pkl` file specified by `pkl_file`.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note Since the constructed emulators are 'python' objects, [save()] from R will not work as it is only for R objects. If `object`
-#'     was processed by [set_vecchia()] to add or remove the Vecchia approximation, `light` needs to be set to `FALSE` to ensure
-#'     reproducibility after the saved emulator is loaded by [read()], since when `light = TRUE`, the imputations generated during
-#'     emulator loading will be different.
+#' @note Since dgpsi emulators are 'python' objects, [save()] from R will not work as it would for R objects. If `object`
+#'     was processed by [set_vecchia()] to add or remove the Vecchia approximation, `light` should be set to `FALSE` to ensure
+#'     reproducibility after the saved emulator is loaded by [read()]. 
 #' @examples
 #' \dontrun{
 #'
@@ -1423,12 +1422,10 @@ set_linked_idx <- function(object, idx) {
 
 #' @title Reset number of imputations for a DGP emulator
 #'
-#' @description This function resets the number of imputations for predictions from a DGP emulator.
+#' @description This function resets the number of imputations for prediction from a DGP emulator.
 #'
 #' @param object an instance of the S3 class `dgp`.
-#' @param B the number of imputations to produce predictions from `object`. Increase the value to account for
-#'     more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
-#'     but faster predictions. Defaults to `5`.
+#' @param B the number of imputations to produce predictions from `object`. Increase the value to improve imputation uncertainty quantification. Decrease the value to improve speed of prediction. Defaults to `5`.
 #'
 #' @return An updated `object` with the information of `B` incorporated.
 #'
@@ -1490,24 +1487,24 @@ set_imp <- function(object, B = 5) {
 }
 
 
-#' @title Trim the sequences of model parameters of a DGP emulator
+#' @title Trim the sequence of hyperparameter estimates within a DGP emulator
 #'
-#' @description This function trim the sequences of model parameters of a DGP emulator
-#'     that are generated during the training.
+#' @description This function trims the sequence of hyperparameter estimates within a DGP emulator
+#'     generated during training.
 #'
 #' @param object an instance of the S3 class `dgp`.
-#' @param start the first iteration before which all iterations are trimmed from the sequences.
-#' @param end the last iteration after which all iterations are trimmed from the sequences.
+#' @param start the first iteration before which all iterations are trimmed from the sequence.
+#' @param end the last iteration after which all iterations are trimmed from the sequence.
 #'     Set to `NULL` to keep all iterations after (including) `start`. Defaults to `NULL`.
-#' @param thin the interval between the `start` and `end` iterations to thin out the sequences.
+#' @param thin the interval between the `start` and `end` iterations to thin out the sequence.
 #'     Defaults to 1.
 #'
-#' @return An updated `object` with trimmed sequences of model parameters.
+#' @return An updated `object` with a trimmed sequence of hyperparameters.
 #'
 #' @note
 #' * This function is useful when a DGP emulator has been trained and one wants to trim
-#'   the sequences of model parameters and use the trimmed sequences to generate the point estimates
-#'   of DGP model parameters for predictions.
+#'   the sequence of hyperparameters estimated and to use the trimmed sequence to generate point estimates
+#'   of the DGP model parameters for prediction.
 #' * The following slots:
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()]
@@ -1590,9 +1587,9 @@ window <- function(object, start, end = NULL, thin = 1) {
 }
 
 
-#' @title Calculate negative predicted log-likelihood
+#' @title Calculate the negative log-likelihood
 #'
-#' @description This function computes the negative predicted log-likelihood from a
+#' @description This function computes the predictive negative log-likelihood from a
 #'     DGP emulator with a likelihood layer.
 #'
 #' @param object an instance of the `dgp` class and it should be produced by [dgp()] with `likelihood` not being `NULL`;
@@ -1649,9 +1646,9 @@ nllik <- function(object, x, y) {
 }
 
 
-#' @title Plot of DGP model parameter traces
+#' @title Trace Plot for DGP hyperparameters
 #'
-#' @description This function plots the traces of model parameters of a chosen GP node
+#' @description This function draws trace plots for the hyperparameters of a chosen GP node
 #'     in a DGP emulator.
 #'
 #' @param object an instance of the `dgp` class.
@@ -1717,21 +1714,20 @@ trace_plot <- function(object, layer = NULL, node = 1) {
 
 #' @title Static pruning of a DGP emulator
 #'
-#' @description This function implements the static pruning of a DGP emulator.
+#' @description This function implements static pruning for a DGP emulator.
 #'
-#' @param object an instance of the `dgp` class that is generated by `dgp()` with `struc = NULL`.
-#' @param control a list that can supply the following two components to control the static pruning of the DGP emulator:
-#' * `min_size`, the minimum number of design points required to trigger the pruning. Defaults to 10 times of the input dimensions.
-#' * `threshold`, the R2 value above which a GP node is considered redundant and removable. Defaults to `0.97`.
-#' @param verb a bool indicating if the trace information will be printed during the function execution. Defaults to `TRUE`.
+#' @param object an instance of the `dgp` class that is generated by `dgp()`.
+#' @param control a list that can supply the following two components to control static pruning of the DGP emulator:
+#' * `min_size`, the minimum number of design points required to trigger pruning. Defaults to 10 times of the input dimensions.
+#' * `threshold`, the R^2 value above which a GP node is considered redundant and removable. Defaults to `0.97`.
+#' @param verb a bool indicating if trace information will be printed during the function execution. Defaults to `TRUE`.
 #'
 #' @return An updated `object` that could be an instance of `gp`, `dgp`, or `bundle` (of GP emulators) class.
 #'
 #' @note
 #' * The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to `min_size` in `control`.
-#'    If the training dataset size is smaller than this, it is suggested to enrich the design of the DGP emulator and prune its
-#'    structure dynamically using the `design()` function. Depending on the design of the DGP emulator, the static pruning may not be accurate.
-#'    It is thus suggested to implement dynamic pruning as a part of the sequential design via `design()`.
+#'    If the training dataset size is smaller than this, it is recommended that the design of the DGP emulator is enriched and its structure pruned dynamically using the `design()` function. Depending on the design of the DGP emulator, static pruning may not be accurate.
+#'    It is thus recommended that dynamic pruning is implemented as a part of a sequential design via `design()`.
 #' * The following slots:
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()];
@@ -1805,7 +1801,7 @@ prune <- function(object, control = list(), verb = TRUE) {
   if (con$threshold>1 || con$threshold<0) stop("'threshold' in 'control' must be between 0 and 1.", call. = FALSE)
 
   if (nrow(object$data$X) < con$min_size) {
-    stop("To prune, 'object' needs to be trained with a dataset comprising a size at least equal to 'min_size' in 'control'. Use design() to enrich the design size.", call. = FALSE)
+    stop("To prune, 'object' needs to be trained with a dataset comprising a size at least equal to 'min_size' in 'control'. Use design() to enrich the training set.", call. = FALSE)
   }
 
   if (!"internal_dims" %in% names(object[['specs']])) {

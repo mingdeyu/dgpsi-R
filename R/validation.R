@@ -1,14 +1,13 @@
 #' @title Validate a constructed GP, DGP, or linked (D)GP emulator
 #'
-#' @description This function validate a constructed GP, DGP, or linked (D)GP emulator via the Leave-One-Out (LOO)
-#'    cross validation or Out-Of-Sample (OOS) validation.
+#' @description This function calculates Leave-One-Out (LOO) cross validation or Out-Of-Sample (OOS) validation statistics for a constructed GP, DGP, or linked (D)GP emulator.
 #'
 #' @param object can be one of the following:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `lgp`.
-#' @param x_test the OOS testing input data:
-#' * if `object` is an instance of the `gp` or `dgp` class, `x_test` is a matrix where each row is an input testing data point and each column is an input dimension.
+#' @param x_test OOS testing input data:
+#' * if `object` is an instance of the `gp` or `dgp` class, `x_test` is a matrix where each row is a new input location to be used for validating the emulator and each column is an input dimension.
 #' * `r lifecycle::badge("deprecated")` if `object` is an instance of the `lgp` class, `x_test` can be a matrix or a list:
 #'    - if `x_test` is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
 #'      The rows of `x_test` represent different input data points and the columns represent input dimensions across all emulators in
@@ -26,33 +25,32 @@
 #' * `r new_badge("new")` If `object` is an instance of the `lgp` class created by [lgp()] with argument `struc` in data frame form,
 #'   `x_test` must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
 #'   The column indices in `x_test` must align with the indices specified in the `From_Output` column of the `struc` data frame (used in [lgp()]),
-#'   corresponding to rows where the `From_Emulator` column is `"Global"`.
+#'   corresponding to rows where the `From_Emulator` column is `"Global"`. 
 #'
-#' `x_test` must be provided for the validation if `object` is an instance of the `lgp`. Defaults to `NULL`.
-#' @param y_test the OOS testing output data that correspond to `x_test`:
-#' * if `object` is an instance of the `gp` class, `y_test` is a matrix with only one column and each row being an testing output data point.
-#' * if `object` is an instance of the `dgp` class, `y_test` is a matrix with its rows being testing output data points and columns being
-#'   output dimensions.
+#' `x_test` must be provided if `object` is an instance of the `lgp`. `x_test` must also be provided if `y_test` is provided. Defaults to `NULL`, in which case LOO validation is performed.
+#' @param y_test the OOS output data corresponding to `x_test`:
+#' * if `object` is an instance of the `gp` class, `y_test` is a matrix with only one column where each row represents the output corresponding to the matching row of `x_test`.
+#' * if `object` is an instance of the `dgp` class, `y_test` is a matrix where each row represents the output corresponding to the matching row of `x_test` and with columns representing output dimensions.
 #' * if `object` is an instance of the `lgp` class, `y_test` can be a single matrix or a list of matrices:
-#'   - if `y_test` is a single matrix, then there is only one emulator in the final layer of the linked emulator system and `y_test`
+#'   - if `y_test` is a single matrix, then there should be only one emulator in the final layer of the linked emulator system and `y_test`
 #'     represents the emulator's output with rows being testing positions and columns being output dimensions.
-#'   - if `y_test` is a list, then `y_test` should have *M* number (the same number of emulators in the final layer of the system) of matrices.
+#'   - if `y_test` is a list, then `y_test` should have *L* matrices, where *L* is the number of emulators in the final layer of the system.
 #'     Each matrix has its rows corresponding to testing positions and columns corresponding to output dimensions of the associated emulator
 #'     in the final layer.
 #'
-#' `y_test` must be provided for the validation if `object` is an instance of the `lgp`. Defaults to `NULL`.
-#' @param method `r new_badge("updated")` the prediction approach to use in validations: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`).
+#' `y_test` must be provided if `object` is an instance of the `lgp`. `y_test` must also be provided if `x_test` is provided. Defaults to `NULL`, in which case LOO validation is performed.
+#' @param method `r new_badge("updated")` the prediction approach to use for validation: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). For details see [prediction()].
 #'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
 #'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
-#' @param verb a bool indicating if the trace information on validations will be printed during the function execution.
+#' @param verb a bool indicating if trace information for validation should be printed during function execution.
 #'     Defaults to `TRUE`.
-#' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the emulator validation. This argument is only used if the emulator `object`
+#' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in emulator validation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
-#' @param force a bool indicating whether to force the LOO or OOS re-evaluation when `loo` or `oos` slot already exists in `object`. When `force = FALSE`,
-#'     [validate()] will try to determine automatically if the LOO or OOS re-evaluation is needed. Set `force` to `TRUE` when LOO or OOS re-evaluation
+#' @param force a bool indicating whether to force LOO or OOS re-evaluation when the `loo` or `oos` slot already exists in `object`. When `force = FALSE`,
+#'     [validate()] will only re-evaluate the emulators if the `x_test` and `y_test` are not identical to the values in the `oos` slot. If the existing `loo` or `oos` validation used a different `M` in a Vecchia approximation or a different `method` to the one prescribed in this call, the emulator will be re-evaluated. Set `force` to `TRUE` when LOO or OOS re-evaluation
 #'     is required. Defaults to `FALSE`.
-#' @param cores the number of processes to be used for validations. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`.
+#' @param cores the number of processes to be used for validation. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`.
 #'     Defaults to `1`.
 #' @param ... N/A.
 #'
@@ -66,10 +64,10 @@
 #'     GP emulator at validation positions. If `method = "mean_var"`, the upper and lower bounds of a credible interval are two standard deviations above
 #'     and below the predictive mean. If `method = "sampling"`, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
 #'   - a numeric value called `rmse` that contains the root mean/median squared error of the GP emulator.
-#'   - a numeric value called `nrmse` that contains the (min-max) normalized root mean/median squared error of the GP emulator. The min-max normalization
-#'     is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
-#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
-#'   - an integer called `sample_size` that contains the number of samples used for the validation if `method = "sampling"`.
+#'   - a numeric value called `nrmse` that contains the (max-min) normalized root mean/median squared error of the GP emulator. The max-min normalization
+#'     uses the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
+#'   - `r new_badge("new")` an integer called `M` that contains the size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for validation if `method = "sampling"`.
 #'
 #'   The rows of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions.
 #' * If `object` is an instance of the `dgp` class, an updated `object` is returned with an additional slot called `loo` (for LOO cross validation) or
@@ -82,10 +80,11 @@
 #'     and below the predictive mean. If `method = "sampling"`, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
 #'   - a vector called `rmse` that contains the root mean/median squared errors of the DGP emulator across different output
 #'     dimensions.
-#'   - a vector called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the DGP emulator across different output
-#'     dimensions. The min-max normalization is based on the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
-#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
-#'   - an integer called `sample_size` that contains the number of samples used for the validation if `method = "sampling"`.
+#'   - a vector called `nrmse` that contains the (max-min) normalized root mean/median squared errors of the DGP emulator across different output
+#'     dimensions. The max-min normalization
+#'     uses the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
+#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for validation if `method = "sampling"`.
 #'
 #'   The rows and columns of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions and DGP emulator output
 #' dimensions, respectively.
@@ -99,8 +98,8 @@
 #'   - a scalar called `log_loss` that represents the average log loss of the predicted labels in the DGP emulator across all validation positions. Log loss measures the
 #'     accuracy of probabilistic predictions, with lower values indicating better classification performance. `log_loss` ranges from `0` to positive infinity, where a
 #'     value closer to `0` suggests more confident and accurate predictions.
-#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
-#'   - an integer called `sample_size` that contains the number of samples used for the validation.
+#'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for validation.
 #' * If `object` is an instance of the `lgp` class, an updated `object` is returned with an additional slot called `oos` (for OOS validation) that contains:
 #'   - two slots called `x_test` and `y_test` that contain the validation data points for OOS.
 #'   - a list called `mean`, if `method = "mean_var"`, or `median`, if `method = "sampling"`, that contains the predictive means or medians of
@@ -109,17 +108,17 @@
 #'     the linked (D)GP emulator at validation positions. If `method = "mean_var"`, the upper and lower bounds of a credible interval are two standard
 #'     deviations above and below the predictive mean. If `method = "sampling"`, the upper and lower bounds of a credible interval are 2.5th and 97.5th percentiles.
 #'   - a list called `rmse` that contains the root mean/median squared errors of the linked (D)GP emulator.
-#'   - a list called `nrmse` that contains the (min-max) normalized root mean/median squared errors of the linked (D)GP emulator. The min-max normalization
-#'     is based on the maximum and minimum values of the validation outputs contained in `y_test`.
-#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in the emulator validation.
-#'   - an integer called `sample_size` that contains the number of samples used for the validation if `method = "sampling"`.
+#'   - a list called `nrmse` that contains the (max-min) normalized root mean/median squared errors of the linked (D)GP emulator. The max-min normalization
+#'     uses the maximum and minimum values of the validation outputs contained in `y_test`.
+#'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.
+#'   - an integer called `sample_size` that contains the number of samples used for validation if `method = "sampling"`.
 #'
 #'   Each element in `mean`, `median`, `std`, `lower`, `upper`, `rmse`, and `nrmse` corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 #' emulator.
 #'
 #' @note
-#' * When both `x_test` and `y_test` are `NULL`, the LOO cross validation will be implemented. Otherwise, OOS validation will
-#'   be implemented. The LOO validation is only applicable to a GP or DGP emulator (i.e., `object` is an instance of the `gp` or `dgp`
+#' * When both `x_test` and `y_test` are `NULL`, LOO cross validation will be implemented. Otherwise, OOS validation will
+#'   be implemented. LOO validation is only applicable to a GP or DGP emulator (i.e., `object` is an instance of the `gp` or `dgp`
 #'   class). If a linked (D)GP emulator (i.e., `object` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
 #'   also be provided for OOS validation.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -341,7 +340,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
   }
   M <- as.integer(M)
 
@@ -620,13 +619,13 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
 
   if ( "metadata" %in% names(object$specs) ){
     if ( !("emulator_obj" %in% names(object)) ){
-      stop("'object' is not in activation mode for validations. Please set `mode = 'activate'` in `lgp()` to build the emulator.", call. = FALSE)
+      stop("'object' is not in activation mode for validation. Please set `mode = 'activate'` in `lgp()` to build the emulator.", call. = FALSE)
     }
   }
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
   }
   M <- as.integer(M)
 
@@ -772,7 +771,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
                   }
                 }
                 if ( nrow(x_test[[l]][[k]])!=nrow_x ) {
-                  stop(sprintf("The element %i in the sublist %i of 'x_test' has inconsistent number of data points with the first element of 'x_test'.", k, l), call. = FALSE)
+                  stop(sprintf("The element %i in the sublist %i of 'x_test' has an inconsistent number of data points with the first element of 'x_test'.", k, l), call. = FALSE)
                 }
               }
             }
@@ -827,7 +826,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
               }
             }
             nrow_y <- nrow(y_test[[l]])
-            if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points are inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
+            if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points is inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
           }
         }
       }
@@ -855,7 +854,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
             }
           }
           nrow_y <- nrow(y_test)
-          if ( nrow_y!=nrow_x ) stop("The number of data points are inconsistent between 'x_test' and 'y_test'.", call. = FALSE)
+          if ( nrow_y!=nrow_x ) stop("The number of data points is inconsistent between 'x_test' and 'y_test'.", call. = FALSE)
         }
       } else {
         total_layer <- length(object$constructor_obj)
@@ -881,7 +880,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
               }
             }
             nrow_y <- nrow(y_test[[l]])
-            if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points are inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
+            if ( nrow_y!=nrow_x ) stop(sprintf("The number of data points is inconsistent between 'x_test' and the element %i of 'y_test'.", l), call. = FALSE)
           }
         }
       }
@@ -994,6 +993,6 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     return(object)
     #For other cases
   } else {
-    stop("Both 'x_test' and 'y_test' must be provided for the validation of a linked (D)GP emulator.", call. = FALSE)
+    stop("Both 'x_test' and 'y_test' must be provided for validation of a linked (D)GP emulator.", call. = FALSE)
   }
 }

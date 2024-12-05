@@ -9,7 +9,7 @@
 #' * the S3 class `bundle`.
 #' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
 #'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class, `x_cand` could also
-#'     be a list with the length equal to the number of emulators contained in the `object`. Each slot in `x_cand` is a matrix
+#'     be a list with length equal to the number of emulators contained in the `object`. Each slot in `x_cand` is a matrix
 #'     that gives a candidate set for each emulator included in the bundle. See *Note* section below for further information.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
