@@ -279,7 +279,7 @@ The returned \code{dgp} object can be used by
 \item \code{\link[=set_imp]{set_imp()}} to change the number of imputations.
 \item \code{\link[=design]{design()}} for sequential designs.
 \item \code{\link[=update]{update()}} to update the DGP emulator with new inputs and outputs.
-\item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.
+\item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.
 }
 }
 \description{

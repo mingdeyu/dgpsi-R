@@ -72,7 +72,7 @@ kernel <- function(length, scale = 1., nugget = 1e-6, name = 'sexp', prior_name 
   }
 
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "kernel()",
     details = c(i = "The function will be removed in the next release.",
                 i=  "It may not be compatible with other functions in this version.",

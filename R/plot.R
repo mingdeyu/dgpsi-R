@@ -11,13 +11,17 @@
 #' @param dim if `dim = NULL`, the index of an emulator's input will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
 #'     which dimension of an emulator's input will be shown on the x-axis in validation plots:
 #' * If `x` is an instance of the `gp` of `dgp` class, `dim` is an integer.
-#' * If `x` is an instance of the `lgp` class, `dim` can be
+#' * `r lifecycle::badge("deprecated")` If `x` is an instance of the `lgp` class created by [lgp()] without specifying argument `struc` in data frame form, `dim` can be
 #'   1. an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
 #'   2. a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
 #'   (specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
 #'   system.
 #'
-#' This argument is only used when `style = 1` and the emulator input is at least two-dimensional. Defaults to `NULL`.
+#'   **This option for linked (D)GP emulators is deprecated and will be removed in the next release.**
+#' * `r new_badge("new")` If `x` is an instance of the `lgp` class created by [lgp()] with argument `struc` in data frame form, `dim` is an integer referring
+#'   to the dimension of the global input to the linked emulator system.
+#'
+#' This argument is only used when `style = 1`. Defaults to `NULL`.
 #' @param method same as that of [validate()].
 #' @param sample_size same as that of [validate()].
 #' @param style either `1` or `2`, indicating two different types of validation plots.
@@ -498,6 +502,16 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
+
+  if ( "metadata" %in% names(x$specs) ){
+    if ( !("emulator_obj" %in% names(x)) ){
+      stop("'object' is not activated for plotting. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
+    }
+    is.df <- TRUE
+  } else {
+    is.df <- FALSE
+  }
+
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
@@ -631,7 +645,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
         } else {
           if ( length(dim)==1 ){
             idx <- oos_res$x_test[,dim]
-            dim <- c(1,dim)
+            if (!is.df) dim <- c(1,dim)
           } else {
             stop("'dim' must be a vector of length 1. See documentation for details.", call. = FALSE)
           }

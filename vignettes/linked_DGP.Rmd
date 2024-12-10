@@ -191,10 +191,10 @@ Finally, we can pass `struc` and a list of the three trained emulators to `lgp()
 emulators <- list(m1, m2, m3)
 ```
 
-Before activating the linked emulator for predictions, it's good practice to first set it to validation mode:
+It's good practice to first inspect the structure of the linked emulator before activating it for predictions:
 
 ```{r}
-m_link <- lgp(struc, emulators, mode = "validate")
+m_link <- lgp(struc, emulators, activate = FALSE)
 ```
 
 ```         
@@ -211,10 +211,10 @@ summary(m_link)
 
 <iframe src="https://mingdeyu.github.io/dgpsi-R/linked_emu.html" width="100%" height="410" style="border: none;"></iframe>
 
-If everything looks correct, we can then construct the linked emulator in activation mode for prediction:
+If everything looks correct, we can then activate the linked emulator for prediction:
 
 ```{r}
-m_link <- lgp(struc, emulators, mode = "activate")
+m_link <- lgp(struc, emulators, activate = TRUE)
 ```
 
 ```         

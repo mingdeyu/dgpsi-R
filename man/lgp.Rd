@@ -4,7 +4,7 @@
 \alias{lgp}
 \title{Linked (D)GP emulator construction}
 \usage{
-lgp(struc, emulators = NULL, B = 10, mode = "activate", verb = TRUE, id = NULL)
+lgp(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, id = NULL)
 }
 \arguments{
 \item{struc}{the structure of the linked emulator, which can take one of two forms:
@@ -48,14 +48,9 @@ to ensure each instance can be uniquely referenced.}
 imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 If the system consists only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{10}.}
 
-\item{mode}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a character string indicating the operational mode of the object returned by the function:
-\itemize{
-\item \code{"validate"}: returns an object suitable for visual inspection of the linked emulator structure,
-which can be examined using \code{\link[=summary]{summary()}}.
-\item \code{"activate"}: returns an object ready for predictions, which can be used with \code{\link[=predict]{predict()}}.
-}
-
-Defaults to \code{"activate"}. This argument is only applicable when \code{struc} is specified as a data frame.}
+\item{activate}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating if the initialized linked emulator will be activated for prediction, which can be used with \code{\link[=predict]{predict()}} or \code{\link[=validate]{validate()}}.
+When set to \code{FALSE}, \code{\link[=lgp]{lgp()}} returns an inactive linked emulator, to which one can apply \code{\link[=summary]{summary()}} to inspect its structure. Defaults to \code{TRUE}. This argument is only
+applicable when \code{struc} is specified as a data frame.}
 
 \item{verb}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating if the trace information on linked (D)GP emulator construction will be printed during the function call.
 Defaults to \code{TRUE}. This argument is only applicable when \code{struc} is specified as a data frame.}
@@ -146,13 +141,13 @@ struc <- data.frame(From_Emulator = c("Global", "emulator1"),
 emulators <- list(m1, m2)
 
 # construct the linked emulator for visual inspection
-m_link <- lgp(struc, emulators, mode = "validate")
+m_link <- lgp(struc, emulators, activate = FALSE)
 
 # visual inspection
 summary(m_link)
 
 # build the linked emulator for prediction
-m_link <- lgp(struc, emulators, mode = "activate")
+m_link <- lgp(struc, emulators, activate = TRUE)
 test_x <- seq(0, 1, length = 300)
 m_link <- predict(m_link, x = test_x)
 

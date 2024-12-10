@@ -12,7 +12,7 @@ update(object, X, Y, refit, reset, verb, ...)
   object,
   X,
   Y,
-  refit = FALSE,
+  refit = TRUE,
   reset = FALSE,
   verb = TRUE,
   N = NULL,
@@ -22,7 +22,7 @@ update(object, X, Y, refit, reset, verb, ...)
   ...
 )
 
-\method{update}{gp}(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, ...)
+\method{update}{gp}(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ...)
 }
 \arguments{
 \item{object}{can be one of the following:
@@ -40,7 +40,7 @@ update(object, X, Y, refit, reset, verb, ...)
 output dimensions. When \code{likelihood} (see below) is not \code{NULL}, \code{Y} must be a matrix with only one column.
 }}
 
-\item{refit}{a bool indicating whether to re-fit the emulator \code{object} after the training input and output are updated. Defaults to \code{FALSE}.}
+\item{refit}{a bool indicating whether to re-fit the emulator \code{object} after the training input and output are updated. Defaults to \code{TRUE}.}
 
 \item{reset}{a bool indicating whether to reset hyperparameters of the emulator \code{object} to their initial values when the emulator was
 constructed, after the training input and output are updated. Defaults to \code{FALSE}.}
@@ -90,6 +90,6 @@ in \code{object} will be removed and not contained in the returned object.
 \examples{
 \dontrun{
 
-# See alm(), mice(), pei(), or vigf() for an example.
+# See alm(), mice(), or vigf() for an example.
 }
 }

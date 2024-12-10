@@ -110,7 +110,7 @@
 #' * [write()] to save the GP emulator to a `.pkl` file.
 #' * [design()] for sequential designs.
 #' * [update()] to update the GP emulator with new inputs and outputs.
-#' * [alm()], [mice()], [pei()], and [vigf()] to locate next design points.
+#' * [alm()], [mice()], and [vigf()] to locate next design points.
 #'
 #' @references
 #' - Gu, M. (2019). Jointly robust prior for Gaussian stochastic process in emulation, calibration and variable selection. *Bayesian Analysis*, **14(3)**, 857-885.
@@ -168,7 +168,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   if (!is.null(struc)) {
     # Display a combined warning message
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = "gp(struc)",
       details = c(i = "The argument will be dropped in the next release.",
                   i = "To customize GP specifications, please adjust the other arguments in the `gp()` function."
@@ -179,7 +179,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   if (!is.null(internal_input_idx)) {
     # Display a combined warning message
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = "gp(internal_input_idx)",
       details = c(i = "The argument will be dropped in the next release.",
                   i = "To set up connections of emulators for linked emulations, please use the updated `lgp()` function instead."
@@ -190,7 +190,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
   if (!is.null(linked_idx)) {
     # Display a combined warning message
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = "gp(linked_idx)",
       details = c(i = "The argument will be dropped in the next release.",
         i = "To set up connections of emulators for linked emulations, please use the updated `lgp()` function instead."

@@ -6,10 +6,13 @@
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param emulator the index of the emulator packed in `object` if `object` is an instance of the `bundle` class.
-#' @param type either `"rmse"`, for the trace plot of RMSEs or customized evaluating metrics of emulators constructed during the sequential designs,
-#'     or `"design"`, for visualizations of input designs created by the sequential design procedure. Defaults to `"rmse"`.
-#' @param log a bool that indicates whether to plot RMSEs or customized evaluating metrics in log-scale if `type = "rmse"`. Defaults to `FALSE`.
+#' @param type either `"rmse"`, for the trace plot of RMSEs, or log-losses for DGP emulators with categorical likelihoods, or customized evaluating metrics
+#'     of emulators constructed during the sequential designs, or `"design"`, for visualizations of input designs created by the sequential design procedure.
+#'     Defaults to `"rmse"`.
+#' @param log a bool that indicates whether to plot RMSEs, or log-losses (in case of DGP emulators with categorical likelihoods), or customized evaluating
+#'     metrics in log-scale if `type = "rmse"`. Defaults to `FALSE`.
+#' @param emulator a vector of indices of emulators packed in `object` to be drawn, if `object` is an instance of the `bundle` class. When set to `NULL`, all
+#'     emulators in the bundle are drawn. Defaults to `NULL`.
 #' @param ... N/A.
 #'
 #' @return A `patchwork` object.
@@ -194,6 +197,11 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
           'Xi = Input dimension i of the DGP emulator'
       )
   } else if ( type == 'rmse' ){
+    if (object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$name == "Categorical") {
+      is.categorical <- TRUE
+    } else {
+      is.categorical <- FALSE
+    }
     total_N <- nrow(object$data$X)
     #output_D <- ncol(object$data$Y)
     seq_N <- 0
@@ -254,7 +262,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
       dat[["N"]] <- design_N
       dat[["rmse"]] <- rmse[,l]
       dat[["Design"]] <- wave
-      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log, target = dat_target, cust = cust)
+      p_list[[l]] <- draw_seq_design(as.data.frame(dat), log = log, target = dat_target, cust = cust, is.categorical = is.categorical)
       if ( output_D==ncol(object$data$Y) ){
         p_list[[l]] <- p_list[[l]] +
            ggplot2::ggtitle(sprintf("O%i", l)) +
@@ -277,12 +285,20 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
           )
       }
     } else {
-      p_patch <- p_patch +
-        patchwork::plot_annotation(
-          title = 'Sequential Design Validation',
-          caption = 'Oi = Output i of the DGP emulator
+      if ( is.categorical ){
+        p_patch <- p_patch +
+          patchwork::plot_annotation(
+            title = 'Sequential Design Validation',
+            caption = 'Oi = Output i of the DGP emulator'
+          )
+      } else {
+        p_patch <- p_patch +
+          patchwork::plot_annotation(
+            title = 'Sequential Design Validation',
+            caption = 'Oi = Output i of the DGP emulator
                    RMSE = Root Mean Squared Error'
-        )
+          )
+      }
     }
   } else {
     stop("The provided 'type' is not supported.", call. = FALSE)
@@ -294,7 +310,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
 #' @rdname draw
 #' @method draw bundle
 #' @export
-draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
+draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...){
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -305,127 +321,158 @@ draw.bundle <- function(object, emulator = 1, type = 'rmse', log = FALSE, ...){
   }
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
+  if (is.null(emulator)){
+    n_emulator <- length(grep("^emulator[0-9]+$", names(object), value = TRUE))
+    emulator <- 1:n_emulator
+  }
+
   if ( type == 'design' ) {
-    design_data <- object$data$X[[paste('emulator', emulator, sep="")]]
-    total_N <- nrow(design_data)
-    design_data <- as.data.frame(design_data)
-    for (l in 1:length(design_data)) {
-      names(design_data)[l] <- paste('X', l, sep="")
-    }
-    wave <- c()
-    seq_N <- 0
-    wave_N <- length(object$design)
-    if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
-    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
-    if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
-    for ( i in 1:wave_N ){
-      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
-      wave <- c(wave, rep(paste("wave",i,sep=""), Ni))
-      seq_N <- seq_N + Ni
-    }
-    wave <- c(rep("Initial", total_N-seq_N), wave)
-    design_data$Design <- wave
+    p_list <- list()
+    for (emu in 1:length(emulator)){
+      design_data <- object$data$X[[paste('emulator', emulator[emu], sep="")]]
+      total_N <- nrow(design_data)
+      design_data <- as.data.frame(design_data)
+      for (l in 1:length(design_data)) {
+        names(design_data)[l] <- paste('X', l, sep="")
+      }
+      wave <- c()
+      seq_N <- 0
+      wave_N <- length(object$design)
+      if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+      if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
+      if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
+      for ( i in 1:wave_N ){
+        Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator[emu]])
+        wave <- c(wave, rep(paste("wave",i,sep=""), Ni))
+        seq_N <- seq_N + Ni
+      }
+      wave <- c(rep("Initial", total_N-seq_N), wave)
+      design_data$Design <- wave
+      p_list[[emu]] <- pair_design(design_data) +
+        ggplot2::ggtitle(sprintf("Emulator %i", emulator[emu])) +
+        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
 
-    p <- pair_design(design_data) +
-      ggplot2::ggtitle(sprintf("Emulator %i", emulator)) +
-      ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+    }
 
-    p_patch <- patchwork::wrap_plots(p) +
+    p_patch <- patchwork::wrap_plots(p_list) +
+      patchwork::plot_layout() & ggplot2::theme(legend.position='bottom')
+
+    p_patch <- p_patch +
       patchwork::plot_annotation(
         title = 'Sequential Designs',
-        caption =
-          'Xi = Input dimension i'
+        caption = 'Xi = Input dimension i'
       )
   } else if ( type == 'rmse' ){
-    total_N <- nrow(object$data$X[[paste('emulator', emulator, sep="")]])
-    seq_N <- 0
-    wave_N <- length(object$design)
-    if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
-    if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
-    cust <- object$design$type=='customized'
-    if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
-    for ( i in 1:wave_N ){
-      Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
-      seq_N <- seq_N + Ni
-    }
-    init_N <- total_N - seq_N
-    design_N <- c()
-    rmse <- c()
-    wave <- c()
-    target <- c()
-    target_wave <- c()
+    p_list <- list()
+    for (emu in 1:length(emulator)){
+      is.categorical <- FALSE
+      obj_k <- object[[paste('emulator',emulator[emu],sep='')]]
+      if (inherits(obj_k,"dgp")){
+        if (obj_k$constructor_obj$all_layer[[obj_k$constructor_obj$n_layer]][[1]]$name == "Categorical") {
+          is.categorical <- TRUE
+        }
+      }
 
-    for ( i in 1:wave_N ){
-      Ni <- object$design[[paste('wave',i,sep='')]]$N
-      if ( cust ){
-        if ( ncol(object$design[[paste('wave',i,sep='')]]$metric)==1 ) {
-          emulator_tmp <- 1
+      total_N <- nrow(object$data$X[[paste('emulator', emulator[emu], sep="")]])
+      seq_N <- 0
+      wave_N <- length(object$design)
+      if ( "type" %in% names(object$design) ) wave_N <- wave_N - 1
+      if ( "exclusion" %in% names(object$design) ) wave_N <- wave_N - 1
+      cust <- object$design$type=='customized'
+      if ( "x_test" %in% names(object$design) & "y_test" %in% names(object$design) ) wave_N <- wave_N - 2
+      for ( i in 1:wave_N ){
+        Ni <- sum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator[emu]])
+        seq_N <- seq_N + Ni
+      }
+      init_N <- total_N - seq_N
+      design_N <- c()
+      rmse <- c()
+      wave <- c()
+      target <- c()
+      target_wave <- c()
+
+      for ( i in 1:wave_N ){
+        Ni <- object$design[[paste('wave',i,sep='')]]$N
+        if ( cust ){
+          if ( ncol(object$design[[paste('wave',i,sep='')]]$metric)==1 ) {
+            emulator_tmp <- 1
+          } else {
+            emulator_tmp <- emulator[emu]
+          }
         } else {
-          emulator_tmp <- emulator
+          emulator_tmp <- emulator[emu]
+        }
+        if ( cust ){
+          rmsei <- object$design[[paste('wave',i,sep='')]]$metric[,emulator_tmp]
+        } else {
+          rmsei <- object$design[[paste('wave',i,sep='')]]$rmse[,emulator_tmp]
+        }
+        Fi <- object$design[[paste('wave',i,sep='')]]$freq
+        enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator[emu]])
+        enrichi <- c(init_N, init_N + enrichi)
+        step_Ni <- seq(0, Ni, Fi)
+        if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
+        design_Ni <- enrichi[step_Ni+1]
+        design_N <- c(design_N, design_Ni)
+        wave <- c(wave, rep(paste("wave",i,sep=" "), length(rmsei)))
+        rmse <- c(rmse, rmsei)
+        init_N <- design_Ni[length(design_Ni)]
+        if ( 'target' %in% names(object$design[[paste('wave',i,sep='')]]) ){
+          target <- c(target, object$design[[paste('wave',i,sep='')]]$target[emulator_tmp])
+          target_wave <- c(target_wave, i)
+        }
+      }
+
+      if ( !is.null(target) ){
+        dat_target <- list()
+        dat_target[["val"]] <- target
+        dat_target[["Target"]] <- target_wave
+        dat_target <- stats::aggregate(Target~val, dat_target, function(x) paste('wave',paste0(stats::na.omit(x), collapse = ","), sep=" "))
+        dat_target <- dat_target[order(dat_target$val,decreasing = T),]
+        dat_target <- as.data.frame(dat_target)
+      } else {
+        dat_target <- NULL
+      }
+
+      dat <- list()
+      dat[["N"]] <- design_N
+      dat[["rmse"]] <- rmse
+      dat[["Design"]] <- wave
+      p <- draw_seq_design(as.data.frame(dat), log = log, target = dat_target, cust = cust, is.categorical = is.categorical)
+
+      if ( cust ){
+        if (ncol(object$design[['wave1']]$metric)!=1) {
+          p <- p +ggplot2::ggtitle( sprintf("Emulator %i", emulator[emu]) ) +
+            ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
       } else {
-        emulator_tmp <- emulator
-      }
-      if ( cust ){
-        rmsei <- object$design[[paste('wave',i,sep='')]]$metric[,emulator_tmp]
-      } else {
-        rmsei <- object$design[[paste('wave',i,sep='')]]$rmse[,emulator_tmp]
-      }
-      Fi <- object$design[[paste('wave',i,sep='')]]$freq
-      enrichi <- cumsum(object$design[[paste('wave',i,sep='')]]$enrichment[,emulator])
-      enrichi <- c(init_N, init_N + enrichi)
-      step_Ni <- seq(0, Ni, Fi)
-      if ( step_Ni[length(step_Ni)]!=Ni ) step_Ni <- c(step_Ni, Ni)
-      design_Ni <- enrichi[step_Ni+1]
-      design_N <- c(design_N, design_Ni)
-      wave <- c(wave, rep(paste("wave",i,sep=" "), length(rmsei)))
-      rmse <- c(rmse, rmsei)
-      init_N <- design_Ni[length(design_Ni)]
-      if ( 'target' %in% names(object$design[[paste('wave',i,sep='')]]) ){
-        target <- c(target, object$design[[paste('wave',i,sep='')]]$target[emulator_tmp])
-        target_wave <- c(target_wave, i)
-      }
-    }
-
-    if ( !is.null(target) ){
-      dat_target <- list()
-      dat_target[["val"]] <- target
-      dat_target[["Target"]] <- target_wave
-      dat_target <- stats::aggregate(Target~val, dat_target, function(x) paste('wave',paste0(stats::na.omit(x), collapse = ","), sep=" "))
-      dat_target <- dat_target[order(dat_target$val,decreasing = T),]
-      dat_target <- as.data.frame(dat_target)
-    } else {
-      dat_target <- NULL
-    }
-
-    dat <- list()
-    dat[["N"]] <- design_N
-    dat[["rmse"]] <- rmse
-    dat[["Design"]] <- wave
-    p <- draw_seq_design(as.data.frame(dat), log = log, target = dat_target, cust = cust)
-
-    if ( cust ){
-      if (ncol(object$design[['wave1']]$metric)!=1) {
-        p <- p +ggplot2::ggtitle( sprintf("Emulator %i", emulator) ) +
+        p <- p +ggplot2::ggtitle( sprintf("Emulator %i", emulator[emu]) ) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
-    } else {
-      p <- p +ggplot2::ggtitle( sprintf("Emulator %i", emulator) ) +
-        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+      p_list[[emu]] <- p
     }
 
-    p_patch <- patchwork::wrap_plots(p)
+    p_patch <- patchwork::wrap_plots(p_list) +
+      patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+
     if ( cust ){
       p_patch <- p_patch +
         patchwork::plot_annotation(
           title = 'Sequential Design Validation',
         )
     } else {
+      if (is.categorical){
+        p_patch <- p_patch +
+          patchwork::plot_annotation(
+            title = 'Sequential Design Validation'
+          )
+      } else {
       p_patch <- p_patch +
         patchwork::plot_annotation(
           title = 'Sequential Design Validation',
           caption = 'RMSE = Root Mean Squared Error'
         )
+      }
     }
   } else {
     stop("The provided 'type' is not supported.", call. = FALSE)
@@ -453,7 +500,7 @@ pair_design <- function(dat){
   return(p)
 }
 
-draw_seq_design <- function(dat, log, target, cust) {
+draw_seq_design <- function(dat, log, target, cust, is.categorical = FALSE) {
   c24 <- c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2",
            "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
            "darkorange4", "brown")
@@ -480,10 +527,10 @@ draw_seq_design <- function(dat, log, target, cust) {
 
   if ( log ){
     p <- p + ggplot2::scale_y_continuous(trans='log10') +
-      ggplot2::labs(x ="Number of design points", y = ifelse(cust, "Metric (log-scale)", "RMSE (log-scale)"))
+      ggplot2::labs(x ="Number of design points", y = ifelse(cust, "Metric (log-scale)", ifelse(is.categorical, "Log-Loss (log-scale)", "RMSE (log-scale)" )))
   } else {
     p <- p +
-      ggplot2::labs(x ="Number of design points", y = ifelse(cust, "Metric", "RMSE"))
+      ggplot2::labs(x ="Number of design points", y = ifelse(cust, "Metric",  ifelse(is.categorical, "Log-Loss", "RMSE")))
   }
   return(p)
 }

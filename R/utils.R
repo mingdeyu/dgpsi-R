@@ -29,7 +29,7 @@
 #' @export
 combine <- function(...) {
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "combine()",
     details = c(i = "The function will be removed in the next release.",
                 i = "To construct linked (D)GP structure, please use the updated `lgp()` function instead."
@@ -211,7 +211,7 @@ unpack <- function(object) {
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
 #' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be saved.
-#'     This argument has no effects on GP or bundles of GP emulators. Defaults to `TRUE`.
+#'     Defaults to `TRUE`.
 #'
 #' @return No return value. `object` will be save to a local `.pkl` file specified by `pkl_file`.
 #'
@@ -241,7 +241,7 @@ write <- function(object, pkl_file, light = TRUE) {
       object[['emulator_obj']] <- NULL
       object[['container_obj']] <- NULL
     } else if (inherits(object,"lgp")){
-      if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct the 'object' by lgp().", call. = FALSE)
+      if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct and activate the 'object' by lgp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
     } else if (inherits(object,"bundle")){
       N <- length(object) - 1
@@ -251,6 +251,8 @@ write <- function(object, pkl_file, light = TRUE) {
         if ( inherits(object[[paste('emulator',i, sep='')]],"dgp") ) {
           if ( !"seed" %in% names(object[[paste('emulator',i, sep='')]][['specs']]) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or produce a new version of 'object' by updating the included DGP emulators via set_imp().", call. = FALSE)
           object[[paste('emulator',i, sep='')]][['emulator_obj']] <- NULL
+          object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
+        } else {
           object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
         }
       }
@@ -409,7 +411,11 @@ read <- function(pkl_file) {
         class(res) <- "gp"
       } else {
         est_obj <- res$constructor_obj$export()
-        linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        if (is.null(res[['specs']][['linked_idx']])){
+          linked_idx <- NULL
+        } else {
+          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
@@ -431,7 +437,11 @@ read <- function(pkl_file) {
         est_obj <- res$constructor_obj$estimate(burnin)
         B <- res$specs$B
         isblock <- res$constructor_obj$block
-        linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        if (is.null(res[['specs']][['linked_idx']])){
+          linked_idx <- NULL
+        } else {
+          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
@@ -474,14 +484,29 @@ read <- function(pkl_file) {
           if ( type=='emulator' ) {
             class(res[[paste('emulator',i, sep='')]]) <- "dgp"
           } else if ( type=='gp' ) {
-            class(res[[paste('emulator',i, sep='')]]) <- "gp"
+            if ('container_obj' %in% names(res[[paste('emulator',i, sep='')]])){
+              class(res[[paste('emulator',i, sep='')]]) <- "gp"
+            } else {
+              est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$export()
+              if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
+                linked_idx <- NULL
+              } else {
+                linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+              }
+              res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+              class(res[[paste('emulator',i, sep='')]]) <- "gp"
+            }
           }
         } else {
           burnin <- res[[paste('emulator',i, sep='')]]$constructor_obj$burnin
           est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$estimate(burnin)
           B <- res[[paste('emulator',i, sep='')]]$specs$B
           isblock <- res[[paste('emulator',i, sep='')]]$constructor_obj$block
-          linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+          if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
+            linked_idx <- NULL
+          } else {
+            linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+          }
           set_seed(res[[paste('emulator',i, sep='')]]$specs$seed)
           res[[paste('emulator',i, sep='')]][['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
           res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
@@ -583,16 +608,17 @@ read <- function(pkl_file) {
 #' @param type a character string, either `"table"` or `"plot"`, indicating the format of the output.
 #'     If set to `"table"`, the function returns a summary in table. If set to `"plot"`, the function
 #'     returns an interactive visualization. Defaults to `"plot"`. If the `object` was created with
-#'     `lgp()` where `struc` is not a data frame, `type` will automatically default to `"table"`.
+#'     [lgp()] where `struc` is not a data frame, `type` will automatically default to `"table"`.
 #' @param group_size an integer specifying the number of consecutive layers to be grouped together
 #'     in the interactive visualization of linked emulators when `type = "plot"`.
 #'     This argument is only applicable if `object` is an instance of the `lgp` class.
 #'     Defaults to `1`.
-#' @param ... N/A.
+#' @param ... Any arguments that can be passed to [kableExtra::kbl()] when `type = "table"`.
 #'
-#' @return Either a table or an interactive visualization of the emulator, returned as a `visNetwork` object.
-#' The visualization is compatible with R Markdown documents and the RStudio Viewer.
-#' The resulting `visNetwork` object can be saved as an HTML file using [visNetwork::visSave()].
+#' @return Either a summary table (returned as `kableExtra` object) or an interactive visualization
+#' (returned as a `visNetwork` object) of the emulator. The visualization is compatible with R Markdown
+#' documents and the RStudio Viewer. The summary table can be further customized by [kableExtra] package.
+#' The resulting [visNetwork] object can be saved as an HTML file using [visNetwork::visSave()].
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
 #' @examples
@@ -616,7 +642,39 @@ summary.gp <- function(object, type = "plot", ...) {
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
   if (type == "table"){
-    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+    nodes <- data.frame(
+      KernelType = ifelse(object$specs$kernel=='sexp', "Squared Exp", "Mat\u00e9rn-2.5"),
+      InputDims = length(object$emulator_obj$kernel$input_dim),
+      OutputDims = 1,
+      LengthScales = paste(format(object$specs$lengthscales, digits = 3, nsmall = 3), collapse = ", "),
+      Variance = format(object$specs$scale, digits = 3, nsmall = 3),
+      Nugget = format(object$specs$nugget, digits = 3, nsmall = 3, scientific = TRUE),
+      Vecchia = ifelse(object$specs$vecchia, "ON", "OFF"),
+      stringsAsFactors = FALSE
+    )
+    defaults <- list(
+      col.names = c(
+        "Kernel", "Input Dim(s)", "Output Dim",
+        "Length-scale(s)", "Scale (Prior Var)", "Nugget", "Vecchia"
+      ),
+      format = "simple",
+      row.names = FALSE,
+      align = rep("c", ncol(nodes)),
+      caption = "Summary of GP Emulator",
+      escape = FALSE
+    )
+
+    # Capture user-supplied arguments as a list
+    user_args <- list(...)
+
+    # Merge defaults with user-supplied arguments (only if not already provided)
+    final_args <- defaults
+    for (name in names(user_args)) {
+      final_args[[name]] <- user_args[[name]]
+    }
+
+    # Call knitr::kable with the merged arguments
+    do.call(kableExtra::kbl, c(list(nodes), final_args))
   } else {
 
     c24_rgba_lighter <- c(
@@ -778,7 +836,82 @@ summary.dgp <- function(object, type = "plot", ...) {
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
   if (type == "table"){
-    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+    nodes <- data.frame()
+
+    # Iterate through layers and nodes to populate the dataframe
+    n_layer <- object$constructor_obj$n_layer
+    for (i in 1:n_layer) {
+      layer_id <- object$specs[[paste0("layer", i)]]
+
+      for (j in 1:length(layer_id)) {
+        node_id <- layer_id[[paste0("node", j)]]
+
+        # Default values
+        formatted_lengthscales <- NA
+        total_input_dim <- NA
+        kernel_display <- NA
+
+        if (is.null(node_id[["type"]])) {
+          # Format length scales
+          formatted_lengthscales <- paste(format(node_id$lengthscales, digits = 3, nsmall = 3), collapse = ", ")
+
+          # Calculate total input dimension
+          total_input_dim <- length(object$emulator_obj$all_layer[[i]][[j]]$input_dim)
+          global_connect_dim <- object$emulator_obj$all_layer[[i]][[j]]$connect
+          if (!is.null(global_connect_dim)) {
+            total_input_dim <- total_input_dim + length(global_connect_dim)
+          }
+
+          # Determine kernel display
+          kernel_display <- ifelse(node_id$kernel == "sexp", "Squared Exp", "Mat\u00e9rn-2.5")
+        }
+
+        # Combine Node Type and Kernel Type
+        node_type_display <- ifelse(
+          is.null(node_id[["type"]]),
+          paste0("GP (", kernel_display, ")"),
+          paste0("Likelihood (", node_id$type, ")")
+        )
+
+        # Append to the nodes dataframe
+        nodes <- rbind(nodes, data.frame(
+          NodeType = node_type_display,
+          Layer = i,
+          NodeNo = j,
+          InputDims = ifelse(is.null(node_id[["type"]]), total_input_dim, length(object$emulator_obj$all_layer[[i]][[j]]$input_dim)),
+          OutputDims = 1,
+          LengthScales = formatted_lengthscales,
+          Variance = ifelse(is.null(node_id[["type"]]), format(node_id$scale, digits = 3, nsmall = 3), NA),
+          Nugget = ifelse(is.null(node_id[["type"]]), format(node_id$nugget, digits = 3, nsmall = 3, scientific = TRUE), NA),
+          stringsAsFactors = FALSE
+        ))
+      }
+    }
+
+    # Rename columns to add spaces and make them more readable
+    defaults <- list(
+      col.names = c(
+        "Node Type", "Layer", "Node No", "Input Dim(s)", "Output Dim",
+        "Length-scale(s)", "Scale (Prior Var)", "Nugget"
+      ),
+      format = "simple",
+      row.names = FALSE,
+      align = rep("c", ncol(nodes)),
+      caption = "Summary of DGP Emulator Nodes",
+      escape = FALSE
+    )
+
+    # Capture user-supplied arguments as a list
+    user_args <- list(...)
+
+    # Merge defaults with user-supplied arguments (only if not already provided)
+    final_args <- defaults
+    for (name in names(user_args)) {
+      final_args[[name]] <- user_args[[name]]
+    }
+
+    # Call knitr::kable with the merged arguments
+    do.call(kableExtra::kbl, c(list(nodes), final_args))
   } else {
     c24_rgba_lighter <- c(
       "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
@@ -1042,8 +1175,63 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 
   if ( "metadata" %in% names(object$specs) ){
     if (type == 'table') {
-      if ( isFALSE("emulator_obj" %in% names(object)) ) stop("Table summary is only available when 'object' is built with `mode = 'activate'` in lgp(). Use `type = 'plot'` instead for graphical summary.", call. = FALSE)
-      pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+      struc <- object$specs$struc
+      metadata <- object$specs$metadata
+      metadata$Global_Output_Dims <- sapply(metadata$Emulator, function(emulator_id) {
+        # Get the total output dimensions for this emulator
+        total_out_dim <- metadata$Total_Output_Dims[metadata$Emulator == emulator_id]
+
+        # Full set of output dimensions for this emulator
+        all_output_dims <- 1:total_out_dim
+
+        # Find connected output dims in struc
+        connected_outputs <- struc$From_Output[struc$From_Emulator == emulator_id]
+
+        # Global output dims are those not in connected outputs
+        global_outputs <- setdiff(all_output_dims, connected_outputs)
+
+        # Convert to string if there are multiple or no global outputs
+        if (length(global_outputs) == 0) {
+          return(NA)  # No global outputs
+        } else {
+          return(paste(global_outputs, collapse = ", "))
+        }
+      })
+
+      nodes <- data.frame(
+        Emulator = metadata$Emulator,
+        Type = toupper(metadata$Type),
+        Layer = metadata$Layer,
+        Position = metadata$Pos_in_Layer,
+        Input_Dims = metadata$Total_Input_Dims,
+        Output_Dims = metadata$Total_Output_Dims,
+        Global_Output_Indices = ifelse(is.na(metadata$Global_Output_Dims), 'None', metadata$Global_Output_Dims),
+        Vecchia = ifelse(metadata$Vecchia, "ON", "OFF"),
+        stringsAsFactors = FALSE
+      )
+
+      defaults <- list(
+        col.names = c(
+          "Emulator ID", "Type", "Layer", "Position", "Input Dim(s)",
+          "Output Dim(s)", "Global Output Idx", "Vecchia"
+        ),
+        format = "simple",
+        row.names = FALSE,
+        align = rep("c", ncol(nodes)),
+        caption = "Summary of Linked Emulators"
+      )
+
+      # Capture user-supplied arguments as a list
+      user_args <- list(...)
+
+      # Merge defaults with user-supplied arguments (only if not already provided)
+      final_args <- defaults
+      for (name in names(user_args)) {
+        final_args[[name]] <- user_args[[name]]
+      }
+
+      # Call knitr::kable with the merged arguments
+      do.call(kableExtra::kbl, c(list(nodes), final_args))
     } else {
       N <- as.integer(group_size)
       c24_rgba_lighter <- c(
@@ -1408,7 +1596,7 @@ set_linked_idx <- function(object, idx) {
   }
 
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "set_linked_idx()",
     details = c(i = "The function will be removed in the next release.",
                 i = "Please use the updated `lgp()` function to specify linked information for (D)GP emulators."

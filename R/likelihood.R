@@ -33,7 +33,7 @@ Poisson <- function(input_dim = NULL) {
   }
 
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "kernel()",
     details = c(i = "The function will be removed in the next release.",
                 i=  "It may not be compatible with other functions in this version.",
@@ -84,7 +84,7 @@ Hetero <- function(input_dim = NULL) {
   }
 
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "kernel()",
     details = c(i = "The function will be removed in the next release.",
                 i=  "It may not be compatible with other functions in this version.",
@@ -134,7 +134,7 @@ NegBin <- function(input_dim = NULL) {
   }
 
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "kernel()",
     details = c(i = "The function will be removed in the next release.",
                 i=  "It may not be compatible with other functions in this version.",

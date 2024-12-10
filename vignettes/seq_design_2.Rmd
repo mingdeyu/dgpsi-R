@@ -59,7 +59,7 @@ wrap_plots(list(p1, p2, p3)) + plot_annotation(title = 'Synthetic Simulator')
 We now specify a seed with `set_seed()` from the package for reproducibility
 
 ```{r}
-set_seed(999)
+set_seed(99)
 ```
 
 and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
@@ -237,8 +237,7 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
 
 ```{r}
-draw(m, 1, 'design') + draw(m, 2, 'design') + draw(m, 3, 'design') +
-  plot_layout() & theme(legend.position = 'bottom')
+draw(m, 'design')
 ```
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_design.png){width=100%}
@@ -299,16 +298,17 @@ rmse_static_3 <- data.frame('N' = c(10, 20, 30), 'rmse' = c(m13$oos$rmse, m23$oo
 and add them to the sequential design validation plot (in log-scale) for comparisons:
 
 ```{r}
-p1 <- draw(m, emulator = 1, type = 'rmse', log = T) + 
+p <- draw(m, type = 'rmse', log = T) 
+p[[1]] <- p[[1]] + 
   geom_point(data = rmse_static_1, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(3, 4, 8))
-p2 <- draw(m, emulator = 2, type = 'rmse', log = T) + 
+p[[2]] <- p[[2]] +
   geom_point(data = rmse_static_2, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(3, 4, 8))
-p3 <- draw(m, emulator = 3, type = 'rmse', log = T) + 
+p[[3]] <- p[[3]] +
   geom_point(data = rmse_static_3, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(3, 4, 8))
-p1 + p2 + p3 + plot_layout(guides = 'collect') & theme(legend.position = 'bottom')
+p
 ```
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_rmse.png){width=100%}

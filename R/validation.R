@@ -673,7 +673,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
       x_test <- x_list
     } else {
       lifecycle::deprecate_warn(
-        when = "3.0.0",
+        when = "2.5.0",
         what = I("The `object` created by `lgp()` without specifying `struc` as a data frame"),
         details = c(
           i = "Support for `object` structures created without `struc` specified as a data frame will be removed in the next release.",

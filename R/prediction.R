@@ -25,7 +25,7 @@
 #'   The column indices in `x` must align with the indices specified in the `From_Output` column of the `struc` data frame (used in [lgp()]),
 #'   corresponding to rows where the `From_Emulator` column is `"Global"`.
 #' @param method `r new_badge("updated")` the prediction approach to use: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`).
-#'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
+#'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), the argument is only used when `full_layer = TRUE`.
 #'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
 #' @param mode `r new_badge("new")` whether to predict the classes (`"label"`) or probabilities (`"proba"`) of different classes when `object` is a DGP emulator with a categorical likelihood.
 #'      Defaults to `"label"`.
@@ -69,18 +69,26 @@
 #'      *D* is the number of classes in the training output), where each matrix gives probability samples for the corresponding class with its rows corresponding to testing
 #'      positions and columns containing probabilities. The number of columns of each matrix is `B * sample_size`, where `B` is the number of imputations
 #'      specified in the [dgp()] function.
-#'   3. if `full_layer = TRUE` and `mode = "label"`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
+#'   3. if `method = "mean_var"` and `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
+#'      of layers) sub-lists named `layer1, layer2,..., layerL`. Each of first `L-1` sub-lists contains two matrices named `mean` for the predictive means and `var`
+#'      for the predictive variances of the GP nodes in the associated layer. Rows of each matrix correspond to testing positions.
+#'      - when `mode = "label"`, the sub-list `LayerL` contains one matrix named `label`. The matrix has its rows corresponding to testing positions and columns
+#'        corresponding to label samples of size: `B * sample_size`. `B` is the number of imputations specified in [dgp()].
+#'      - when `mode = "proba"`, the sub-list `LayerL` contains *D* matrices (where *D* is the number of classes in the training output), where each matrix gives probability
+#'        samples for the corresponding class with its rows corresponding to testing positions and columns containing probabilities. The number of columns of each matrix
+#'        is `B * sample_size`. `B` is the number of imputations specified in [dgp()].
+#'   4. if `method = "sampling"` and `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
 #'      of layers) sub-lists named `layer1, layer2,..., layerL`. Each of first `L-1` sub-lists represents samples drawn from the GP nodes in the
 #'      corresponding layer, and contains *D* (i.e., the number of GP nodes in the corresponding layer) matrices named `output1, output2,..., outputD`. Each matrix
 #'      gives samples of the output from one of *D* GP nodes, and has its rows corresponding to testing positions and columns corresponding to samples
-#'      of size: `B * sample_size`.The sub-list `LayerL` contains one matrix named `label`. The matrix has its rows corresponding to testing positions and columns
-#'      corresponding to label samples of size: `B * sample_size`. `B` is the number of imputations specified in [dgp()].
-#'   4. if `full_layer = TRUE` and `mode = "proba"`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
-#'      of layers) sub-lists named `layer1, layer2,..., layerL`. Each of first `L-1` sub-lists represents samples drawn from the GP nodes in the
-#'      corresponding layer, and contains *D* (i.e., the number of GP nodes in the corresponding layer) matrices named `output1, output2,..., outputD`. The sub-list `LayerL`
-#'      contains *D* matrices (where *D* is the number of classes in the training output), where each matrix gives probability samples for the corresponding class with its
-#'      rows corresponding to testing positions and columns containing probabilities. The number of columns of each matrix is `B * sample_size`. `B` is the number of
-#'      imputations specified in [dgp()].
+#'      of size: `B * sample_size`.
+#'      - when `mode = "label"`, the sub-list `LayerL` contains one matrix named `label`. The matrix has its rows corresponding to testing positions and columns
+#'        corresponding to label samples of size: `B * sample_size`.
+#'      - when `mode = "proba"`, the sub-list `LayerL` contains *D* matrices (where *D* is the number of classes in the training output), where each matrix gives probability
+#'        samples for the corresponding class with its rows corresponding to testing positions and columns containing probabilities. The number of columns of each matrix
+#'        is `B * sample_size`.
+#'
+#'      `B` is the number of imputations specified in [dgp()].
 #' * `r new_badge("updated")` If `object` is an instance of the `lgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that
 #'      contains two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list
@@ -172,8 +180,8 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
     }
   } else {
     if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-    if ( method=='mean_var' && is.categorical){
-      stop("'method' can only be 'sampling' for DGP emulators with categorical likelihoods.", call. = FALSE)
+    if ( method=='mean_var' && is.categorical && !full_layer){
+      method = 'sampling'
     }
   }
 
@@ -194,13 +202,13 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
 
   if ( identical(cores,as.integer(1)) ){
     if (is.categorical) {
-      res <- object$emulator_obj$classify(reticulate::np_array(x_unique), mode, full_layer, sample_size, M)
+      res <- object$emulator_obj$classify(reticulate::np_array(x_unique), mode, method, full_layer, sample_size, M)
     } else {
       res <- object$emulator_obj$predict(x_unique, method, full_layer, sample_size, M)
     }
   } else {
     if (is.categorical) {
-      res <- object$emulator_obj$pclassify(reticulate::np_array(x_unique), mode, full_layer, sample_size, M, chunks, cores)
+      res <- object$emulator_obj$pclassify(reticulate::np_array(x_unique), mode, method, full_layer, sample_size, M, chunks, cores)
     } else {
       res <- object$emulator_obj$ppredict(x_unique, method, full_layer, sample_size, M, chunks, cores)
     }
@@ -208,12 +216,32 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
 
   if (method == 'mean_var'){
     if (full_layer) {
-      named_res <- list("mean" = res[[1]], "var" = res[[2]])
-      for (l in 1:length(named_res$mean)) {
-        named_res$mean[[l]] <- named_res$mean[[l]][rep,,drop=F]
-        named_res$var[[l]] <- named_res$var[[l]][rep,,drop=F]
-        names(named_res$mean)[l] <- paste('layer', l, sep="")
-        names(named_res$var)[l] <- paste('layer', l, sep="")
+      if (is.categorical){
+        named_res <- vector('list', L)
+        for (l in 1:(L-1)) {
+          names(named_res)[l] <- paste('layer', l, sep="")
+          named_res[[l]][[1]] <- res[[1]][[l]][rep,,drop=F]
+          named_res[[l]][[2]] <- res[[2]][[l]][rep,,drop=F]
+          names(named_res[[l]])[1] <- 'mean'
+          names(named_res[[l]])[2] <- 'var'
+        }
+        names(named_res)[L] <- paste('layer', L, sep="")
+        for (k in 1:length(res[[3]])) {
+          named_res[[L]][[k]] <- res[[3]][[k]][rep,,drop=F]
+          if ( mode == 'label' ){
+            names(named_res[[L]])[k] <- 'label'
+          } else {
+            names(named_res[[L]])[k] <- index_to_label[k]
+          }
+        }
+      } else {
+        named_res <- list("mean" = res[[1]], "var" = res[[2]])
+        for (l in 1:length(named_res$mean)) {
+          named_res$mean[[l]] <- named_res$mean[[l]][rep,,drop=F]
+          named_res$var[[l]] <- named_res$var[[l]][rep,,drop=F]
+          names(named_res$mean)[l] <- paste('layer', l, sep="")
+          names(named_res$var)[l] <- paste('layer', l, sep="")
+        }
       }
     } else {
       named_res <- list("mean" = res[[1]][rep,,drop=F], "var" = res[[2]][rep,,drop=F])
@@ -255,7 +283,7 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
 
   object$results <- named_res
   object$results[["M"]] <- M
-  if (method == "sampling"){
+  if (method == "sampling" | is.categorical){
     object$results[["sample_size"]] <- sample_size
   }
   return(object)
@@ -273,7 +301,7 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
   if ( "metadata" %in% names(object$specs) ){
     if ( !("emulator_obj" %in% names(object)) ){
-      stop("'object' is not in activation mode for predictions. Please set `mode = 'activate'` in `lgp()` to build the emulator.", call. = FALSE)
+      stop("'object' is not activated for predictions. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
     }
     if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
     x <- unname(x)
@@ -307,7 +335,7 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
     x <- x_list
   } else {
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = I("The `object` created by `lgp()` without specifying `struc` as a data frame"),
       details = c(
         i = "Support for `object` structures created without `struc` specified as a data frame will be removed in the next release.",

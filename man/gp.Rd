@@ -169,7 +169,7 @@ The returned \code{gp} object can be used by
 \item \code{\link[=write]{write()}} to save the GP emulator to a \code{.pkl} file.
 \item \code{\link[=design]{design()}} for sequential designs.
 \item \code{\link[=update]{update()}} to update the GP emulator with new inputs and outputs.
-\item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.
+\item \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}} to locate next design points.
 }
 }
 \description{

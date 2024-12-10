@@ -78,16 +78,20 @@
 which dimension of an emulator's input will be shown on the x-axis in validation plots:
 \itemize{
 \item If \code{x} is an instance of the \code{gp} of \code{dgp} class, \code{dim} is an integer.
-\item If \code{x} is an instance of the \code{lgp} class, \code{dim} can be
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} If \code{x} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} without specifying argument \code{struc} in data frame form, \code{dim} can be
 \enumerate{
 \item an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
 \item a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
 (specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
 system.
 }
+
+\strong{This option for linked (D)GP emulators is deprecated and will be removed in the next release.}
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{x} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} with argument \code{struc} in data frame form, \code{dim} is an integer referring
+to the dimension of the global input to the linked emulator system.
 }
 
-This argument is only used when \code{style = 1} and the emulator input is at least two-dimensional. Defaults to \code{NULL}.}
+This argument is only used when \code{style = 1}. Defaults to \code{NULL}.}
 
 \item{method}{same as that of \code{\link[=validate]{validate()}}.}
 

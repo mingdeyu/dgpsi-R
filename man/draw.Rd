@@ -13,7 +13,7 @@ draw(object, ...)
 
 \method{draw}{dgp}(object, type = "rmse", log = FALSE, ...)
 
-\method{draw}{bundle}(object, emulator = 1, type = "rmse", log = FALSE, ...)
+\method{draw}{bundle}(object, type = "rmse", log = FALSE, emulator = NULL, ...)
 }
 \arguments{
 \item{object}{can be one of the following emulator classes:
@@ -25,12 +25,15 @@ draw(object, ...)
 
 \item{...}{N/A.}
 
-\item{type}{either \code{"rmse"}, for the trace plot of RMSEs or customized evaluating metrics of emulators constructed during the sequential designs,
-or \code{"design"}, for visualizations of input designs created by the sequential design procedure. Defaults to \code{"rmse"}.}
+\item{type}{either \code{"rmse"}, for the trace plot of RMSEs, or log-losses for DGP emulators with categorical likelihoods, or customized evaluating metrics
+of emulators constructed during the sequential designs, or \code{"design"}, for visualizations of input designs created by the sequential design procedure.
+Defaults to \code{"rmse"}.}
 
-\item{log}{a bool that indicates whether to plot RMSEs or customized evaluating metrics in log-scale if \code{type = "rmse"}. Defaults to \code{FALSE}.}
+\item{log}{a bool that indicates whether to plot RMSEs, or log-losses (in case of DGP emulators with categorical likelihoods), or customized evaluating
+metrics in log-scale if \code{type = "rmse"}. Defaults to \code{FALSE}.}
 
-\item{emulator}{the index of the emulator packed in \code{object} if \code{object} is an instance of the \code{bundle} class.}
+\item{emulator}{a vector of indices of emulators packed in \code{object} to be drawn, if \code{object} is an instance of the \code{bundle} class. When set to \code{NULL}, all
+emulators in the bundle are drawn. Defaults to \code{NULL}.}
 }
 \value{
 A \code{patchwork} object.

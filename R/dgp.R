@@ -184,7 +184,7 @@
 #' * [set_imp()] to change the number of imputations.
 #' * [design()] for sequential designs.
 #' * [update()] to update the DGP emulator with new inputs and outputs.
-#' * [alm()], [mice()], [pei()], and [vigf()] to locate next design points.
+#' * [alm()], [mice()], and [vigf()] to locate next design points.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/> and learn how to customize a DGP structure.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
@@ -254,7 +254,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   if (!is.null(struc)) {
     # Display a combined warning message
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = "dgp(struc)",
       details = c(i = "The argument will be dropped in the next release.",
                   i = "To customize DGP specifications, please adjust the other arguments in the `dgp()` function."
@@ -264,7 +264,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 
   if (!is.null(internal_input_idx)) {
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = "dgp(internal_input_idx)",
       details = c(i = "The argument will be dropped in the next release.",
                   i = "To set up connections of emulators for linked emulations, please use the updated `lgp()` function instead."
@@ -274,7 +274,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 
   if (!is.null(linked_idx)) {
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = "dgp(linked_idx)",
       details = c(i = "The argument will be dropped in the next release.",
                   i = "To set up connections of emulators for linked emulations, please use the updated `lgp()` function instead."

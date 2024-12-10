@@ -12,9 +12,9 @@ design(
   N,
   x_cand,
   y_cand,
+  n_sample,
   n_cand,
   limits,
-  int,
   f,
   reps,
   freq,
@@ -23,6 +23,7 @@ design(
   reset,
   target,
   method,
+  batch_size,
   eval,
   verb,
   autosave,
@@ -37,9 +38,9 @@ design(
   N,
   x_cand = NULL,
   y_cand = NULL,
-  n_cand = 200,
+  n_sample = 200,
+  n_cand = lifecycle::deprecated(),
   limits = NULL,
-  int = FALSE,
   f = NULL,
   reps = 1,
   freq = c(1, 1),
@@ -48,6 +49,7 @@ design(
   reset = FALSE,
   target = NULL,
   method = vigf,
+  batch_size = 1,
   eval = NULL,
   verb = TRUE,
   autosave = list(),
@@ -62,9 +64,9 @@ design(
   N,
   x_cand = NULL,
   y_cand = NULL,
-  n_cand = 200,
+  n_sample = 200,
+  n_cand = lifecycle::deprecated(),
   limits = NULL,
-  int = FALSE,
   f = NULL,
   reps = 1,
   freq = c(1, 1),
@@ -73,6 +75,7 @@ design(
   reset = FALSE,
   target = NULL,
   method = vigf,
+  batch_size = 1,
   eval = NULL,
   verb = TRUE,
   autosave = list(),
@@ -91,9 +94,9 @@ design(
   N,
   x_cand = NULL,
   y_cand = NULL,
-  n_cand = 200,
+  n_sample = 200,
+  n_cand = lifecycle::deprecated(),
   limits = NULL,
-  int = FALSE,
   f = NULL,
   reps = 1,
   freq = c(1, 1),
@@ -102,6 +105,7 @@ design(
   reset = FALSE,
   target = NULL,
   method = vigf,
+  batch_size = 1,
   eval = NULL,
   verb = TRUE,
   autosave = list(),
@@ -124,29 +128,23 @@ design(
 \item{N}{the number of steps for the sequential design.}
 
 \item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-in which the next design point is determined. If \code{x_cand = NULL}, the candidate set will be generated using \code{n_cand},
-\code{limits}, and \code{int}. Defaults to \code{NULL}.}
+from which the next design points are determined. Defaults to \code{NULL}.}
 
 \item{y_cand}{a matrix (with each row being a simulator evaluation and column being an output dimension) that gives the realizations
 from the simulator at input positions in \code{x_cand}. Defaults to \code{NULL}.}
 
-\item{n_cand}{an integer that gives
-\itemize{
-\item the size of the candidate set in which the next design point is determined, if \code{x_cand = NULL};
-\item the size of a sub-set to be sampled from the candidate set \code{x_cand} at each step of the sequential design to determine the next
+\item{n_sample}{an integer that gives the size of a sub-set to be sampled from the candidate set \code{x_cand} at each step of the sequential design to determine the next
 design point, if \code{x_cand} is not \code{NULL}.
-}
 
 Defaults to \code{200}.}
+
+\item{n_cand}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} this argument is deprecated. Use \code{n_sample} instead.}
 
 \item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
 dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. Set
-\code{limits = NULL} if \code{x_cand} is supplied. This argument is only used when \code{x_cand} is not supplied, i.e., \code{x_cand = NULL}. Defaults to \code{NULL}.}
-
-\item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a bool is given, it will be applied to
-all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
-input dimensions. Defaults to \code{FALSE}.}
+\code{limits = NULL} if \code{x_cand} is supplied. This argument is only used when \code{x_cand} is not supplied, i.e., \code{x_cand = NULL}. Defaults to \code{NULL}. If you provide
+a custom \code{method} function with an argument called \code{limits}, the value of \code{limits} will be passed to your function.}
 
 \item{f}{an R function that represents the simulator. \code{f} needs to be specified with the following basic rules:
 \itemize{
@@ -200,20 +198,26 @@ case the sequential design stops after \code{N} steps. See \emph{Note} section b
 \item the \code{dgp} class (produced by \code{\link[=dgp]{dgp()}});
 \item the \code{bundle} class (produced by \code{\link[=pack]{pack()}}).
 }
-\item the second argument is a matrix with rows representing a set of different design points.
-\item the output of the function
+\item if \code{x_cand} is not \code{NULL}, the second argument is a matrix with rows representing a set of different design points.
+\item if \code{x_cand} is not \code{NULL}, the output of the function
 \itemize{
-\item is a vector of indices if the first argument is an instance of the \code{gp} class;
-\item is a matrix of indices if the first argument is an instance of the \code{dgp} class. If there are different design points to be added with
-respect to different outputs of the DGP emulator, the column number of the matrix should equal to the number of the outputs. If design
-points are common to all outputs of the DGP emulator, the matrix should be single-columned. If more than one design points are determined
-for a given output or for all outputs, the indices of these design points are placed in the matrix with extra rows.
-\item is a matrix of indices if the first argument is an instance of the \code{bundle} class. Each row of the matrix gives the indices of the design
+\item is a vector that gives the row indices of chosen design points from the matrix supplied to the second argument, if the first argument is an instance of the \code{gp} or \code{dgp} class;
+\item is a matrix that row indices of chosen design points from the matrix supplied to the second argument, if the first argument is an instance of the \code{bundle} class. Each column of the matrix gives the indices of the design
 points to be added to individual emulators in the bundle.
+}
+\item if \code{x_cand} is \code{NULL}, the output of the function
+\itemize{
+\item is a matrix that gives with each row representing a new design point to be added, if the first argument is an instance of the \code{gp} or \code{dgp} class;
+\item is a list with the length equal to the number of emulators in the bundle, if the first argument is an instance of the \code{bundle} class. Each element in the list is a matrix with same number of row. The rows of the matrix
+represent next design points to be added to the corresponding emulator.
 }
 }
 
-See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} for examples on customizing \code{method}. Defaults to \code{\link[=vigf]{vigf()}}.}
+See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}} for examples on customizing \code{method}. Defaults to \code{\link[=vigf]{vigf()}}.}
+
+\item{batch_size}{an integer specifying the number of design points to select in a single iteration. Defaults to \code{1}. This argument is used by
+the built-in \code{method} functions \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}}. If you provide a custom \code{method} function with an argument called \code{batch_size}, the value of \code{batch_size}
+will be passed to your function.}
 
 \item{eval}{an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:
 \itemize{
@@ -245,7 +249,7 @@ the emulator in the final iteration is always saved. Defaults to \code{FALSE}.
 \item \code{directory}: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
 of \code{directory} named 'emulator-\code{id}'. Defaults to './check_points'.
 \item \code{fname}: a string representing the base name for the saved emulator files. Defaults to 'check_point'.
-\item \code{freq}: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to \code{5}.
+\item \code{save_freq}: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to \code{5}.
 \item \code{overwrite}: a bool value controlling the file saving behavior. When set to \code{TRUE}, each new automatic saving overwrites the previous one,
 keeping only the latest version. If \code{FALSE}, each automatic saving creates a new file, preserving all previous versions. Defaults to \code{FALSE}.
 }}
@@ -262,10 +266,7 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 \verb{max physical cores available \%/\% 2}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
 
 \item{...}{Any arguments with names that differ from those used in \code{\link[=design]{design()}} but are required by \code{f}, \code{method}, or \code{eval} can be passed here.
-\code{\link[=design]{design()}} will forward relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of the additional arguments provided.
-
-If you are using package-provided methods such as \code{\link[=vigf]{vigf()}}, \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, or \code{\link[=pei]{pei()}} for \code{method}, you can pass \code{batch_size} to \code{design()}
-to select multiple design points at each iteration. For other arguments that control the behavior of these four methods, please refer to their documentation.}
+\code{\link[=design]{design()}} will forward relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of the additional arguments provided.}
 
 \item{train_N}{the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:
 \itemize{
@@ -304,7 +305,11 @@ An updated \code{object} is returned with a slot called \code{design} that conta
 Each slot contains the following elements:
 \itemize{
 \item \code{N}, an integer that gives the numbers of steps implemented in the corresponding wave;
-\item \code{rmse}, a matrix that gives the RMSEs of emulators constructed during the corresponding wave, if \code{eval = NULL};
+\item \code{rmse}, a matrix that gives the values of evaluation metrics of emulators constructed during the corresponding wave, if \code{eval = NULL}. Each
+row of the matrix represents an iteration. If \code{object} is an instance of \code{gp} class, the matrix has a single columns of RMSEs. If \code{object} is
+an instance of \code{dgp} class, the elements in a row give the RMSEs corresponding to different output dimensions. If \code{object} is an instance of
+\code{dgp} class with categorical likelihood, the matrix has a single column of log-losses. If \code{object} is an instance of \code{bundle} class, the elements in
+a row give either RMSEs or log-losses of emulators contained in the bundle.
 \item \code{metric}, a matrix that gives the customized evaluating metric values of emulators constructed during the corresponding wave,
 if a customized function is supplied to \code{eval};
 \item \code{freq}, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.
@@ -315,7 +320,7 @@ the sequential design (if \code{object} is an instance of the \code{bundle} clas
 
 If \code{target} is not \code{NULL}, the following additional elements are also included:
 \itemize{
-\item \code{target}, the target RMSE(s) to stop the sequential design.
+\item \code{target}, the target evaluating metric computed by the \code{eval} or built-in function to stop the sequential design.
 \item \code{reached}, a bool (if \code{object} is an instance of the \code{gp} or \code{dgp} class) or a vector of bools (if \code{object} is an instance of the \code{bundle}
 class) that indicate if the target RMSEs are reached at the end of the sequential design.
 }
@@ -325,9 +330,9 @@ class) that indicate if the target RMSEs are reached at the end of the sequentia
 \item 'customized' if a customized R function is provided to \code{eval}.
 }
 \item two slots called \code{x_test} and \code{y_test} that contain the data points for the OOS validation if the \code{type} slot is 'oos'.
-\item If \code{y_cand = NULL} and there are \code{NA}s returned from the supplied \code{f} during the sequential design, a slot called \code{exclusion} is included
+\item If \code{y_cand = NULL} and \code{x_cand} is supplied, and there are \code{NA}s returned from the supplied \code{f} during the sequential design, a slot called \code{exclusion} is included
 that records the located design positions that produced \code{NA}s via \code{f}. The sequential design will use this information to
-avoid re-visiting the same locations (if \code{x_cand} is supplied) or their neighborhoods (if \code{x_cand} is \code{NULL}) in later runs of \code{design()}.
+avoid re-visiting the same locations in later runs of \code{design()}.
 }
 
 See \emph{Note} section below for further information.
@@ -363,7 +368,7 @@ or different emulators in the bundle.
 of the \code{dgp} or \code{bundle} class and \code{eval = NULL}, \code{target} can be a vector of values that gives the RMSE thresholds for different output dimensions or
 different emulators. If a single value is provided, it will be used as the RMSE threshold for all output dimensions (if \code{object} is an instance of the \code{dgp}) or all emulators
 (if \code{object} is an instance of the \code{bundle}). If a customized function is supplied to \code{eval}, the user needs to ensure that the length of \code{target} is equal
-to that of the output from \code{eval}.
+to that of the output from \code{eval} if \code{target} is given as a vector.
 \item When defining \code{f}, it is important to ensure that:
 \itemize{
 \item the column order of the first argument of \code{f} is consistent with the training input used for the emulator;

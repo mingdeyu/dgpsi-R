@@ -36,12 +36,9 @@
 #' @param B the number of imputations to produce the predictions. Increase the value to account for more
 #'     imputation uncertainties. Decrease the value for lower imputation uncertainties but faster predictions.
 #'     If the system consists only GP emulators, `B` is set to `1` automatically. Defaults to `10`.
-#' @param mode `r new_badge("new")` a character string indicating the operational mode of the object returned by the function:
-#' - `"validate"`: returns an object suitable for visual inspection of the linked emulator structure,
-#'   which can be examined using [summary()].
-#' - `"activate"`: returns an object ready for predictions, which can be used with [predict()].
-#'
-#' Defaults to `"activate"`. This argument is only applicable when `struc` is specified as a data frame.
+#' @param activate `r new_badge("new")` a bool indicating if the initialized linked emulator will be activated for prediction, which can be used with [predict()] or [validate()].
+#'     When set to `FALSE`, [lgp()] returns an inactive linked emulator, to which one can apply [summary()] to inspect its structure. Defaults to `TRUE`. This argument is only
+#'     applicable when `struc` is specified as a data frame.
 #' @param verb `r new_badge("new")` a bool indicating if the trace information on linked (D)GP emulator construction will be printed during the function call.
 #'     Defaults to `TRUE`. This argument is only applicable when `struc` is specified as a data frame.
 #' @param id an ID to be assigned to the linked (D)GP emulator. If an ID is not provided (i.e., `id = NULL`), a UUID
@@ -115,13 +112,13 @@
 #' emulators <- list(m1, m2)
 #'
 #' # construct the linked emulator for visual inspection
-#' m_link <- lgp(struc, emulators, mode = "validate")
+#' m_link <- lgp(struc, emulators, activate = FALSE)
 #'
 #' # visual inspection
 #' summary(m_link)
 #'
 #' # build the linked emulator for prediction
-#' m_link <- lgp(struc, emulators, mode = "activate")
+#' m_link <- lgp(struc, emulators, activate = TRUE)
 #' test_x <- seq(0, 1, length = 300)
 #' m_link <- predict(m_link, x = test_x)
 #'
@@ -136,14 +133,14 @@
 #' }
 #' @md
 #' @export
-lgp <- function(struc, emulators = NULL, B = 10, mode = "activate", verb = TRUE, id = NULL) {
+lgp <- function(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
 
   if ( is.data.frame(struc) ){
-    if ( mode!='validate' & mode!='activate' ) stop("'mode' can only be either 'validate' or 'activate'.", call. = FALSE)
+    #if ( mode!='validate' & mode!='activate' ) stop("'mode' can only be either 'validate' or 'activate'.", call. = FALSE)
     if ( verb ) message("Processing emulators ...", appendLF = FALSE)
     struc <- validate_emulator_data(struc, emulators)
     metadata <- infer_metadata_from_struc(struc)
@@ -156,7 +153,7 @@ lgp <- function(struc, emulators = NULL, B = 10, mode = "activate", verb = TRUE,
     }
   } else {
     lifecycle::deprecate_warn(
-      when = "3.0.0",
+      when = "2.5.0",
       what = I("Providing `struc` in list form"),
       details = c(
         i = "Support for providing `struc` as a list will be removed in the next release.",
@@ -377,14 +374,15 @@ lgp <- function(struc, emulators = NULL, B = 10, mode = "activate", verb = TRUE,
   }
 
   if ( is.data.frame(struc) ){
-    if ( mode == "validate" ) {
-      if ( verb ) message("Validating the linked emulator ...", appendLF = FALSE)
-    } else if ( mode == "activate" ){
+    #if ( mode == "validate" ) {
+    #  if ( verb ) message("Validating the linked emulator ...", appendLF = FALSE)
+    #} else if ( mode == "activate" ){
+    if ( activate ){
       if ( verb ) message("Activating the linked emulator ...", appendLF = FALSE)
     }
     res <- list(constructor_obj = extracted_struc)
     res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
-    if ( mode == "activate") {
+    if ( activate ) {
       seed <- sample.int(100000, 1)
       set_seed(seed)
       obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
@@ -394,9 +392,11 @@ lgp <- function(struc, emulators = NULL, B = 10, mode = "activate", verb = TRUE,
     }
     res[['specs']][['struc']] <- struc
     res[['specs']][['metadata']] <- metadata
-    if ( verb ) {
-      Sys.sleep(0.1)
-      message(" done")
+    if ( activate ){
+      if ( verb ) {
+        Sys.sleep(0.1)
+        message(" done")
+      }
     }
   } else {
     res <- list(constructor_obj = extracted_struc)

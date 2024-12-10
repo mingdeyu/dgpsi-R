@@ -10,7 +10,7 @@
 #' * If `object` is an instance of the `gp` class, `Y` is a matrix with only one column and each row being an output data point.
 #' * If `object` is an instance of the `dgp` class, `Y` is a matrix with its rows being output data points and columns being
 #'     output dimensions. When `likelihood` (see below) is not `NULL`, `Y` must be a matrix with only one column.
-#' @param refit a bool indicating whether to re-fit the emulator `object` after the training input and output are updated. Defaults to `FALSE`.
+#' @param refit a bool indicating whether to re-fit the emulator `object` after the training input and output are updated. Defaults to `TRUE`.
 #' @param reset a bool indicating whether to reset hyperparameters of the emulator `object` to their initial values when the emulator was
 #'     constructed, after the training input and output are updated. Defaults to `FALSE`.
 #' @param verb a bool indicating if the trace information will be printed during the function execution.
@@ -42,7 +42,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' # See alm(), mice(), pei(), or vigf() for an example.
+#' # See alm(), mice(), or vigf() for an example.
 #' }
 #' @md
 #' @name update
@@ -54,7 +54,7 @@ update <- function(object, X, Y, refit, reset, verb, ...){
 #' @rdname update
 #' @method update dgp
 #' @export
-update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, N = NULL, cores = 1, ess_burn = 10, B = NULL, ...) {
+update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N = NULL, cores = 1, ess_burn = 10, B = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -171,7 +171,7 @@ update.dgp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, 
 #' @rdname update
 #' @method update gp
 #' @export
-update.gp <- function(object, X, Y, refit = FALSE, reset = FALSE, verb = TRUE, ...) {
+update.gp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))

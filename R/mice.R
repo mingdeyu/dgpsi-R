@@ -7,10 +7,12 @@
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-#'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class, `x_cand` could also
-#'     be a list with the length equal to the number of emulators contained in the `object`. Each slot in `x_cand` is a matrix
-#'     that gives a candidate set for each emulator included in the bundle. See *Note* section below for further information.
+#' @param x_cand a matrix (with each row containing a design point and column representing an input dimension) that gives a candidate set
+#'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class and `aggregate` is not supplied, `x_cand` could also
+#'     be a list with length equal to the number of emulators contained in `object`. In this case, each slot in `x_cand` should be a candidate set matrix
+#'     for each emulator included in the bundle. Defaults to `NULL`.
+#' @param n_cand an integer that gives the size of the candidate set to be generated from which the next design point is determined. This argument
+#'     is only used when `x_cand` is `NULL`. Defaults to `200`.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
@@ -18,6 +20,13 @@
 #' @param nugget_s the value of the smoothing nugget term used by MICE. Defaults to `1e-6`.
 #' @param workers  the number of processes to be used for the criterion calculation. If set to `NULL`,
 #'     the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`.
+#' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
+#'     If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
+#'     first and second columns correspond to the minimum and maximum values of the input dimensions. This
+#'     argument is only used when `x_cand = NULL`. Defaults to `NULL`.
+#' @param int a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+#'     all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
+#'     input dimensions. This argument is only used when `x_cand = NULL`. Defaults to `FALSE`.
 #' @param aggregate an R function that aggregates scores of the MICE across different output dimensions (if `object` is an instance
 #'     of the `dgp` class) or across different emulators (if `object` is an instance of the `bundle` class). The function should be specified in the
 #'     following basic form:
@@ -32,24 +41,26 @@
 #'     can be passed here.
 #'
 #' @return
-#' * If `object` is an instance of the `gp` class, a vector is returned with the length equal to `batch_size`, giving the positions (i.e., row numbers)
-#'   of next design points from `x_cand`.
-#' * If `object` is an instance of the `dgp` class, a matrix is returned with row number equal to `batch_size` and column number equal to one (if `aggregate`
-#'   is not `NULL`) or the output dimension (if `aggregate` is `NULL`), giving positions (i.e., row numbers) of next design points from `x_cand` to be added
-#'   to the DGP emulator across different outputs. If `object` is a DGP emulator with either `Hetero` or `NegBin` likelihood layer, the returned matrix has
-#'   two columns with the first column giving positions of next design points from `x_cand` that correspond to the mean parameter of the normal or negative Binomial
-#'   distribution, and the second column giving positions of next design points from `x_cand` that correspond to the variance parameter of the normal distribution or
-#'   the dispersion parameter of the negative Binomial distribution. If `object` is a DGP emulator with a `Categorical` likelihood layer, the returned matrix will
-#'   have either one column (for binary output) or `K` columns (for multi-class output), giving the positions of the next design points from `x_cand` that correspond
-#'   to the probabilities of different classes.
-#' * If `object` is an instance of the `bundle` class, a matrix is returned with row number equal to `batch_size` and column number equal to the number of
-#'   emulators in the bundle, giving positions (i.e., row numbers) of next design points from `x_cand` to be added to individual emulators.
+#' 1. If `x_cand` is not `NULL` and:
+#'    - `object` is an instance of the `gp` class, a vector is returned with length equal to `batch_size`, giving the positions (i.e., row numbers)
+#'      of next design points from `x_cand`.
+#'    - `object` is an instance of the `dgp` class, a vector is returned with length equal to `batch_size * D`, giving positions (i.e., row numbers)
+#'      of next design points from `x_cand` to be added to the DGP emulator. `D` equals to the number of output dimensions of the DGP
+#'      emulator if there is no likelihood layer in the hierarchy. If `object` is a DGP emulator with either `Hetero` or `NegBin` likelihood layer,
+#'      `D = 2`. If `object` is a DGP emulator with a `Categorical` likelihood layer, `D` equals to one (for binary output) or `K` (for multi-class output with `K` classes).
+#'    - `object` is an instance of the `bundle` class, a matrix is returned with row number equal to `batch_size` and column number equal to the number of
+#'      emulators in the bundle, giving positions (i.e., row numbers) of next design points from `x_cand` to be added to individual emulators.
+#' 2. If `x_cand = NULL` and:
+#'    - `object` is an instance of the `gp` class, a matrix is returned with row number equal to `batch_size`, giving the next design points to be evaluated.
+#'    - `object` is an instance of the `dgp` class, a matrix is returned with row number equal to `batch_size * D` where `D` is the number of output dimensions of the DGP
+#'      emulator if no likelihood layer is included. If `object` is a DGP emulator with either `Hetero` or `NegBin` likelihood layer, `D = 2`. If `object` is a DGP emulator
+#'      with a `Categorical` likelihood layer, `D` equals to one (for binary output) or `K` (for multi-class output with `K` classes).
+#'    - `object` is an instance of the `bundle` class, a list is returned with the length equal to the number of
+#'      emulators in the bundle. Each element in the list is a matrix with row number equal to `batch_size`, giving next design points to be added to individual emulators.
 #'
 #' @note
-#' * The column order of the first argument of `aggregate` must be consistent with the order of emulator output dimensions (if `object` is an instance of the
-#'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class;
-#' * If `x_cand` is supplied as a list when `object` is an instance of `bundle` class and a `aggregate` function is provided, the matrices in `x_cand` must have
-#'   common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the `aggregate` function can be applied.
+#' The column order of the first argument of `aggregate` must be consistent with the order of emulator output dimensions (if `object` is an instance of the
+#'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class.
 #' @references
 #' Beck, J., & Guillas, S. (2016). Sequential design with mutual information for computer experiments (MICE): emulation of a tsunami model.
 #' *SIAM/ASA Journal on Uncertainty Quantification*, **4(1)**, 739-766.
@@ -97,14 +108,14 @@
 #' @md
 #' @name mice
 #' @export
-mice <- function(object, x_cand, ...){
+mice <- function(object, ...){
   UseMethod("mice")
 }
 
 #' @rdname mice
 #' @method mice gp
 #' @export
-mice.gp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, ...) {
+mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, limits = NULL, int = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -115,16 +126,33 @@ mice.gp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wor
   training_output <- object$data$Y
   n_dim_X <- ncol(training_input)
   #check x_cand
-  if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_cand) ) {
-    if ( ncol(object$data$X)!=1 ){
-      x_cand <- matrix(x_cand, nrow = 1)
-    } else {
-      x_cand <- as.matrix(x_cand)
+  if ( is.null(x_cand) ){
+    is_cand <- FALSE
+    limits <- check_limits(limits, n_dim_X)
+    #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input, limits), n_cand), n_cand), limits)
+    #x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
+    x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+    for (j in 1:n_dim_X){
+      if ( int[j] ){
+        if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+        x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+      } else {
+        x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+      }
     }
+  } else {
+    is_cand <- TRUE
+    if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
+    if ( is.vector(x_cand) ) {
+      if ( ncol(object$data$X)!=1 ){
+        x_cand <- matrix(x_cand, nrow = 1)
+      } else {
+        x_cand <- as.matrix(x_cand)
+      }
+    }
+    if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   }
-  if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
-  #check core number
+    #check core number
   if( !is.null(workers) ) {
     workers <- as.integer(workers)
     if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
@@ -166,13 +194,19 @@ mice.gp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wor
     pkg.env$py_gc$collect()
     gc(full=T)
   }
-  return(idx)
+  if (is_cand){
+    return(idx)
+  } else {
+    final_res <- x_cand[idx,,drop=F]
+    rownames(final_res) <- NULL
+    return(final_res)
+  }
 }
 
 #' @rdname mice
 #' @method mice dgp
 #' @export
-mice.dgp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, aggregate = NULL, ...) {
+mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -187,15 +221,32 @@ mice.dgp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wo
   n_dim_X <- ncol(training_input)
   n_dim_Y <- ncol(training_output)
   #check x_cand
-  if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
-  if ( is.vector(x_cand) ) {
-    if ( ncol(object$data$X)!=1 ){
-      x_cand <- matrix(x_cand, nrow = 1)
-    } else {
-      x_cand <- as.matrix(x_cand)
+  if ( is.null(x_cand) ){
+    is_cand <- FALSE
+    limits <- check_limits(limits, n_dim_X)
+    int <- check_int(int, n_dim_X)
+    #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input, limits), n_cand), n_cand), limits)
+    x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+    for (j in 1:n_dim_X){
+      if ( int[j] ){
+        if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+        x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+      } else {
+        x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+      }
     }
+  } else {
+    is_cand <- TRUE
+    if ( !is.matrix(x_cand)&!is.vector(x_cand) ) stop("'x_cand' must be a vector or a matrix.", call. = FALSE)
+    if ( is.vector(x_cand) ) {
+      if ( ncol(object$data$X)!=1 ){
+        x_cand <- matrix(x_cand, nrow = 1)
+      } else {
+        x_cand <- as.matrix(x_cand)
+      }
+    }
+    if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   }
-  if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   #check core number
   if( !is.null(workers) ) {
     workers <- as.integer(workers)
@@ -233,7 +284,8 @@ mice.dgp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wo
         idx <- which.max(agg_res)
       }
     }
-    idx <- matrix(idx, nrow = 1, byrow = T)
+    #idx <- matrix(idx, nrow = 1, byrow = T)
+    idx <- as.vector(idx)
   } else {
     idx <- c()
     idx_x_cand0 <- c(1:nrow(x_cand))
@@ -278,20 +330,26 @@ mice.dgp <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, wo
       idx <- c(idx,  idx_x_cand[idx_i])
       idx_x_cand <- idx_x_cand0[-unique(idx)]
     }
-    idx <- matrix(idx, nrow = batch_size, byrow = T)
+    #idx <- matrix(idx, nrow = batch_size, byrow = T)
   }
   if ( batch_size!=1 ){
     pkg.env$py_gc$collect()
     gc(full=T)
   }
-  return(idx)
+  if (is_cand) {
+    return(idx)
+  } else {
+    final_res <- x_cand[idx,,drop=F]
+    rownames(final_res) <- NULL
+    return(final_res)
+  }
 }
 
 
 #' @rdname mice
 #' @method mice bundle
 #' @export
-mice.bundle <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, aggregate = NULL, ...) {
+mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -307,6 +365,44 @@ mice.bundle <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6,
   training_output <- object$data$Y
   n_dim_X <- ncol(training_input[[1]])
   #check x_cand
+  if ( is.null(x_cand) ){
+    is_cand <- FALSE
+    limits <- check_limits(limits, n_dim_X)
+    int <- check_int(int, n_dim_X)
+    if ( is.null(aggregate) ) {
+      x_cand <- vector('list', n_emulators)
+      for (k in 1:n_emulators){
+        #x_cand[[i]] <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input[[i]], limits), n_cand), n_cand), limits)
+        #x_cand[[i]] <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
+        x_cand[[k]] <- lhs::maximinLHS(n_cand,n_dim_X)
+        for (j in 1:n_dim_X){
+          if ( int[j] ){
+            if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+            x_cand[[k]][,j] <- floor( x_cand[[k]][,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+          } else {
+            x_cand[[k]][,j] <- x_cand[[k]][,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+          }
+        }
+      }
+    } else {
+      #total_input <- do.call(rbind, training_input)
+      #total_input <- pkg.env$np$unique(total_input, axis=0L)
+      #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(total_input, limits), n_cand), n_cand), limits)
+      #x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
+      x_cand <- lhs::maximinLHS(n_cand,n_dim_X)
+      for (j in 1:n_dim_X){
+        if ( int[j] ){
+          if ( !is.integer(limits[j,2])|!is.integer(limits[j,1]) ) stop(sprintf("The upper and lower limits specified for the input dimension %i should be intgers.", j), call. = FALSE)
+          x_cand[,j] <- floor( x_cand[,j]*(limits[j,2]-limits[j,1]+1) ) + limits[j,1]
+        } else {
+          x_cand[,j] <- x_cand[,j]*(limits[j,2]-limits[j,1]) + limits[j,1]
+        }
+      }
+    }
+  } else {
+    is_cand <- TRUE
+  }
+
   if ( !is.list(x_cand) ){
     if ( !is.matrix(x_cand) ) {
       if ( !is.vector(x_cand) ) {
@@ -351,7 +447,7 @@ mice.bundle <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6,
     if (islist){
       x_cand_dfs <- lapply(x_cand, as.data.frame)
       x_cand <- as.matrix(Reduce(function(x, y) merge(x, y, all = FALSE), x_cand_dfs))
-      if (length(x_cand)==0) stop("Elements in 'x_cand' must have common positions when 'aggregate' is used.", call. = FALSE)
+      if (length(x_cand)==0) stop("When using 'aggregate,' matrices in 'x_cand' must share at least some common rows.", call. = FALSE)
     }
   }
   #check batch size
@@ -481,6 +577,15 @@ mice.bundle <- function(object, x_cand, batch_size = 1, M = 50, nugget_s = 1e-6,
     pkg.env$py_gc$collect()
     gc(full=T)
   }
-  return(idx)
+  if (is_cand){
+    return(idx)
+  } else {
+    final_res <- vector('list', n_emulators)
+    for (i in 1:n_emulators){
+      final_res[[i]] <- if (is.null(aggregate)) {x_cand[[i]][idx[,i],,drop=F]} else {x_cand[idx[,i],,drop=F]}
+      rownames(final_res[[i]]) <- NULL
+    }
+    return(unname(final_res))
+  }
 }
 
