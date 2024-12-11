@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to use the package to sequentially enrich the design for adaptive improvements and pruning of a DGP emulator.
+This vignette shows how to use `dgpsi` to sequentially enrich a design for adaptive improvement and pruning of an emulator. We choose a DGP for this example, but the methods work equally well on all types of emulator.
 
 ## Load the packages
 
@@ -51,9 +51,9 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_fct.png){width=100%}
 
-We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space while in the top-right part the simulator shows little variations. 
+We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space whil,e in the top-right part, the simulator shows little variation. 
 
-We now specify a seed with `set_seed()` from the package for reproducibility
+We now specify a seed with `set_seed()` for reproducibility
 
 ```{r}
 set_seed(99)
@@ -66,7 +66,7 @@ X <- maximinLHS(5,2)
 Y <- f(X)
 ```
 
-To track the qualities of constructed emulators during the sequential design, we generate a validation dataset:
+To track the qualities of constructed emulators during sequential design, we generate a validation dataset:
 
 ```{r}
 validate_x <- maximinLHS(200,2)
@@ -89,7 +89,7 @@ m <- dgp(X, Y)
 ## Imputing ... done
 ```
 
-We then specify the boundaries of input parameters of `f` for the sequential design to locate design points to be added:
+We then specify the boundaries of the input parameter space for `f` so that the sequential design can restrict it's search for new points.
 
 ```{r}
 lim_1 <- c(0, 1)
@@ -97,9 +97,9 @@ lim_2 <- c(0, 1)
 lim <- rbind(lim_1, lim_2)
 ```
 
-The boundaries of input parameters are defined as a matrix with each row giving the lower and upper limits of an input parameter. After the boundaries are specified, we are ready to conduct the sequential design to adaptively improve the emulator `m` via `design()`. The function `design()` provides a simple and flexible implementation of sequential designs for DGP emulators. In this vignette, we only demonstrate its basic usage and refer users to `?design` for more advanced specifications, e.g., on checkpoints to manually control the design progress and on schedules to re-fit and validate emulators. 
+The limits of the input parameters are defined as a matrix with each row giving the lower and upper limits of an input parameter. After the boundaries are specified, we are ready to conduct a sequential design that adaptively improve the emulator, `m`, via `design()`. The function `design()` provides a simple and flexible implementation of sequential design for emulation. In this vignette, we only demonstrate its basic usage and refer users to `?design` for more advanced specification, e.g., on checkpoints to manually control the design progress and on schedules to re-fit and validate emulators. 
 
-For illustrative purpose, we implement two waves of sequential designs on `m`:
+For illustrative purpose, we implement two waves of sequential design on `m`:
 
 ```{r}
 # 1st wave with 25 steps
@@ -137,7 +137,7 @@ m <- design(m, N = 25, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  * RMSE: 0.032189
 ```
 
-After the first wave of the sequential design, we see that 1 GP node is removed from the first layer by the automatic pruning of the DGP which leaves only one node in both the first and second layer of the DGP hierarchy respectively. This helps accelerate the inference of the DGP emulator in subsequent waves of the sequential design while maintaining accuracy. We now start the second wave of the sequential design:
+After the first wave we see that 1 GP node is removed from the first layer by automatic pruning of the DGP which leaves only one node in both the first and second layer of the DGP hierarchy respectively. This helps accelerate the inference of the DGP emulator in subsequent waves of the sequential design while maintaining accuracy. We now start the second wave of the sequential design:
 
 ```{r}
 # 2nd wave with 10 steps
@@ -187,14 +187,14 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  * RMSE: 0.003784
 ```
 
-After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
+Resuming rather than adding an additional wave can be a useful feature, particularly for plotting using `draw`. After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
 
 ```{r}
 draw(m, 'design')
 ```
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_design.png){width=100%}
-It can be seen from the figure above that most of the added design points concentrate at the bottom-left corner of the input space where the simulator `f` exhibits more variations and thus needs more data to be well-emulated. We can also visualize the changes of qualities (in terms of RMSEs wrt the validation dataset) of emulators constructed during the three waves of sequential designs:
+It can be seen from the figure above that most of the added design points concentrate at the bottom-left corner of the input space where the simulator `f` exhibits more variation and thus needs more data to be well-emulated. We can also visualize the improvement to RMSE during the sequential design:
 
 ```{r}
 draw(m, 'rmse')
@@ -263,7 +263,7 @@ rmse5 <- m5$oos$rmse
 rmse_static <- data.frame('N' = c(10, 20, 30, 40, 50), 'rmse' = c(rmse1, rmse2, rmse3, rmse4, rmse5), 'LHD' = c('lhd-10', 'lhd-20', 'lhd-30', 'lhd-40', 'lhd-50'))
 ```
 
-and add them to the sequential design validation plot (in log-scale) for comparisons:
+and add them to the sequential design validation plot (in log-scale) for comparison:
 
 ```{r}
 draw(m, 'rmse', log = T) + 
@@ -273,7 +273,7 @@ draw(m, 'rmse', log = T) +
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_comparison.png){width=100%}
 
-It can be seen from the plot above that with static space-filling designs, the quality of an emulator may not be improved as the design size increases. This is because increasing the size of a space-filling design may not capture regions where the simulator exhibits more variations, and thus cause DGP emulators with higher RMSEs than those constructed through the sequential design.
+It can be seen from the plot above that with static space-filling designs, the quality of an emulator may not be improved as the design size increases. This is because increasing the size of a space-filling design may not capture regions where the simulator exhibits more variation, and thus cause emulators with higher RMSEs than those constructed through sequential design.
 
 ### See also
 

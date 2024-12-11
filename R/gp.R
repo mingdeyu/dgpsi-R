@@ -4,23 +4,23 @@
 #'
 #' @param X a matrix where each row is an input data point and each column is an input dimension.
 #' @param Y a matrix with only one column and each row being an output data point.
-#' @param struc `r lifecycle::badge("deprecated")` an object produced by [kernel()] that gives a user-defined GP specifications. When `struc = NULL`,
+#' @param struc `r lifecycle::badge("deprecated")` an object produced by [kernel()] that gives a user-defined GP specification. When `struc = NULL`,
 #'     the GP specifications are automatically generated using information provided in `name`, `lengthscale`,
 #'     `nugget_est`, `nugget`, `scale_est`, `scale`,and `internal_input_idx`. Defaults to `NULL`.
 #'
 #' **The argument will be removed in the next release. To customize GP specifications, please adjust the other arguments in the [gp()] function.**
 #' @param name kernel function to be used. Either `"sexp"` for squared exponential kernel or
-#'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`. This argument is only used when `struc = NULL`.
-#' @param lengthscale initial values of lengthscales in the kernel function. It can be a single numeric value or a vector:
+#'     `"matern2.5"` for Matérn-2.5 kernel. Defaults to `"sexp"`.
+#' @param lengthscale initial values of lengthscales in the kernel function. It can be a single numeric value or a vector of length `ncol(X)`:
 #' * if it is a single numeric value, it is assumed that kernel functions across input dimensions share the same lengthscale;
-#' * if it is a vector (which must have a length of `ncol(X)`), it is assumed that kernel functions across input dimensions have different lengthscales.
+#' * if it is a vector, it is assumed that kernel functions across input dimensions have different lengthscales.
 #'
-#' Defaults to a vector of `0.1`. This argument is only used when `struc = NULL`.
+#' Defaults to a vector of `0.1`.
 #' @param bounds the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 #'    the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
-#'    to `NULL` where no bounds are specified for the lengthscales. This argument is only used when `struc = NULL`.
+#'    to `NULL` where no bounds are specified for the lengthscales.
 #' @param prior prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (`"ga"`), inverse gamma prior (`"inv_ga"`),
-#'     or jointly robust prior (`"ref"`). Defaults to `"ref"`. This argument is only used when `struc = NULL`. See the reference below for the jointly
+#'     or jointly robust prior (`"ref"`). Defaults to `"ref"`. See the reference below for the jointly
 #'     robust prior.
 #' @param nugget_est a bool indicating if the nugget term is to be estimated:
 #' 1. `FALSE`: the nugget term is fixed to `nugget`.
@@ -28,21 +28,20 @@
 #'
 #' Defaults to `FALSE`. This argument is only used when `struc = NULL`.
 #' @param nugget the initial nugget value. If `nugget_est = FALSE`, the assigned value is fixed during the training.
-#'     Set `nugget` to a small value (e.g., `1e-8`) and the corresponding bool in `nugget_est` to `FASLE` for deterministic emulations where the emulator
-#'     interpolates the training data points. Set `nugget` to a reasonable larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic
-#'     emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-8` if `nugget_est = FALSE` and
+#'     Set `nugget` to a small value (e.g., `1e-8`) and the corresponding bool in `nugget_est` to `FALSE` for deterministic computer models where the emulator
+#'    should interpolate the training data points. Set `nugget` to a larger value and the corresponding bool in `nugget_est` to `TRUE` for stochastic
+#'     emulation where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-8` if `nugget_est = FALSE` and
 #'     `0.01` if `nugget_est = TRUE`. This argument is only used when `struc = NULL`.
 #' @param scale_est a bool indicating if the variance is to be estimated:
 #' 1. `FALSE`: the variance is fixed to `scale`.
 #' 2. `TRUE`: the variance term will be estimated.
 #'
-#' Defaults to `TRUE`. This argument is only used when `struc = NULL`.
+#' Defaults to `TRUE`.
 #' @param scale the initial variance value. If `scale_est = FALSE`, the assigned value is fixed during the training.
-#'     Defaults to `1`. This argument is only used when `struc = NULL`.
+#'     Defaults to `1`.
 #' @param training a bool indicating if the initialized GP emulator will be trained.
-#'     When set to `FALSE`, [gp()] returns an untrained GP emulator, to which one can apply [summary()] to inspect its specifications
-#'     (especially when a customized `struc` is provided) or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
-#' @param verb a bool indicating if the trace information on GP emulator construction and training will be printed during the function execution.
+#'     When set to `FALSE`, [gp()] returns an untrained GP emulator, to which one can apply [summary()] to inspect its specification or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
+#' @param verb a bool indicating if the trace information on GP emulator construction and training will be printed during function execution.
 #'     Defaults to `TRUE`.
 #' @param vecchia `r new_badge("new")` a bool indicating whether to use Vecchia approximation for large-scale GP emulator construction and prediction. Defaults to `FALSE`.
 #'     The Vecchia approximation implemented for the GP emulation largely follows Katzfuss et al. (2022). See reference below.
@@ -54,7 +53,7 @@
 #' If `ord = NULL`, the default random ordering is used. Defaults to `NULL`.
 #' @param internal_input_idx `r lifecycle::badge("deprecated")` The column indices of `X` that are generated by the linked emulators in the preceding layers.
 #'     Set `internal_input_idx = NULL` if the GP emulator is in the first layer of a system or all columns in `X` are
-#'     generated by the linked emulators in the preceding layers. Defaults to `NULL`. This argument is only used when `struc = NULL`.
+#'     generated by the linked emulators in the preceding layers. Defaults to `NULL`.
 #'
 #' **The argument will be removed in the next release. To set up connections of emulators for linked emulations, please use the updated [lgp()] function instead.**
 #' @param linked_idx `r lifecycle::badge("deprecated")` Either a vector or a list of vectors:
@@ -171,7 +170,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
       when = "2.5.0",
       what = "gp(struc)",
       details = c(i = "The argument will be dropped in the next release.",
-                  i = "To customize GP specifications, please adjust the other arguments in the `gp()` function."
+                  i = "To customize GP specification, please adjust the other arguments in the `gp()` function."
       )
     )
   }
@@ -182,7 +181,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
       when = "2.5.0",
       what = "gp(internal_input_idx)",
       details = c(i = "The argument will be dropped in the next release.",
-                  i = "To set up connections of emulators for linked emulations, please use the updated `lgp()` function instead."
+                  i = "To set up connections of emulators for linked emulation, please use the updated `lgp()` function instead."
       )
     )
   }
@@ -193,7 +192,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
       when = "2.5.0",
       what = "gp(linked_idx)",
       details = c(i = "The argument will be dropped in the next release.",
-        i = "To set up connections of emulators for linked emulations, please use the updated `lgp()` function instead."
+        i = "To set up connections of emulators for linked emulation, please use the updated `lgp()` function instead."
         )
     )
   }
@@ -246,7 +245,7 @@ gp <- function(X, Y, struc = NULL, name = 'sexp', lengthscale = rep(0.1, ncol(X)
       if ( length(bounds)!=2 ) {
         stop(sprintf("length(bounds) must equal to %i.", 2), call. = FALSE)
       }
-      if ( bounds[1]>bounds[2] ) stop("The second element of 'bounds' must be greater than the first one.", call. = FALSE)
+      if ( bounds[1]>bounds[2] ) stop("The second element of 'bounds' must be greater than the first.", call. = FALSE)
       bounds <- reticulate::np_array(bounds)
     }
 

@@ -2,7 +2,7 @@
 title: "Sequential Design II"
 output: rmarkdown::html_vignette
 description: >
-  Sequential design for a bundle of DGP emulators with the stopping rule.
+  Sequential design for a bundle of DGP emulators with a stopping rule.
 vignette: >
   %\VignetteIndexEntry{Sequential Design II}
   %\VignetteEngine{knitr::rmarkdown}
@@ -40,7 +40,7 @@ f <- function(x) {
 }
 ```
 
-Note that the function is defined in such a way that both its input `x` and output are matrices. The following figure shows the true functional forms of the three outputs of the simulator over `[0, 1]`:
+Note that the function is defined in such a way that both its input, `x`, and output are matrices. The following figure shows the true functional forms of the three outputs of the simulator over `[0, 1]`:
 
 ```{r}
 dense_x <- seq(0, 1, length = 200)
@@ -62,7 +62,7 @@ We now specify a seed with `set_seed()` from the package for reproducibility
 set_seed(99)
 ```
 
-and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+and generate an initial design with 5 design points using a maximin Latin hypercube sampler:
 
 ```{r}
 X <- maximinLHS(5, 1)
@@ -116,15 +116,15 @@ m3 <- dgp(X, Y[,3])
 ## Imputing ... done
 ```
 
-Note that we have the global connection turned off for the first two DGP emulators because we found that this yields better emulation performances. We then build a bundle of the three DGP emulators using `pack()`:
+Note that we have the global connection turned off for the first two DGP emulators because we found that this yields better emulation performance. We then build a bundle of the three DGP emulators using `pack()`:
 
 ```{r}
 m <- pack(m1, m2, m3)
 ```
 
-## Sequential designs of the bundle emulator
+## Sequential design for the emulator bundle
 
-To start with the sequential design, we specify the limit of the input:
+To begin sequential design, we first specify the limit of each input:
 
 ```{r}
 lim <- c(0, 1)
@@ -136,7 +136,7 @@ and set a target RMSE to stop the sequential design:
 target <- 0.01
 ```
 
-Here we choose `0.01` because it is equivalent to `1%` normalized error given that the ranges of both outputs are `[0,1]`. We can of course set different targets for different outputs, e.g., by setting `target <- c(0.005, 0.02, 0.01)`. 
+Here we choose `0.01` because it is equivalent to `1%` normalized error given that the ranges of both outputs are `[0,1]`. We can set different targets for different outputs, e.g., by setting `target <- c(0.005, 0.02, 0.01)`. 
 
 We start the first-wave of the sequential design with 10 steps:
 
@@ -195,7 +195,7 @@ Since the third emulator has already reached the target, we assign zero weights 
 weight <- c(0.8, 0.2, 0)
 ```
 
-We now pass both the aggregate function `g()` and its `weight` argument to `design()` for the second wave of the sequential design with a further 15 steps:
+We now pass both the aggregate function, `g()`, and its `weight` argument to `design()` for a second wave of the sequential design with a further 15 steps:
 
 ```{r}
 # 2nd wave with 15 steps
@@ -234,7 +234,7 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ## Target reached! The sequential design stops at step 10.
 ```
 
-The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
+The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential design points of the three emulators can be plotted with `draw()`:
 
 ```{r}
 draw(m, 'design')
@@ -295,7 +295,7 @@ m33 <- validate(m33, x_test = validate_x, y_test = validate_y[,3], verb = F)
 rmse_static_3 <- data.frame('N' = c(10, 20, 30), 'rmse' = c(m13$oos$rmse, m23$oos$rmse, m33$oos$rmse), 'LHD' = c('lhd-10', 'lhd-20', 'lhd-30'))
 ```
 
-and add them to the sequential design validation plot (in log-scale) for comparisons:
+and add them to the sequential design validation plot (in log-scale) for comparison:
 
 ```{r}
 p <- draw(m, type = 'rmse', log = T) 
@@ -313,7 +313,7 @@ p
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_rmse.png){width=100%}
 
-It can be seen from the plot above that with the sequential design, emulators in the bundle can achieve higher or similar accuracy with smaller number of design points. 
+It can be seen from the plot above that sequential design is more efficient than batch space filling design, achieving similar RMSE with far fewer design points.
 
 ### See also
 

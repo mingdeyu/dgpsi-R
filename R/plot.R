@@ -8,10 +8,10 @@
 #' * the S3 class `lgp`.
 #' @param x_test same as that of [validate()].
 #' @param y_test same as that of [validate()].
-#' @param dim if `dim = NULL`, the index of an emulator's input will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
+#' @param dim if `dim = NULL`, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
 #'     which dimension of an emulator's input will be shown on the x-axis in validation plots:
 #' * If `x` is an instance of the `gp` of `dgp` class, `dim` is an integer.
-#' * `r lifecycle::badge("deprecated")` If `x` is an instance of the `lgp` class created by [lgp()] without specifying argument `struc` in data frame form, `dim` can be
+#' * `r lifecycle::badge("deprecated")` If `x` is an instance of the `lgp` class created by [lgp()] without specifying the `struc` argument in data frame form, `dim` can be:
 #'   1. an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
 #'   2. a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
 #'   (specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
@@ -24,7 +24,7 @@
 #' This argument is only used when `style = 1`. Defaults to `NULL`.
 #' @param method same as that of [validate()].
 #' @param sample_size same as that of [validate()].
-#' @param style either `1` or `2`, indicating two different types of validation plots.
+#' @param style either `1` or `2`, indicating two different plotting styles for validation.
 #' @param min_max a bool indicating if min-max normalization will be used to scale the testing output, RMSE, predictive mean and std from the
 #'     emulator. Defaults to `TRUE`. This argument is not applicable to DGP emulators with categorical likelihoods.
 #' @param normalize `r new_badge("new")` a bool indicating if normalization will be used to scale the counts in validation plots of DGP emulators with categorical
@@ -43,7 +43,7 @@
 #' @param type either `'line'` or `'points`, indicating whether to draw testing data in the OOS validation plot as a line or
 #'     individual points when the input of the emulator is one-dimensional and `style = 1`. This argument is not applicable to DGP emulators with
 #'     categorical likelihoods. Defaults to `'points'`
-#' @param verb a bool indicating if the trace information on plotting will be printed during the function execution.
+#' @param verb a bool indicating if trace information on plotting will be printed during execution.
 #'     Defaults to `TRUE`.
 #' @param M `r new_badge("new")` same as that of [validate()].
 #' @param force same as that of [validate()].
@@ -55,13 +55,10 @@
 #' @note
 #' * [plot()] calls [validate()] internally to obtain validation results for plotting. However, [plot()] will not export the
 #'   emulator object with validation results. Instead, it only returns the plotting object. For small-scale validations (i.e., small
-#'   training or testing data points), direct execution of [plot()] is fine. However, for moderate- to large-scale validations,
+#'   training or testing data points), direct execution of [plot()] works well. However, for moderate- to large-scale validation,
 #'   it is recommended to first run [validate()] to obtain and store validation results in the emulator object, and then supply the
-#'   object to [plot()]. This is because if an emulator object has the validation results stored, each time when [plot()]
-#'   is invoked, unnecessary evaluations of repetitive LOO or OOS validation will not be implemented.
-#' * [plot()] uses information provided in `x_test` and `y_test` to produce the OOS validation plots. Therefore, if validation results
-#'   are already stored in `x`, unless `x_test` and `y_test` are identical to those used by [validate()], [plot()] will re-evaluate OOS
-#'   validations before plotting.
+#'   object to [plot()]. [plot()] checks the object's `loo` and `oos` slots prior to calling [validate()] and will not perform further calculation if the required information is already stored.
+#' * [plot()] will only use stored OOS validation if `x_test` and `y_test` are identical to those used by [validate()] to produce the data contained in the object's `oos` slot, otherwise [plot()] will re-evaluate OOS validation before plotting.
 #' * The returned `patchwork` object contains the `ggplot2` objects. One can modify the included individual ggplots
 #'   by accessing them with double-bracket indexing. See <https://patchwork.data-imaginist.com/> for further information.
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
@@ -87,7 +84,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
   }
 
   if ( isTRUE(verb) ) message("Validating and computing ...", appendLF = FALSE)
@@ -516,7 +513,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
   }
 
   if ( isTRUE(verb) ) message("Validating and computing ...", appendLF = FALSE)
@@ -635,7 +632,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
             idx <- oos_res$x_test[[1]][,dim]
             dim <- c(1,dim)
           } else if ( length(dim)==3 ){
-            if ( dim[1]<2 ) stop("The first element of 'dim' must be equal or greater than 2. See documentation for details.", call. = FALSE)
+            if ( dim[1]<2 ) stop("The first element of 'dim' must be greater than or equal to 2. See documentation for details.", call. = FALSE)
             target_emulator_input <- oos_res$x_test[[dim[1]]][[dim[2]]]
             if ( is.null(target_emulator_input) ) stop("The emulator specified by the first two elements of 'dim' has no global input.", call. = FALSE)
             idx <- target_emulator_input[,dim[3]]
@@ -784,7 +781,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, 
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
   }
 
   if ( isTRUE(verb) ) message("Validating and computing ...", appendLF = FALSE)

@@ -7,12 +7,12 @@
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param x_cand a matrix (with each row containing a design point and column representing an input dimension) that gives a candidate set
-#'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class and `aggregate` is not supplied, `x_cand` could also
-#'     be a list with length equal to the number of emulators contained in `object`. In this case, each slot in `x_cand` should be a candidate set matrix
-#'     for each emulator included in the bundle. Defaults to `NULL`.
-#' @param n_cand an integer that gives the size of the candidate set to be generated from which the next design point is determined. This argument
-#'     is only used when `x_cand` is `NULL`. Defaults to `200`.
+#' @param x_cand a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
+#'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class and `aggregate` is not supplied, `x_cand` can also be a list.
+#'     The list must have a length equal to the number of emulators in `object`, with each element being a matrix representing the candidate set for a corresponding
+#'     emulator in the bundle. Defaults to `NULL`.
+#' @param n_cand an integer specifying the size of the candidate set to be generated for selecting the next design point(s).
+#'     This argument is used only when `x_cand` is `NULL`. Defaults to `200`.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
@@ -34,33 +34,36 @@
 #'   of the matrix equals to:
 #'   - the emulator output dimension if `object` is an instance of the `dgp` class; or
 #'   - the number of emulators contained in `object` if `object` is an instance of the `bundle` class.
-#' * the output should be a vector that gives aggregations of scores at different design points.
+#' * the output should be a vector that gives aggregate scores at different design points.
 #'
-#' Set to `NULL` to disable the aggregation. Defaults to `NULL`.
+#' Set to `NULL` to disable aggregation. Defaults to `NULL`.
 #' @param ... any arguments (with names different from those of arguments used in [mice()]) that are used by `aggregate`
 #'     can be passed here.
 #'
 #' @return
-#' 1. If `x_cand` is not `NULL` and:
-#'    - `object` is an instance of the `gp` class, a vector is returned with length equal to `batch_size`, giving the positions (i.e., row numbers)
-#'      of next design points from `x_cand`.
-#'    - `object` is an instance of the `dgp` class, a vector is returned with length equal to `batch_size * D`, giving positions (i.e., row numbers)
-#'      of next design points from `x_cand` to be added to the DGP emulator. `D` equals to the number of output dimensions of the DGP
-#'      emulator if there is no likelihood layer in the hierarchy. If `object` is a DGP emulator with either `Hetero` or `NegBin` likelihood layer,
-#'      `D = 2`. If `object` is a DGP emulator with a `Categorical` likelihood layer, `D` equals to one (for binary output) or `K` (for multi-class output with `K` classes).
-#'    - `object` is an instance of the `bundle` class, a matrix is returned with row number equal to `batch_size` and column number equal to the number of
-#'      emulators in the bundle, giving positions (i.e., row numbers) of next design points from `x_cand` to be added to individual emulators.
-#' 2. If `x_cand = NULL` and:
-#'    - `object` is an instance of the `gp` class, a matrix is returned with row number equal to `batch_size`, giving the next design points to be evaluated.
-#'    - `object` is an instance of the `dgp` class, a matrix is returned with row number equal to `batch_size * D` where `D` is the number of output dimensions of the DGP
-#'      emulator if no likelihood layer is included. If `object` is a DGP emulator with either `Hetero` or `NegBin` likelihood layer, `D = 2`. If `object` is a DGP emulator
-#'      with a `Categorical` likelihood layer, `D` equals to one (for binary output) or `K` (for multi-class output with `K` classes).
-#'    - `object` is an instance of the `bundle` class, a list is returned with the length equal to the number of
-#'      emulators in the bundle. Each element in the list is a matrix with row number equal to `batch_size`, giving next design points to be added to individual emulators.
+#' 1. If `x_cand` is not `NULL`:
+#'    - When `object` is an instance of the `gp` class, a vector of length `batch_size` is returned, containing the positions
+#'      (row numbers) of the next design points from `x_cand`.
+#'    - When `object` is an instance of the `dgp` class, a vector of length `batch_size * D` is returned, containing the positions
+#'      (row numbers) of the next design points from `x_cand` to be added to the DGP emulator.
+#'      * `D` is the number of output dimensions of the DGP emulator if no likelihood layer is included.
+#'      * For a DGP emulator with a `Hetero` or `NegBin` likelihood layer, `D = 2`.
+#'      * For a DGP emulator with a `Categorical` likelihood layer, `D = 1` for binary output or `D = K` for multi-class output with `K` classes.
+#'    - When `object` is an instance of the `bundle` class, a matrix is returned with `batch_size` rows and a column for each emulator in
+#'      the bundle, containing the positions (row numbers) of the next design points from `x_cand` for individual emulators.
+#' 2. If `x_cand` is `NULL`:
+#'    - When `object` is an instance of the `gp` class, a matrix with `batch_size` rows is returned, giving the next design points to be evaluated.
+#'    - When `object` is an instance of the `dgp` class, a matrix with `batch_size * D` rows is returned, where:
+#'      - `D` is the number of output dimensions of the DGP emulator if no likelihood layer is included.
+#'      - For a DGP emulator with a `Hetero` or `NegBin` likelihood layer, `D = 2`.
+#'      - For a DGP emulator with a `Categorical` likelihood layer, `D = 1` for binary output or `D = K` for multi-class output with `K` classes.
+#'    - When `object` is an instance of the `bundle` class, a list is returned with a length equal to the number of emulators in the bundle. Each
+#'      element of the list is a matrix with `batch_size` rows, where each row represents a design point to be added to the corresponding emulator.
 #'
 #' @note
-#' The column order of the first argument of `aggregate` must be consistent with the order of emulator output dimensions (if `object` is an instance of the
-#'     `dgp` class), or the order of emulators placed in `object` if `object` is an instance of the `bundle` class.
+#' The first column of the matrix supplied to the first argument of `aggregate` must correspond to the first output dimension of the DGP emulator
+#'     if `object` is an instance of the `dgp` class, and so on for subsequent columns and dimensions. If `object` is an instance of the `bundle` class,
+#'     the first column must correspond to the first emulator in the bundle, and so on for subsequent columns and emulators.
 #' @references
 #' Beck, J., & Guillas, S. (2016). Sequential design with mutual information for computer experiments (MICE): emulation of a tsunami model.
 #' *SIAM/ASA Journal on Uncertainty Quantification*, **4(1)**, 739-766.

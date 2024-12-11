@@ -1,25 +1,25 @@
-#' @title Validation plots of a sequential design
+#' @title Validation and diagnostic plots for a sequential design
 #'
-#' @description This function draws validation plots of the sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+#' @description This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
 #'
 #' @param object can be one of the following emulator classes:
 #' * the S3 class `gp`.
 #' * the S3 class `dgp`.
 #' * the S3 class `bundle`.
-#' @param type either `"rmse"`, for the trace plot of RMSEs, or log-losses for DGP emulators with categorical likelihoods, or customized evaluating metrics
-#'     of emulators constructed during the sequential designs, or `"design"`, for visualizations of input designs created by the sequential design procedure.
-#'     Defaults to `"rmse"`.
-#' @param log a bool that indicates whether to plot RMSEs, or log-losses (in case of DGP emulators with categorical likelihoods), or customized evaluating
-#'     metrics in log-scale if `type = "rmse"`. Defaults to `FALSE`.
-#' @param emulator a vector of indices of emulators packed in `object` to be drawn, if `object` is an instance of the `bundle` class. When set to `NULL`, all
+#' @param type specifies the type of plot or visualization to generate:
+#' - `"rmse"`: generates a trace plot of RMSEs, log-losses for DGP emulators with categorical likelihoods, or custom evaluation metrics specified via the `"eval"` argument in the `[design()]` function.
+#' - `"design"`: shows visualizations of input designs created by the sequential design procedure.
+#'
+#' Defaults to `"rmse"`.
+#' @param log a boolean indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when `type = "rmse"`.
+#'     Defaults to `FALSE`.
+#' @param emulator an index or vector of indices of emulators packed in `object`. This argument is only used if `object` is an instance of the `bundle` class. When set to `NULL`, all
 #'     emulators in the bundle are drawn. Defaults to `NULL`.
 #' @param ... N/A.
 #'
 #' @return A `patchwork` object.
 #'
 #' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note If a customized evaluating function is provided to [design()] and the function returns a single evaluating metric value when `object` is
-#'     an instance of the `bundle` class, the value of `emulator` has no effects on the plot when `type = "rmse"`.
 #' @examples
 #' \dontrun{
 #'
@@ -71,7 +71,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
-      title = 'Sequential Designs',
+      title = 'Sequential Design',
       caption =
         'Xi = Input dimension i of the GP emulator'
     )
@@ -192,7 +192,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
 
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
-        title = 'Sequential Designs',
+        title = 'Sequential Design',
         caption =
           'Xi = Input dimension i of the DGP emulator'
       )
@@ -359,7 +359,7 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...
 
     p_patch <- p_patch +
       patchwork::plot_annotation(
-        title = 'Sequential Designs',
+        title = 'Sequential Design',
         caption = 'Xi = Input dimension i'
       )
   } else if ( type == 'rmse' ){
