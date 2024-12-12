@@ -607,8 +607,8 @@ read <- function(pkl_file) {
 #'
 #' @return Either a summary table (returned as `kableExtra` object) or an interactive visualization
 #' (returned as a `visNetwork` object) of the emulator. The visualization is compatible with R Markdown
-#' documents and the RStudio Viewer. The summary table can be further customized by [kableExtra] package.
-#' The resulting [visNetwork] object can be saved as an HTML file using [visNetwork::visSave()].
+#' documents and the RStudio Viewer. The summary table can be further customized by [kableExtra::kableExtra] package.
+#' The resulting `visNetwork` object can be saved as an HTML file using [visNetwork::visSave()] from the [visNetwork::visNetwork] package.
 #'
 #' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples

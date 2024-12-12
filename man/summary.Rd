@@ -36,8 +36,8 @@ Defaults to \code{1}.}
 \value{
 Either a summary table (returned as \code{kableExtra} object) or an interactive visualization
 (returned as a \code{visNetwork} object) of the emulator. The visualization is compatible with R Markdown
-documents and the RStudio Viewer. The summary table can be further customized by \link{kableExtra} package.
-The resulting \link{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}}.
+documents and the RStudio Viewer. The summary table can be further customized by \link[kableExtra:kableExtra-package]{kableExtra::kableExtra} package.
+The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}} from the \link[visNetwork:visNetwork]{visNetwork::visNetwork} package.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}

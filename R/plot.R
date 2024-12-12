@@ -59,7 +59,7 @@
 #'   it is recommended to first run [validate()] to obtain and store validation results in the emulator object, and then supply the
 #'   object to [plot()]. [plot()] checks the object's `loo` and `oos` slots prior to calling [validate()] and will not perform further calculation if the required information is already stored.
 #' * [plot()] will only use stored OOS validation if `x_test` and `y_test` are identical to those used by [validate()] to produce the data contained in the object's `oos` slot, otherwise [plot()] will re-evaluate OOS validation before plotting.
-#' * The returned [patchwork] object contains the [ggplot2] objects. One can modify the included individual ggplots
+#' * The returned [patchwork::patchwork] object contains the [ggplot2::ggplot2] objects. One can modify the included individual ggplots
 #'   by accessing them with double-bracket indexing. See <https://patchwork.data-imaginist.com/> for further information.
 #' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples

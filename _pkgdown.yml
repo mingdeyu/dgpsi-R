@@ -112,6 +112,8 @@ reference:
   - get_thread_num
   - set_vecchia
   - set_id
+  - serialize
+  - deserialize
 
 
 
