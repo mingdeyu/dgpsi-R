@@ -50,9 +50,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul>
 </li>
@@ -92,8 +92,10 @@
 
     
     
-<p>This vignette shows how to use the package to sequentially enrich the
-design for adaptive improvements and pruning of a DGP emulator.</p>
+<p>This vignette shows how to use <code>dgpsi</code> to sequentially
+enrich a design for adaptive improvement and pruning of an emulator. We
+choose a DGP for this example, but the methods work equally well on all
+types of emulator.</p>
 <div class="section level2">
 <h2 id="load-the-packages">Load the packages<a class="anchor" aria-label="anchor" href="#load-the-packages"></a>
 </h2>
@@ -127,9 +129,9 @@ the function:</p>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_fct.png" style="width:100.0%"></p>
 <p>We can see from the figure above that the synthetic simulator
 exhibits more fluctuations on the bottom left of its input space while
-in the top-right part the simulator shows little variations.</p>
-<p>We now specify a seed with <code><a href="../reference/set_seed.html">set_seed()</a></code> from the package
-for reproducibility</p>
+in the top-right part, the simulator shows little variation.</p>
+<p>We now specify a seed with <code><a href="../reference/set_seed.html">set_seed()</a></code> for
+reproducibility</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">99</span><span class="op">)</span></span></code></pre></div>
 <p>and generate an initial design with 5 design points using the maximin
@@ -137,7 +139,7 @@ Latin hypercube sampler:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></code></pre></div>
-<p>To track the qualities of constructed emulators during the sequential
+<p>To track the qualities of constructed emulators during sequential
 design, we generate a validation dataset:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">validate_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">200</span>,<span class="fl">2</span><span class="op">)</span></span>
@@ -156,24 +158,25 @@ layer) using the generated initial design:</p>
 <span><span class="co">## Training the DGP emulator: </span></span>
 <span><span class="co">## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01&lt;00:00, 353.90it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
-<p>We then specify the boundaries of input parameters of <code>f</code>
-for the sequential design to locate design points to be added:</p>
+<p>We then specify the boundaries of the input parameter space for
+<code>f</code> so that the sequential design can restrict its search for
+new points.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lim_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">lim_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">lim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">lim_1</span>, <span class="va">lim_2</span><span class="op">)</span></span></code></pre></div>
-<p>The boundaries of input parameters are defined as a matrix with each
+<p>The limits of the input parameters are defined as a matrix with each
 row giving the lower and upper limits of an input parameter. After the
-boundaries are specified, we are ready to conduct the sequential design
-to adaptively improve the emulator <code>m</code> via
+boundaries are specified, we are ready to conduct a sequential design
+that adaptively improve the emulator, <code>m</code>, via
 <code><a href="../reference/design.html">design()</a></code>. The function <code><a href="../reference/design.html">design()</a></code> provides a
-simple and flexible implementation of sequential designs for DGP
-emulators. In this vignette, we only demonstrate its basic usage and
-refer users to <code><a href="../reference/design.html">?design</a></code> for more advanced specifications,
-e.g., on checkpoints to manually control the design progress and on
-schedules to re-fit and validate emulators.</p>
-<p>For illustrative purpose, we implement two waves of sequential
-designs on <code>m</code>:</p>
+simple and flexible implementation of sequential design for emulation.
+In this vignette, we only demonstrate its basic usage and refer users to
+<code><a href="../reference/design.html">?design</a></code> for more advanced specification, e.g., on
+checkpoints to manually control the design progress and on schedules to
+re-fit and validate emulators.</p>
+<p>For illustrative purpose, we implement two waves of sequential design
+on <code>m</code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1st wave with 25 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">25</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
@@ -181,85 +184,86 @@ designs on <code>m</code>:</p>
 <span><span class="co">##  * RMSE: 0.527337</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.868213 0.037359</span></span>
+<span><span class="co">##  * Next design point: 0.930278 0.033542</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.541914</span></span>
+<span><span class="co">##  * RMSE: 0.532428</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 18:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.341178 0.003477</span></span>
+<span><span class="co">##  * Next design point: 0.706449 0.048681</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Pruning 1 node(s) in layer 1 ... done</span></span>
 <span><span class="co">##  - Re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.107640</span></span>
+<span><span class="co">##  * RMSE: 0.139819</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 25:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.168364 0.984091</span></span>
+<span><span class="co">##  * Next design point: 0.000010 0.483511</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.032189</span></span></code></pre>
-<p>After the first wave of the sequential design, we see that 1 GP node
-is removed from the first layer by the automatic pruning of the DGP
-which leaves only one node in both the first and second layer of the DGP
-hierarchy respectively. This helps accelerate the inference of the DGP
-emulator in subsequent waves of the sequential design while maintaining
-accuracy. We now start the second wave of the sequential design:</p>
+<span><span class="co">##  * RMSE: 0.071370</span></span></code></pre>
+<p>After the first wave we see that 1 GP node is removed from the first
+layer by automatic pruning of the DGP which leaves only one node in both
+the first and second layer of the DGP hierarchy respectively. This helps
+accelerate the inference of the DGP emulator in subsequent waves of the
+sequential design while maintaining accuracy. We now start the second
+wave of the sequential design:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.032189</span></span>
+<span><span class="co">##  * RMSE: 0.071370</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.215369 0.384567</span></span>
+<span><span class="co">##  * Next design point: 0.461239 0.415336</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.017259</span></span>
+<span><span class="co">##  * RMSE: 0.056827</span></span>
 <span><span class="co">##   </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.198905 0.873454</span></span>
+<span><span class="co">##  * Next design point: 0.177935 0.459387</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.008300</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.011508</span></span></code></pre>
 <p>Finally, we resume the second wave with 10 additional iterations:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 additional steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, new_wave <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Iteration 11:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.977752 0.011568</span></span>
+<span><span class="co">##  * Next design point: 0.029874 0.763962</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.007264</span></span>
+<span><span class="co">##  * RMSE: 0.014444</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 20:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.258375 0.028753</span></span>
+<span><span class="co">##  * Next design point: 0.829788 0.452129</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.003784</span></span></code></pre>
-<p>After the sequential design is done, we can inspect the enriched
-design by applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
+<span><span class="co">##  * RMSE: 0.004783</span></span></code></pre>
+<p>Resuming rather than adding an additional wave can be a useful
+feature, particularly for plotting using <code><a href="../reference/draw.html">draw()</a></code>. After the
+sequential design is done, we can inspect the enriched design by
+applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'design'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_design.png" style="width:100.0%"> It can be seen from the figure above that most
 of the added design points concentrate at the bottom-left corner of the
-input space where the simulator <code>f</code> exhibits more variations
+input space where the simulator <code>f</code> exhibits more variation
 and thus needs more data to be well-emulated. We can also visualize the
-changes of qualities (in terms of RMSEs wrt the validation dataset) of
-emulators constructed during the three waves of sequential designs:</p>
+improvement to RMSE during the sequential design:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'rmse'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_rmse.png" style="width:100.0%"></p>
@@ -314,7 +318,7 @@ designs (LHD) of size 10, 20, 30, 40, and 50 respectively:</p>
 <span><span class="co"># create a dataframe that stores the RMSEs of the four DGP emulators</span></span>
 <span><span class="va">rmse_static</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="st">'N'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">40</span>, <span class="fl">50</span><span class="op">)</span>, <span class="st">'rmse'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rmse1</span>, <span class="va">rmse2</span>, <span class="va">rmse3</span>, <span class="va">rmse4</span>, <span class="va">rmse5</span><span class="op">)</span>, <span class="st">'LHD'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'lhd-10'</span>, <span class="st">'lhd-20'</span>, <span class="st">'lhd-30'</span>, <span class="st">'lhd-40'</span>, <span class="st">'lhd-50'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>and add them to the sequential design validation plot (in log-scale)
-for comparisons:</p>
+for comparison:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rmse_static</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">N</span>, y <span class="op">=</span> <span class="va">rmse</span>, group <span class="op">=</span> <span class="va">LHD</span>, shape <span class="op">=</span> <span class="va">LHD</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">'#E69F00'</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
@@ -324,14 +328,14 @@ for comparisons:</p>
 designs, the quality of an emulator may not be improved as the design
 size increases. This is because increasing the size of a space-filling
 design may not capture regions where the simulator exhibits more
-variations, and thus cause DGP emulators with higher RMSEs than those
-constructed through the sequential design.</p>
+variation, and thus cause emulators with higher RMSEs than those
+constructed through sequential design.</p>
 <div class="section level3">
 <h3 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h3>
-<p>See <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html" class="external-link"><code>Sequential Design II</code></a>
-for the sequential design of a bundle of DGP emulators with automatic
-terminations.</p>
+<p>See <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html" class="external-link">Sequential
+Design II</a> for the sequential design of a bundle of DGP emulators
+with automatic terminations.</p>
 </div>
 <div class="section level3 unnumbered">
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

@@ -50,9 +50,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul>
 </li>
@@ -168,7 +168,7 @@ LOO results before plotting with <code><a href="../reference/plot.html">plot()</
 <h2 id="emulation-of-model-2">Emulation of Model 2<a class="anchor" aria-label="anchor" href="#emulation-of-model-2"></a>
 </h2>
 <p>We construct a two-layered DGP emulator with Matérn-2.5 kernels to
-emulate the Model 2:</p>
+emulate Model 2:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X2</span>, <span class="va">Y2</span>, depth <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 2-layered DGP structure ... done</span></span>
@@ -193,7 +193,7 @@ Plotting ... done</code></pre>
 <h2 id="emulation-of-model-3">Emulation of Model 3<a class="anchor" aria-label="anchor" href="#emulation-of-model-3"></a>
 </h2>
 <p>We now construct a three-layered DGP emulator with Matérn-2.5 kernels
-to emulate the Model 3:</p>
+to emulate Model 3:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dgp.html">dgp</a></span><span class="op">(</span><span class="va">X3</span>, <span class="va">Y3</span>, depth <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"matern2.5"</span>, id <span class="op">=</span> <span class="st">"gp3"</span> <span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Auto-generating a 3-layered DGP structure ... done</span></span>
@@ -246,23 +246,22 @@ trained emulators to <code><a href="../reference/lgp.html">lgp()</a></code> to c
 The order of the emulators in the list does not matter:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emulators</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span>, <span class="va">m3</span><span class="op">)</span></span></code></pre></div>
-<p>Before activating the linked emulator for predictions, it’s good
-practice to first set it to validation mode:</p>
+<p>Before activating the linked emulator for prediction, it’s good
+practice to first inspect the structure of the emulator:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span>, <span class="va">emulators</span>, mode <span class="op">=</span> <span class="st">"validate"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span>, <span class="va">emulators</span>, activate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Processing emulators ... done
-Linking and synchronizing emulators ... done
-Validating the linked emulator ... done</code></pre>
+Linking and synchronizing emulators ... done</code></pre>
 <p>and visually check the relationships between emulators by applying
 <code><a href="../reference/summary.html">summary()</a></code> to <code>m_link</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m_link</span><span class="op">)</span></span></code></pre></div>
 <iframe src="https://mingdeyu.github.io/dgpsi-R/linked_emu.html" width="100%" height="410" style="border: none;">
 </iframe>
-<p>If everything looks correct, we can then construct the linked
-emulator in activation mode for prediction:</p>
+<p>If everything looks correct, we can then activate the linked emulator
+for prediction:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span>, <span class="va">emulators</span>, mode <span class="op">=</span> <span class="st">"activate"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lgp.html">lgp</a></span><span class="op">(</span><span class="va">struc</span>, <span class="va">emulators</span>, activate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Processing emulators ... done
 Linking and synchronizing emulators ... done
 Activating the linked emulator ... done</code></pre>
@@ -287,7 +286,7 @@ generating 15 training data points from Model 1 and Model 2:</p>
 <span><span class="va">m_gp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m_gp</span>, x_test <span class="op">=</span> <span class="va">test_x</span>, y_test <span class="op">=</span> <span class="va">test_y</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co"># Validate linked emulator</span></span>
 <span><span class="va">m_link</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m_link</span>, x_test <span class="op">=</span> <span class="va">test_x</span>, y_test <span class="op">=</span> <span class="va">test_y</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
-<p>and plot them to compare their emulation performances:</p>
+<p>and plot them to compare their performance:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># GP emulator</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_gp</span>, x_test <span class="op">=</span> <span class="va">test_x</span>, y_test <span class="op">=</span> <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'line'</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
@@ -298,21 +297,20 @@ generating 15 training data points from Model 1 and Model 2:</p>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_link</span>, x_test <span class="op">=</span> <span class="va">test_x</span>, y_test <span class="op">=</span> <span class="va">test_y</span>, type <span class="op">=</span> <span class="st">'line'</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html" class="external-link">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">'Linked Emulator'</span>, theme <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_result_new.png" style="width:100.0%"></p>
-<p>It can be seen from the above plots that the linked emulator
-outperforms the GP emulator with significantly better mean predictions
-and predictive uncertainties.</p>
+<p>We see that the linked emulator outperforms the GP emulator with
+significantly better mean prediction and uncertainty quantification.</p>
 <p>In real-life applications, we are rarely able to generate this many
 testing data points from the underlying computer simulators to evaluate
 the emulators over the whole input space. However, we are still able to
-retain some available realizations from the computer simulators for the
-linked emulator validation. Say we were able to afford 20 runs of the
-above linked computer system:</p>
+retain some available realizations from the computer simulators for
+validation. Say we were able to afford 20 runs of the above linked
+computer system:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># OOS testing input</span></span>
 <span><span class="va">test_x_oos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">300</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="co"># OOS testing output</span></span>
 <span><span class="va">test_y_oos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x_oos</span>, <span class="va">f123</span><span class="op">)</span></span></code></pre></div>
-<p>Then, we can conduct OOS validations for the GP emulator:</p>
+<p>Then, we can conduct OOS validation for the GP emulator:</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m_gp</span>, <span class="va">test_x_oos</span>, <span class="va">test_y_oos</span>, style <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Validating and computing ... done</span></span>

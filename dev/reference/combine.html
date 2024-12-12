@@ -31,9 +31,9 @@ approach to building (D)GP emulators."><meta property="og:image" content="http:/
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -76,31 +76,19 @@ approach to building (D)GP emulators.</p>
 
 
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>a sequence of lists:</p><ol><li><p>For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by <code><a href="kernel.html">kernel()</a></code>), or
-likelihood nodes (produced by <code><a href="Poisson.html">Poisson()</a></code>, <code><a href="Hetero.html">Hetero()</a></code>, or <code><a href="NegBin.html">NegBin()</a></code>.</p></li>
-<li><p>For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by <code><a href="gp.html">gp()</a></code> or
-<code><a href="dgp.html">dgp()</a></code>) in that layer.</p></li>
-</ol></dd>
+<dd><p>a sequence of lists. Each list represents a system layer and contains emulators (produced by <code><a href="gp.html">gp()</a></code> or
+<code><a href="dgp.html">dgp()</a></code>) in that layer.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list defining a DGP structure (for <code>struc</code> of <code><a href="dgp.html">dgp()</a></code>) or a linked (D)GP structure
-(for <code>struc</code> for <code><a href="lgp.html">lgp()</a></code>).</p>
+    <p>A list defining a linked (D)GP structure to be passed to <code>struc</code> of <code><a href="lgp.html">lgp()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># See lgp() for an example.</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -135,14 +135,16 @@
 
 
 <dt id="arg-dim">dim<a class="anchor" aria-label="anchor" href="#arg-dim"></a></dt>
-<dd><p>if <code>dim = NULL</code>, the index of an emulator's input will be shown on the x-axis in validation plots. Otherwise, <code>dim</code> indicates
+<dd><p>if <code>dim = NULL</code>, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, <code>dim</code> indicates
 which dimension of an emulator's input will be shown on the x-axis in validation plots:</p><ul><li><p>If <code>x</code> is an instance of the <code>gp</code> of <code>dgp</code> class, <code>dim</code> is an integer.</p></li>
-<li><p>If <code>x</code> is an instance of the <code>lgp</code> class, <code>dim</code> can be</p><ol><li><p>an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or</p></li>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> If <code>x</code> is an instance of the <code>lgp</code> class created by <code><a href="lgp.html">lgp()</a></code> without specifying the <code>struc</code> argument in data frame form, <code>dim</code> can be:</p><ol><li><p>an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or</p></li>
 <li><p>a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
 (specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
 system.</p></li>
-</ol></li>
-</ul><p>This argument is only used when <code>style = 1</code> and the emulator input is at least two-dimensional. Defaults to <code>NULL</code>.</p></dd>
+</ol><p><strong>This option for linked (D)GP emulators is deprecated and will be removed in the next release.</strong></p></li>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> If <code>x</code> is an instance of the <code>lgp</code> class created by <code><a href="lgp.html">lgp()</a></code> with argument <code>struc</code> in data frame form, <code>dim</code> is an integer referring
+to the dimension of the global input to the linked emulator system.</p></li>
+</ul><p>This argument is only used when <code>style = 1</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -154,7 +156,7 @@ system.</p></li>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>either <code>1</code> or <code>2</code>, indicating two different types of validation plots.</p></dd>
+<dd><p>either <code>1</code> or <code>2</code>, indicating two different plotting styles for validation.</p></dd>
 
 
 <dt id="arg-min-max">min_max<a class="anchor" aria-label="anchor" href="#arg-min-max"></a></dt>
@@ -186,7 +188,7 @@ categorical likelihoods. Defaults to <code>'points'</code></p></dd>
 
 
 <dt id="arg-verb">verb<a class="anchor" aria-label="anchor" href="#arg-verb"></a></dt>
-<dd><p>a bool indicating if the trace information on plotting will be printed during the function execution.
+<dd><p>a bool indicating if trace information on plotting will be printed during execution.
 Defaults to <code>TRUE</code>.</p></dd>
 
 
@@ -212,21 +214,18 @@ Defaults to <code>TRUE</code>.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
 
 <ul><li><p><code>plot()</code> calls <code><a href="validate.html">validate()</a></code> internally to obtain validation results for plotting. However, <code>plot()</code> will not export the
 emulator object with validation results. Instead, it only returns the plotting object. For small-scale validations (i.e., small
-training or testing data points), direct execution of <code>plot()</code> is fine. However, for moderate- to large-scale validations,
+training or testing data points), direct execution of <code>plot()</code> works well. However, for moderate- to large-scale validation,
 it is recommended to first run <code><a href="validate.html">validate()</a></code> to obtain and store validation results in the emulator object, and then supply the
-object to <code>plot()</code>. This is because if an emulator object has the validation results stored, each time when <code>plot()</code>
-is invoked, unnecessary evaluations of repetitive LOO or OOS validation will not be implemented.</p></li>
-<li><p><code>plot()</code> uses information provided in <code>x_test</code> and <code>y_test</code> to produce the OOS validation plots. Therefore, if validation results
-are already stored in <code>x</code>, unless <code>x_test</code> and <code>y_test</code> are identical to those used by <code><a href="validate.html">validate()</a></code>, <code>plot()</code> will re-evaluate OOS
-validations before plotting.</p></li>
-<li><p>The returned <code>patchwork</code> object contains the <code>ggplot2</code> objects. One can modify the included individual ggplots
+object to <code>plot()</code>. <code>plot()</code> checks the object's <code>loo</code> and <code>oos</code> slots prior to calling <code><a href="validate.html">validate()</a></code> and will not perform further calculation if the required information is already stored.</p></li>
+<li><p><code>plot()</code> will only use stored OOS validation if <code>x_test</code> and <code>y_test</code> are identical to those used by <code><a href="validate.html">validate()</a></code> to produce the data contained in the object's <code>oos</code> slot, otherwise <code>plot()</code> will re-evaluate OOS validation before plotting.</p></li>
+<li><p>The returned <a href="https://patchwork.data-imaginist.com/reference/patchwork-package.html" class="external-link">patchwork::patchwork</a> object contains the <a href="https://ggplot2.tidyverse.org/reference/ggplot2-package.html" class="external-link">ggplot2::ggplot2</a> objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See <a href="https://patchwork.data-imaginist.com/" class="external-link">https://patchwork.data-imaginist.com/</a> for further information.</p></li>
 </ul></div>
 

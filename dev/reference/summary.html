@@ -27,9 +27,9 @@ by generating either a table or an interactive plot of the emulator’s structur
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -91,7 +91,7 @@ returns an interactive visualization. Defaults to <code>"plot"</code>. If the <c
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>N/A.</p></dd>
+<dd><p>Any arguments that can be passed to <code><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kableExtra::kbl()</a></code> when <code>type = "table"</code>.</p></dd>
 
 
 <dt id="arg-group-size">group_size<a class="anchor" aria-label="anchor" href="#arg-group-size"></a></dt>
@@ -103,13 +103,14 @@ Defaults to <code>1</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Either a table or an interactive visualization of the emulator, returned as a <code>visNetwork</code> object.
-The visualization is compatible with R Markdown documents and the RStudio Viewer.
-The resulting <code>visNetwork</code> object can be saved as an HTML file using <code><a href="https://rdrr.io/pkg/visNetwork/man/visSave.html" class="external-link">visNetwork::visSave()</a></code>.</p>
+    <p>Either a summary table (returned as <code>kableExtra</code> object) or an interactive visualization
+(returned as a <code>visNetwork</code> object) of the emulator. The visualization is compatible with R Markdown
+documents and the RStudio Viewer. The summary table can be further customized by <a href="https://rdrr.io/pkg/kableExtra/man/kableExtra-package.html" class="external-link">kableExtra::kableExtra</a> package.
+The resulting <code>visNetwork</code> object can be saved as an HTML file using <code><a href="https://rdrr.io/pkg/visNetwork/man/visSave.html" class="external-link">visNetwork::visSave()</a></code> from the <a href="https://rdrr.io/pkg/visNetwork/man/visNetwork.html" class="external-link">visNetwork::visNetwork</a> package.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
 
     <div class="section level2">

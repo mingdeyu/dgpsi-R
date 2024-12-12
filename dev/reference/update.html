@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,7 +63,7 @@
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">X</span>,</span>
 <span>  <span class="va">Y</span>,</span>
-<span>  refit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  refit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  N <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -74,7 +74,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'gp'</span></span>
-<span><span class="fu">update</span><span class="op">(</span><span class="va">object</span>, <span class="va">X</span>, <span class="va">Y</span>, refit <span class="op">=</span> <span class="cn">FALSE</span>, reset <span class="op">=</span> <span class="cn">FALSE</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">update</span><span class="op">(</span><span class="va">object</span>, <span class="va">X</span>, <span class="va">Y</span>, refit <span class="op">=</span> <span class="cn">TRUE</span>, reset <span class="op">=</span> <span class="cn">FALSE</span>, verb <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -88,7 +88,7 @@
 
 
 <dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>the new input data which is a matrix where each row is an input training data point and each column is an input dimension.</p></dd>
+<dd><p>the new input data which is a matrix where each row is an input training data point and each column represents an input dimension.</p></dd>
 
 
 <dt id="arg-y">Y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
@@ -99,16 +99,16 @@ output dimensions. When <code>likelihood</code> (see below) is not <code>NULL</c
 
 
 <dt id="arg-refit">refit<a class="anchor" aria-label="anchor" href="#arg-refit"></a></dt>
-<dd><p>a bool indicating whether to re-fit the emulator <code>object</code> after the training input and output are updated. Defaults to <code>FALSE</code>.</p></dd>
+<dd><p>a bool indicating whether to re-fit the emulator <code>object</code> after the training input and output are updated. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-reset">reset<a class="anchor" aria-label="anchor" href="#arg-reset"></a></dt>
-<dd><p>a bool indicating whether to reset hyperparameters of the emulator <code>object</code> to their initial values when the emulator was
-constructed, after the training input and output are updated. Defaults to <code>FALSE</code>.</p></dd>
+<dd><p>a bool indicating whether to reset hyperparameters of the emulator <code>object</code> to the initial values first obtained when the emulator was
+constructed. Use if it is suspected that a local mode for the hyperparameters has been reached through successive updates. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-verb">verb<a class="anchor" aria-label="anchor" href="#arg-verb"></a></dt>
-<dd><p>a bool indicating if the trace information will be printed during the function execution.
+<dd><p>a bool indicating if trace information will be printed during the function execution.
 Defaults to <code>TRUE</code>.</p></dd>
 
 
@@ -130,7 +130,7 @@ layers and optimization of GP components is computationally expensive. Defaults 
 
 
 <dt id="arg-ess-burn">ess_burn<a class="anchor" aria-label="anchor" href="#arg-ess-burn"></a></dt>
-<dd><p>number of burnin steps for the ESS-within-Gibbs at each I-step in training the emulator <code>object</code> if it is an
+<dd><p>number of burnin steps for the ESS-within-Gibbs sampler at each I-step of the training of the emulator <code>object</code> if it is an
 instance of the <code>dgp</code> class. Defaults to <code>10</code>.</p></dd>
 
 
@@ -146,7 +146,7 @@ in <code>object</code>. Defaults to <code>NULL</code>.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -161,7 +161,7 @@ in <code>object</code>. Defaults to <code>NULL</code>.</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># See alm(), mice(), pei(), or vigf() for an example.</span></span></span>
+<span class="r-in"><span><span class="co"># See alm(), mice(), or vigf() for an example.</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

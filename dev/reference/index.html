@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -99,13 +99,13 @@
           <code><a href="continue.html">continue()</a></code>
 
         </dt>
-        <dd>Continue the training of a DGP emulator</dd>
+        <dd>Continue training a DGP emulator</dd>
       </dl><dl><dt>
 
           <code><a href="predict.html">predict(<i>&lt;dgp&gt;</i>)</a></code> <code><a href="predict.html">predict(<i>&lt;lgp&gt;</i>)</a></code> <code><a href="predict.html">predict(<i>&lt;gp&gt;</i>)</a></code>
 
         </dt>
-        <dd>Predictions from GP, DGP, or linked (D)GP emulators</dd>
+        <dd>Prediction from GP, DGP, or linked (D)GP emulators</dd>
       </dl><dl><dt>
 
           <code><a href="validate.html">validate()</a></code>
@@ -161,12 +161,6 @@
         <dd>Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using VIGF</dd>
       </dl><dl><dt>
 
-          <code><a href="pei.html">pei()</a></code>
-
-        </dt>
-        <dd>Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using PEI</dd>
-      </dl><dl><dt>
-
           <code><a href="update.html">update()</a></code>
 
         </dt>
@@ -176,7 +170,7 @@
           <code><a href="draw.html">draw()</a></code>
 
         </dt>
-        <dd>Validation plots of a sequential design</dd>
+        <dd>Validation and diagnostic plots for a sequential design</dd>
       </dl><dl><dt>
 
           <code><a href="pack.html">pack()</a></code>
@@ -235,19 +229,19 @@
           <code><a href="window.html">window()</a></code>
 
         </dt>
-        <dd>Trim the sequences of model parameters of a DGP emulator</dd>
+        <dd>Trim the sequence of hyperparameter estimates within a DGP emulator</dd>
       </dl><dl><dt>
 
           <code><a href="trace_plot.html">trace_plot()</a></code>
 
         </dt>
-        <dd>Plot of DGP model parameter traces</dd>
+        <dd>Trace plot for DGP hyperparameters</dd>
       </dl><dl><dt>
 
           <code><a href="nllik.html">nllik()</a></code>
 
         </dt>
-        <dd>Calculate negative predicted log-likelihood</dd>
+        <dd>Calculate the predictive negative log-likelihood</dd>
       </dl><dl><dt>
 
           <code><a href="set_thread_num.html">set_thread_num()</a></code>
@@ -272,6 +266,18 @@
           <span class="badge lifecycle lifecycle-new">new</span>
         </dt>
         <dd>Set Emulator ID</dd>
+      </dl><dl><dt>
+
+          <code><a href="serialize.html">serialize()</a></code>
+
+        </dt>
+        <dd>Serialize the constructed emulator</dd>
+      </dl><dl><dt>
+
+          <code><a href="deserialize.html">deserialize()</a></code>
+
+        </dt>
+        <dd>Restore the serialized emulator</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

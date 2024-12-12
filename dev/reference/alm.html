@@ -25,9 +25,9 @@ or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion 
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -59,16 +59,48 @@ or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion 
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">alm</span><span class="op">(</span><span class="va">object</span>, <span class="va">x_cand</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">alm</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'gp'</span></span>
-<span><span class="fu">alm</span><span class="op">(</span><span class="va">object</span>, <span class="va">x_cand</span>, batch_size <span class="op">=</span> <span class="fl">1</span>, M <span class="op">=</span> <span class="fl">50</span>, workers <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">alm</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  x_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_start <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  M <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  workers <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'dgp'</span></span>
-<span><span class="fu">alm</span><span class="op">(</span><span class="va">object</span>, <span class="va">x_cand</span>, batch_size <span class="op">=</span> <span class="fl">1</span>, M <span class="op">=</span> <span class="fl">50</span>, workers <span class="op">=</span> <span class="fl">1</span>, aggregate <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">alm</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  x_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_start <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  M <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  workers <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aggregate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'bundle'</span></span>
-<span><span class="fu">alm</span><span class="op">(</span><span class="va">object</span>, <span class="va">x_cand</span>, batch_size <span class="op">=</span> <span class="fl">1</span>, M <span class="op">=</span> <span class="fl">50</span>, workers <span class="op">=</span> <span class="fl">1</span>, aggregate <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">alm</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  x_cand <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_start <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  M <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  workers <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aggregate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -82,21 +114,25 @@ or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion 
 </ul></dd>
 
 
-<dt id="arg-x-cand">x_cand<a class="anchor" aria-label="anchor" href="#arg-x-cand"></a></dt>
-<dd><p>a matrix (with each row containing a design point and column representing an input dimension) that gives a candidate set
-from which the next design point(s) are determined. If <code>object</code> is an instance of the <code>bundle</code> class, <code>x_cand</code> could also
-be a list with length equal to the number of emulators contained in <code>object</code>. In this case, each slot in <code>x_cand</code> should be a candidate set matrix
-for each emulator included in the bundle. See <em>Note</em> section below for further information.</p></dd>
-
-
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>any arguments (with names different from those of arguments used in <code>alm()</code>) that are used by <code>aggregate</code>
 can be passed here.</p></dd>
 
 
+<dt id="arg-x-cand">x_cand<a class="anchor" aria-label="anchor" href="#arg-x-cand"></a></dt>
+<dd><p>a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
+from which the next design point(s) are determined. If <code>object</code> is an instance of the <code>bundle</code> class and <code>aggregate</code> is not supplied, <code>x_cand</code> can also be a list.
+The list must have a length equal to the number of emulators in <code>object</code>, with each element being a matrix representing the candidate set for a corresponding
+emulator in the bundle. Defaults to <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-n-start">n_start<a class="anchor" aria-label="anchor" href="#arg-n-start"></a></dt>
+<dd><p>an integer that gives the number of initial design points to be used to determine next design point(s). This argument
+is only used when <code>x_cand</code> is <code>NULL</code>. Defaults to <code>20</code>.</p></dd>
+
+
 <dt id="arg-batch-size">batch_size<a class="anchor" aria-label="anchor" href="#arg-batch-size"></a></dt>
-<dd><p>an integer that gives the number of design points to be chosen in a single iteration.
-Defaults to <code>1</code>.</p></dd>
+<dd><p>an integer that gives the number of design points to be chosen. Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-m">M<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
@@ -105,8 +141,22 @@ was constructed under the Vecchia approximation. Defaults to <code>50</code>.</p
 
 
 <dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
-<dd><p>the number of processes to be used for the criterion calculation. If set to <code>NULL</code>,
-the number of processes is set to <code>max physical cores available %/% 2</code>. Defaults to <code>1</code>.</p></dd>
+<dd><p>the number of processes to be used for design point selection. If set to <code>NULL</code>,
+the number of processes is set to <code>max physical cores available %/% 2</code>. Defaults to <code>1</code>. The argument does not currently support Windows machines when the <code>aggregate</code>
+function is provided, due to the significant overhead caused by initializing the Python environment for each worker under spawning.</p></dd>
+
+
+<dt id="arg-limits">limits<a class="anchor" aria-label="anchor" href="#arg-limits"></a></dt>
+<dd><p>a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
+If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
+first and second columns correspond to the minimum and maximum values of the input dimensions. This
+argument is only used when <code>x_cand = NULL</code>. Defaults to <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-int">int<a class="anchor" aria-label="anchor" href="#arg-int"></a></dt>
+<dd><p>a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
+input dimensions. This argument is only used when <code>x_cand = NULL</code>. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-aggregate">aggregate<a class="anchor" aria-label="anchor" href="#arg-aggregate"></a></dt>
@@ -116,38 +166,42 @@ following basic form:</p><ul><li><p>the first argument is a matrix representing 
 of the matrix is equal to:</p><ul><li><p>the emulator output dimension if <code>object</code> is an instance of the <code>dgp</code> class; or</p></li>
 <li><p>the number of emulators contained in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class.</p></li>
 </ul></li>
-<li><p>the output should be a vector that aggregates scores across outputs or emulators at different design points.</p></li>
-</ul><p>Set to <code>NULL</code> to disable the aggregation. Defaults to <code>NULL</code>.</p></dd>
+<li><p>the output should be a vector that gives aggregate scores at different design points.</p></li>
+</ul><p>Set to <code>NULL</code> to disable aggregation. Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
 
-<ul><li><p>If <code>object</code> is an instance of the <code>gp</code> class, a vector is returned with length equal to <code>batch_size</code>, giving the positions (i.e., row numbers)
-of next design points from <code>x_cand</code>.</p></li>
-<li><p>If <code>object</code> is an instance of the <code>dgp</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to one (if <code>aggregate</code>
-is not <code>NULL</code>) or the output dimension (if <code>aggregate</code> is <code>NULL</code>), giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added
-to the DGP emulator across different outputs. If <code>object</code> is a DGP emulator with either <code>Hetero</code> or <code>NegBin</code> likelihood layer, the returned matrix has
-two columns with the first column giving positions of next design points from <code>x_cand</code> that correspond to the mean parameter of the normal or negative Binomial
-distribution, and the second column giving positions of next design points from <code>x_cand</code> that correspond to the variance parameter of the normal distribution or
-the dispersion parameter of the negative Binomial distribution. If <code>object</code> is a DGP emulator with a <code>Categorical</code> likelihood layer, the returned matrix will
-have either one column (for binary output) or <code>K</code> columns (for multi-class output with K classes), giving the positions of the next design points from <code>x_cand</code> that correspond
-to the probabilities of different classes.</p></li>
-<li><p>If <code>object</code> is an instance of the <code>bundle</code> class, a matrix is returned with row number equal to <code>batch_size</code> and column number equal to the number of
-emulators in the bundle, giving positions (i.e., row numbers) of next design points from <code>x_cand</code> to be added to individual emulators.</p></li>
-</ul></div>
+<ol><li><p>If <code>x_cand</code> is not <code>NULL</code>:</p><ul><li><p>When <code>object</code> is an instance of the <code>gp</code> class, a vector of length <code>batch_size</code> is returned, containing the positions
+(row numbers) of the next design points from <code>x_cand</code>.</p></li>
+<li><p>When <code>object</code> is an instance of the <code>dgp</code> class, a vector of length <code>batch_size * D</code> is returned, containing the positions
+(row numbers) of the next design points from <code>x_cand</code> to be added to the DGP emulator.</p><ul><li><p><code>D</code> is the number of output dimensions of the DGP emulator if no likelihood layer is included.</p></li>
+<li><p>For a DGP emulator with a <code>Hetero</code> or <code>NegBin</code> likelihood layer, <code>D = 2</code>.</p></li>
+<li><p>For a DGP emulator with a <code>Categorical</code> likelihood layer, <code>D = 1</code> for binary output or <code>D = K</code> for multi-class output with <code>K</code> classes.</p></li>
+</ul></li>
+<li><p>When <code>object</code> is an instance of the <code>bundle</code> class, a matrix is returned with <code>batch_size</code> rows and a column for each emulator in
+the bundle, containing the positions (row numbers) of the next design points from <code>x_cand</code> for individual emulators.</p></li>
+</ul></li>
+<li><p>If <code>x_cand</code> is <code>NULL</code>:</p><ul><li><p>When <code>object</code> is an instance of the <code>gp</code> class, a matrix with <code>batch_size</code> rows is returned, giving the next design points to be evaluated.</p></li>
+<li><p>When <code>object</code> is an instance of the <code>dgp</code> class, a matrix with <code>batch_size * D</code> rows is returned, where:</p><ul><li><p><code>D</code> is the number of output dimensions of the DGP emulator if no likelihood layer is included.</p></li>
+<li><p>For a DGP emulator with a <code>Hetero</code> or <code>NegBin</code> likelihood layer, <code>D = 2</code>.</p></li>
+<li><p>For a DGP emulator with a <code>Categorical</code> likelihood layer, <code>D = 1</code> for binary output or <code>D = K</code> for multi-class output with <code>K</code> classes.</p></li>
+</ul></li>
+<li><p>When <code>object</code> is an instance of the <code>bundle</code> class, a list is returned with a length equal to the number of emulators in the bundle. Each
+element of the list is a matrix with <code>batch_size</code> rows, where each row represents a design point to be added to the corresponding emulator.</p></li>
+</ul></li>
+</ol></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-
-<ul><li><p>The column order of the first argument of <code>aggregate</code> must be consistent with the order of emulator output dimensions (if <code>object</code> is an instance of the
-<code>dgp</code> class), or the order of emulators placed in <code>object</code> if <code>object</code> is an instance of the <code>bundle</code> class;</p></li>
-<li><p>If <code>x_cand</code> is supplied as a list when <code>object</code> is an instance of <code>bundle</code> class and a <code>aggregate</code> function is provided, the matrices in <code>x_cand</code> must have
-common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the <code>aggregate</code> function can be applied.</p></li>
-</ul></div>
+    <p>The first column of the matrix supplied to the first argument of <code>aggregate</code> must correspond to the first output dimension of the DGP emulator
+if <code>object</code> is an instance of the <code>dgp</code> class, and so on for subsequent columns and dimensions. If <code>object</code> is an instance of the <code>bundle</code> class,
+the first column must correspond to the first emulator in the bundle, and so on for subsequent columns and emulators.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>MacKay, D. J. (1992). Information-based objective functions for active data selection. <em>Neural Computation</em>, <strong>4(4)</strong>, 590-604.</p>
@@ -173,12 +227,11 @@ common rows (i.e., the candidate sets of emulators in the bundle have common inp
 <span class="r-in"><span><span class="co"># training a 2-layered DGP emulator with the global connection off</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="dgp.html">dgp</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, connect <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># generate a candidate set</span></span></span>
-<span class="r-in"><span><span class="va">x_cand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">200</span>,<span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># specify the input range</span></span></span>
+<span class="r-in"><span><span class="va">lim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># locate the next design point using ALM</span></span></span>
-<span class="r-in"><span><span class="va">next_point</span> <span class="op">&lt;-</span> <span class="fu">alm</span><span class="op">(</span><span class="va">m</span>, x_cand <span class="op">=</span> <span class="va">x_cand</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X_new</span> <span class="op">&lt;-</span> <span class="va">x_cand</span><span class="op">[</span><span class="va">next_point</span>,,drop <span class="op">=</span> <span class="cn">F</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">X_new</span> <span class="op">&lt;-</span> <span class="fu">alm</span><span class="op">(</span><span class="va">m</span>, limits <span class="op">=</span> <span class="va">lim</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># obtain the corresponding output at the located design point</span></span></span>
 <span class="r-in"><span><span class="va">Y_new</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">X_new</span><span class="op">)</span></span></span>

@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -59,7 +59,6 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gp</span><span class="op">(</span></span>
 <span>  <span class="va">X</span>,</span>
 <span>  <span class="va">Y</span>,</span>
-<span>  struc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">"sexp"</span>,</span>
 <span>  lengthscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  bounds <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -91,69 +90,61 @@
 <dd><p>a matrix with only one column and each row being an output data point.</p></dd>
 
 
-<dt id="arg-struc">struc<a class="anchor" aria-label="anchor" href="#arg-struc"></a></dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> an object produced by <code><a href="kernel.html">kernel()</a></code> that gives a user-defined GP specifications. When <code>struc = NULL</code>,
-the GP specifications are automatically generated using information provided in <code>name</code>, <code>lengthscale</code>,
-<code>nugget_est</code>, <code>nugget</code>, <code>scale_est</code>, <code>scale</code>,and <code>internal_input_idx</code>. Defaults to <code>NULL</code>.</p>
-<p><strong>The argument will be removed in the next release. To customize GP specifications, please adjust the other arguments in the <code>gp()</code> function.</strong></p></dd>
-
-
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
 <dd><p>kernel function to be used. Either <code>"sexp"</code> for squared exponential kernel or
-<code>"matern2.5"</code> for Matérn-2.5 kernel. Defaults to <code>"sexp"</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+<code>"matern2.5"</code> for Matérn-2.5 kernel. Defaults to <code>"sexp"</code>.</p></dd>
 
 
 <dt id="arg-lengthscale">lengthscale<a class="anchor" aria-label="anchor" href="#arg-lengthscale"></a></dt>
-<dd><p>initial values of lengthscales in the kernel function. It can be a single numeric value or a vector:</p><ul><li><p>if it is a single numeric value, it is assumed that kernel functions across input dimensions share the same lengthscale;</p></li>
-<li><p>if it is a vector (which must have a length of <code>ncol(X)</code>), it is assumed that kernel functions across input dimensions have different lengthscales.</p></li>
-</ul><p>Defaults to a vector of <code>0.1</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+<dd><p>initial values of lengthscales in the kernel function. It can be a single numeric value or a vector of length <code>ncol(X)</code>:</p><ul><li><p>if it is a single numeric value, it is assumed that kernel functions across input dimensions share the same lengthscale;</p></li>
+<li><p>if it is a vector, it is assumed that kernel functions across input dimensions have different lengthscales.</p></li>
+</ul><p>Defaults to a vector of <code>0.1</code>.</p></dd>
 
 
 <dt id="arg-bounds">bounds<a class="anchor" aria-label="anchor" href="#arg-bounds"></a></dt>
 <dd><p>the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
-to <code>NULL</code> where no bounds are specified for the lengthscales. This argument is only used when <code>struc = NULL</code>.</p></dd>
+to <code>NULL</code> where no bounds are specified for the lengthscales.</p></dd>
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
 <dd><p>prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (<code>"ga"</code>), inverse gamma prior (<code>"inv_ga"</code>),
-or jointly robust prior (<code>"ref"</code>). Defaults to <code>"ref"</code>. This argument is only used when <code>struc = NULL</code>. See the reference below for the jointly
+or jointly robust prior (<code>"ref"</code>). Defaults to <code>"ref"</code>. See the reference below for the jointly
 robust prior.</p></dd>
 
 
 <dt id="arg-nugget-est">nugget_est<a class="anchor" aria-label="anchor" href="#arg-nugget-est"></a></dt>
 <dd><p>a bool indicating if the nugget term is to be estimated:</p><ol><li><p><code>FALSE</code>: the nugget term is fixed to <code>nugget</code>.</p></li>
 <li><p><code>TRUE</code>: the nugget term will be estimated.</p></li>
-</ol><p>Defaults to <code>FALSE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ol><p>Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-nugget">nugget<a class="anchor" aria-label="anchor" href="#arg-nugget"></a></dt>
 <dd><p>the initial nugget value. If <code>nugget_est = FALSE</code>, the assigned value is fixed during the training.
-Set <code>nugget</code> to a small value (e.g., <code>1e-8</code>) and the corresponding bool in <code>nugget_est</code> to <code>FASLE</code> for deterministic emulations where the emulator
-interpolates the training data points. Set <code>nugget</code> to a reasonable larger value and the corresponding bool in <code>nugget_est</code> to <code>TRUE</code> for stochastic
-emulations where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-8</code> if <code>nugget_est = FALSE</code> and
-<code>0.01</code> if <code>nugget_est = TRUE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+Set <code>nugget</code> to a small value (e.g., <code>1e-8</code>) and the corresponding bool in <code>nugget_est</code> to <code>FALSE</code> for deterministic computer models where the emulator
+should interpolate the training data points. Set <code>nugget</code> to a larger value and the corresponding bool in <code>nugget_est</code> to <code>TRUE</code> for stochastic
+emulation where the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-8</code> if <code>nugget_est = FALSE</code> and
+<code>0.01</code> if <code>nugget_est = TRUE</code>.</p></dd>
 
 
 <dt id="arg-scale-est">scale_est<a class="anchor" aria-label="anchor" href="#arg-scale-est"></a></dt>
 <dd><p>a bool indicating if the variance is to be estimated:</p><ol><li><p><code>FALSE</code>: the variance is fixed to <code>scale</code>.</p></li>
 <li><p><code>TRUE</code>: the variance term will be estimated.</p></li>
-</ol><p>Defaults to <code>TRUE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ol><p>Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>the initial variance value. If <code>scale_est = FALSE</code>, the assigned value is fixed during the training.
-Defaults to <code>1</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-training">training<a class="anchor" aria-label="anchor" href="#arg-training"></a></dt>
 <dd><p>a bool indicating if the initialized GP emulator will be trained.
-When set to <code>FALSE</code>, <code>gp()</code> returns an untrained GP emulator, to which one can apply <code><a href="summary.html">summary()</a></code> to inspect its specifications
-(especially when a customized <code>struc</code> is provided) or apply <code><a href="predict.html">predict()</a></code> to check its emulation performance before the training. Defaults to <code>TRUE</code>.</p></dd>
+When set to <code>FALSE</code>, <code>gp()</code> returns an untrained GP emulator, to which one can apply <code><a href="summary.html">summary()</a></code> to inspect its specification or apply <code><a href="predict.html">predict()</a></code> to check its emulation performance before the training. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-verb">verb<a class="anchor" aria-label="anchor" href="#arg-verb"></a></dt>
-<dd><p>a bool indicating if the trace information on GP emulator construction and training will be printed during the function execution.
+<dd><p>a bool indicating if the trace information on GP emulator construction and training will be printed during function execution.
 Defaults to <code>TRUE</code>.</p></dd>
 
 
@@ -175,7 +166,7 @@ The Vecchia approximation implemented for the GP emulation largely follows Katzf
 <dt id="arg-internal-input-idx">internal_input_idx<a class="anchor" aria-label="anchor" href="#arg-internal-input-idx"></a></dt>
 <dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> The column indices of <code>X</code> that are generated by the linked emulators in the preceding layers.
 Set <code>internal_input_idx = NULL</code> if the GP emulator is in the first layer of a system or all columns in <code>X</code> are
-generated by the linked emulators in the preceding layers. Defaults to <code>NULL</code>. This argument is only used when <code>struc = NULL</code>.</p>
+generated by the linked emulators in the preceding layers. Defaults to <code>NULL</code>.</p>
 <p><strong>The argument will be removed in the next release. To set up connections of emulators for linked emulations, please use the updated <code><a href="lgp.html">lgp()</a></code> function instead.</strong></p></dd>
 
 
@@ -219,7 +210,7 @@ It is shown as <code>FALSE</code> if <code>internal_input_idx = NULL</code>. <st
 <strong>The slot will be removed in the next release</strong>.</p></li>
 <li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>vecchia</code>: whether the Vecchia approximation is used for the GP emulator training.</p></li>
 <li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>M</code>: the size of the conditioning set for the Vecchia approximation in the GP emulator training.</p></li>
-</ol><p><code>internal_dims</code> and <code>external_dims</code> are generated only when <code>struc = NULL</code>.</p></li>
+</ol></li>
 <li><p><code>constructor_obj</code>: a 'python' object that stores the information of the constructed GP emulator.</p></li>
 <li><p><code>container_obj</code>: a 'python' object that stores the information for the linked emulation.</p></li>
 <li><p><code>emulator_obj</code>: a 'python' object that stores the information for the predictions from the GP emulator.</p></li>
@@ -231,11 +222,11 @@ It is shown as <code>FALSE</code> if <code>internal_input_idx = NULL</code>. <st
 <li><p><code><a href="write.html">write()</a></code> to save the GP emulator to a <code>.pkl</code> file.</p></li>
 <li><p><code><a href="design.html">design()</a></code> for sequential designs.</p></li>
 <li><p><code><a href="update.html">update()</a></code> to update the GP emulator with new inputs and outputs.</p></li>
-<li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
+<li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

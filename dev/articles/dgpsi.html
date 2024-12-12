@@ -50,9 +50,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul>
 </li>
@@ -92,13 +92,18 @@
 
     
     
-<p><code>dgpsi</code> provides a flexible toolbox for Gaussian process
-(GP), deep Gaussian process (DGP) and linked (D)GP emulations. In this
-guide, we show how to use the package to emulate a step function with a
-three-layered DGP structure. There are other examples showing the
-functionality of the package in <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/index.html" class="external-link"><code>Articles</code></a>
-on the package website, and how to customize a DGP structure. A
-comprehensive reference of available functions is documented in <a href="https://mingdeyu.github.io/dgpsi-R/dev/reference/index.html" class="external-link"><code>Reference</code></a>
+<p>The <code>dgpsi</code> package offers a flexible toolbox for Gaussian
+process (GP), deep Gaussian process (DGP), and linked (D)GP emulation.
+In this guide, we show how to use the package to emulate a step function
+using a three-layered DGP structure. Additional examples showcasing the
+package’s functionality are available in the <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/index.html" class="external-link">Articles</a>
+section of the package website. Topics include <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/linked_DGP.html" class="external-link">linked
+DGPs</a>, <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/large_scale_emulation.html" class="external-link">scalable
+DGPs</a>, <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/classification.html" class="external-link">DGPs
+for classification</a>, <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/motorcycle.html" class="external-link">non-Gaussian
+problems</a>, and <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html" class="external-link">sequential
+design and active learning for DGPs</a>. A detailed reference for all
+available functions is provided in the <a href="https://mingdeyu.github.io/dgpsi-R/dev/reference/index.html" class="external-link">Reference</a>
 section of the package website.</p>
 <div class="section level2">
 <h2 id="load-the-package">Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
@@ -116,11 +121,11 @@ Python environment. We could run <code><a href="../reference/init_py.html">init_
 environment. Alternatively, we could activate the Python environment by
 simply executing a function from <code>dgpsi</code>. For example, the
 Python environment will be automatically loaded after we run
-<code><a href="../reference/set_seed.html">set_seed()</a></code> from the package to specify a seed for the
+<code><a href="../reference/set_seed.html">set_seed()</a></code> from the package to specify a seed for
 reproducibility:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">9999</span><span class="op">)</span></span></code></pre></div>
-<p>We then define the step function:</p>
+<p>Define the step function:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">x</span> <span class="op">&lt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
@@ -142,7 +147,7 @@ reproducibility:</p>
 <span><span class="co">## Training the DGP emulator: </span></span>
 <span><span class="co">## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03&lt;00:00, 148.10it/s]</span></span>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
-<p>The progress bar displayed shows how long it takes to finish the
+<p>The progress bar displayed shows how long it takes to finish
 training. We are able to switch off the progress bar and the trace
 information by setting <code>verb = FALSE</code>. Note that if we want
 to train the DGP emulator <code>m</code> for additional iterations, we
@@ -154,7 +159,7 @@ DGP emulator.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
 <iframe src="https://mingdeyu.github.io/dgpsi-R/dgpsi_summary.html" width="100%" height="410" style="border: none;">
 </iframe>
-<p>The visualization also gives key information about the trained DGP
+<p>The visualization gives key information about the trained DGP
 emulator. Note that in the auto-generated emulator we have nugget terms
 fixed to <code>1e-6</code> for all GP nodes because we are emulating a
 deterministic step function (i.e., we would like our emulator to
@@ -167,7 +172,7 @@ emulator, see <code><a href="../reference/dgp.html">?dgp</a></code>.</p>
 <p>At this point, you could use <code><a href="../reference/write.html">write()</a></code> to save the
 emulator <code>m</code> to a local file and then load it using
 <code><a href="../reference/read.html">read()</a></code> when you would like to make predictions from the
-emulator, e.g., on another laptop that also has the package
+emulator, e.g., on another computer that also has the package
 installed.</p>
 </div>
 <div class="section level2">
@@ -185,34 +190,37 @@ plot:</p>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_loo.png" style="width:100.0%"></p>
 <p>The second validation plot is the Out-Of-Sample (OOS) validation plot
 that requires an out-of-sample testing data set. Here we generate an OOS
-data set that contains 10 testing data points</p>
+data set that contains 10 testing data points:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oos_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">oos_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">oos_x</span>, <span class="va">f</span><span class="op">)</span></span></code></pre></div>
-<p>for the validation:</p>
+<p>We can now perform OOS validation:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">m</span>,<span class="va">oos_x</span>,<span class="va">oos_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Validating and computing ... done</span></span>
 <span><span class="co">## Post-processing OOS results ... done</span></span>
 <span><span class="co">## Plotting ... done</span></span></code></pre>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_oos.png" style="width:100.0%"></p>
+<p>Note that the <code>style</code> argument to the <code><a href="../reference/plot.html">plot()</a></code>
+function can be used to draw different types of plot (see
+<code><a href="../reference/plot.html">?plot</a></code>).</p>
 </div>
 <div class="section level2">
 <h2 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
 </h2>
 <p>Once the validation is done, we can make predictions from the DGP
 emulator. We generate 200 data points from the step function over
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">test_x</span>, <span class="va">f</span><span class="op">)</span></span></code></pre></div>
-<p>for predictions:</p>
+<p>and predict at these locations:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict.html">predict</a></span><span class="op">(</span><span class="va">m</span>, x <span class="op">=</span> <span class="va">test_x</span><span class="op">)</span></span></code></pre></div>
 <p>The <code><a href="../reference/predict.html">predict()</a></code> function returns an updated DGP emulator
 <code>m</code> that contains a slot named <code>results</code> that
 gives the posterior predictive means and variances at testing positions.
-We can extract these information and plot the emulation results to check
+We can extract this information and plot the emulation results to check
 the predictive performance of our constructed DGP emulator:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">mean</span> <span class="co"># extract the predictive means </span></span>

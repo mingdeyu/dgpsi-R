@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -59,7 +59,6 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dgp</span><span class="op">(</span></span>
 <span>  <span class="va">X</span>,</span>
 <span>  <span class="va">Y</span>,</span>
-<span>  struc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  depth <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">"sexp"</span>,</span>
@@ -96,47 +95,36 @@
 
 
 <dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a matrix where each row is an input training data point and each column is an input dimension.</p></dd>
+<dd><p>a matrix where each row is an input training data point and each column represents an input dimension.</p></dd>
 
 
 <dt id="arg-y">Y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
-<dd><p>a matrix containing observed training output data. The matrix has its rows being output data points and columns being
-output dimensions. When <code>likelihood</code> (see below) is not <code>NULL</code>, <code>Y</code> must be a matrix with only one column.</p></dd>
-
-
-<dt id="arg-struc">struc<a class="anchor" aria-label="anchor" href="#arg-struc"></a></dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> a list that specifies a user-defined DGP structure. It should contain <em>L</em> (the number of DGP layers) sub-lists,
-each of which represents a layer and contains a number of GP nodes (defined by <code><a href="kernel.html">kernel()</a></code>) in the corresponding layer.
-The final layer of the DGP structure (i.e., the final sub-list in <code>struc</code>) can be a likelihood
-layer that contains a likelihood function (e.g., <code><a href="Poisson.html">Poisson()</a></code>). When <code>struc = NULL</code>,
-the DGP structure is automatically generated and can be checked by applying <code><a href="summary.html">summary()</a></code> to the output from <code>dgp()</code> with <code>training = FALSE</code>.
-If this argument is used (i.e., user provides a customized DGP structure), arguments <code>depth</code>, <code>node</code>, <code>name</code>, <code>lengthscale</code>, <code>bounds</code>, <code>prior</code>,
-<code>share</code>, <code>nugget_est</code>, <code>nugget</code>, <code>scale_est</code>, <code>scale</code>, <code>connect</code>, <code>likelihood</code>, and <code>internal_input_idx</code> will NOT be used. Defaults to <code>NULL</code>.</p>
-<p><strong>The argument will be removed in the next release. To customize DGP specifications, please adjust the other arguments in the <code>dgp()</code> function.</strong></p></dd>
+<dd><p>a matrix containing observed training output data. The matrix has its rows being output data points and columns representing
+output dimensions. When <code>likelihood</code> (see below) is not <code>NULL</code>, <code>Y</code> must be a matrix with a single column.</p></dd>
 
 
 <dt id="arg-depth">depth<a class="anchor" aria-label="anchor" href="#arg-depth"></a></dt>
 <dd><p>number of layers (including the likelihood layer) for a DGP structure. <code>depth</code> must be at least <code>2</code>.
-Defaults to <code>2</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+Defaults to <code>2</code>.</p></dd>
 
 
 <dt id="arg-node">node<a class="anchor" aria-label="anchor" href="#arg-node"></a></dt>
 <dd><p>number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
-<code>ncol(X)</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+<code>ncol(X)</code>.</p></dd>
 
 
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
 <dd><p>a character or a vector of characters that indicates the kernel functions (either <code>"sexp"</code> for squared exponential kernel or
 <code>"matern2.5"</code> for Matérn-2.5 kernel) used in the DGP emulator:</p><ol><li><p>if a single character is supplied, the corresponding kernel function will be used for all GP nodes in the DGP hierarchy.</p></li>
 <li><p>if a vector of characters is supplied, each character of the vector specifies the kernel function that will be applied to all GP nodes in the corresponding layer.</p></li>
-</ol><p>Defaults to <code>"sexp"</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ol><p>Defaults to <code>"sexp"</code>.</p></dd>
 
 
 <dt id="arg-lengthscale">lengthscale<a class="anchor" aria-label="anchor" href="#arg-lengthscale"></a></dt>
 <dd><p>initial lengthscales for GP nodes in the DGP emulator. It can be a single numeric value or a vector:</p><ol><li><p>if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP hierarchy.</p></li>
 <li><p>if it is a vector, each element of the vector specifies the initial lengthscales that will be applied to all GP nodes in the corresponding layer.
 The vector should have a length of <code>depth</code> if <code>likelihood = NULL</code> or a length of <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
-</ol><p>Defaults to a numeric value of <code>1.0</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ol><p>Defaults to a numeric value of <code>1.0</code>.</p></dd>
 
 
 <dt id="arg-bounds">bounds<a class="anchor" aria-label="anchor" href="#arg-bounds"></a></dt>
@@ -144,18 +132,18 @@ The vector should have a length of <code>depth</code> if <code>likelihood = NULL
 lengthscales for all GP nodes in the DGP hierarchy.</p></li>
 <li><p>if it is a matrix, each row of the matrix specifies the lower and upper bounds of lengthscales for all GP nodes in the corresponding layer.
 The matrix should have its row number equal to <code>depth</code> if <code>likelihood = NULL</code> or to <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
-</ol><p>Defaults to <code>NULL</code> where no bounds are specified for the lengthscales. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ol><p>Defaults to <code>NULL</code> where no bounds are specified for the lengthscales.</p></dd>
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
-<dd><p>prior to be used for Maximum a Posterior for lengthscales and nuggets of all GP nodes in the DGP hierarchy:</p><ul><li><p>gamma prior (<code>"ga"</code>),</p></li>
+<dd><p>prior to be used for MAP estimation of lengthscales and nuggets of all GP nodes in the DGP hierarchy:</p><ul><li><p>gamma prior (<code>"ga"</code>),</p></li>
 <li><p>inverse gamma prior (<code>"inv_ga"</code>), or</p></li>
 <li><p>jointly robust prior (<code>"ref"</code>).</p></li>
-</ul><p>Defaults to <code>"ga"</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ul><p>Defaults to <code>"ga"</code>.</p></dd>
 
 
 <dt id="arg-share">share<a class="anchor" aria-label="anchor" href="#arg-share"></a></dt>
-<dd><p>a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to <code>TRUE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+<dd><p>a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-nugget-est">nugget_est<a class="anchor" aria-label="anchor" href="#arg-nugget-est"></a></dt>
@@ -163,53 +151,53 @@ The matrix should have its row number equal to <code>depth</code> if <code>likel
 provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of <code>ncol(Y)</code>) is provided, each
 bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the nugget of the corresponding GP in the final layer is fixed to the corresponding value defined in <code>nugget</code> (see below).</p></li>
 <li><p><code>TRUE</code>: the nugget of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in <code>nugget</code> (see below).</p></li>
-</ul><p>Defaults to <code>FALSE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ul><p>Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-nugget">nugget<a class="anchor" aria-label="anchor" href="#arg-nugget"></a></dt>
 <dd><p>the initial nugget value(s) of GP nodes (if any) in each layer:</p><ol><li><p>if it is a single numeric value, the value will be applied as the initial nugget for all GP nodes in the DGP hierarchy.</p></li>
 <li><p>if it is a vector, each element of the vector specifies the initial nugget that will be applied to all GP nodes in the corresponding layer.
 The vector should have a length of <code>depth</code> if <code>likelihood = NULL</code> or a length of <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
-</ol><p>Set <code>nugget</code> to a small value and the bools in <code>nugget_est</code> to <code>FASLE</code> for deterministic emulations where the emulator
-interpolates the training data points. Set <code>nugget</code> to a reasonable larger value and the bools in <code>nugget_est</code> to <code>TRUE</code> for stochastic emulations where
+</ol><p>Set <code>nugget</code> to a small value and the bools in <code>nugget_est</code> to <code>FALSE</code> for deterministic emulation, where the emulator
+interpolates the training data points. Set <code>nugget</code> to a larger value and the bools in <code>nugget_est</code> to <code>TRUE</code> for stochastic emulation where
 the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-6</code> if <code>nugget_est = FALSE</code> and
 <code>0.01</code> if <code>nugget_est = TRUE</code>. If <code>likelihood</code> is not <code>NULL</code> and <code>nugget_est = FALSE</code>, the nuggets of GPs that feed into the likelihood layer default to
-<code>1e-4</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+<code>1e-4</code>.</p></dd>
 
 
 <dt id="arg-scale-est">scale_est<a class="anchor" aria-label="anchor" href="#arg-scale-est"></a></dt>
-<dd><p>a bool or a bool vector that indicates if variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
+<dd><p>a bool or a bool vector that indicates if the variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of <code>ncol(Y)</code>) is provided, each
 bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the variance of the corresponding GP in the final layer is fixed to the corresponding value defined in <code>scale</code> (see below).</p></li>
 <li><p><code>TRUE</code>: the variance of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in <code>scale</code> (see below).</p></li>
-</ul><p>Defaults to <code>TRUE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+</ul><p>Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>the initial variance value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
 in the final layer. If it is a vector (which must have a length of <code>ncol(Y)</code>), each numeric in the vector will be applied to the corresponding GP node
-(if any) in the final layer. Defaults to <code>1</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+(if any) in the final layer. Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-connect">connect<a class="anchor" aria-label="anchor" href="#arg-connect"></a></dt>
 <dd><p>a bool indicating whether to implement global input connection to the DGP structure. Setting it to <code>FALSE</code> may produce a better emulator in some cases at
-the cost of slower training. Defaults to <code>TRUE</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+the cost of slower training. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-likelihood">likelihood<a class="anchor" aria-label="anchor" href="#arg-likelihood"></a></dt>
 <dd><p>the likelihood type of a DGP emulator:</p><ol><li><p><code>NULL</code>: no likelihood layer is included in the emulator.</p></li>
 <li><p><code>"Hetero"</code>: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
-(i.e., the computer model outputs have varying noises).</p></li>
-<li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for stochastic emulation where the computer model outputs are assumed to a Poisson distribution.</p></li>
-<li><p><code>"NegBin"</code>: a negative Binomial likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a negative Binomial distribution.</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>"Categorical"</code>: a categorical likelihood layer is added for stochastic emulation (i.e., classification), where the computer model outputs are assumed to follow a categorical distribution.</p></li>
-</ol><p>When <code>likelihood</code> is not <code>NULL</code>, the value of <code>nugget_est</code> is overridden by <code>FALSE</code>. Defaults to <code>NULL</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+(i.e., the computer model outputs have input-dependent noise).</p></li>
+<li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for emulation where the computer model outputs are counts and a Poisson distribution is used to model them.</p></li>
+<li><p><code>"NegBin"</code>: a negative Binomial likelihood layer is added for emulation where the computer model outputs are counts and a negative Binomial distribution is used to capture dispersion variability in input space.</p></li>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>"Categorical"</code>: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.</p></li>
+</ol><p>When <code>likelihood</code> is not <code>NULL</code>, the value of <code>nugget_est</code> is overridden by <code>FALSE</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-training">training<a class="anchor" aria-label="anchor" href="#arg-training"></a></dt>
 <dd><p>a bool indicating if the initialized DGP emulator will be trained.
 When set to <code>FALSE</code>, <code>dgp()</code> returns an untrained DGP emulator, to which one can apply <code><a href="summary.html">summary()</a></code> to inspect its specifications
-(especially when a customized <code>struc</code> is provided) or apply <code><a href="predict.html">predict()</a></code> to check its emulation performance before the training. Defaults to <code>TRUE</code>.</p></dd>
+or apply <code><a href="predict.html">predict()</a></code> to check its emulation performance before training. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-verb">verb<a class="anchor" aria-label="anchor" href="#arg-verb"></a></dt>
@@ -218,7 +206,7 @@ Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-check-rep">check_rep<a class="anchor" aria-label="anchor" href="#arg-check-rep"></a></dt>
-<dd><p>a bool indicating whether to check the repetitions in the dataset, i.e., if one input
+<dd><p>a bool indicating whether to check for repetitions in the dataset, i.e., if one input
 position has multiple outputs. Defaults to <code>TRUE</code>.</p></dd>
 
 
@@ -249,7 +237,7 @@ Only use multiple processes when there is a large number of GP components in dif
 
 <dt id="arg-blocked-gibbs">blocked_gibbs<a class="anchor" aria-label="anchor" href="#arg-blocked-gibbs"></a></dt>
 <dd><p>a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
-more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during the Gibbs,
+more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during Gibbs steps,
 especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to <code>TRUE</code>.</p></dd>
 
 
@@ -265,8 +253,7 @@ are used. Defaults to <code>NULL</code>. This argument is only used when <code>t
 
 
 <dt id="arg-b">B<a class="anchor" aria-label="anchor" href="#arg-b"></a></dt>
-<dd><p>the number of imputations to produce the later predictions. Increase the value to account for
-more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties but faster predictions.
+<dd><p>the number of imputations used to produce predictions. Increase the value to refine the representation of imputation uncertainty.
 Defaults to <code>10</code>.</p></dd>
 
 
@@ -275,11 +262,11 @@ Defaults to <code>10</code>.</p></dd>
 please use the updated <code><a href="lgp.html">lgp()</a></code> function instead.</p>
 <p>Column indices of <code>X</code> that are generated by the linked emulators in the preceding layers.
 Set <code>internal_input_idx = NULL</code> if the DGP emulator is in the first layer of a system or all columns in <code>X</code> are
-generated by the linked emulators in the preceding layers. Defaults to <code>NULL</code>. This argument is only used when <code>struc = NULL</code>.</p></dd>
+generated by the linked emulators in the preceding layers. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-linked-idx">linked_idx<a class="anchor" aria-label="anchor" href="#arg-linked-idx"></a></dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> The argument will be removed in the next release. To set up connections of emulators for linked emulations,
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> The argument will be removed in the next release. To set up connections of emulators for linked emulation,
 please use the updated <code><a href="lgp.html">lgp()</a></code> function instead.</p>
 <p>Either a vector or a list of vectors:</p><ul><li><p>If <code>linked_idx</code> is a vector, it gives indices of columns in the pooled output matrix (formed by column-combined outputs of all
 emulators in the feeding layer) that feed into the DGP emulator. The length of the vector shall equal to the length of <code>internal_input_idx</code>
@@ -323,12 +310,12 @@ If a sub-list corresponds to a GP node, it contains four elements:</p><ul><li><p
 as <code>FALSE</code> if <code>internal_input_idx = NULL</code>. <strong>The slot will be removed in the next release</strong>.</p></li>
 <li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> <code>linked_idx</code>: the value passed to argument <code>linked_idx</code>. It is shown as <code>FALSE</code> if the argument <code>linked_idx</code> is <code>NULL</code>.
 <strong>The slot will be removed in the next release</strong>.</p></li>
-<li><p><code>seed</code>: the random seed generated to produce the imputations. This information is stored for the reproducibility when the DGP emulator (that was saved by <code><a href="write.html">write()</a></code>
+<li><p><code>seed</code>: the random seed generated to produce imputations. This information is stored for reproducibility when the DGP emulator (that was saved by <code><a href="write.html">write()</a></code>
 with the light option <code>light = TRUE</code>) is loaded back to R by <code><a href="read.html">read()</a></code>.</p></li>
 <li><p><code>B</code>: the number of imputations used to generate the emulator.</p></li>
 <li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>vecchia</code>: whether the Vecchia approximation is used for the GP emulator training.</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>M</code>: the size of the conditioning set for the Vecchia approximation in the DGP emulator training.</p></li>
-</ol><p><code>internal_dims</code> and <code>external_dims</code> are generated only when <code>struc = NULL</code>. <code>M</code> is generated only when <code>vecchia = TRUE</code>.</p></li>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>M</code>: the size of the conditioning set for the Vecchia approximation in the DGP emulator training. <code>M</code> is generated only when <code>vecchia = TRUE</code>.</p></li>
+</ol></li>
 <li><p><code>constructor_obj</code>: a 'python' object that stores the information of the constructed DGP emulator.</p></li>
 <li><p><code>container_obj</code>: a 'python' object that stores the information for the linked emulation.</p></li>
 <li><p><code>emulator_obj</code>: a 'python' object that stores the information for the predictions from the DGP emulator.</p></li>
@@ -341,13 +328,13 @@ with the light option <code>light = TRUE</code>) is loaded back to R by <code><a
 <li><p><code><a href="summary.html">summary()</a></code> to summarize the trained DGP emulator.</p></li>
 <li><p><code><a href="write.html">write()</a></code> to save the DGP emulator to a <code>.pkl</code> file.</p></li>
 <li><p><code><a href="set_imp.html">set_imp()</a></code> to change the number of imputations.</p></li>
-<li><p><code><a href="design.html">design()</a></code> for sequential designs.</p></li>
+<li><p><code><a href="design.html">design()</a></code> for sequential design.</p></li>
 <li><p><code><a href="update.html">update()</a></code> to update the DGP emulator with new inputs and outputs.</p></li>
-<li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, <code><a href="pei.html">pei()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
+<li><p><code><a href="alm.html">alm()</a></code>, <code><a href="mice.html">mice()</a></code>, and <code><a href="vigf.html">vigf()</a></code> to locate next design points.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a> and learn how to customize a DGP structure.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

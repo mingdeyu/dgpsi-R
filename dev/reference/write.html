@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -73,24 +73,23 @@ the emulator <code>object</code> is saved.</p></dd>
 
 
 <dt id="arg-light">light<a class="anchor" aria-label="anchor" href="#arg-light"></a></dt>
-<dd><p>a bool indicating if a light version of the constructed emulator (that requires a small storage) will be saved.
-This argument has no effects on GP or bundles of GP emulators. Defaults to <code>TRUE</code>.</p></dd>
+<dd><p>a bool indicating if a light version of the constructed emulator
+(that requires less disk space to store) will be saved. Defaults to <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>No return value. <code>object</code> will be save to a local <code>.pkl</code> file specified by <code>pkl_file</code>.</p>
+    <p>No return value. <code>object</code> will be saved to a local <code>.pkl</code> file specified by <code>pkl_file</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link">https://mingdeyu.github.io/dgpsi-R/</a>.</p>
+    <p>See further examples and tutorials at <a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link">https://mingdeyu.github.io/dgpsi-R/dev/</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Since the constructed emulators are 'python' objects, <code><a href="https://rdrr.io/r/base/save.html" class="external-link">save()</a></code> from R will not work as it is only for R objects. If <code>object</code>
-was processed by <code><a href="set_vecchia.html">set_vecchia()</a></code> to add or remove the Vecchia approximation, <code>light</code> needs to be set to <code>FALSE</code> to ensure
-reproducibility after the saved emulator is loaded by <code><a href="read.html">read()</a></code>, since when <code>light = TRUE</code>, the imputations generated during
-emulator loading will be different.</p>
+    <p>Since emulators built from the package are 'python' objects, <code><a href="https://rdrr.io/r/base/save.html" class="external-link">save()</a></code> from R will not work as it would for R objects. If <code>object</code>
+was processed by <code><a href="set_vecchia.html">set_vecchia()</a></code> to add or remove the Vecchia approximation, <code>light</code> should be set to <code>FALSE</code> to ensure
+reproducibility after the saved emulator is reloaded by <code><a href="read.html">read()</a></code>.</p>
     </div>
 
     <div class="section level2">

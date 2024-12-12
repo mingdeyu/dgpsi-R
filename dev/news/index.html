@@ -23,9 +23,9 @@
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
-    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale DGP Emulation
+    <li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-scale Emulation with the Vecchia Approximation
     </a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using Stochastic Imputation
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification using dgpsi
     </a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,12 +63,26 @@
 <li>An issue related to the <code>LD_LIBRARY</code> environment variable on Linux systems has been resolved via the <code><a href="../reference/init_py.html">init_py()</a></code> function.</li>
 <li>The <code><a href="../reference/lgp.html">lgp()</a></code> function has been enhanced to accept connection information among emulators in the form of a data frame, streamlining linked emulation setup.</li>
 <li>A new function, <code><a href="../reference/set_id.html">set_id()</a></code>, allows users to assign unique IDs to emulators.</li>
-<li>The <code><a href="../reference/plot.html">plot()</a></code> function has been updated to generate validation plots for DGP classifiers (i.e., DGP emulators with categorical likelihoods).</li>
-<li>The <code><a href="../reference/summary.html">summary()</a></code> function has been redesigned to provide visualizations of structure and model specifications for (D)GP and linked (D)GP emulators.</li>
+<li>The <code><a href="../reference/predict.html">predict()</a></code> function has been updated to accommodate predictions from DGP classifiers.<br></li>
+<li>The <code><a href="../reference/plot.html">plot()</a></code> function has been updated to generate validation plots for DGP classifiers (i.e., DGP emulators with categorical likelihoods) and linked emulators created by <code><a href="../reference/lgp.html">lgp()</a></code> using the new data frame form for <code>struc</code>.<br></li>
+<li>The <code><a href="../reference/summary.html">summary()</a></code> function has been redesigned to provide both summary tables and visualizations of structure and model specifications for (D)GP and linked (D)GP emulators.<br></li>
 <li>A <code>sample_size</code> argument has been added to the <code><a href="../reference/validate.html">validate()</a></code> and <code><a href="../reference/plot.html">plot()</a></code> functions, allowing users to adjust the number of samples used for validation when the validation method is set to <code>sampling</code>.</li>
-<li>The following functions are deprecated as of this version and will be removed in the next release: <code><a href="../reference/combine.html">combine()</a></code>, <code><a href="../reference/set_linked_idx.html">set_linked_idx()</a></code>, <code><a href="../reference/kernel.html">kernel()</a></code>, <code><a href="../reference/Poisson.html">Poisson()</a></code>, <code><a href="../reference/Hetero.html">Hetero()</a></code>, and <code><a href="../reference/NegBin.html">NegBin()</a></code>. These functions are no longer maintained. Please refer to the updated package documentation for alternative workflows.</li>
-<li>The basic node functions <code><a href="../reference/kernel.html">kernel()</a></code>, <code><a href="../reference/Hetero.html">Hetero()</a></code>, <code><a href="../reference/Poisson.html">Poisson()</a></code>, and <code><a href="../reference/NegBin.html">NegBin()</a></code>, along with the <code>struc</code> argument in the <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> functions, have been deprecated as of this version and will be removed in the next release. Customization of (D)GP specifications can be achieved by modifying the other arguments in <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
+<li>
+<code><a href="../reference/combine.html">combine()</a></code> and <code><a href="../reference/set_linked_idx.html">set_linked_idx()</a></code> are deprecated as of this version and will be removed in the next release. These two functions are no longer maintained. Please refer to the updated package documentation for alternative workflows.</li>
+<li>The basic node functions <code><a href="https://rdrr.io/r/stats/kernel.html" class="external-link">kernel()</a></code>, <code>Hetero()</code>, <code>Poisson()</code>, and <code>NegBin()</code>, along with the <code>struc</code> argument in the <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> functions, have been removed as of this version. Customization of (D)GP specifications can be achieved by modifying the other arguments in <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
+<li>The <code><a href="../reference/draw.html">draw()</a></code> function has been updated for instances of the <code>bundle</code> class to allow drawing of design and evaluation plots of all emulators in a single figure.<br></li>
+<li>The <code><a href="../reference/plot.html">plot()</a></code> function has been updated for linked emulators generated by <code><a href="../reference/lgp.html">lgp()</a></code> using the new data frame form for <code>struc</code>.<br></li>
+<li>The <code><a href="../reference/design.html">design()</a></code> function has been redesigned to allow new specifications of the user-supplied <code>method</code> function.<br></li>
+<li>The <code>batch_size</code> argument has been added to <code><a href="../reference/design.html">design()</a></code> to enable locating multiple design points in a single iteration of the sequential design. This argument is compatible with all built-in <code>method</code> functions: <code><a href="../reference/alm.html">alm()</a></code>, <code><a href="../reference/mice.html">mice()</a></code>, and <code><a href="../reference/vigf.html">vigf()</a></code>.</li>
+<li>The <code><a href="../reference/alm.html">alm()</a></code> and <code><a href="../reference/vigf.html">vigf()</a></code> functions have been redesigned to support continuous search for the next design point or search from a discrete candidate set passed through the <code>x_cand</code> argument.</li>
+<li>The <code><a href="../reference/alm.html">alm()</a></code>, <code><a href="../reference/mice.html">mice()</a></code>, and <code><a href="../reference/vigf.html">vigf()</a></code> functions have been updated to output the locations of identified design points when a discrete candidate set is not supplied.<br></li>
+<li>The <code>pei()</code> function has been removed from the package for re-engineering and will be added back in a future version.<br></li>
+<li>The default of the <code>refit</code> argument in the <code><a href="../reference/update.html">update()</a></code> function has been changed from <code>FALSE</code> to <code>TRUE</code>.<br></li>
+<li>The <code><a href="../reference/write.html">write()</a></code> function now allows <code>light = TRUE</code> for both GP emulators and bundles of GP emulators.<br></li>
+<li>Two new functions, <code><a href="../reference/serialize.html">serialize()</a></code> and <code><a href="../reference/deserialize.html">deserialize()</a></code>, have been added to allow users to export emulators to multi-session workers for parallel processing.</li>
 <li>Additional vignettes are available, showcasing large-scale DGP emulation and DGP classification.</li>
+<li>Enhanced clarity and consistency across the documentation.</li>
+<li>Improved examples and explanations in vignettes for better user guidance.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.4.0" id="dgpsi-240">dgpsi 2.4.0<a class="anchor" aria-label="anchor" href="#dgpsi-240"></a></h2><p class="text-muted">CRAN release: 2024-01-14</p>
@@ -87,7 +101,7 @@
 <code><a href="../reference/design.html">design()</a></code> now supports <code>f</code> that produce <code>NA</code> as outputs. This is useful to prevent the sequential design from stopping due to errors or <code>NA</code> outputs from a simulator at some input locations identified by the sequential design process.</li>
 <li>A bug is fixed in <code><a href="../reference/design.html">design()</a></code> when <code>x_cand</code> is supplied and the input dimension is one.</li>
 <li>
-<code><a href="../reference/alm.html">alm()</a></code>, <code><a href="../reference/mice.html">mice()</a></code>, <code><a href="../reference/pei.html">pei()</a></code>, and <code><a href="../reference/vigf.html">vigf()</a></code> now accept separate candidate sets (even with different number of candidate points) via <code>x_cand</code> for bundle emulators.</li>
+<code><a href="../reference/alm.html">alm()</a></code>, <code><a href="../reference/mice.html">mice()</a></code>, <code>pei()</code>, and <code><a href="../reference/vigf.html">vigf()</a></code> now accept separate candidate sets (even with different number of candidate points) via <code>x_cand</code> for bundle emulators.</li>
 <li>A slot called <code>id</code> is added to instances of <code>gp</code>, <code>dgp</code>, <code>lgp</code>, and <code>bundle</code> classes to uniquely identify the emulators. <code>id</code> can also be passed to instances of <code>gp</code>, <code>dgp</code>,<code>lgp</code>, and <code>bundle</code> classes by the new <code>id</code> argument in <code><a href="../reference/gp.html">gp()</a></code>, <code><a href="../reference/dgp.html">dgp()</a></code>, <code><a href="../reference/lgp.html">lgp()</a></code>, and <code><a href="../reference/pack.html">pack()</a></code>.</li>
 <li>
 <code><a href="../reference/pack.html">pack()</a></code> can now accept a list of (D)GP emulators as the input.</li>
