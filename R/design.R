@@ -1,6 +1,10 @@
 #' @title Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
 #'
-#' @description This function implements sequential design and active learning for a (D)GP emulator or
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function implements sequential design and active learning for a (D)GP emulator or
 #'     a bundle of (D)GP emulators, supporting an array of popular methods as well as user-specified approaches.
 #'     It can also be used as a wrapper for Bayesian optimization methods.
 #'
@@ -13,7 +17,7 @@
 #'     from which the next design points are determined. Defaults to `NULL`.
 #' @param y_cand a matrix (with each row being a simulator evaluation and column being an output dimension) that gives the realizations
 #'    from the simulator at input positions in `x_cand`. Defaults to `NULL`.
-#' @param n_sample an integer that gives the size of a sub-set to be sampled from the candidate set `x_cand` at each step of the sequential design to determine the next
+#' @param n_sample `r new_badge("new")` an integer that gives the size of a sub-set to be sampled from the candidate set `x_cand` at each step of the sequential design to determine the next
 #'   design point, if `x_cand` is not `NULL`.
 #'
 #' Defaults to `200`.
@@ -59,7 +63,7 @@
 #' Defaults to `FALSE`.
 #' @param target a number or vector specifying the target evaluation metric value(s) at which the sequential design should terminate.
 #'     Defaults to `NULL`, in which case the sequential design stops after `N` steps. See the *Note* section below for further details about `target`.
-#' @param method an R function that determines the next design points to be evaluated by `f`. The function must adhere to the following rules:
+#' @param method `r new_badge("updated")` an R function that determines the next design points to be evaluated by `f`. The function must adhere to the following rules:
 #' - **First argument**: an emulator object, which can be one of the following:
 #'   - an instance of the `gp` class (produced by [gp()]);
 #'   - an instance of the `dgp` class (produced by [dgp()]);
@@ -76,7 +80,7 @@
 #'       represent the new design points for the corresponding emulator.
 #'
 #' See [alm()], [mice()], and [vigf()] for examples of built-in `method` functions. Defaults to [vigf()].
-#' @param batch_size an integer specifying the number of design points to select in a single iteration. Defaults to `1`.
+#' @param batch_size `r new_badge("new")` an integer specifying the number of design points to select in a single iteration. Defaults to `1`.
 #'     This argument is used by the built-in `method` functions [alm()], [mice()], and [vigf()].
 #'     If you provide a custom `method` function with an argument named `batch_size`, the value of `batch_size` will be passed to your function.
 #' @param eval an R function that computes a customized metric for evaluating emulator performance. The function must adhere to the following rules:

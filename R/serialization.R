@@ -1,6 +1,10 @@
 #' @title Serialize the constructed emulator
 #'
-#' @description This function serialize the constructed emulator.
+#' @description
+#'
+#' `r new_badge("new")`
+#'
+#' This function serialize the constructed emulator.
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be serialized.
@@ -98,7 +102,11 @@ serialize <- function(object, light = TRUE) {
 
 #' @title Restore the serialized emulator
 #'
-#' @description This function restores the serialized emulator created by [serialize()].
+#' @description
+#'
+#' `r new_badge("new")`
+#'
+#' This function restores the serialized emulator created by [serialize()].
 #'
 #' @param object the serialized object of an emulator.
 #'

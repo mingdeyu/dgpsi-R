@@ -133,7 +133,7 @@ from which the next design points are determined. Defaults to \code{NULL}.}
 \item{y_cand}{a matrix (with each row being a simulator evaluation and column being an output dimension) that gives the realizations
 from the simulator at input positions in \code{x_cand}. Defaults to \code{NULL}.}
 
-\item{n_sample}{an integer that gives the size of a sub-set to be sampled from the candidate set \code{x_cand} at each step of the sequential design to determine the next
+\item{n_sample}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer that gives the size of a sub-set to be sampled from the candidate set \code{x_cand} at each step of the sequential design to determine the next
 design point, if \code{x_cand} is not \code{NULL}.
 
 Defaults to \code{200}.}
@@ -199,7 +199,7 @@ Defaults to \code{FALSE}.}
 \item{target}{a number or vector specifying the target evaluation metric value(s) at which the sequential design should terminate.
 Defaults to \code{NULL}, in which case the sequential design stops after \code{N} steps. See the \emph{Note} section below for further details about \code{target}.}
 
-\item{method}{an R function that determines the next design points to be evaluated by \code{f}. The function must adhere to the following rules:
+\item{method}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} an R function that determines the next design points to be evaluated by \code{f}. The function must adhere to the following rules:
 \itemize{
 \item \strong{First argument}: an emulator object, which can be one of the following:
 \itemize{
@@ -227,7 +227,7 @@ represent the new design points for the corresponding emulator.
 
 See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}} for examples of built-in \code{method} functions. Defaults to \code{\link[=vigf]{vigf()}}.}
 
-\item{batch_size}{an integer specifying the number of design points to select in a single iteration. Defaults to \code{1}.
+\item{batch_size}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer specifying the number of design points to select in a single iteration. Defaults to \code{1}.
 This argument is used by the built-in \code{method} functions \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}}.
 If you provide a custom \code{method} function with an argument named \code{batch_size}, the value of \code{batch_size} will be passed to your function.}
 
@@ -361,6 +361,8 @@ avoid re-visiting the same locations in later runs of \code{design()}.
 See \emph{Note} section below for further information.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function implements sequential design and active learning for a (D)GP emulator or
 a bundle of (D)GP emulators, supporting an array of popular methods as well as user-specified approaches.
 It can also be used as a wrapper for Bayesian optimization methods.

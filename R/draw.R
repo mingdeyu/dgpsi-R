@@ -1,6 +1,10 @@
 #' @title Validation and diagnostic plots for a sequential design
 #'
-#' @description This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
 #'
 #' @param object can be one of the following emulator classes:
 #' * the S3 class `gp`.
@@ -13,7 +17,7 @@
 #' Defaults to `"rmse"`.
 #' @param log a bool indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when `type = "rmse"`.
 #'     Defaults to `FALSE`.
-#' @param emulator an index or vector of indices of emulators packed in `object`. This argument is only used if `object` is an instance of the `bundle` class. When set to `NULL`, all
+#' @param emulator `r new_badge("updated")` an index or vector of indices of emulators packed in `object`. This argument is only used if `object` is an instance of the `bundle` class. When set to `NULL`, all
 #'     emulators in the bundle are drawn. Defaults to `NULL`.
 #' @param ... N/A.
 #'

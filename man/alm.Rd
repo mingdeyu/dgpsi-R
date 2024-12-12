@@ -63,7 +63,7 @@ from which the next design point(s) are determined. If \code{object} is an insta
 The list must have a length equal to the number of emulators in \code{object}, with each element being a matrix representing the candidate set for a corresponding
 emulator in the bundle. Defaults to \code{NULL}.}
 
-\item{n_start}{an integer that gives the number of initial design points to be used to determine next design point(s). This argument
+\item{n_start}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer that gives the number of initial design points to be used to determine next design point(s). This argument
 is only used when \code{x_cand} is \code{NULL}. Defaults to \code{20}.}
 
 \item{batch_size}{an integer that gives the number of design points to be chosen. Defaults to \code{1}.}
@@ -80,7 +80,7 @@ If a vector is provided, it will be converted to a two-column row matrix. The ro
 first and second columns correspond to the minimum and maximum values of the input dimensions. This
 argument is only used when \code{x_cand = NULL}. Defaults to \code{NULL}.}
 
-\item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+\item{int}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
 all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
 input dimensions. This argument is only used when \code{x_cand = NULL}. Defaults to \code{FALSE}.}
 
@@ -130,6 +130,8 @@ element of the list is a matrix with \code{batch_size} rows, where each row repr
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 }

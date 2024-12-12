@@ -1,6 +1,10 @@
 #' @title Locate the next design point(s) for a (D)GP emulator or a bundle of (D)GP emulators using Active Learning MacKay (ALM)
 #'
-#' @description This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 #'     or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 #'
 #' @param object can be one of the following:
@@ -11,7 +15,7 @@
 #'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class and `aggregate` is not supplied, `x_cand` can also be a list.
 #'     The list must have a length equal to the number of emulators in `object`, with each element being a matrix representing the candidate set for a corresponding
 #'     emulator in the bundle. Defaults to `NULL`.
-#' @param n_start an integer that gives the number of initial design points to be used to determine next design point(s). This argument
+#' @param n_start `r new_badge("new")` an integer that gives the number of initial design points to be used to determine next design point(s). This argument
 #'     is only used when `x_cand` is `NULL`. Defaults to `20`.
 #' @param batch_size an integer that gives the number of design points to be chosen. Defaults to `1`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
@@ -23,7 +27,7 @@
 #'     If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
 #'     first and second columns correspond to the minimum and maximum values of the input dimensions. This
 #'     argument is only used when `x_cand = NULL`. Defaults to `NULL`.
-#' @param int a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+#' @param int `r new_badge("new")` a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
 #'     all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
 #'     input dimensions. This argument is only used when `x_cand = NULL`. Defaults to `FALSE`.
 #' @param aggregate an R function that aggregates scores of the ALM across different output dimensions (if `object` is an instance

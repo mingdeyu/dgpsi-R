@@ -1,6 +1,10 @@
 #' @title Validation plots of a constructed GP, DGP, or linked (D)GP emulator
 #'
-#' @description This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 #'
 #' @param x can be one of the following emulator classes:
 #' * the S3 class `gp`.
@@ -8,7 +12,7 @@
 #' * the S3 class `lgp`.
 #' @param x_test same as that of [validate()].
 #' @param y_test same as that of [validate()].
-#' @param dim if `dim = NULL`, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
+#' @param dim `r new_badge("updated")` if `dim = NULL`, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
 #'     which dimension of an emulator's input will be shown on the x-axis in validation plots:
 #' * If `x` is an instance of the `gp` of `dgp` class, `dim` is an integer.
 #' * `r lifecycle::badge("deprecated")` If `x` is an instance of the `lgp` class created by [lgp()] without specifying the `struc` argument in data frame form, `dim` can be:

@@ -80,12 +80,12 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 \item{workers}{the number of processes to be used for the criterion calculation. If set to \code{NULL},
 the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
 
-\item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
+\item{limits}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
 If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
 first and second columns correspond to the minimum and maximum values of the input dimensions. This
 argument is only used when \code{x_cand = NULL}. Defaults to \code{NULL}.}
 
-\item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+\item{int}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
 all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
 input dimensions. This argument is only used when \code{x_cand = NULL}. Defaults to \code{FALSE}.}
 
@@ -135,6 +135,8 @@ element of the list is a matrix with \code{batch_size} rows, where each row repr
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 or a bundle of (D)GP emulators using the Mutual Information for Computer Experiments (MICE), see the reference below.
 }

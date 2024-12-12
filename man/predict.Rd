@@ -193,8 +193,9 @@ The \code{results} slot will also include:
 }
 }
 \description{
-This function implements single-core or multi-core prediction (with or without multi-threading)
-from GP, DGP, or linked (D)GP emulators.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
+This function implements prediction from GP, DGP, or linked (D)GP emulators.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.

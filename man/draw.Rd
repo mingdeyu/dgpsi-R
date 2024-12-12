@@ -36,13 +36,15 @@ Defaults to \code{"rmse"}.}
 \item{log}{a bool indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when \code{type = "rmse"}.
 Defaults to \code{FALSE}.}
 
-\item{emulator}{an index or vector of indices of emulators packed in \code{object}. This argument is only used if \code{object} is an instance of the \code{bundle} class. When set to \code{NULL}, all
+\item{emulator}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} an index or vector of indices of emulators packed in \code{object}. This argument is only used if \code{object} is an instance of the \code{bundle} class. When set to \code{NULL}, all
 emulators in the bundle are drawn. Defaults to \code{NULL}.}
 }
 \value{
 A \code{patchwork} object.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
 }
 \details{

@@ -74,7 +74,7 @@
 
 \item{y_test}{same as that of \code{\link[=validate]{validate()}}.}
 
-\item{dim}{if \code{dim = NULL}, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, \code{dim} indicates
+\item{dim}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} if \code{dim = NULL}, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, \code{dim} indicates
 which dimension of an emulator's input will be shown on the x-axis in validation plots:
 \itemize{
 \item If \code{x} is an instance of the \code{gp} of \code{dgp} class, \code{dim} is an integer.
@@ -138,6 +138,8 @@ Defaults to \code{TRUE}.}
 A \code{patchwork} object.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 }
 \details{

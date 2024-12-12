@@ -100,6 +100,8 @@ The returned \code{lgp} object can be used by
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function constructs a linked (D)GP emulator for a model chain or network.
 }
 \details{

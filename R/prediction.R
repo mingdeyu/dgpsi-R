@@ -1,7 +1,10 @@
 #' @title Prediction from GP, DGP, or linked (D)GP emulators
 #'
-#' @description This function implements single-core or multi-core prediction (with or without multi-threading)
-#'     from GP, DGP, or linked (D)GP emulators.
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function implements prediction from GP, DGP, or linked (D)GP emulators.
 #'
 #' @param object an instance of the `gp`, `dgp`, or `lgp` class.
 #' @param x the testing input data:

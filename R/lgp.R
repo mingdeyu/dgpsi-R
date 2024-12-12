@@ -1,6 +1,10 @@
 #' @title Linked (D)GP emulator construction
 #'
-#' @description This function constructs a linked (D)GP emulator for a model chain or network.
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function constructs a linked (D)GP emulator for a model chain or network.
 #'
 #' @param struc the structure of the linked emulator, which can take one of two forms:
 #' - `r lifecycle::badge("deprecated")` a list contains *L* (the number of layers in a systems of computer models) sub-lists,

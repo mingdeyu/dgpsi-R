@@ -16,6 +16,8 @@ Defaults to \code{TRUE}.}
 A serialized version of \code{object}.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}}
+
 This function serialize the constructed emulator.
 }
 \details{
