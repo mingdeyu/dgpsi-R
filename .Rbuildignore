@@ -11,4 +11,9 @@
 ^RESEARCH-NOTICE\.md$
 ^vignettes/images
 ^vignettes/motorcycle.Rmd$
+^vignettes/classification.Rmd$
+^vignettes/large_scale_emulation.Rmd$
+^vignettes/linked_DGP.Rmd$
+^vignettes/seq_design.Rmd$
+^vignettes/seq_design_2.Rmd$
 ^LICENSE\.md$

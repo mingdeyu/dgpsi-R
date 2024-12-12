@@ -2,7 +2,7 @@
 title: "Sequential Design II"
 output: rmarkdown::html_vignette
 description: >
-  Sequential design for a bundle of DGP emulators with the stopping rule.
+  Sequential design for a bundle of DGP emulators with a stopping rule.
 vignette: >
   %\VignetteIndexEntry{Sequential Design II}
   %\VignetteEngine{knitr::rmarkdown}
@@ -14,6 +14,20 @@ knitr::opts_chunk$set(
   echo = TRUE,
   eval = FALSE
 )
+
+get_article_url <- function(article) {
+  pkg_version <- as.character(utils::packageVersion("dgpsi"))
+  
+  is_dev <- grepl("\\.9000$", pkg_version)
+  
+  base_url <- if (is_dev) {
+    "https://mingdeyu.github.io/dgpsi-R/dev"
+  } else {
+    "https://mingdeyu.github.io/dgpsi-R"
+  }
+  
+  paste0(base_url, article)
+}
 ```
 
 This vignette shows how to use the package to sequentially refine a bundle of DGP emulators, each of which emulates an output of a simulator.
@@ -40,7 +54,7 @@ f <- function(x) {
 }
 ```
 
-Note that the function is defined in such a way that both its input `x` and output are matrices. The following figure shows the true functional forms of the three outputs of the simulator over `[0, 1]`:
+Note that the function is defined in such a way that both its input, `x`, and output are matrices. The following figure shows the true functional forms of the three outputs of the simulator over $[0, 1]$:
 
 ```{r}
 dense_x <- seq(0, 1, length = 200)
@@ -59,10 +73,10 @@ wrap_plots(list(p1, p2, p3)) + plot_annotation(title = 'Synthetic Simulator')
 We now specify a seed with `set_seed()` from the package for reproducibility
 
 ```{r}
-set_seed(999)
+set_seed(9999)
 ```
 
-and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+and generate an initial design with 5 design points using a maximin Latin hypercube sampler:
 
 ```{r}
 X <- maximinLHS(5, 1)
@@ -116,15 +130,15 @@ m3 <- dgp(X, Y[,3])
 ## Imputing ... done
 ```
 
-Note that we have the global connection turned off for the first two DGP emulators because we found that this yields better emulation performances. We then build a bundle of the three DGP emulators using `pack()`:
+Note that we have the global connection turned off for the first two DGP emulators because we found that this yields better emulation performance. We then build a bundle of the three DGP emulators using `pack()`:
 
 ```{r}
 m <- pack(m1, m2, m3)
 ```
 
-## Sequential designs of the bundle emulator
+## Sequential design for the emulator bundle
 
-To start with the sequential design, we specify the limit of the input:
+To begin sequential design, we first specify the limit of each input:
 
 ```{r}
 lim <- c(0, 1)
@@ -136,7 +150,7 @@ and set a target RMSE to stop the sequential design:
 target <- 0.01
 ```
 
-Here we choose `0.01` because it is equivalent to `1%` normalized error given that the ranges of both outputs are `[0,1]`. We can of course set different targets for different outputs, e.g., by setting `target <- c(0.005, 0.02, 0.01)`. 
+Here we choose `0.01` because it is equivalent to `1%` normalized error given that the ranges of both outputs are `[0,1]`. We can set different targets for different outputs, e.g., by setting `target <- c(0.005, 0.02, 0.01)`. 
 
 We start the first-wave of the sequential design with 10 steps:
 
@@ -147,38 +161,32 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.340553 0.158352 0.019125
+##  *  RMSE: 0.383722, RMSE: 0.154689, RMSE: 0.008984
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.467905
-##  * Next design point (Emulator2): 0.003782
-##  * Next design point (Emulator3): 0.997096
-##  - Updating and re-fitting ... done
-##  - Validating ... done
-##  * RMSE: 0.309701 0.158634 0.006056
-## Iteration 2:
-##  - Locating ... done
-##  * Next design point (Emulator1): 0.997773
-##  * Next design point (Emulator2): 0.997773
+##  * Next design point (Emulator1): 0.207895
+##  * Next design point (Emulator2): 0.235873
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.291350 0.159032 0.006056
+##  *  RMSE: 0.337517, RMSE: 0.155087, RMSE: 0.008984
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.198829
-##  * Next design point (Emulator2): 0.311879
+##  * Next design point (Emulator1): 0.430889
+##  * Next design point (Emulator2): 0.479682
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.190767 0.014075 0.006056
-## Targets are not reached for all emulators at the end of the sequential design.
+##  *  RMSE: 0.120320, RMSE: 0.062365, RMSE: 0.008984
+## Targets not reached for all emulators at the end of the sequential design.
 ```
 
-It can be seen that at the second step, the DGP emulator for the third output has already reached the target, so for the rest of the steps no further refinements (i.e., additions of design points to the third DGP emulator) are performed. At the end of the first wave, the DGP emulators for both the first and second outputs have not reached the target yet. At this point, we can proceed to a second wave by repeating the command above, but we show below an alternative way, in which we define an aggregation function that aggregates criterion scores across the three outputs such that the same design points are added to the three emulators at each step (instead of different design points for each emulator). We define the aggregation function `g` that aggregate scores by calculating their weighted average: 
+It can be seen that at the first step, the DGP emulator for the third output has already reached the target, so no further refinements (i.e., additions of design points to the third DGP emulator) are performed for the remaining steps. By the end of the first wave, the DGP emulators for the first and second outputs have not yet reached the target. At this point, we can proceed to a second wave by repeating the command above. However, we demonstrate an alternative approach below, where we define an aggregation function (applicable to all built-in `method` functions of `design()`). This function aggregates criterion scores across the three outputs, ensuring that the same design points are added to all three emulators at each step, instead of selecting different design points for each emulator. Using the aggregation approach can be advantageous if the different outputs exhibit similar behavior with respect to the input, as it reduces number of simulations required at each iteration. However, if the outputs behave differently, it may be more effective to add distinct design points to each emulator to achieve lower errors more quickly. 
+
+We define the aggregation function `g` to compute a weighted average of the scores:
 
 ```{r}
 g <- function(x, weight){
@@ -189,13 +197,13 @@ g <- function(x, weight){
 }
 ```
 
-Since the third emulator has already reached the target, we assign zero weights to it and weights of 0.8 and 0.2 to the first and second emulators respectively:
+Since the third emulator has already reached the target, we assign zero weights to it and weights of 0.6 and 0.4 to the first and second emulators respectively:
 
 ```{r}
-weight <- c(0.8, 0.2, 0)
+weight <- c(0.6, 0.4, 0)
 ```
 
-We now pass both the aggregate function `g()` and its `weight` argument to `design()` for the second wave of the sequential design with a further 15 steps:
+We now pass both the aggregate function, `g()`, and its `weight` argument to `design()` for a second wave of the sequential design with a further 15 steps:
 
 ```{r}
 # 2nd wave with 15 steps
@@ -203,47 +211,49 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.190767 0.014075 0.006056
+##  *  RMSE: 0.120320, RMSE: 0.062365, RMSE: 0.008984
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.263892
-##  * Next design point (Emulator2): 0.263892
+##  * Next design point (Emulator1): 0.062821
+##  * Next design point (Emulator2): 0.062821
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.176961 0.009467 0.006056
-## Iteration 2:
+##  *  RMSE: 0.151946, RMSE: 0.061865, RMSE: 0.008984
+##  
+##  ...
+##  
+## Iteration 6:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.030840
+##  * Next design point (Emulator1): 0.233155
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.203489 0.009467 0.006056
+##  *  RMSE: 0.014147, RMSE: 0.004410, RMSE: 0.008984
 ##  
 ##  ...
 ## 
-## Iteration 10:
+## Iteration 8:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.788265
+##  * Next design point (Emulator1): 0.009688
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.009116 0.009467 0.006056
-## Target reached! The sequential design stops at step 10.
+##  *  RMSE: 0.005913, RMSE: 0.004410, RMSE: 0.008984
+Target reached! Sequential design stopped at step 8.
 ```
 
-The first and the second emulators reached the target after iteration 9 and 1 of the second wave, respectively. The sequential designs of the three emulators can be plotted with `draw()`:
+The first and the second emulators reached the target after iteration 8 and 5 of the second wave, respectively. The sequential design points of the three emulators can be plotted with `draw()`:
 
 ```{r}
-draw(m, 1, 'design') + draw(m, 2, 'design') + draw(m, 3, 'design') +
-  plot_layout() & theme(legend.position = 'bottom')
+draw(m, 'design')
 ```
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_design.png){width=100%}
 
-The figure above shows that for the first emulator most of the design points are added below 0.5 whilst for the second emulator most of the design points concentrate around 0.5. For the third emulator, the resulting design is space-filling. It can be seen that these design point distributions are consistent with the functional complexities of the three outputs. 
+The figure above shows that, for the first emulator, most of the design points are added below 0.5, while for the second emulator, the design points are concentrated around 0.5. For the third emulator, the resulting design is space-filling. These design point distributions align with the functional complexities of the three outputs. However, in the second wave, which uses the aggregation function, additional points are added below 0.5 for the second emulator due to the higher weight assigned to the first emulator. These points may not be necessary for the second output, as its functional behavior does not require further refinement in that region. This observation aligns with the earlier argument that using the aggregation function to add the same design points to outputs with differing behaviors may not always be effective.
 
 ## Comparison to DGP emulators with space-filling designs
 
@@ -296,25 +306,26 @@ m33 <- validate(m33, x_test = validate_x, y_test = validate_y[,3], verb = F)
 rmse_static_3 <- data.frame('N' = c(10, 20, 30), 'rmse' = c(m13$oos$rmse, m23$oos$rmse, m33$oos$rmse), 'LHD' = c('lhd-10', 'lhd-20', 'lhd-30'))
 ```
 
-and add them to the sequential design validation plot (in log-scale) for comparisons:
+and add them to the sequential design validation plot (in log-scale) for comparison:
 
 ```{r}
-p1 <- draw(m, emulator = 1, type = 'rmse', log = T) + 
+p <- draw(m, type = 'rmse', log = T) 
+p[[1]] <- p[[1]] + 
   geom_point(data = rmse_static_1, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(3, 4, 8))
-p2 <- draw(m, emulator = 2, type = 'rmse', log = T) + 
+p[[2]] <- p[[2]] +
   geom_point(data = rmse_static_2, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(3, 4, 8))
-p3 <- draw(m, emulator = 3, type = 'rmse', log = T) + 
+p[[3]] <- p[[3]] +
   geom_point(data = rmse_static_3, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(3, 4, 8))
-p1 + p2 + p3 + plot_layout(guides = 'collect') & theme(legend.position = 'bottom')
+p
 ```
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_rmse.png){width=100%}
 
-It can be seen from the plot above that with the sequential design, emulators in the bundle can achieve higher or similar accuracy with smaller number of design points. 
+It can be seen from the plot above that sequential design is more efficient than batch space-filling design, achieving similar RMSE with fat fewer design points, particularly for the first emulator in the bundle.
 
 ### See also
 
-See [`Sequential Design I`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.html) for the sequential design and automatic structure simplification of a DGP emulator on a 2D simulator.
+See [Sequential Design I](`r get_article_url("/articles/seq_design.html")`) for the sequential design and automatic structure simplification of a DGP emulator on a 2D simulator.

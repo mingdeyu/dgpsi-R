@@ -1,12 +1,12 @@
 ---
 title: >
-  DGP Classification using Stochastic Imputation
+  DGP Classification using dgpsi
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
   DGP classification of the iris data set.
 vignette: >
-  %\VignetteIndexEntry{DGP Classification using Stochastic Imputation}
+  %\VignetteIndexEntry{DGP Classification using dgpsi}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -35,7 +35,7 @@ We now load the iris data set,
 data(iris)
 ```
 
-and do a min-max normalization on its four input variables.
+and re-scale its four input variables to $[0,1]$.
 
 ```{r}
 iris <- iris %>%
@@ -48,7 +48,7 @@ Before building a classifier, we set a seed with `set_seed()` from the package f
 set_seed(9999)
 ```
 
-and split a training data set and a testing data set:
+and split the data into training and testing:
 
 ```{r}
 test_idx <- sample(seq_len(nrow(iris)), size = 30)
@@ -79,7 +79,15 @@ m_dgp <- dgp(X_train, Y_train, depth = 3, name = c('matern2.5', 'sexp'), likelih
 ## Imputing ... done
 ```
 
-We set `likelihood = "Categorical"` since the DGP classifier is essentially a DGP emulator with a categorical likelihood.
+Visualizing the DGP object helps to clarify the layered structure for non-Gaussian (in this case categorical) likelihoods. 
+
+```{r}
+summary(m_dgp)
+```
+
+<iframe src="https://mingdeyu.github.io/dgpsi-R/categorical_summary.html" width="100%" height="410" style="border: none;"></iframe>
+
+After the global inputs, the 3-layered DGP is comprised of 2 hidden layers containing GPs, and a "likelihood layer" that transforms each of the preceding GP nodes to one of the parameters required by the likelihood function. In this example, we have 3 possible categories and we use a softmax link function, so there are 3 parameters to set and the second layer has 3 GP nodes, one for each of them. 
 
 ## Validation
 

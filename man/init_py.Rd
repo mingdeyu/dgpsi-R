@@ -31,7 +31,7 @@ of 'dgpsi'. Defaults to \code{FALSE}.}
 in \code{dgpsi_ver} if it has already been installed. This argument is useful when the 'python' environment
 is corrupted and one wants to completely uninstall and reinstall it. Defaults to \code{FALSE}.}
 
-\item{verb}{a bool indicating if the trace information will be printed during the function execution.
+\item{verb}{a bool indicating if trace information will be printed during function execution.
 Defaults to \code{TRUE}.}
 }
 \value{
@@ -41,7 +41,7 @@ No return value, called to install required 'python' environment.
 This function initializes the 'python' environment for the package.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

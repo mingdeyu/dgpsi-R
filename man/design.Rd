@@ -12,9 +12,9 @@ design(
   N,
   x_cand,
   y_cand,
+  n_sample,
   n_cand,
   limits,
-  int,
   f,
   reps,
   freq,
@@ -23,6 +23,7 @@ design(
   reset,
   target,
   method,
+  batch_size,
   eval,
   verb,
   autosave,
@@ -37,9 +38,9 @@ design(
   N,
   x_cand = NULL,
   y_cand = NULL,
-  n_cand = 200,
+  n_sample = 200,
+  n_cand = lifecycle::deprecated(),
   limits = NULL,
-  int = FALSE,
   f = NULL,
   reps = 1,
   freq = c(1, 1),
@@ -48,6 +49,7 @@ design(
   reset = FALSE,
   target = NULL,
   method = vigf,
+  batch_size = 1,
   eval = NULL,
   verb = TRUE,
   autosave = list(),
@@ -62,9 +64,9 @@ design(
   N,
   x_cand = NULL,
   y_cand = NULL,
-  n_cand = 200,
+  n_sample = 200,
+  n_cand = lifecycle::deprecated(),
   limits = NULL,
-  int = FALSE,
   f = NULL,
   reps = 1,
   freq = c(1, 1),
@@ -73,6 +75,7 @@ design(
   reset = FALSE,
   target = NULL,
   method = vigf,
+  batch_size = 1,
   eval = NULL,
   verb = TRUE,
   autosave = list(),
@@ -91,9 +94,9 @@ design(
   N,
   x_cand = NULL,
   y_cand = NULL,
-  n_cand = 200,
+  n_sample = 200,
+  n_cand = lifecycle::deprecated(),
   limits = NULL,
-  int = FALSE,
   f = NULL,
   reps = 1,
   freq = c(1, 1),
@@ -102,6 +105,7 @@ design(
   reset = FALSE,
   target = NULL,
   method = vigf,
+  batch_size = 1,
   eval = NULL,
   verb = TRUE,
   autosave = list(),
@@ -121,158 +125,169 @@ design(
 \item the S3 class \code{bundle}.
 }}
 
-\item{N}{the number of steps for the sequential design.}
+\item{N}{the number of iterations for the sequential design.}
 
 \item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-in which the next design point is determined. If \code{x_cand = NULL}, the candidate set will be generated using \code{n_cand},
-\code{limits}, and \code{int}. Defaults to \code{NULL}.}
+from which the next design points are determined. Defaults to \code{NULL}.}
 
 \item{y_cand}{a matrix (with each row being a simulator evaluation and column being an output dimension) that gives the realizations
 from the simulator at input positions in \code{x_cand}. Defaults to \code{NULL}.}
 
-\item{n_cand}{an integer that gives
-\itemize{
-\item the size of the candidate set in which the next design point is determined, if \code{x_cand = NULL};
-\item the size of a sub-set to be sampled from the candidate set \code{x_cand} at each step of the sequential design to determine the next
+\item{n_sample}{an integer that gives the size of a sub-set to be sampled from the candidate set \code{x_cand} at each step of the sequential design to determine the next
 design point, if \code{x_cand} is not \code{NULL}.
-}
 
 Defaults to \code{200}.}
+
+\item{n_cand}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} this argument is deprecated. Use \code{n_sample} instead.}
 
 \item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
 dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. Set
-\code{limits = NULL} if \code{x_cand} is supplied. This argument is only used when \code{x_cand} is not supplied, i.e., \code{x_cand = NULL}. Defaults to \code{NULL}.}
+\code{limits = NULL} if \code{x_cand} is supplied. This argument is only used when \code{x_cand} is not supplied, i.e., \code{x_cand = NULL}. Defaults to \code{NULL}. If you provide
+a custom \code{method} function with an argument called \code{limits}, the value of \code{limits} will be passed to your function.}
 
-\item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a bool is given, it will be applied to
-all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
-input dimensions. Defaults to \code{FALSE}.}
-
-\item{f}{an R function that represents the simulator. \code{f} needs to be specified with the following basic rules:
+\item{f}{an R function representing the simulator. \code{f} must adhere to the following rules:
 \itemize{
-\item the first argument of the function should be a matrix with rows being different design points and columns being input dimensions.
-\item the output of the function can either
+\item \strong{First argument}: a matrix where rows correspond to different design points, and columns represent input dimensions.
+\item \strong{Function output}:
 \itemize{
-\item a matrix with rows being different outputs (corresponding to the input design points) and columns being output dimensions. If there is
-only one output dimension, the matrix still needs to be returned with a single column.
-\item a list with the first element being the output matrix described above and, optionally, additional named elements which will update values
-of any arguments with the same names passed via \code{...}. The list output can be useful if some additional arguments of \code{f} and \code{aggregate}
-need to be updated after each step of the sequential design.
+\item a matrix where rows correspond to different outputs (matching the input design points) and columns represent output dimensions.
+If there is only one output dimension, the function should return a matrix with a single column.
+\item alternatively, a list where:
+\itemize{
+\item the first element is the output matrix as described above.
+\item additional named elements can optionally update values of arguments with matching names passed via \code{...}. This list output is
+useful if additional arguments to \code{f}, \code{method}, or \code{eval} need to be updated after each sequential design iteration.
 }
 }
+}
 
-See \emph{Note} section below for further information. This argument is used when \code{y_cand = NULL}. Defaults to \code{NULL}.}
+See the \emph{Note} section below for additional details. This argument is required and must be supplied when \code{y_cand = NULL}. Defaults to \code{NULL}.}
 
 \item{reps}{an integer that gives the number of repetitions of the located design points to be created and used for evaluations of \code{f}. Set the
-argument to an integer greater than \code{1} if \code{f} is a stochastic function that can generate different responses given a same input and the
+argument to an integer greater than \code{1} only if \code{f} is a stochastic function that can generate different responses given for the same input and the
 supplied emulator \code{object} can deal with stochastic responses, e.g., a (D)GP emulator with \code{nugget_est = TRUE} or a DGP emulator with a
 likelihood layer. The argument is only used when \code{f} is supplied. Defaults to \code{1}.}
 
-\item{freq}{a vector of two integers with the first element giving the frequency (in number of steps) to re-fit the
-emulator, and the second element giving the frequency to implement the emulator validation (for RMSE). Defaults to \code{c(1, 1)}.}
+\item{freq}{a vector of two integers with the first element indicating the number of iterations taken between re-estimating
+the emulator hyperparameters, and the second element defining the number of iterations to take between re-calculation of evaluating metrics
+on the validation set (see \code{x_test} below) via the \code{eval} function. Defaults to \code{c(1, 1)}.}
 
 \item{x_test}{a matrix (with each row being an input testing data point and each column being an input dimension) that gives the testing
-input data to evaluate the emulator after each step of the sequential design. Set to \code{NULL} for the LOO-based emulator validation.
+input data to evaluate the emulator after each \code{freq[2]} iterations of the sequential design. Set to \code{NULL} for LOO-based emulator validation.
 Defaults to \code{NULL}. This argument is only used if \code{eval = NULL}.}
 
-\item{y_test}{the testing output data that correspond to \code{x_test} for the emulator validation after each step of the sequential design:
+\item{y_test}{the testing output data corresponding to \code{x_test} for emulator validation after each \code{freq[2]} iterations of the sequential design:
 \itemize{
-\item if \code{object} is an instance of the \code{gp} class, \code{y_test} is a matrix with only one column and each row being an testing output data point.
-\item if \code{object} is an instance of the \code{dgp} class, \code{y_test} is a matrix with its rows being testing output data points and columns being
+\item if \code{object} is an instance of the \code{gp} class, \code{y_test} is a matrix with only one column and each row contains a testing output data point from the corresponding row of \code{x_test}.
+\item if \code{object} is an instance of the \code{dgp} class, \code{y_test} is a matrix with its rows containing testing output data points corresponding to the same rows of \code{x_test} and columns representing the
 output dimensions.
+\item if \code{object} is an instance of the \code{bundle} class, \code{y_test} is a matrix with each row representing the outputs for the corresponding row of \code{x_test} and each column representing the output of the different emulators in the bundle.
 }
 
-Set to \code{NULL} for the LOO-based emulator validation. Defaults to \code{NULL}. This argument is only used if \code{eval = NULL}.}
+Set to \code{NULL} for LOO-based emulator validation. Defaults to \code{NULL}. This argument is only used if \code{eval = NULL}.}
 
-\item{reset}{a bool or a vector of bools indicating whether to reset hyperparameters of the emulator to their initial values when it was initially
-constructed after the input-output update and before the re-fit. If a bool is given, it will be applied to
-every step of the sequential design. If a vector is provided, its length should be equal to \code{N} and will be applied to individual
-steps of the sequential design. Defaults to \code{FALSE}.}
-
-\item{target}{a numeric or a vector that gives the target RMSEs at which the sequential design is terminated. Defaults to \code{NULL}, in which
-case the sequential design stops after \code{N} steps. See \emph{Note} section below for further information about \code{target}.}
-
-\item{method}{an R function that give indices of designs points in a candidate set. The function must satisfy the following basic rules:
+\item{reset}{A bool or a vector of bools indicating whether to reset the hyperparameters of the emulator(s) to their initial values (as set during initial construction) before re-fitting.
+The re-fitting occurs based on the frequency specified by \code{freq[1]}. This option is useful when hyperparameters are suspected to have converged to a local optimum affecting validation performance.
 \itemize{
-\item the first argument is an emulator object that can be either an instance of
-\itemize{
-\item the \code{gp} class (produced by \code{\link[=gp]{gp()}});
-\item the \code{dgp} class (produced by \code{\link[=dgp]{dgp()}});
-\item the \code{bundle} class (produced by \code{\link[=pack]{pack()}}).
+\item If a single bool is provided, it applies to every iteration of the sequential design.
+\item If a vector is provided, its length must equal \code{N} (even if the re-fit frequency specified in \code{freq[1]} is not 1) and it will apply to the corresponding iterations of the sequential design.
 }
-\item the second argument is a matrix with rows representing a set of different design points.
-\item the output of the function
+
+Defaults to \code{FALSE}.}
+
+\item{target}{a number or vector specifying the target evaluation metric value(s) at which the sequential design should terminate.
+Defaults to \code{NULL}, in which case the sequential design stops after \code{N} steps. See the \emph{Note} section below for further details about \code{target}.}
+
+\item{method}{an R function that determines the next design points to be evaluated by \code{f}. The function must adhere to the following rules:
 \itemize{
-\item is a vector of indices if the first argument is an instance of the \code{gp} class;
-\item is a matrix of indices if the first argument is an instance of the \code{dgp} class. If there are different design points to be added with
-respect to different outputs of the DGP emulator, the column number of the matrix should equal to the number of the outputs. If design
-points are common to all outputs of the DGP emulator, the matrix should be single-columned. If more than one design points are determined
-for a given output or for all outputs, the indices of these design points are placed in the matrix with extra rows.
-\item is a matrix of indices if the first argument is an instance of the \code{bundle} class. Each row of the matrix gives the indices of the design
-points to be added to individual emulators in the bundle.
+\item \strong{First argument}: an emulator object, which can be one of the following:
+\itemize{
+\item an instance of the \code{gp} class (produced by \code{\link[=gp]{gp()}});
+\item an instance of the \code{dgp} class (produced by \code{\link[=dgp]{dgp()}});
+\item an instance of the \code{bundle} class (produced by \code{\link[=pack]{pack()}}).
+}
+\item \strong{Second argument} (if \code{x_cand} is not \code{NULL}): a \emph{candidate matrix} representing a set of potential design points from which the \code{method} function selects the next points.
+\item \strong{Function output}:
+\itemize{
+\item If \code{x_cand} is not \code{NULL}:
+\itemize{
+\item for \code{gp} or \code{dgp} objects, the output must be a vector of row indices corresponding to the selected design points from the \emph{candidate matrix} (the second argument).
+\item for \code{bundle} objects, the output must be a matrix containing the row indices of the selected design points from the \emph{candidate matrix}. Each column corresponds to
+the indices for an individual emulator in the bundle.
+}
+\item If \code{x_cand} is \code{NULL}:
+\itemize{
+\item for \code{gp} or \code{dgp} objects, the output must be a matrix where each row represents a new design point to be added.
+\item for \code{bundle} objects, the output must be a list with a length equal to the number of emulators in the bundle. Each element in the list is a matrix where rows
+represent the new design points for the corresponding emulator.
+}
 }
 }
 
-See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, \code{\link[=pei]{pei()}}, and \code{\link[=vigf]{vigf()}} for examples on customizing \code{method}. Defaults to \code{\link[=vigf]{vigf()}}.}
+See \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}} for examples of built-in \code{method} functions. Defaults to \code{\link[=vigf]{vigf()}}.}
 
-\item{eval}{an R function that calculates the customized evaluating metric of the emulator. The function must satisfy the following basic rules:
+\item{batch_size}{an integer specifying the number of design points to select in a single iteration. Defaults to \code{1}.
+This argument is used by the built-in \code{method} functions \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, and \code{\link[=vigf]{vigf()}}.
+If you provide a custom \code{method} function with an argument named \code{batch_size}, the value of \code{batch_size} will be passed to your function.}
+
+\item{eval}{an R function that computes a customized metric for evaluating emulator performance. The function must adhere to the following rules:
 \itemize{
-\item the first argument is an emulator object that can be either an instance of
+\item \strong{First argument}: an emulator object, which can be one of the following:
 \itemize{
-\item the \code{gp} class (produced by \code{\link[=gp]{gp()}});
-\item the \code{dgp} class (produced by \code{\link[=dgp]{dgp()}});
-\item the \code{bundle} class (produced by \code{\link[=pack]{pack()}}).
+\item an instance of the \code{gp} class (produced by \code{\link[=gp]{gp()}});
+\item an instance of the \code{dgp} class (produced by \code{\link[=dgp]{dgp()}});
+\item an instance of the \code{bundle} class (produced by \code{\link[=pack]{pack()}}).
 }
-\item the output of the function can be
+\item \strong{Function output}:
 \itemize{
-\item a single metric value, if the first argument is an instance of the \code{gp} class;
-\item a single metric value or a vector of metric values with the length equal to the number of output dimensions, if the first argument is an
-instance of the \code{dgp} class;
-\item a single metric value metric or a vector of metric values with the length equal to the number of emulators in the bundle, if the first
-argument is an instance of the \code{bundle} class.
+\item for \code{gp} objects, the output must be a single metric value.
+\item for \code{dgp} objects, the output can be a single metric value or a vector of metric values with a length equal to the number of output dimensions.
+\item for \code{bundle} objects, the output can be a single metric value or a vector of metric values with a length equal to the number of emulators in the bundle.
 }
 }
 
-If no customized function is provided, the built-in evaluation metric, RMSE, will be calculated. Defaults to \code{NULL}. See \emph{Note} section below for further information.}
+If no custom function is provided, a built-in evaluation metric (RMSE or log-loss, in the case of DGP emulators with categorical likelihoods) will be used.
+Defaults to \code{NULL}. See the \emph{Note} section below for additional details.}
 
-\item{verb}{a bool indicating if the trace information will be printed during the sequential design.
+\item{verb}{a bool indicating if trace information will be printed during the sequential design.
 Defaults to \code{TRUE}.}
 
 \item{autosave}{a list that contains configuration settings for the automatic saving of the emulator:
 \itemize{
-\item \code{switch}: a bool indicating whether to enable the automatic saving of the emulator during the sequential design. When set to \code{TRUE},
+\item \code{switch}: a bool indicating whether to enable automatic saving of the emulator during sequential design. When set to \code{TRUE},
 the emulator in the final iteration is always saved. Defaults to \code{FALSE}.
 \item \code{directory}: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
 of \code{directory} named 'emulator-\code{id}'. Defaults to './check_points'.
 \item \code{fname}: a string representing the base name for the saved emulator files. Defaults to 'check_point'.
-\item \code{freq}: an integer indicating the frequency of automatic savings, measured in the number of iterations. Defaults to \code{5}.
-\item \code{overwrite}: a bool value controlling the file saving behavior. When set to \code{TRUE}, each new automatic saving overwrites the previous one,
-keeping only the latest version. If \code{FALSE}, each automatic saving creates a new file, preserving all previous versions. Defaults to \code{FALSE}.
+\item \code{save_freq}: an integer indicating the frequency of automatic saves, measured in the number of iterations. Defaults to \code{5}.
+\item \code{overwrite}: a bool value controlling the file saving behavior. When set to \code{TRUE}, each new automatic save overwrites the previous one,
+keeping only the latest version. If \code{FALSE}, each automatic save creates a new file, preserving all previous versions. Defaults to \code{FALSE}.
 }}
 
-\item{new_wave}{a bool indicating if the current execution of \code{\link[=design]{design()}} will create a new wave of sequential designs or add the sequential designs to
-the last existing wave. This argument is only used if there are waves existing in the emulator. By creating new waves, one can better visualize the performance
-of the sequential designs in different executions of \code{\link[=design]{design()}} in \code{\link[=draw]{draw()}} and can specify a different evaluation frequency in \code{freq}. However, it can be
-beneficiary to turn this option off to restrict a large number of waves to be visualized in \code{\link[=draw]{draw()}} that could run out of colors. Defaults to \code{TRUE}.}
+\item{new_wave}{a bool indicating whether the current call to \code{\link[=design]{design()}} will create a new wave of sequential designs or add the next sequence of designs to the most recent wave.
+This argument is relevant only if waves already exist in the emulator. Creating new waves can improve the visualization of sequential design performance across different calls
+to \code{\link[=design]{design()}} via \code{\link[=draw]{draw()}}, and allows for specifying a different evaluation frequency in \code{freq}. However, disabling this option can help limit the number of waves visualized
+in \code{\link[=draw]{draw()}} to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to \code{TRUE}.}
 
 \item{M_val}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
-\item{cores}{an integer that gives the number of processes to be used for emulator validations. If set to \code{NULL}, the number of processes is set to
+\item{cores}{an integer that gives the number of processes to be used for emulator validation. If set to \code{NULL}, the number of processes is set to
 \verb{max physical cores available \%/\% 2}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
 
 \item{...}{Any arguments with names that differ from those used in \code{\link[=design]{design()}} but are required by \code{f}, \code{method}, or \code{eval} can be passed here.
-\code{\link[=design]{design()}} will forward relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of the additional arguments provided.
+\code{\link[=design]{design()}} will forward relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of the additional arguments provided.}
 
-If you are using package-provided methods such as \code{\link[=vigf]{vigf()}}, \code{\link[=alm]{alm()}}, \code{\link[=mice]{mice()}}, or \code{\link[=pei]{pei()}} for \code{method}, you can pass \code{batch_size} to \code{design()}
-to select multiple design points at each iteration. For other arguments that control the behavior of these four methods, please refer to their documentation.}
-
-\item{train_N}{the number of training iterations to be used to re-fit the DGP emulator at each step of the sequential design:
+\item{train_N}{the number of training iterations to be used for re-fitting the DGP emulator at each step of the sequential design:
 \itemize{
-\item If \code{train_N} is an integer, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in \code{freq}) with \code{train_N} iterations.
-\item If \code{train_N} is a vector, then its size must be \code{N} even the re-fit frequency specified in \code{freq} is not one.
-\item If \code{train_N} is \code{NULL}, then at each step the DGP emulator will be re-fitted (based on the frequency of re-fit specified in \code{freq}) with \code{100} iterations
-if the DGP emulator was constructed without the Vecchia approximation, and with \code{50} iterations if Vecchia approximation was used.
+\item If \code{train_N} is an integer, the DGP emulator will be re-fitted at each step (based on the re-fit frequency specified in \code{freq[1]}) using \code{train_N} iterations.
+\item If \code{train_N} is a vector, its length must be \code{N}, even if the re-fit frequency specified in \code{freq[1]} is not 1.
+\item If \code{train_N} is \code{NULL}, the DGP emulator will be re-fitted at each step (based on the re-fit frequency specified in \code{freq[1]}) using:
+\itemize{
+\item \code{100} iterations if the DGP emulator was constructed without the Vecchia approximation, or
+\item \code{50} iterations if the Vecchia approximation was used.
+}
 }
 
 Defaults to \code{NULL}.}
@@ -285,13 +300,13 @@ is computationally expensive. Defaults to \code{1}.}
 
 \item{pruning}{a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
 design points exceeds \code{min_size} in \code{control}. The argument is only applicable to DGP emulators (i.e., \code{object} is an instance of \code{dgp} class)
-produced by \code{dgp()} with \code{struc = NULL}. Defaults to \code{TRUE}.}
+produced by \code{dgp()}. Defaults to \code{TRUE}.}
 
 \item{control}{a list that can supply any of the following components to control the dynamic pruning of the DGP emulator:
 \itemize{
-\item \code{min_size}, the minimum number of design points required to trigger the dynamic pruning. Defaults to 10 times of the input dimensions.
-\item \code{threshold}, the R2 value above which a GP node is considered redundant. Defaults to \code{0.97}.
-\item \code{nexceed}, the minimum number of consecutive iterations that the R2 value of a GP node must exceed \code{threshold} to trigger the removal of that node from
+\item \code{min_size}, the minimum number of design points required to trigger dynamic pruning. Defaults to 10 times the number of input dimensions.
+\item \code{threshold}, the \eqn{R^2} value above which a GP node is considered redundant. Defaults to \code{0.97}.
+\item \code{nexceed}, the minimum number of consecutive iterations that the \eqn{R^2} value of a GP node must exceed \code{threshold} to trigger the removal of that node from
 the DGP structure. Defaults to \code{3}.
 }
 
@@ -300,13 +315,19 @@ The argument is only used when \code{pruning = TRUE}.}
 \value{
 An updated \code{object} is returned with a slot called \code{design} that contains:
 \itemize{
-\item \emph{S} slots, named \verb{wave1, wave2,..., waveS}, that contain information of \emph{S} waves of sequential designs that have been applied to the emulator.
+\item \emph{S} slots, named \verb{wave1, wave2,..., waveS}, that contain information of \emph{S} waves of sequential design that have been applied to the emulator.
 Each slot contains the following elements:
 \itemize{
-\item \code{N}, an integer that gives the numbers of steps implemented in the corresponding wave;
-\item \code{rmse}, a matrix that gives the RMSEs of emulators constructed during the corresponding wave, if \code{eval = NULL};
-\item \code{metric}, a matrix that gives the customized evaluating metric values of emulators constructed during the corresponding wave,
-if a customized function is supplied to \code{eval};
+\item \code{N}, an integer that gives the numbers of iterations implemented in the corresponding wave;
+\item \code{rmse}, a matrix providing the evaluation metric values for emulators constructed during the corresponding wave, when \code{eval = NULL}.
+Each row of the matrix represents an iteration.
+\itemize{
+\item for an \code{object} of class \code{gp}, the matrix contains a single column of RMSE values.
+\item for an \code{object} of class \code{dgp} without a categorical likelihood, each row contains mean/median squared errors corresponding to different output dimensions.
+\item for an \code{object} of class \code{dgp} with a categorical likelihood, the matrix contains a single column of log-loss values.
+\item for an \code{object} of class \code{bundle}, each row contains either mean/median squared errors or log-loss values for the emulators in the bundle.
+}
+\item \code{metric}: a matrix providing the values of custom evaluation metrics, as computed by the user-supplied \code{eval} function, for emulators constructed during the corresponding wave.
 \item \code{freq}, an integer that gives the frequency that the emulator validations are implemented during the corresponding wave.
 \item \code{enrichment}, a vector of size \code{N} that gives the number of new design points added after each step of the sequential design (if \code{object} is
 an instance of the \code{gp} or \code{dgp} class), or a matrix that gives the number of new design points added to emulators in a bundle after each step of
@@ -315,36 +336,45 @@ the sequential design (if \code{object} is an instance of the \code{bundle} clas
 
 If \code{target} is not \code{NULL}, the following additional elements are also included:
 \itemize{
-\item \code{target}, the target RMSE(s) to stop the sequential design.
-\item \code{reached}, a bool (if \code{object} is an instance of the \code{gp} or \code{dgp} class) or a vector of bools (if \code{object} is an instance of the \code{bundle}
-class) that indicate if the target RMSEs are reached at the end of the sequential design.
+\item \code{target}: the target evaluating metric computed by the \code{eval} or built-in function to stop the sequential design.
+\item \code{reached}: indicates whether the \code{target} was reached at the end of the sequential design:
+\itemize{
+\item a bool if \code{object} is an instance of the \code{gp} or \code{dgp} class.
+\item a vector of bools if \code{object} is an instance of the \code{bundle} class, with its length determined as follows:
+\itemize{
+\item equal to the number of emulators in the bundle when \code{eval = NULL}.
+\item equal to the length of the output from \code{eval} when a custom \code{eval} function is provided.
 }
-\item a slot called \code{type} that gives the type of validations:
+}
+}
+\item a slot called \code{type} that gives the type of validation:
 \itemize{
 \item either LOO ('loo') or OOS ('oos') if \code{eval = NULL}. See \code{\link[=validate]{validate()}} for more information about LOO and OOS.
 \item 'customized' if a customized R function is provided to \code{eval}.
 }
 \item two slots called \code{x_test} and \code{y_test} that contain the data points for the OOS validation if the \code{type} slot is 'oos'.
-\item If \code{y_cand = NULL} and there are \code{NA}s returned from the supplied \code{f} during the sequential design, a slot called \code{exclusion} is included
+\item If \code{y_cand = NULL} and \code{x_cand} is supplied, and there are \code{NA}s returned from the supplied \code{f} during the sequential design, a slot called \code{exclusion} is included
 that records the located design positions that produced \code{NA}s via \code{f}. The sequential design will use this information to
-avoid re-visiting the same locations (if \code{x_cand} is supplied) or their neighborhoods (if \code{x_cand} is \code{NULL}) in later runs of \code{design()}.
+avoid re-visiting the same locations in later runs of \code{design()}.
 }
 
 See \emph{Note} section below for further information.
 }
 \description{
-This function implements the sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+This function implements sequential design and active learning for a (D)GP emulator or
+a bundle of (D)GP emulators, supporting an array of popular methods as well as user-specified approaches.
+It can also be used as a wrapper for Bayesian optimization methods.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 \itemize{
-\item The validation of an emulator is forced after the final step of a sequential design even \code{N} is not multiples of the second element in \code{freq}.
+\item Validation of an emulator is forced after the final step of a sequential design even if \code{N} is not a multiple of the second element in \code{freq}.
 \item Any \code{loo} or \code{oos} slot that already exists in \code{object} will be cleaned, and a new slot called \code{loo} or \code{oos} will be created in the returned object
 depending on whether \code{x_test} and \code{y_test} are provided. The new slot gives the validation information of the emulator constructed in the final step of
 the sequential design. See \code{\link[=validate]{validate()}} for more information about the slots \code{loo} and \code{oos}.
-\item If \code{object} has previously been used by \code{\link[=design]{design()}} for sequential designs, the information of the current wave of the sequential design will replace
+\item If \code{object} has previously been used by \code{\link[=design]{design()}} for sequential design, the information of the current wave of the sequential design will replace
 those of old waves and be contained in the returned object, unless
 \itemize{
 \item the validation type (LOO or OOS depending on whether \code{x_test} and \code{y_test} are supplied or not) of the current wave of the sequential design is the
@@ -355,15 +385,15 @@ functions are consistent among different waves. Otherwise, the trace plot of RMS
 different waves.
 }
 
-In above two cases, the information of the current wave of the sequential design will be added to the \code{design} slot of the returned object under the name \code{waveS}.
+For the above two cases, the information of the current wave of the sequential design will be added to the \code{design} slot of the returned object under the name \code{waveS}.
 \item If \code{object} is an instance of the \code{gp} class and \code{eval = NULL}, the matrix in the \code{rmse} slot is single-columned. If \code{object} is an instance of
 the \code{dgp} or \code{bundle} class and \code{eval = NULL}, the matrix in the \code{rmse} slot can have multiple columns that correspond to different output dimensions
 or different emulators in the bundle.
 \item If \code{object} is an instance of the \code{gp} class and \code{eval = NULL}, \code{target} needs to be a single value giving the RMSE threshold. If \code{object} is an instance
-of the \code{dgp} or \code{bundle} class and \code{eval = NULL}, \code{target} can be a vector of values that gives the RMSE thresholds for different output dimensions or
-different emulators. If a single value is provided, it will be used as the RMSE threshold for all output dimensions (if \code{object} is an instance of the \code{dgp}) or all emulators
-(if \code{object} is an instance of the \code{bundle}). If a customized function is supplied to \code{eval}, the user needs to ensure that the length of \code{target} is equal
-to that of the output from \code{eval}.
+of the \code{dgp} or \code{bundle} class and \code{eval = NULL}, \code{target} can be a vector of values that gives the thresholds of evaluating metrics for different output dimensions or
+different emulators. If a single value is provided, it will be used as the threshold for all output dimensions (if \code{object} is an instance of the \code{dgp}) or all emulators
+(if \code{object} is an instance of the \code{bundle}). If a customized function is supplied to \code{eval} and \code{target} is given as a vector, the user needs to ensure that the length
+of \code{target} is equal to that of the output from \code{eval}.
 \item When defining \code{f}, it is important to ensure that:
 \itemize{
 \item the column order of the first argument of \code{f} is consistent with the training input used for the emulator;
@@ -371,8 +401,8 @@ to that of the output from \code{eval}.
 or the order of emulators placed in \code{object} (if \code{object} is an instance of the \code{bundle} class).
 }
 \item The output matrix produced by \code{f} may include \code{NA}s. This is especially beneficial as it allows the sequential design process to continue without interruption,
-even if errors or \code{NA} outputs are encountered from \code{f} at certain input locations identified by the sequential designs. Users should ensure to handle any errors
-within \code{f} by appropriately returning \code{NA}s.
+even if errors or \code{NA} outputs are encountered from \code{f} at certain input locations identified by the sequential design. Users should ensure that any errors
+within \code{f} are handled by appropriately returning \code{NA}s.
 \item When defining \code{eval}, the output metric needs to be positive if \code{\link[=draw]{draw()}} is used with \code{log = T}. And one needs to ensure that a lower metric value indicates
 a better emulation performance if \code{target} is set.
 }

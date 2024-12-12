@@ -7,36 +7,45 @@
 \alias{mice.bundle}
 \title{Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using MICE}
 \usage{
-mice(object, x_cand, ...)
+mice(object, ...)
 
 \method{mice}{gp}(
   object,
-  x_cand,
+  x_cand = NULL,
+  n_cand = 200,
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
   workers = 1,
+  limits = NULL,
+  int = FALSE,
   ...
 )
 
 \method{mice}{dgp}(
   object,
-  x_cand,
+  x_cand = NULL,
+  n_cand = 200,
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
   workers = 1,
+  limits = NULL,
+  int = FALSE,
   aggregate = NULL,
   ...
 )
 
 \method{mice}{bundle}(
   object,
-  x_cand,
+  x_cand = NULL,
+  n_cand = 200,
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
   workers = 1,
+  limits = NULL,
+  int = FALSE,
   aggregate = NULL,
   ...
 )
@@ -49,13 +58,16 @@ mice(object, x_cand, ...)
 \item the S3 class \code{bundle}.
 }}
 
-\item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
-from which the next design point(s) are determined. If \code{object} is an instance of the \code{bundle} class, \code{x_cand} could also
-be a list with the length equal to the number of emulators contained in the \code{object}. Each slot in \code{x_cand} is a matrix
-that gives a candidate set for each emulator included in the bundle. See \emph{Note} section below for further information.}
-
 \item{...}{any arguments (with names different from those of arguments used in \code{\link[=mice]{mice()}}) that are used by \code{aggregate}
 can be passed here.}
+
+\item{x_cand}{a matrix (with each row being a design point and column being an input dimension) that gives a candidate set
+from which the next design point(s) are determined. If \code{object} is an instance of the \code{bundle} class and \code{aggregate} is not supplied, \code{x_cand} can also be a list.
+The list must have a length equal to the number of emulators in \code{object}, with each element being a matrix representing the candidate set for a corresponding
+emulator in the bundle. Defaults to \code{NULL}.}
+
+\item{n_cand}{an integer specifying the size of the candidate set to be generated for selecting the next design point(s).
+This argument is used only when \code{x_cand} is \code{NULL}. Defaults to \code{200}.}
 
 \item{batch_size}{an integer that gives the number of design points to be chosen.
 Defaults to \code{1}.}
@@ -68,6 +80,15 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 \item{workers}{the number of processes to be used for the criterion calculation. If set to \code{NULL},
 the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
 
+\item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
+If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
+first and second columns correspond to the minimum and maximum values of the input dimensions. This
+argument is only used when \code{x_cand = NULL}. Defaults to \code{NULL}.}
+
+\item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
+input dimensions. This argument is only used when \code{x_cand = NULL}. Defaults to \code{FALSE}.}
+
 \item{aggregate}{an R function that aggregates scores of the MICE across different output dimensions (if \code{object} is an instance
 of the \code{dgp} class) or across different emulators (if \code{object} is an instance of the \code{bundle} class). The function should be specified in the
 following basic form:
@@ -78,25 +99,39 @@ of the matrix equals to:
 \item the emulator output dimension if \code{object} is an instance of the \code{dgp} class; or
 \item the number of emulators contained in \code{object} if \code{object} is an instance of the \code{bundle} class.
 }
-\item the output should be a vector that gives aggregations of scores at different design points.
+\item the output should be a vector that gives aggregate scores at different design points.
 }
 
-Set to \code{NULL} to disable the aggregation. Defaults to \code{NULL}.}
+Set to \code{NULL} to disable aggregation. Defaults to \code{NULL}.}
 }
 \value{
+\enumerate{
+\item If \code{x_cand} is not \code{NULL}:
 \itemize{
-\item If \code{object} is an instance of the \code{gp} class, a vector is returned with the length equal to \code{batch_size}, giving the positions (i.e., row numbers)
-of next design points from \code{x_cand}.
-\item If \code{object} is an instance of the \code{dgp} class, a matrix is returned with row number equal to \code{batch_size} and column number equal to one (if \code{aggregate}
-is not \code{NULL}) or the output dimension (if \code{aggregate} is \code{NULL}), giving positions (i.e., row numbers) of next design points from \code{x_cand} to be added
-to the DGP emulator across different outputs. If \code{object} is a DGP emulator with either \code{Hetero} or \code{NegBin} likelihood layer, the returned matrix has
-two columns with the first column giving positions of next design points from \code{x_cand} that correspond to the mean parameter of the normal or negative Binomial
-distribution, and the second column giving positions of next design points from \code{x_cand} that correspond to the variance parameter of the normal distribution or
-the dispersion parameter of the negative Binomial distribution. If \code{object} is a DGP emulator with a \code{Categorical} likelihood layer, the returned matrix will
-have either one column (for binary output) or \code{K} columns (for multi-class output), giving the positions of the next design points from \code{x_cand} that correspond
-to the probabilities of different classes.
-\item If \code{object} is an instance of the \code{bundle} class, a matrix is returned with row number equal to \code{batch_size} and column number equal to the number of
-emulators in the bundle, giving positions (i.e., row numbers) of next design points from \code{x_cand} to be added to individual emulators.
+\item When \code{object} is an instance of the \code{gp} class, a vector of length \code{batch_size} is returned, containing the positions
+(row numbers) of the next design points from \code{x_cand}.
+\item When \code{object} is an instance of the \code{dgp} class, a vector of length \code{batch_size * D} is returned, containing the positions
+(row numbers) of the next design points from \code{x_cand} to be added to the DGP emulator.
+\itemize{
+\item \code{D} is the number of output dimensions of the DGP emulator if no likelihood layer is included.
+\item For a DGP emulator with a \code{Hetero} or \code{NegBin} likelihood layer, \code{D = 2}.
+\item For a DGP emulator with a \code{Categorical} likelihood layer, \code{D = 1} for binary output or \code{D = K} for multi-class output with \code{K} classes.
+}
+\item When \code{object} is an instance of the \code{bundle} class, a matrix is returned with \code{batch_size} rows and a column for each emulator in
+the bundle, containing the positions (row numbers) of the next design points from \code{x_cand} for individual emulators.
+}
+\item If \code{x_cand} is \code{NULL}:
+\itemize{
+\item When \code{object} is an instance of the \code{gp} class, a matrix with \code{batch_size} rows is returned, giving the next design points to be evaluated.
+\item When \code{object} is an instance of the \code{dgp} class, a matrix with \code{batch_size * D} rows is returned, where:
+\itemize{
+\item \code{D} is the number of output dimensions of the DGP emulator if no likelihood layer is included.
+\item For a DGP emulator with a \code{Hetero} or \code{NegBin} likelihood layer, \code{D = 2}.
+\item For a DGP emulator with a \code{Categorical} likelihood layer, \code{D = 1} for binary output or \code{D = K} for multi-class output with \code{K} classes.
+}
+\item When \code{object} is an instance of the \code{bundle} class, a list is returned with a length equal to the number of emulators in the bundle. Each
+element of the list is a matrix with \code{batch_size} rows, where each row represents a design point to be added to the corresponding emulator.
+}
 }
 }
 \description{
@@ -104,15 +139,12 @@ This function searches from a candidate set to locate the next design point(s) t
 or a bundle of (D)GP emulators using the Mutual Information for Computer Experiments (MICE), see the reference below.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
-\itemize{
-\item The column order of the first argument of \code{aggregate} must be consistent with the order of emulator output dimensions (if \code{object} is an instance of the
-\code{dgp} class), or the order of emulators placed in \code{object} if \code{object} is an instance of the \code{bundle} class;
-\item If \code{x_cand} is supplied as a list when \code{object} is an instance of \code{bundle} class and a \code{aggregate} function is provided, the matrices in \code{x_cand} must have
-common rows (i.e., the candidate sets of emulators in the bundle have common input locations) so the \code{aggregate} function can be applied.
-}
+The first column of the matrix supplied to the first argument of \code{aggregate} must correspond to the first output dimension of the DGP emulator
+if \code{object} is an instance of the \code{dgp} class, and so on for subsequent columns and dimensions. If \code{object} is an instance of the \code{bundle} class,
+the first column must correspond to the first emulator in the bundle, and so on for subsequent columns and emulators.
 }
 \examples{
 \dontrun{

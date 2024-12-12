@@ -24,9 +24,9 @@
 \item{type}{a character string, either \code{"table"} or \code{"plot"}, indicating the format of the output.
 If set to \code{"table"}, the function returns a summary in table. If set to \code{"plot"}, the function
 returns an interactive visualization. Defaults to \code{"plot"}. If the \code{object} was created with
-\code{lgp()} where \code{struc} is not a data frame, \code{type} will automatically default to \code{"table"}.}
+\code{\link[=lgp]{lgp()}} where \code{struc} is not a data frame, \code{type} will automatically default to \code{"table"}.}
 
-\item{...}{N/A.}
+\item{...}{Any arguments that can be passed to \code{\link[kableExtra:kbl]{kableExtra::kbl()}} when \code{type = "table"}.}
 
 \item{group_size}{an integer specifying the number of consecutive layers to be grouped together
 in the interactive visualization of linked emulators when \code{type = "plot"}.
@@ -34,9 +34,10 @@ This argument is only applicable if \code{object} is an instance of the \code{lg
 Defaults to \code{1}.}
 }
 \value{
-Either a table or an interactive visualization of the emulator, returned as a \code{visNetwork} object.
-The visualization is compatible with R Markdown documents and the RStudio Viewer.
-The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}}.
+Either a summary table (returned as \code{kableExtra} object) or an interactive visualization
+(returned as a \code{visNetwork} object) of the emulator. The visualization is compatible with R Markdown
+documents and the RStudio Viewer. The summary table can be further customized by \link[kableExtra:kableExtra-package]{kableExtra::kableExtra} package.
+The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}} from the \link[visNetwork:visNetwork]{visNetwork::visNetwork} package.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
@@ -45,7 +46,7 @@ This function provides a summary of key information for a GP, DGP, or linked (D)
 by generating either a table or an interactive plot of the emulator’s structure.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

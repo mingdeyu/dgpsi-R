@@ -9,27 +9,18 @@
 #' please use the updated [lgp()] function, which provides a simpler and more efficient
 #' approach to building (D)GP emulators.
 #'
-#' @param ... a sequence of lists:
-#' 1. For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by [kernel()]), or
-#'    likelihood nodes (produced by [Poisson()], [Hetero()], or [NegBin()].
-#' 2. For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by [gp()] or
+#' @param ... a sequence of lists. Each list represents a system layer and contains emulators (produced by [gp()] or
 #'    [dgp()]) in that layer.
 #'
-#' @return A list defining a DGP structure (for `struc` of [dgp()]) or a linked (D)GP structure
-#'     (for `struc` for [lgp()]).
+#' @return A list defining a linked (D)GP structure to be passed to `struc` of [lgp()].
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @examples
-#' \dontrun{
-#'
-#' # See lgp() for an example.
-#' }
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @keywords internal
 #' @export
 combine <- function(...) {
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "combine()",
     details = c(i = "The function will be removed in the next release.",
                 i = "To construct linked (D)GP structure, please use the updated `lgp()` function instead."
@@ -56,7 +47,7 @@ combine <- function(...) {
 #'   training input data for different emulators. `Y` contains *N* single-column matrices named `emulator1,...,emulatorN` that are
 #'   training output data for different emulators.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -163,15 +154,15 @@ pack <- function(..., id = NULL) {
 
 #' @title Unpack a bundle of (D)GP emulators
 #'
-#' @description This function unpacks a bundle of (D)GP emulators safely so any further manipulations of unpacked individual emulators
-#'     will not impact the ones in the bundle.
+#' @description This function unpacks a bundle of (D)GP emulators safely so that any further manipulations of unpacked individual emulators
+#'     will not impact those in the bundle.
 #'
 #' @param object an instance of the class `bundle`.
 #'
 #' @return A named list that contains individual emulators (named `emulator1,...,emulatorS`) packed in `object`,
 #'    where `S` is the number of emulators in `object`.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -210,16 +201,15 @@ unpack <- function(object) {
 #' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param pkl_file the path to and the name of the `.pkl` file to which
 #'     the emulator `object` is saved.
-#' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be saved.
-#'     This argument has no effects on GP or bundles of GP emulators. Defaults to `TRUE`.
+#' @param light a bool indicating if a light version of the constructed emulator
+#'     (that requires less disk space to store) will be saved. Defaults to `TRUE`.
 #'
-#' @return No return value. `object` will be save to a local `.pkl` file specified by `pkl_file`.
+#' @return No return value. `object` will be saved to a local `.pkl` file specified by `pkl_file`.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @note Since the constructed emulators are 'python' objects, [save()] from R will not work as it is only for R objects. If `object`
-#'     was processed by [set_vecchia()] to add or remove the Vecchia approximation, `light` needs to be set to `FALSE` to ensure
-#'     reproducibility after the saved emulator is loaded by [read()], since when `light = TRUE`, the imputations generated during
-#'     emulator loading will be different.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
+#' @note Since emulators built from the package are 'python' objects, [save()] from R will not work as it would for R objects. If `object`
+#'     was processed by [set_vecchia()] to add or remove the Vecchia approximation, `light` should be set to `FALSE` to ensure
+#'     reproducibility after the saved emulator is reloaded by [read()].
 #' @examples
 #' \dontrun{
 #'
@@ -241,7 +231,7 @@ write <- function(object, pkl_file, light = TRUE) {
       object[['emulator_obj']] <- NULL
       object[['container_obj']] <- NULL
     } else if (inherits(object,"lgp")){
-      if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct the 'object' by lgp().", call. = FALSE)
+      if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct and activate the 'object' by lgp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
     } else if (inherits(object,"bundle")){
       N <- length(object) - 1
@@ -251,6 +241,8 @@ write <- function(object, pkl_file, light = TRUE) {
         if ( inherits(object[[paste('emulator',i, sep='')]],"dgp") ) {
           if ( !"seed" %in% names(object[[paste('emulator',i, sep='')]][['specs']]) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or produce a new version of 'object' by updating the included DGP emulators via set_imp().", call. = FALSE)
           object[[paste('emulator',i, sep='')]][['emulator_obj']] <- NULL
+          object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
+        } else {
           object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
         }
       }
@@ -271,7 +263,7 @@ write <- function(object, pkl_file, light = TRUE) {
 #'
 #' @return No return value.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -305,7 +297,7 @@ set_seed <- function(seed) {
 #'
 #' @return The updated `object`, with the assigned ID stored in its `id` slot.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -336,7 +328,7 @@ set_id <- function(object, id) {
 #'
 #' @return No return value.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 set_thread_num <- function(num) {
@@ -360,7 +352,7 @@ set_thread_num <- function(num) {
 #'
 #' @return the number of threads.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 get_thread_num <- function() {
@@ -380,7 +372,7 @@ get_thread_num <- function() {
 #'
 #' @return The S3 class of a GP emulator, a DGP emulator, a linked (D)GP emulator, or a bundle of (D)GP emulators.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -409,7 +401,11 @@ read <- function(pkl_file) {
         class(res) <- "gp"
       } else {
         est_obj <- res$constructor_obj$export()
-        linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        if (is.null(res[['specs']][['linked_idx']])){
+          linked_idx <- NULL
+        } else {
+          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
@@ -431,7 +427,11 @@ read <- function(pkl_file) {
         est_obj <- res$constructor_obj$estimate(burnin)
         B <- res$specs$B
         isblock <- res$constructor_obj$block
-        linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        if (is.null(res[['specs']][['linked_idx']])){
+          linked_idx <- NULL
+        } else {
+          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
+        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
@@ -474,14 +474,29 @@ read <- function(pkl_file) {
           if ( type=='emulator' ) {
             class(res[[paste('emulator',i, sep='')]]) <- "dgp"
           } else if ( type=='gp' ) {
-            class(res[[paste('emulator',i, sep='')]]) <- "gp"
+            if ('container_obj' %in% names(res[[paste('emulator',i, sep='')]])){
+              class(res[[paste('emulator',i, sep='')]]) <- "gp"
+            } else {
+              est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$export()
+              if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
+                linked_idx <- NULL
+              } else {
+                linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+              }
+              res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+              class(res[[paste('emulator',i, sep='')]]) <- "gp"
+            }
           }
         } else {
           burnin <- res[[paste('emulator',i, sep='')]]$constructor_obj$burnin
           est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$estimate(burnin)
           B <- res[[paste('emulator',i, sep='')]]$specs$B
           isblock <- res[[paste('emulator',i, sep='')]]$constructor_obj$block
-          linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+          if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
+            linked_idx <- NULL
+          } else {
+            linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
+          }
           set_seed(res[[paste('emulator',i, sep='')]]$specs$seed)
           res[[paste('emulator',i, sep='')]][['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
           res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
@@ -583,18 +598,19 @@ read <- function(pkl_file) {
 #' @param type a character string, either `"table"` or `"plot"`, indicating the format of the output.
 #'     If set to `"table"`, the function returns a summary in table. If set to `"plot"`, the function
 #'     returns an interactive visualization. Defaults to `"plot"`. If the `object` was created with
-#'     `lgp()` where `struc` is not a data frame, `type` will automatically default to `"table"`.
+#'     [lgp()] where `struc` is not a data frame, `type` will automatically default to `"table"`.
 #' @param group_size an integer specifying the number of consecutive layers to be grouped together
 #'     in the interactive visualization of linked emulators when `type = "plot"`.
 #'     This argument is only applicable if `object` is an instance of the `lgp` class.
 #'     Defaults to `1`.
-#' @param ... N/A.
+#' @param ... Any arguments that can be passed to [kableExtra::kbl()] when `type = "table"`.
 #'
-#' @return Either a table or an interactive visualization of the emulator, returned as a `visNetwork` object.
-#' The visualization is compatible with R Markdown documents and the RStudio Viewer.
-#' The resulting `visNetwork` object can be saved as an HTML file using [visNetwork::visSave()].
+#' @return Either a summary table (returned as `kableExtra` object) or an interactive visualization
+#' (returned as a `visNetwork` object) of the emulator. The visualization is compatible with R Markdown
+#' documents and the RStudio Viewer. The summary table can be further customized by [kableExtra::kableExtra] package.
+#' The resulting `visNetwork` object can be saved as an HTML file using [visNetwork::visSave()] from the [visNetwork::visNetwork] package.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -616,7 +632,39 @@ summary.gp <- function(object, type = "plot", ...) {
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
   if (type == "table"){
-    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+    nodes <- data.frame(
+      KernelType = ifelse(object$specs$kernel=='sexp', "Squared Exp", "Mat\u00e9rn-2.5"),
+      InputDims = length(object$emulator_obj$kernel$input_dim),
+      OutputDims = 1,
+      LengthScales = paste(format(object$specs$lengthscales, digits = 3, nsmall = 3), collapse = ", "),
+      Variance = format(object$specs$scale, digits = 3, nsmall = 3),
+      Nugget = format(object$specs$nugget, digits = 3, nsmall = 3, scientific = TRUE),
+      Vecchia = ifelse(object$specs$vecchia, "ON", "OFF"),
+      stringsAsFactors = FALSE
+    )
+    defaults <- list(
+      col.names = c(
+        "Kernel", "Input Dim(s)", "Output Dim",
+        "Length-scale(s)", "Scale (Prior Var)", "Nugget", "Vecchia"
+      ),
+      format = "simple",
+      row.names = FALSE,
+      align = rep("c", ncol(nodes)),
+      caption = "Summary of GP Emulator",
+      escape = FALSE
+    )
+
+    # Capture user-supplied arguments as a list
+    user_args <- list(...)
+
+    # Merge defaults with user-supplied arguments (only if not already provided)
+    final_args <- defaults
+    for (name in names(user_args)) {
+      final_args[[name]] <- user_args[[name]]
+    }
+
+    # Call knitr::kable with the merged arguments
+    do.call(kableExtra::kbl, c(list(nodes), final_args))
   } else {
 
     c24_rgba_lighter <- c(
@@ -778,7 +826,82 @@ summary.dgp <- function(object, type = "plot", ...) {
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
   if (type == "table"){
-    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+    nodes <- data.frame()
+
+    # Iterate through layers and nodes to populate the dataframe
+    n_layer <- object$constructor_obj$n_layer
+    for (i in 1:n_layer) {
+      layer_id <- object$specs[[paste0("layer", i)]]
+
+      for (j in 1:length(layer_id)) {
+        node_id <- layer_id[[paste0("node", j)]]
+
+        # Default values
+        formatted_lengthscales <- NA
+        total_input_dim <- NA
+        kernel_display <- NA
+
+        if (is.null(node_id[["type"]])) {
+          # Format length scales
+          formatted_lengthscales <- paste(format(node_id$lengthscales, digits = 3, nsmall = 3), collapse = ", ")
+
+          # Calculate total input dimension
+          total_input_dim <- length(object$emulator_obj$all_layer[[i]][[j]]$input_dim)
+          global_connect_dim <- object$emulator_obj$all_layer[[i]][[j]]$connect
+          if (!is.null(global_connect_dim)) {
+            total_input_dim <- total_input_dim + length(global_connect_dim)
+          }
+
+          # Determine kernel display
+          kernel_display <- ifelse(node_id$kernel == "sexp", "Squared Exp", "Mat\u00e9rn-2.5")
+        }
+
+        # Combine Node Type and Kernel Type
+        node_type_display <- ifelse(
+          is.null(node_id[["type"]]),
+          paste0("GP (", kernel_display, ")"),
+          paste0("Likelihood (", node_id$type, ")")
+        )
+
+        # Append to the nodes dataframe
+        nodes <- rbind(nodes, data.frame(
+          NodeType = node_type_display,
+          Layer = i,
+          NodeNo = j,
+          InputDims = ifelse(is.null(node_id[["type"]]), total_input_dim, length(object$emulator_obj$all_layer[[i]][[j]]$input_dim)),
+          OutputDims = 1,
+          LengthScales = formatted_lengthscales,
+          Variance = ifelse(is.null(node_id[["type"]]), format(node_id$scale, digits = 3, nsmall = 3), NA),
+          Nugget = ifelse(is.null(node_id[["type"]]), format(node_id$nugget, digits = 3, nsmall = 3, scientific = TRUE), NA),
+          stringsAsFactors = FALSE
+        ))
+      }
+    }
+
+    # Rename columns to add spaces and make them more readable
+    defaults <- list(
+      col.names = c(
+        "Node Type", "Layer", "Node No", "Input Dim(s)", "Output Dim",
+        "Length-scale(s)", "Scale (Prior Var)", "Nugget"
+      ),
+      format = "simple",
+      row.names = FALSE,
+      align = rep("c", ncol(nodes)),
+      caption = "Summary of DGP Emulator Nodes",
+      escape = FALSE
+    )
+
+    # Capture user-supplied arguments as a list
+    user_args <- list(...)
+
+    # Merge defaults with user-supplied arguments (only if not already provided)
+    final_args <- defaults
+    for (name in names(user_args)) {
+      final_args[[name]] <- user_args[[name]]
+    }
+
+    # Call knitr::kable with the merged arguments
+    do.call(kableExtra::kbl, c(list(nodes), final_args))
   } else {
     c24_rgba_lighter <- c(
       "rgba(115, 184, 255, 1)",   # lighter dodgerblue2
@@ -1042,8 +1165,63 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 
   if ( "metadata" %in% names(object$specs) ){
     if (type == 'table') {
-      if ( isFALSE("emulator_obj" %in% names(object)) ) stop("Table summary is only available when 'object' is built with `mode = 'activate'` in lgp(). Use `type = 'plot'` instead for graphical summary.", call. = FALSE)
-      pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
+      struc <- object$specs$struc
+      metadata <- object$specs$metadata
+      metadata$Global_Output_Dims <- sapply(metadata$Emulator, function(emulator_id) {
+        # Get the total output dimensions for this emulator
+        total_out_dim <- metadata$Total_Output_Dims[metadata$Emulator == emulator_id]
+
+        # Full set of output dimensions for this emulator
+        all_output_dims <- 1:total_out_dim
+
+        # Find connected output dims in struc
+        connected_outputs <- struc$From_Output[struc$From_Emulator == emulator_id]
+
+        # Global output dims are those not in connected outputs
+        global_outputs <- setdiff(all_output_dims, connected_outputs)
+
+        # Convert to string if there are multiple or no global outputs
+        if (length(global_outputs) == 0) {
+          return(NA)  # No global outputs
+        } else {
+          return(paste(global_outputs, collapse = ", "))
+        }
+      })
+
+      nodes <- data.frame(
+        Emulator = metadata$Emulator,
+        Type = toupper(metadata$Type),
+        Layer = metadata$Layer,
+        Position = metadata$Pos_in_Layer,
+        Input_Dims = metadata$Total_Input_Dims,
+        Output_Dims = metadata$Total_Output_Dims,
+        Global_Output_Indices = ifelse(is.na(metadata$Global_Output_Dims), 'None', metadata$Global_Output_Dims),
+        Vecchia = ifelse(metadata$Vecchia, "ON", "OFF"),
+        stringsAsFactors = FALSE
+      )
+
+      defaults <- list(
+        col.names = c(
+          "Emulator ID", "Type", "Layer", "Position", "Input Dim(s)",
+          "Output Dim(s)", "Global Output Idx", "Vecchia"
+        ),
+        format = "simple",
+        row.names = FALSE,
+        align = rep("c", ncol(nodes)),
+        caption = "Summary of Linked Emulators"
+      )
+
+      # Capture user-supplied arguments as a list
+      user_args <- list(...)
+
+      # Merge defaults with user-supplied arguments (only if not already provided)
+      final_args <- defaults
+      for (name in names(user_args)) {
+        final_args[[name]] <- user_args[[name]]
+      }
+
+      # Call knitr::kable with the merged arguments
+      do.call(kableExtra::kbl, c(list(nodes), final_args))
     } else {
       N <- as.integer(group_size)
       c24_rgba_lighter <- c(
@@ -1274,13 +1452,13 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 #'     constructed by [gp()], [dgp()] or [lgp()].
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
-#' @param vecchia a boolean or a list of booleans to indicate the addition or removal of the Vecchia approximation:
-#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` is a boolean that indicates
+#' @param vecchia a bool or a list of bools to indicate the addition or removal of the Vecchia approximation:
+#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` is a bool that indicates
 #'   either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of the Vecchia approximation from `object`.
-#' * if `object` is an instance of the `lgp` class, `x` can be a boolean or a list of booleans:
-#'   - if `vecchia` is a boolean, it indicates either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of
+#' * if `object` is an instance of the `lgp` class, `x` can be a bool or a list of bools:
+#'   - if `vecchia` is a bool, it indicates either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of
 #'     the Vecchia approximation from all individual (D)GP emulators contained in `object`.
-#'   - if `vecchia` is a list of booleans, it should have same shape as `struc` that was supplied to [lgp()]. Each boolean
+#'   - if `vecchia` is a list of bools, it should have same shape as `struc` that was supplied to [lgp()]. Each bool
 #'     in the list indicates if the corresponding (D)GP emulator contained in `object` shall have the Vecchia approximation
 #'     added or removed.
 #' @param M the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to `25`.
@@ -1298,7 +1476,7 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 #'     without the need to reconstruct the emulator. If the emulator was built without the Vecchia approximation, the function
 #'     can add it, and if the emulator was built with the Vecchia approximation, the function can remove it. If the current
 #'     state already matches the requested state, the emulator remains unchanged.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
@@ -1392,7 +1570,7 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
 #'     even without knowing how different emulators are connected together. When this information is available and
 #'     different emulators are collected, the connection information between emulators can then be assigned to
 #'     individual emulators with this function.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1408,7 +1586,7 @@ set_linked_idx <- function(object, idx) {
   }
 
   lifecycle::deprecate_warn(
-    when = "3.0.0",
+    when = "2.5.0",
     what = "set_linked_idx()",
     details = c(i = "The function will be removed in the next release.",
                 i = "Please use the updated `lgp()` function to specify linked information for (D)GP emulators."
@@ -1423,12 +1601,10 @@ set_linked_idx <- function(object, idx) {
 
 #' @title Reset number of imputations for a DGP emulator
 #'
-#' @description This function resets the number of imputations for predictions from a DGP emulator.
+#' @description This function resets the number of imputations for prediction from a DGP emulator.
 #'
 #' @param object an instance of the S3 class `dgp`.
-#' @param B the number of imputations to produce predictions from `object`. Increase the value to account for
-#'     more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
-#'     but faster predictions. Defaults to `5`.
+#' @param B the number of imputations to produce predictions from `object`. Increase the value to improve imputation uncertainty quantification. Decrease the value to improve speed of prediction. Defaults to `5`.
 #'
 #' @return An updated `object` with the information of `B` incorporated.
 #'
@@ -1439,7 +1615,7 @@ set_linked_idx <- function(object, idx) {
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()]
 #'   in `object` will be removed and not contained in the returned object.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1468,10 +1644,8 @@ set_imp <- function(object, B = 5) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
@@ -1490,29 +1664,29 @@ set_imp <- function(object, B = 5) {
 }
 
 
-#' @title Trim the sequences of model parameters of a DGP emulator
+#' @title Trim the sequence of hyperparameter estimates within a DGP emulator
 #'
-#' @description This function trim the sequences of model parameters of a DGP emulator
-#'     that are generated during the training.
+#' @description This function trims the sequence of hyperparameter estimates within a DGP emulator
+#'     generated during training.
 #'
 #' @param object an instance of the S3 class `dgp`.
-#' @param start the first iteration before which all iterations are trimmed from the sequences.
-#' @param end the last iteration after which all iterations are trimmed from the sequences.
+#' @param start the first iteration before which all iterations are trimmed from the sequence.
+#' @param end the last iteration after which all iterations are trimmed from the sequence.
 #'     Set to `NULL` to keep all iterations after (including) `start`. Defaults to `NULL`.
-#' @param thin the interval between the `start` and `end` iterations to thin out the sequences.
+#' @param thin the interval between the `start` and `end` iterations to thin out the sequence.
 #'     Defaults to 1.
 #'
-#' @return An updated `object` with trimmed sequences of model parameters.
+#' @return An updated `object` with a trimmed sequence of hyperparameters.
 #'
 #' @note
 #' * This function is useful when a DGP emulator has been trained and one wants to trim
-#'   the sequences of model parameters and use the trimmed sequences to generate the point estimates
-#'   of DGP model parameters for predictions.
+#'   the sequence of hyperparameters estimated and to use the trimmed sequence to generate point estimates
+#'   of the DGP model parameters for prediction.
 #' * The following slots:
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()]
 #'   in `object` will be removed and not contained in the returned object.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1568,10 +1742,8 @@ window <- function(object, start, end = NULL, thin = 1) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
@@ -1590,9 +1762,9 @@ window <- function(object, start, end = NULL, thin = 1) {
 }
 
 
-#' @title Calculate negative predicted log-likelihood
+#' @title Calculate the predictive negative log-likelihood
 #'
-#' @description This function computes the negative predicted log-likelihood from a
+#' @description This function computes the predictive negative log-likelihood from a
 #'     DGP emulator with a likelihood layer.
 #'
 #' @param object an instance of the `dgp` class and it should be produced by [dgp()] with `likelihood` not being `NULL`;
@@ -1604,14 +1776,7 @@ window <- function(object, start, end = NULL, thin = 1) {
 #'     across all testing data points. The second one, named `allNLL`, is a vector that gives the negative predicted
 #'     log-likelihood for each testing data point.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @examples
-#' \dontrun{
-#'
-#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
-#' # on how to compute the negative predicted log-likelihood
-#' # using nllik().
-#' }
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 nllik <- function(object, x, y) {
@@ -1649,9 +1814,9 @@ nllik <- function(object, x, y) {
 }
 
 
-#' @title Plot of DGP model parameter traces
+#' @title Trace plot for DGP hyperparameters
 #'
-#' @description This function plots the traces of model parameters of a chosen GP node
+#' @description This function draws trace plots for the hyperparameters of a chosen GP node
 #'     in a DGP emulator.
 #'
 #' @param object an instance of the `dgp` class.
@@ -1661,7 +1826,7 @@ nllik <- function(object, x, y) {
 #'
 #' @return A `ggplot` object.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1717,28 +1882,28 @@ trace_plot <- function(object, layer = NULL, node = 1) {
 
 #' @title Static pruning of a DGP emulator
 #'
-#' @description This function implements the static pruning of a DGP emulator.
+#' @description This function implements static pruning for a DGP emulator.
 #'
-#' @param object an instance of the `dgp` class that is generated by `dgp()` with `struc = NULL`.
-#' @param control a list that can supply the following two components to control the static pruning of the DGP emulator:
-#' * `min_size`, the minimum number of design points required to trigger the pruning. Defaults to 10 times of the input dimensions.
-#' * `threshold`, the R2 value above which a GP node is considered redundant and removable. Defaults to `0.97`.
-#' @param verb a bool indicating if the trace information will be printed during the function execution. Defaults to `TRUE`.
+#' @param object an instance of the `dgp` class that is generated by `dgp()`.
+#' @param control a list that can supply the following two components to control static pruning of the DGP emulator:
+#' * `min_size`, the minimum number of design points required to trigger pruning. Defaults to 10 times of the input dimensions.
+#' * `threshold`, the \eqn{R^2} value above which a GP node is considered redundant and removable. Defaults to `0.97`.
+#' @param verb a bool indicating if trace information will be printed during the function execution. Defaults to `TRUE`.
 #'
 #' @return An updated `object` that could be an instance of `gp`, `dgp`, or `bundle` (of GP emulators) class.
 #'
 #' @note
 #' * The function requires a DGP emulator that has been trained with a dataset comprising a minimum size equal to `min_size` in `control`.
-#'    If the training dataset size is smaller than this, it is suggested to enrich the design of the DGP emulator and prune its
-#'    structure dynamically using the `design()` function. Depending on the design of the DGP emulator, the static pruning may not be accurate.
-#'    It is thus suggested to implement dynamic pruning as a part of the sequential design via `design()`.
+#'    If the training dataset size is smaller than this, it is recommended that the design of the DGP emulator is enriched and its
+#'    structure pruned dynamically using the `design()` function. Depending on the design of the DGP emulator, static pruning may not be accurate.
+#'    It is thus recommended that dynamic pruning is implemented as a part of a sequential design via `design()`.
 #' * The following slots:
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()];
 #'
 #'   in `object` will be removed and not contained in the returned object.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1805,12 +1970,9 @@ prune <- function(object, control = list(), verb = TRUE) {
   if (con$threshold>1 || con$threshold<0) stop("'threshold' in 'control' must be between 0 and 1.", call. = FALSE)
 
   if (nrow(object$data$X) < con$min_size) {
-    stop("To prune, 'object' needs to be trained with a dataset comprising a size at least equal to 'min_size' in 'control'. Use design() to enrich the design size.", call. = FALSE)
+    stop("To prune, 'object' needs to be trained with a dataset comprising a size at least equal to 'min_size' in 'control'. Use design() to enrich the training set.", call. = FALSE)
   }
 
-  if (!"internal_dims" %in% names(object[['specs']])) {
-    stop("'object' must be an instance of the 'dgp' class generated by dgp() with 'struc = NULL'.", call. = FALSE)
-  } else {
     n_layer <- object$constructor_obj$n_layer
     if (object$constructor_obj$all_layer[[n_layer]][[1]]$type!='gp') {
       n_layer <- n_layer - 1
@@ -1825,7 +1987,6 @@ prune <- function(object, control = list(), verb = TRUE) {
         }
       }
     }
-  }
 
   is.finish <- FALSE
   cropping_times <- 0
@@ -2086,3 +2247,16 @@ upcase2 <- function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
   x
 }
+
+get_docs_url <- function() {
+  pkg_version <- as.character(utils::packageVersion("dgpsi"))
+
+  is_dev <- grepl("\\.9000$", pkg_version)
+
+  if (is_dev) {
+    "https://mingdeyu.github.io/dgpsi-R/dev/"
+  } else {
+    "https://mingdeyu.github.io/dgpsi-R/"
+  }
+}
+

@@ -1,6 +1,6 @@
 ---
 title: >
-  Large-scale DGP Emulation
+  Large-scale Emulation with the Vecchia Approximation
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
@@ -101,7 +101,9 @@ plot(m, oos_x, oos_y)
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/vecchia_oos.png){width=100%}
 
+Note that `gp()` can also operate in Vecchia mode. For this problem, using `m_gp <- gp(X, Y, vecchia = TRUE)`, we found that the GP emulator `m_gp` achieved half the NRMSE of the DGP emulator `m`, but it had a few more points outside the credible intervals.
+
 ### Performance tip
 
-The Vecchia implementation in the package leverages the multiple cores available on the machine for multi-thread computation. To optimize performance, it is recommended to experiment with the number of threads using `set_thread_num()`. The current number of threads being used by the package can be checked with `get_thread_num()`.
+The Vecchia implementation in the package leverages the multiple cores available on the machine for multi-thread computation. To optimize performance, we recommend experimenting with the number of threads using `set_thread_num()`. The current number of threads being used by the package can be checked with `get_thread_num()`.
 

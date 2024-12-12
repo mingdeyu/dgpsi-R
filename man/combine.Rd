@@ -7,17 +7,11 @@
 combine(...)
 }
 \arguments{
-\item{...}{a sequence of lists:
-\enumerate{
-\item For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by \code{\link[=kernel]{kernel()}}), or
-likelihood nodes (produced by \code{\link[=Poisson]{Poisson()}}, \code{\link[=Hetero]{Hetero()}}, or \code{\link[=NegBin]{NegBin()}}.
-\item For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by \code{\link[=gp]{gp()}} or
-\code{\link[=dgp]{dgp()}}) in that layer.
-}}
+\item{...}{a sequence of lists. Each list represents a system layer and contains emulators (produced by \code{\link[=gp]{gp()}} or
+\code{\link[=dgp]{dgp()}}) in that layer.}
 }
 \value{
-A list defining a DGP structure (for \code{struc} of \code{\link[=dgp]{dgp()}}) or a linked (D)GP structure
-(for \code{struc} for \code{\link[=lgp]{lgp()}}).
+A list defining a linked (D)GP structure to be passed to \code{struc} of \code{\link[=lgp]{lgp()}}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
@@ -28,12 +22,6 @@ please use the updated \code{\link[=lgp]{lgp()}} function, which provides a simp
 approach to building (D)GP emulators.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
-}
-\examples{
-\dontrun{
-
-# See lgp() for an example.
-}
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \keyword{internal}

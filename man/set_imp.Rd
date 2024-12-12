@@ -9,18 +9,16 @@ set_imp(object, B = 5)
 \arguments{
 \item{object}{an instance of the S3 class \code{dgp}.}
 
-\item{B}{the number of imputations to produce predictions from \code{object}. Increase the value to account for
-more imputation uncertainties with slower predictions. Decrease the value for lower imputation uncertainties
-but faster predictions. Defaults to \code{5}.}
+\item{B}{the number of imputations to produce predictions from \code{object}. Increase the value to improve imputation uncertainty quantification. Decrease the value to improve speed of prediction. Defaults to \code{5}.}
 }
 \value{
 An updated \code{object} with the information of \code{B} incorporated.
 }
 \description{
-This function resets the number of imputations for predictions from a DGP emulator.
+This function resets the number of imputations for prediction from a DGP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 \itemize{

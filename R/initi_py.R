@@ -6,6 +6,8 @@ pkg.env$copy <- NULL
 pkg.env$py_gc <- NULL
 pkg.env$restart <- FALSE
 pkg.env$thread_num <- NULL
+pkg.env$base64 <- NULL
+pkg.env$dill <- NULL
 
 #' @title 'python' environment initialization
 #'
@@ -23,12 +25,12 @@ pkg.env$thread_num <- NULL
 #' @param uninstall a bool that indicates whether to uninstall the 'python' version of 'dgpsi' specified
 #'    in `dgpsi_ver` if it has already been installed. This argument is useful when the 'python' environment
 #'    is corrupted and one wants to completely uninstall and reinstall it. Defaults to `FALSE`.
-#' @param verb a bool indicating if the trace information will be printed during the function execution.
+#' @param verb a bool indicating if trace information will be printed during function execution.
 #'     Defaults to `TRUE`.
 #'
 #' @return No return value, called to install required 'python' environment.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -135,6 +137,8 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     assign('np', reticulate::import("numpy"), pkg.env)
     assign('copy', reticulate::import("copy"), pkg.env)
     assign('py_gc', reticulate::import("gc"), pkg.env)
+    assign('dill', reticulate::import("dill"), pkg.env)
+    assign('base64', reticulate::import("base64"), pkg.env)
     pkg.env$thread_num <- pkg.env$dgpsi$get_thread()
     if ( verb ) message(" done")
     Sys.sleep(0.5)

@@ -3,9 +3,9 @@ ASA
 CMD
 Challenor
 DGP
+DGPs
 ESS
 GPs
-Goodfellow
 Gu
 Guillas
 Heteroskedastic
@@ -39,6 +39,8 @@ lifecycle
 maximin
 oos
 reproducibility
+scalable
+softmax
 suboptimal
 th
 ’s
