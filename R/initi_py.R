@@ -30,7 +30,7 @@ pkg.env$dill <- NULL
 #'
 #' @return No return value, called to install required 'python' environment.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'

@@ -1,6 +1,6 @@
 ---
 title: >
-  Large-scale Emulation with the Vecchia approximation
+  Large-scale Emulation with the Vecchia Approximation
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
@@ -101,13 +101,7 @@ plot(m, oos_x, oos_y)
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/vecchia_oos.png){width=100%}
 
-Note that `gp` can also be used in Vecchia mode with
-
-```{r}
-m1 <- gp(X, Y, vecchia = TRUE)
-```
-
-For this problem, we found that the Vecchia GP had half the NRMSE of the DGP but a few more points outside of the confidence intervals.
+Note that `gp()` can also operate in Vecchia mode. For this problem, using `m_gp <- gp(X, Y, vecchia = TRUE)`, we found that the GP emulator `m_gp` achieved half the NRMSE of the DGP emulator `m`, but it had a few more points outside the credible intervals.
 
 ### Performance tip
 

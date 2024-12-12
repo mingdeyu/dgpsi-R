@@ -12,7 +12,7 @@
 #'     The list must have a length equal to the number of emulators in `object`, with each element being a matrix representing the candidate set for a corresponding
 #'     emulator in the bundle. Defaults to `NULL`.
 #' @param n_start an integer that gives the number of initial design points to be used to determine next design point(s). This argument
-#'     is only used when `x_cand` is `NULL`. Defaults to `20`.
+#'     is only used when `x_cand` is `NULL`. Defaults to `10`.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
@@ -67,7 +67,7 @@
 #' @references
 #' Mohammadi, H., & Challenor, P. (2022). Sequential adaptive design for emulating costly computer codes. *arXiv:2206.12113*.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -116,7 +116,7 @@ vigf <- function(object, ...){
 #' @rdname vigf
 #' @method vigf gp
 #' @export
-vigf.gp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, ...) {
+vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -237,7 +237,7 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50,
 #' @rdname vigf
 #' @method vigf dgp
 #' @export
-vigf.dgp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
+vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -585,7 +585,7 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50
 #' @rdname vigf
 #' @method vigf bundle
 #' @export
-vigf.bundle <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
+vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))

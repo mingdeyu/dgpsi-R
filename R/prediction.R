@@ -121,7 +121,7 @@
 #' * `r new_badge("new")` the value of `M`, which represents the size of the conditioning set for the Vecchia approximation, if used, in the emulator prediction.
 #' * the value of `sample_size` if `method = "sampling"`.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'

@@ -25,7 +25,7 @@
 #' * `r new_badge("new")` If `object` is an instance of the `lgp` class created by [lgp()] with argument `struc` in data frame form,
 #'   `x_test` must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
 #'   The column indices in `x_test` must align with the indices specified in the `From_Output` column of the `struc` data frame (used in [lgp()]),
-#'   corresponding to rows where the `From_Emulator` column is `"Global"`. 
+#'   corresponding to rows where the `From_Emulator` column is `"Global"`.
 #'
 #' `x_test` must be provided if `object` is an instance of the `lgp`. `x_test` must also be provided if `y_test` is provided. Defaults to `NULL`, in which case LOO validation is performed.
 #' @param y_test the OOS output data corresponding to `x_test`:
@@ -39,7 +39,7 @@
 #'     in the final layer.
 #'
 #' `y_test` must be provided if `object` is an instance of the `lgp`. `y_test` must also be provided if `x_test` is provided. Defaults to `NULL`, in which case LOO validation is performed.
-#' @param method `r new_badge("updated")` the prediction approach to use for validation: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). For details see [prediction()].
+#' @param method `r new_badge("updated")` the prediction approach to use for validation: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). For details see [predict()].
 #'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
 #'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
@@ -81,8 +81,7 @@
 #'   - a vector called `rmse` that contains the root mean/median squared errors of the DGP emulator across different output
 #'     dimensions.
 #'   - a vector called `nrmse` that contains the (max-min) normalized root mean/median squared errors of the DGP emulator across different output
-#'     dimensions. The max-min normalization
-#'     uses the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
+#'     dimensions. The max-min normalization uses the maximum and minimum values of the validation outputs contained in `y_train` (or `y_test`).
 #'   - `r new_badge("new")` an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
 #'   - an integer called `sample_size` that contains the number of samples used for validation if `method = "sampling"`.
 #'
@@ -121,7 +120,7 @@
 #'   be implemented. LOO validation is only applicable to a GP or DGP emulator (i.e., `object` is an instance of the `gp` or `dgp`
 #'   class). If a linked (D)GP emulator (i.e., `object` is an instance of the `lgp` class) is provided, `x_test` and `y_test` must
 #'   also be provided for OOS validation.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -340,7 +339,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
   }
   M <- as.integer(M)
 
@@ -619,13 +618,13 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
 
   if ( "metadata" %in% names(object$specs) ){
     if ( !("emulator_obj" %in% names(object)) ){
-      stop("'object' is not in activation mode for validation. Please set `mode = 'activate'` in `lgp()` to build the emulator.", call. = FALSE)
+      stop("'object' is not activated for predictions. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
     }
   }
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
   }
   M <- as.integer(M)
 

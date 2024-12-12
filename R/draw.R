@@ -11,7 +11,7 @@
 #' - `"design"`: shows visualizations of input designs created by the sequential design procedure.
 #'
 #' Defaults to `"rmse"`.
-#' @param log a boolean indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when `type = "rmse"`.
+#' @param log a bool indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when `type = "rmse"`.
 #'     Defaults to `FALSE`.
 #' @param emulator an index or vector of indices of emulators packed in `object`. This argument is only used if `object` is an instance of the `bundle` class. When set to `NULL`, all
 #'     emulators in the bundle are drawn. Defaults to `NULL`.
@@ -19,7 +19,7 @@
 #'
 #' @return A `patchwork` object.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'

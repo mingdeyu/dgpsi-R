@@ -26,6 +26,7 @@ We start by loading packages:
 ```{r}
 library(dgpsi)
 library(MASS)
+library(ggplot2)
 library(patchwork)
 ```
 
@@ -46,7 +47,11 @@ Y <- scale(Y, center = TRUE, scale = TRUE)
 and plot them:
 
 ```{r}
-plot(X, Y, pch = 16, cex = 1, xlab = 'Time', ylab = 'Acceleration', cex.axis = 1.3, cex.lab = 1.3)
+ggplot(data = data.frame(X = X, Y = Y), aes(x = X, y = Y)) +
+  geom_point(shape = 16, size = 3) +
+  labs(x = "Time", y = "Acceleration") +
+  theme(axis.title = element_text(size = 13), 
+        axis.text = element_text(size = 13))
 ```
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_data.png){width=100%}
@@ -135,7 +140,7 @@ m_gp <- validate(m_gp, test_x, test_y)
 ## Saving results to the slot 'oos' in the gp object ... done
 ```
 
-Note that using `validate()` before plotting can save subsequent computations compared to simply invoking `plot()`, as `validate()` stores validation results in the emulator objects and plot will use these if it can to avoid calculating them on the fly. Finally, we plot the OOS validation for the GP emulator:
+Note that using `validate()` before plotting can save subsequent computations compared to simply invoking `plot()`, as `validate()` stores validation results in the emulator objects and `plot()` will use these, if it can, to avoid calculating them on the fly. Finally, we plot the OOS validation for the GP emulator:
 
 ```{r}
 plot(m_gp, test_x, test_y)

@@ -5,44 +5,35 @@
 #' @param X a matrix where each row is an input training data point and each column represents an input dimension.
 #' @param Y a matrix containing observed training output data. The matrix has its rows being output data points and columns representing
 #'     output dimensions. When `likelihood` (see below) is not `NULL`, `Y` must be a matrix with a single column.
-#' @param struc `r lifecycle::badge("deprecated")` a list that specifies a user-defined DGP structure. It should contain *L* (the number of DGP layers) sub-lists,
-#'     each of which represents a layer and contains a number of GP nodes (defined by [kernel()]) in the corresponding layer.
-#'     The final layer of the DGP structure (i.e., the final sub-list in `struc`) can be a likelihood
-#'     layer that contains a likelihood function (e.g., [Poisson()]). When `struc = NULL`,
-#'     the DGP structure is automatically generated and can be checked by applying [summary()] to the output from [dgp()] with `training = FALSE`.
-#'     If this argument is used (i.e., user provides a customized DGP structure), arguments `depth`, `node`, `name`, `lengthscale`, `bounds`, `prior`,
-#'     `share`, `nugget_est`, `nugget`, `scale_est`, `scale`, `connect`, `likelihood`, and `internal_input_idx` will NOT be used. Defaults to `NULL`.
-#'
-#' **The argument will be removed in the next release. To customize DGP specifications, please adjust the other arguments in the [dgp()] function.**
 #' @param depth number of layers (including the likelihood layer) for a DGP structure. `depth` must be at least `2`.
-#'     Defaults to `2`. 
+#'     Defaults to `2`.
 #' @param node number of GP nodes in each layer (except for the final layer or the layer feeding the likelihood node) of the DGP. Defaults to
-#'    `ncol(X)`. 
+#'    `ncol(X)`.
 #' @param name a character or a vector of characters that indicates the kernel functions (either `"sexp"` for squared exponential kernel or
 #'     `"matern2.5"` for Matérn-2.5 kernel) used in the DGP emulator:
 #' 1. if a single character is supplied, the corresponding kernel function will be used for all GP nodes in the DGP hierarchy.
 #' 2. if a vector of characters is supplied, each character of the vector specifies the kernel function that will be applied to all GP nodes in the corresponding layer.
 #'
-#' Defaults to `"sexp"`. 
+#' Defaults to `"sexp"`.
 #' @param lengthscale initial lengthscales for GP nodes in the DGP emulator. It can be a single numeric value or a vector:
 #' 1. if it is a single numeric value, the value will be applied as the initial lengthscales for all GP nodes in the DGP hierarchy.
 #' 2. if it is a vector, each element of the vector specifies the initial lengthscales that will be applied to all GP nodes in the corresponding layer.
 #'    The vector should have a length of `depth` if `likelihood = NULL` or a length of `depth - 1` if `likelihood` is not `NULL`.
 #'
-#' Defaults to a numeric value of `1.0`. 
+#' Defaults to a numeric value of `1.0`.
 #' @param bounds the lower and upper bounds of lengthscales in GP nodes. It can be a vector or a matrix:
 #' 1. if it is a vector, the lower bound (the first element of the vector) and upper bound (the second element of the vector) will be applied to
 #'    lengthscales for all GP nodes in the DGP hierarchy.
 #' 2. if it is a matrix, each row of the matrix specifies the lower and upper bounds of lengthscales for all GP nodes in the corresponding layer.
 #'    The matrix should have its row number equal to `depth` if `likelihood = NULL` or to `depth - 1` if `likelihood` is not `NULL`.
 #'
-#' Defaults to `NULL` where no bounds are specified for the lengthscales. 
+#' Defaults to `NULL` where no bounds are specified for the lengthscales.
 #' @param prior prior to be used for MAP estimation of lengthscales and nuggets of all GP nodes in the DGP hierarchy:
 #' * gamma prior (`"ga"`),
 #' * inverse gamma prior (`"inv_ga"`), or
 #' * jointly robust prior (`"ref"`).
 #'
-#' Defaults to `"ga"`. 
+#' Defaults to `"ga"`.
 #' @param share a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to `TRUE`.
 #' @param nugget_est a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
 #'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
@@ -67,12 +58,12 @@
 #' * `FALSE`: the variance of the corresponding GP in the final layer is fixed to the corresponding value defined in `scale` (see below).
 #' * `TRUE`: the variance of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in `scale` (see below).
 #'
-#' Defaults to `TRUE`. This argument is only used when `struc = NULL`.
+#' Defaults to `TRUE`.
 #' @param scale the initial variance value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
 #'    in the final layer. If it is a vector (which must have a length of `ncol(Y)`), each numeric in the vector will be applied to the corresponding GP node
-#'    (if any) in the final layer. Defaults to `1`. This argument is only used when `struc = NULL`.
+#'    (if any) in the final layer. Defaults to `1`.
 #' @param connect a bool indicating whether to implement global input connection to the DGP structure. Setting it to `FALSE` may produce a better emulator in some cases at
-#'    the cost of slower training. Defaults to `TRUE`. This argument is only used when `struc = NULL`.
+#'    the cost of slower training. Defaults to `TRUE`.
 #' @param likelihood the likelihood type of a DGP emulator:
 #' 1. `NULL`: no likelihood layer is included in the emulator.
 #' 2. `"Hetero"`: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
@@ -84,7 +75,7 @@
 #' When `likelihood` is not `NULL`, the value of `nugget_est` is overridden by `FALSE`. Defaults to `NULL`.
 #' @param training a bool indicating if the initialized DGP emulator will be trained.
 #'     When set to `FALSE`, [dgp()] returns an untrained DGP emulator, to which one can apply [summary()] to inspect its specifications
-#'     (especially when a customized `struc` is provided) or apply [predict()] to check its emulation performance before training. Defaults to `TRUE`.
+#'     or apply [predict()] to check its emulation performance before training. Defaults to `TRUE`.
 #' @param verb a bool indicating if the trace information on DGP emulator construction and training will be printed during the function execution.
 #'     Defaults to `TRUE`.
 #' @param check_rep a bool indicating whether to check for repetitions in the dataset, i.e., if one input
@@ -109,14 +100,14 @@
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates of model parameters. Must be smaller than the training iterations `N`. If this is not specified, only the last 25% of iterations
 #'     are used. Defaults to `NULL`. This argument is only used when `training = TRUE`.
-#' @param B the number of imputations used to produce predictions. Increase the value to refine the representation of imputation uncertainty. 
+#' @param B the number of imputations used to produce predictions. Increase the value to refine the representation of imputation uncertainty.
 #'     Defaults to `10`.
 #' @param internal_input_idx `r lifecycle::badge("deprecated")` The argument will be removed in the next release. To set up connections of emulators for linked emulations,
 #'     please use the updated [lgp()] function instead.
 #'
 #' Column indices of `X` that are generated by the linked emulators in the preceding layers.
 #'     Set `internal_input_idx = NULL` if the DGP emulator is in the first layer of a system or all columns in `X` are
-#'     generated by the linked emulators in the preceding layers. Defaults to `NULL`. This argument is only used when `struc = NULL`.
+#'     generated by the linked emulators in the preceding layers. Defaults to `NULL`.
 #' @param linked_idx `r lifecycle::badge("deprecated")` The argument will be removed in the next release. To set up connections of emulators for linked emulation,
 #'     please use the updated [lgp()] function instead.
 #'
@@ -164,9 +155,7 @@
 #'      with the light option `light = TRUE`) is loaded back to R by [read()].
 #'   6. `B`: the number of imputations used to generate the emulator.
 #'   7. `r new_badge("new")` `vecchia`: whether the Vecchia approximation is used for the GP emulator training.
-#'   8. `r new_badge("new")` `M`: the size of the conditioning set for the Vecchia approximation in the DGP emulator training.
-#'
-#'   `internal_dims` and `external_dims` are generated only when `struc = NULL`. `M` is generated only when `vecchia = TRUE`.
+#'   8. `r new_badge("new")` `M`: the size of the conditioning set for the Vecchia approximation in the DGP emulator training. `M` is generated only when `vecchia = TRUE`.
 #' * `constructor_obj`: a 'python' object that stores the information of the constructed DGP emulator.
 #' * `container_obj`: a 'python' object that stores the information for the linked emulation.
 #' * `emulator_obj`: a 'python' object that stores the information for the predictions from the DGP emulator.
@@ -185,7 +174,7 @@
 #' * [update()] to update the DGP emulator with new inputs and outputs.
 #' * [alm()], [mice()], and [vigf()] to locate next design points.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/> and learn how to customize a DGP structure.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @note Any R vector detected in `X` and `Y` will be treated as a column vector and automatically converted into a single-column
 #'     R matrix. Thus, if `X` is a single data point with multiple dimensions, it must be given as a matrix.
 #' @examples
@@ -241,7 +230,7 @@
 #' }
 #' @md
 #' @export
-dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
+dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = TRUE,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
                 ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
@@ -250,23 +239,12 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
     if (pkg.env$restart) return(invisible(NULL))
   }
 
-  if (!is.null(struc)) {
-    # Display a combined warning message
-    lifecycle::deprecate_warn(
-      when = "2.5.0",
-      what = "dgp(struc)",
-      details = c(i = "The argument will be dropped in the next release.",
-                  i = "To customize DGP specification, please adjust the other arguments in the `dgp()` function."
-      )
-    )
-  }
-
   if (!is.null(internal_input_idx)) {
     lifecycle::deprecate_warn(
       when = "2.5.0",
       what = "dgp(internal_input_idx)",
       details = c(i = "The argument will be dropped in the next release.",
-                  i = "To set up connections of GPs for linked emulation, please use the updated `lgp()` function instead."
+                  i = "To set up connections of DGPs for linked emulation, please use the updated `lgp()` function instead."
       )
     )
   }
@@ -276,7 +254,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
       when = "2.5.0",
       what = "dgp(linked_idx)",
       details = c(i = "The argument will be dropped in the next release.",
-                  i = "To set up connections of GPs for linked emulation, please use the updated `lgp()` function instead."
+                  i = "To set up connections of DGPs for linked emulation, please use the updated `lgp()` function instead."
       )
     )
   }
@@ -305,12 +283,6 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 
   rank_num <- pkg.env$np$linalg$matrix_rank(X)
   if (rank_num < n_dim_X) stop("The input matrix is not full rank. This indicates perfect multicollinearity and redundant information. We recommend identifying and removing redundant columns.")
-
-  if ( is.null(struc) ) {
-    is.null.struc <- TRUE
-  } else {
-    is.null.struc <- FALSE
-  }
 
   if ( !is.null(likelihood) ){
     if (likelihood!='Hetero' &  likelihood!='Poisson' & likelihood!='NegBin' & likelihood!='Categorical' ) stop("The provided 'likelihood' is not supported.", call. = FALSE)
@@ -341,7 +313,6 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   linked_idx_py <- linked_idx_r_to_py(linked_idx)
 
   #If struc is NULL
-  if ( is.null.struc ) {
     depth <- as.integer(depth)
     if ( depth < 2 ) stop("'depth' must >= 2. Use gp() if you want a single-layered DGP.", call. = FALSE)
 
@@ -623,7 +594,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
       message(" done")
       Sys.sleep(0.5)
     }
-  }
+
 
   if ( isTRUE(verb) ) message("Initializing the DGP emulator ...", appendLF = FALSE)
 
@@ -658,10 +629,8 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
   res[['data']][['X']] <- unname(X)
   res[['data']][['Y']] <- unname(Y)
   res[['specs']] <- extract_specs(est_obj, "dgp")
-  if ( is.null.struc ) {
-    res[['specs']][['internal_dims']] <- if( is.null(internal_input_idx) ) 1:n_dim_X else as.integer(reticulate::py_to_r(internal_input_idx)+1)
-    res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) FALSE else as.integer(reticulate::py_to_r(external_input_idx)+1)
-  }
+  res[['specs']][['internal_dims']] <- if( is.null(internal_input_idx) ) 1:n_dim_X else as.integer(reticulate::py_to_r(internal_input_idx)+1)
+  res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) FALSE else as.integer(reticulate::py_to_r(external_input_idx)+1)
   res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx
   res[['specs']][['vecchia']] <- vecchia
   res[['specs']][['M']] <- M
@@ -692,9 +661,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #'     GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `10`.
-#' @param verb a bool indicating if a progress bar will be printed during training:
-#'
-#' Defaults to `TRUE`.
+#' @param verb a bool indicating if a progress bar will be printed during training. Defaults to `TRUE`.
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates calculation. Must be smaller than the overall training iterations
 #'     so-far implemented. If this is not specified, only the last 25% of iterations
@@ -705,7 +672,7 @@ dgp <- function(X, Y, struc = NULL, depth = 2, node = ncol(X), name = 'sexp', le
 #'
 #' @return An updated `object`.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @note
 #' * One can also use this function to fit an untrained DGP emulator constructed by [dgp()] with `training = FALSE`.
 #' * The following slots:
@@ -740,7 +707,7 @@ continue <- function(object, N = NULL, cores = 1, ess_burn = 10, verb = TRUE, bu
 
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
-    if ( cores < 1 ) stop("cores must be >= 1.", call. = FALSE)
+    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
   }
 
   if ( is.null(B) ){
@@ -777,10 +744,8 @@ continue <- function(object, N = NULL, cores = 1, ess_burn = 10, verb = TRUE, bu
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]

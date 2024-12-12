@@ -38,7 +38,7 @@
 #'   - `design` created by [design()]
 #'
 #'   in `object` will be removed and not contained in the returned object.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -145,10 +145,8 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
   new_object[['data']][['X']] <- unname(X)
   new_object[['data']][['Y']] <- unname(Y)
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
@@ -222,10 +220,8 @@ update.gp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ..
   new_object[['data']][['X']] <- unname(X)
   new_object[['data']][['Y']] <- unname(Y)
   new_object[['specs']] <- extract_specs(constructor_obj_cp, "gp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]

@@ -200,7 +200,6 @@ m_link <- lgp(struc, emulators, activate = FALSE)
 ```         
 Processing emulators ... done
 Linking and synchronizing emulators ... done
-Validating the linked emulator ... done
 ```
 
 and visually check the relationships between emulators by applying `summary()` to `m_link`:

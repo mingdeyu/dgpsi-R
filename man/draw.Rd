@@ -5,7 +5,7 @@
 \alias{draw.gp}
 \alias{draw.dgp}
 \alias{draw.bundle}
-\title{Validation plots of a sequential design}
+\title{Validation and diagnostic plots for a sequential design}
 \usage{
 draw(object, ...)
 
@@ -25,28 +25,28 @@ draw(object, ...)
 
 \item{...}{N/A.}
 
-\item{type}{either \code{"rmse"}, for the trace plot of RMSEs, or log-losses for DGP emulators with categorical likelihoods, or customized evaluating metrics
-of emulators constructed during the sequential designs, or \code{"design"}, for visualizations of input designs created by the sequential design procedure.
+\item{type}{specifies the type of plot or visualization to generate:
+\itemize{
+\item \code{"rmse"}: generates a trace plot of RMSEs, log-losses for DGP emulators with categorical likelihoods, or custom evaluation metrics specified via the \code{"eval"} argument in the \verb{[design()]} function.
+\item \code{"design"}: shows visualizations of input designs created by the sequential design procedure.
+}
+
 Defaults to \code{"rmse"}.}
 
-\item{log}{a bool that indicates whether to plot RMSEs, or log-losses (in case of DGP emulators with categorical likelihoods), or customized evaluating
-metrics in log-scale if \code{type = "rmse"}. Defaults to \code{FALSE}.}
+\item{log}{a bool indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when \code{type = "rmse"}.
+Defaults to \code{FALSE}.}
 
-\item{emulator}{a vector of indices of emulators packed in \code{object} to be drawn, if \code{object} is an instance of the \code{bundle} class. When set to \code{NULL}, all
+\item{emulator}{an index or vector of indices of emulators packed in \code{object}. This argument is only used if \code{object} is an instance of the \code{bundle} class. When set to \code{NULL}, all
 emulators in the bundle are drawn. Defaults to \code{NULL}.}
 }
 \value{
 A \code{patchwork} object.
 }
 \description{
-This function draws validation plots of the sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
-}
-\note{
-If a customized evaluating function is provided to \code{\link[=design]{design()}} and the function returns a single evaluating metric value when \code{object} is
-an instance of the \code{bundle} class, the value of \code{emulator} has no effects on the plot when \code{type = "rmse"}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

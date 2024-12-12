@@ -3,6 +3,7 @@ ASA
 CMD
 Challenor
 DGP
+DGPs
 ESS
 GPs
 Gu
@@ -38,6 +39,8 @@ lifecycle
 maximin
 oos
 reproducibility
+scalable
+softmax
 suboptimal
 th
 ’s

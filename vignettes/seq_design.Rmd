@@ -15,6 +15,20 @@ knitr::opts_chunk$set(
   echo = TRUE,
   eval = FALSE
 )
+
+get_article_url <- function(article) {
+  pkg_version <- as.character(utils::packageVersion("dgpsi"))
+  
+  is_dev <- grepl("\\.9000$", pkg_version)
+  
+  base_url <- if (is_dev) {
+    "https://mingdeyu.github.io/dgpsi-R/dev"
+  } else {
+    "https://mingdeyu.github.io/dgpsi-R"
+  }
+  
+  paste0(base_url, article)
+}
 ```
 
 This vignette shows how to use `dgpsi` to sequentially enrich a design for adaptive improvement and pruning of an emulator. We choose a DGP for this example, but the methods work equally well on all types of emulator.
@@ -51,7 +65,7 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_fct.png){width=100%}
 
-We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space whil,e in the top-right part, the simulator shows little variation. 
+We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space while in the top-right part, the simulator shows little variation. 
 
 We now specify a seed with `set_seed()` for reproducibility
 
@@ -89,7 +103,7 @@ m <- dgp(X, Y)
 ## Imputing ... done
 ```
 
-We then specify the boundaries of the input parameter space for `f` so that the sequential design can restrict it's search for new points.
+We then specify the boundaries of the input parameter space for `f` so that the sequential design can restrict its search for new points.
 
 ```{r}
 lim_1 <- c(0, 1)
@@ -111,30 +125,30 @@ m <- design(m, N = 25, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  * RMSE: 0.527337
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.868213 0.037359
+##  * Next design point: 0.930278 0.033542
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.541914
+##  * RMSE: 0.532428
 ## 
 ## ...
 ## 
 ## Iteration 18:
 ##  - Locating ... done
-##  * Next design point: 0.341178 0.003477
+##  * Next design point: 0.706449 0.048681
 ##  - Updating and re-fitting ... done
 ##  - Pruning 1 node(s) in layer 1 ... done
 ##  - Re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.107640
+##  * RMSE: 0.139819
 ## 
 ## ...
 ## 
 ## Iteration 25:
 ##  - Locating ... done
-##  * Next design point: 0.168364 0.984091
+##  * Next design point: 0.000010 0.483511
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.032189
+##  * RMSE: 0.071370
 ```
 
 After the first wave we see that 1 GP node is removed from the first layer by automatic pruning of the DGP which leaves only one node in both the first and second layer of the DGP hierarchy respectively. This helps accelerate the inference of the DGP emulator in subsequent waves of the sequential design while maintaining accuracy. We now start the second wave of the sequential design:
@@ -145,22 +159,22 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.032189
+##  * RMSE: 0.071370
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.215369 0.384567
+##  * Next design point: 0.461239 0.415336
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.017259
+##  * RMSE: 0.056827
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.198905 0.873454
+##  * Next design point: 0.177935 0.459387
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.008300
+##  * RMSE: 0.011508
 ```
 Finally, we resume the second wave with 10 additional iterations:
 
@@ -172,22 +186,22 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ## Iteration 11:
 ##  - Locating ... done
-##  * Next design point: 0.977752 0.011568
+##  * Next design point: 0.029874 0.763962
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.007264
+##  * RMSE: 0.014444
 ##  
 ##  ...
 ##  
 ## Iteration 20:
 ##  - Locating ... done
-##  * Next design point: 0.258375 0.028753
+##  * Next design point: 0.829788 0.452129
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.003784
+##  * RMSE: 0.004783
 ```
 
-Resuming rather than adding an additional wave can be a useful feature, particularly for plotting using `draw`. After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
+Resuming rather than adding an additional wave can be a useful feature, particularly for plotting using `draw()`. After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
 
 ```{r}
 draw(m, 'design')
@@ -277,7 +291,7 @@ It can be seen from the plot above that with static space-filling designs, the q
 
 ### See also
 
-See [`Sequential Design II`](https://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.html) for the sequential design of a bundle of DGP emulators with automatic terminations.
+See [Sequential Design II](`r get_article_url("/articles/seq_design_2.html")`) for the sequential design of a bundle of DGP emulators with automatic terminations.
 
 ### References
 

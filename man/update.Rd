@@ -31,7 +31,7 @@ update(object, X, Y, refit, reset, verb, ...)
 \item the S3 class \code{dgp}.
 }}
 
-\item{X}{the new input data which is a matrix where each row is an input training data point and each column is an input dimension.}
+\item{X}{the new input data which is a matrix where each row is an input training data point and each column represents an input dimension.}
 
 \item{Y}{the new output data:
 \itemize{
@@ -42,10 +42,10 @@ output dimensions. When \code{likelihood} (see below) is not \code{NULL}, \code{
 
 \item{refit}{a bool indicating whether to re-fit the emulator \code{object} after the training input and output are updated. Defaults to \code{TRUE}.}
 
-\item{reset}{a bool indicating whether to reset hyperparameters of the emulator \code{object} to their initial values when the emulator was
-constructed, after the training input and output are updated. Defaults to \code{FALSE}.}
+\item{reset}{a bool indicating whether to reset hyperparameters of the emulator \code{object} to the initial values first obtained when the emulator was
+constructed. Use if it is suspected that a local mode for the hyperparameters has been reached through successive updates. Defaults to \code{FALSE}.}
 
-\item{verb}{a bool indicating if the trace information will be printed during the function execution.
+\item{verb}{a bool indicating if trace information will be printed during the function execution.
 Defaults to \code{TRUE}.}
 
 \item{...}{N/A.}
@@ -59,7 +59,7 @@ at each M-step during the re-fitting. If set to \code{NULL}, the number of proce
 and \verb{max physical cores available \%/\% 2} if \code{vecchia = TRUE}. Only use multiple processes when there is a large number of GP components in different
 layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
 
-\item{ess_burn}{number of burnin steps for the ESS-within-Gibbs at each I-step in training the emulator \code{object} if it is an
+\item{ess_burn}{number of burnin steps for the ESS-within-Gibbs sampler at each I-step of the training of the emulator \code{object} if it is an
 instance of the \code{dgp} class. Defaults to \code{10}.}
 
 \item{B}{the number of imputations for predictions from the updated emulator \code{object} if it is an instance of the \code{dgp} class.
@@ -73,7 +73,7 @@ An updated \code{object}.
 This function updates the training input and output of a GP or DGP emulator with an option to refit the emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 \itemize{

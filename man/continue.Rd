@@ -2,7 +2,7 @@
 % Please edit documentation in R/dgp.R
 \name{continue}
 \alias{continue}
-\title{Continue the training of a DGP emulator}
+\title{Continue training a DGP emulator}
 \usage{
 continue(
   object,
@@ -17,7 +17,7 @@ continue(
 \arguments{
 \item{object}{an instance of the \code{dgp} class.}
 
-\item{N}{additional number of iterations for the DGP emulator training. If set to \code{NULL}, the number of iterations is set to \code{500} if the DGP emulator
+\item{N}{additional number of iterations to train the DGP emulator. If set to \code{NULL}, the number of iterations is set to \code{500} if the DGP emulator
 was constructed without the Vecchia approximation, and is set to \code{200} if Vecchia approximation was used. Defaults to \code{NULL}.}
 
 \item{cores}{the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
@@ -25,24 +25,18 @@ the number of processes is set to \verb{(max physical cores available - 1)} if t
 Otherwise, the number of processes is set to \verb{max physical cores available \%/\% 2}. Only use multiple processes when there is a large number of
 GP components in different layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
 
-\item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
+\item{ess_burn}{number of burnin steps for ESS-within-Gibbs
 at each I-step of the training. Defaults to \code{10}.}
 
-\item{verb}{a bool indicating if the progress bar will be printed during the training:
-\enumerate{
-\item \code{FALSE}: the training progress bar will not be displayed.
-\item \code{TRUE}: the training progress bar will be displayed.
-}
-
-Defaults to \code{TRUE}.}
+\item{verb}{a bool indicating if a progress bar will be printed during training. Defaults to \code{TRUE}.}
 
 \item{burnin}{the number of training iterations to be discarded for
 point estimates calculation. Must be smaller than the overall training iterations
 so-far implemented. If this is not specified, only the last 25\% of iterations
 are used. This overrides the value of \code{burnin} set in \code{\link[=dgp]{dgp()}}. Defaults to \code{NULL}.}
 
-\item{B}{the number of imputations to produce the predictions. Increase the value to account for
-more imputation uncertainties. This overrides the value of \code{B} set in \code{\link[=dgp]{dgp()}} if \code{B} is not
+\item{B}{the number of imputations to produce predictions. Increase the value to account for
+more imputation uncertainty. This overrides the value of \code{B} set in \code{\link[=dgp]{dgp()}} if \code{B} is not
 \code{NULL}. Defaults to \code{NULL}.}
 }
 \value{
@@ -52,7 +46,7 @@ An updated \code{object}.
 This function implements additional training iterations for a DGP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 \itemize{

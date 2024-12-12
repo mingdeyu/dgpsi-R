@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{nllik}
 \alias{nllik}
-\title{Calculate negative predicted log-likelihood}
+\title{Calculate the predictive negative log-likelihood}
 \usage{
 nllik(object, x, y)
 }
@@ -20,17 +20,9 @@ across all testing data points. The second one, named \code{allNLL}, is a vector
 log-likelihood for each testing data point.
 }
 \description{
-This function computes the negative predicted log-likelihood from a
+This function computes the predictive negative log-likelihood from a
 DGP emulator with a likelihood layer.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
-}
-\examples{
-\dontrun{
-
-# Check https://mingdeyu.github.io/dgpsi-R/ for examples
-# on how to compute the negative predicted log-likelihood
-# using nllik().
-}
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }

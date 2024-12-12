@@ -9,15 +9,15 @@ set_vecchia(object, vecchia = TRUE, M = 25, ord = NULL)
 \arguments{
 \item{object}{an instance of the S3 class \code{gp}, \code{dgp}, or \code{lgp}.}
 
-\item{vecchia}{a boolean or a list of booleans to indicate the addition or removal of the Vecchia approximation:
+\item{vecchia}{a bool or a list of bools to indicate the addition or removal of the Vecchia approximation:
 \itemize{
-\item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{vecchia} is a boolean that indicates
+\item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{vecchia} is a bool that indicates
 either addition (\code{vecchia = TRUE}) or removal (\code{vecchia = FALSE}) of the Vecchia approximation from \code{object}.
-\item if \code{object} is an instance of the \code{lgp} class, \code{x} can be a boolean or a list of booleans:
+\item if \code{object} is an instance of the \code{lgp} class, \code{x} can be a bool or a list of bools:
 \itemize{
-\item if \code{vecchia} is a boolean, it indicates either addition (\code{vecchia = TRUE}) or removal (\code{vecchia = FALSE}) of
+\item if \code{vecchia} is a bool, it indicates either addition (\code{vecchia = TRUE}) or removal (\code{vecchia = FALSE}) of
 the Vecchia approximation from all individual (D)GP emulators contained in \code{object}.
-\item if \code{vecchia} is a list of booleans, it should have same shape as \code{struc} that was supplied to \code{\link[=lgp]{lgp()}}. Each boolean
+\item if \code{vecchia} is a list of bools, it should have same shape as \code{struc} that was supplied to \code{\link[=lgp]{lgp()}}. Each bool
 in the list indicates if the corresponding (D)GP emulator contained in \code{object} shall have the Vecchia approximation
 added or removed.
 }
@@ -46,7 +46,7 @@ This function adds or removes the Vecchia approximation from a GP, DGP or linked
 constructed by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}} or \code{\link[=lgp]{lgp()}}.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 This function is useful for quickly switching between Vecchia and non-Vecchia approximations for an existing emulator

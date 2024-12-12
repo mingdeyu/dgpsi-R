@@ -9,21 +9,12 @@
 #' please use the updated [lgp()] function, which provides a simpler and more efficient
 #' approach to building (D)GP emulators.
 #'
-#' @param ... a sequence of lists:
-#' 1. For DGP emulations, each list represents a DGP layer and contains GP nodes (produced by [kernel()]), or
-#'    likelihood nodes (produced by [Poisson()], [Hetero()], or [NegBin()].
-#' 2. For linked (D)GP emulations, each list represents a system layer and contains emulators (produced by [gp()] or
+#' @param ... a sequence of lists. Each list represents a system layer and contains emulators (produced by [gp()] or
 #'    [dgp()]) in that layer.
 #'
-#' @return A list defining a DGP structure (for `struc` of [dgp()]) or a linked (D)GP structure
-#'     (for `struc` for [lgp()]).
+#' @return A list defining a linked (D)GP structure to be passed to `struc` of [lgp()].
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @examples
-#' \dontrun{
-#'
-#' # See lgp() for an example.
-#' }
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @keywords internal
 #' @export
@@ -56,7 +47,7 @@ combine <- function(...) {
 #'   training input data for different emulators. `Y` contains *N* single-column matrices named `emulator1,...,emulatorN` that are
 #'   training output data for different emulators.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -171,7 +162,7 @@ pack <- function(..., id = NULL) {
 #' @return A named list that contains individual emulators (named `emulator1,...,emulatorS`) packed in `object`,
 #'    where `S` is the number of emulators in `object`.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -215,7 +206,7 @@ unpack <- function(object) {
 #'
 #' @return No return value. `object` will be saved to a local `.pkl` file specified by `pkl_file`.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @note Since emulators built from the package are 'python' objects, [save()] from R will not work as it would for R objects. If `object`
 #'     was processed by [set_vecchia()] to add or remove the Vecchia approximation, `light` should be set to `FALSE` to ensure
 #'     reproducibility after the saved emulator is reloaded by [read()].
@@ -272,7 +263,7 @@ write <- function(object, pkl_file, light = TRUE) {
 #'
 #' @return No return value.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -306,7 +297,7 @@ set_seed <- function(seed) {
 #'
 #' @return The updated `object`, with the assigned ID stored in its `id` slot.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -337,7 +328,7 @@ set_id <- function(object, id) {
 #'
 #' @return No return value.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 set_thread_num <- function(num) {
@@ -361,7 +352,7 @@ set_thread_num <- function(num) {
 #'
 #' @return the number of threads.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 get_thread_num <- function() {
@@ -381,7 +372,7 @@ get_thread_num <- function() {
 #'
 #' @return The S3 class of a GP emulator, a DGP emulator, a linked (D)GP emulator, or a bundle of (D)GP emulators.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -619,7 +610,7 @@ read <- function(pkl_file) {
 #' documents and the RStudio Viewer. The summary table can be further customized by [kableExtra] package.
 #' The resulting [visNetwork] object can be saved as an HTML file using [visNetwork::visSave()].
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1461,13 +1452,13 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 #'     constructed by [gp()], [dgp()] or [lgp()].
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
-#' @param vecchia a boolean or a list of booleans to indicate the addition or removal of the Vecchia approximation:
-#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` is a boolean that indicates
+#' @param vecchia a bool or a list of bools to indicate the addition or removal of the Vecchia approximation:
+#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` is a bool that indicates
 #'   either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of the Vecchia approximation from `object`.
-#' * if `object` is an instance of the `lgp` class, `x` can be a boolean or a list of booleans:
-#'   - if `vecchia` is a boolean, it indicates either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of
+#' * if `object` is an instance of the `lgp` class, `x` can be a bool or a list of bools:
+#'   - if `vecchia` is a bool, it indicates either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of
 #'     the Vecchia approximation from all individual (D)GP emulators contained in `object`.
-#'   - if `vecchia` is a list of booleans, it should have same shape as `struc` that was supplied to [lgp()]. Each boolean
+#'   - if `vecchia` is a list of bools, it should have same shape as `struc` that was supplied to [lgp()]. Each bool
 #'     in the list indicates if the corresponding (D)GP emulator contained in `object` shall have the Vecchia approximation
 #'     added or removed.
 #' @param M the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to `25`.
@@ -1485,7 +1476,7 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 #'     without the need to reconstruct the emulator. If the emulator was built without the Vecchia approximation, the function
 #'     can add it, and if the emulator was built with the Vecchia approximation, the function can remove it. If the current
 #'     state already matches the requested state, the emulator remains unchanged.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
@@ -1579,7 +1570,7 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
 #'     even without knowing how different emulators are connected together. When this information is available and
 #'     different emulators are collected, the connection information between emulators can then be assigned to
 #'     individual emulators with this function.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1624,7 +1615,7 @@ set_linked_idx <- function(object, idx) {
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()]
 #'   in `object` will be removed and not contained in the returned object.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1653,10 +1644,8 @@ set_imp <- function(object, B = 5) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
@@ -1697,7 +1686,7 @@ set_imp <- function(object, B = 5) {
 #'   - `loo` and `oos` created by [validate()]; and
 #'   - `results` created by [predict()]
 #'   in `object` will be removed and not contained in the returned object.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1753,10 +1742,8 @@ window <- function(object, start, end = NULL, thin = 1) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  if ("internal_dims" %in% names(object[['specs']])){
-    new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-    new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  }
+  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
+  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
   new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
@@ -1775,7 +1762,7 @@ window <- function(object, start, end = NULL, thin = 1) {
 }
 
 
-#' @title Calculate the negative log-likelihood
+#' @title Calculate the predictive negative log-likelihood
 #'
 #' @description This function computes the predictive negative log-likelihood from a
 #'     DGP emulator with a likelihood layer.
@@ -1789,14 +1776,7 @@ window <- function(object, start, end = NULL, thin = 1) {
 #'     across all testing data points. The second one, named `allNLL`, is a vector that gives the negative predicted
 #'     log-likelihood for each testing data point.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
-#' @examples
-#' \dontrun{
-#'
-#' # Check https://mingdeyu.github.io/dgpsi-R/ for examples
-#' # on how to compute the negative predicted log-likelihood
-#' # using nllik().
-#' }
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @md
 #' @export
 nllik <- function(object, x, y) {
@@ -1846,7 +1826,7 @@ nllik <- function(object, x, y) {
 #'
 #' @return A `ggplot` object.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1907,7 +1887,7 @@ trace_plot <- function(object, layer = NULL, node = 1) {
 #' @param object an instance of the `dgp` class that is generated by `dgp()`.
 #' @param control a list that can supply the following two components to control static pruning of the DGP emulator:
 #' * `min_size`, the minimum number of design points required to trigger pruning. Defaults to 10 times of the input dimensions.
-#' * `threshold`, the R^2 value above which a GP node is considered redundant and removable. Defaults to `0.97`.
+#' * `threshold`, the \eqn{R^2} value above which a GP node is considered redundant and removable. Defaults to `0.97`.
 #' @param verb a bool indicating if trace information will be printed during the function execution. Defaults to `TRUE`.
 #'
 #' @return An updated `object` that could be an instance of `gp`, `dgp`, or `bundle` (of GP emulators) class.
@@ -1923,7 +1903,7 @@ trace_plot <- function(object, layer = NULL, node = 1) {
 #'
 #'   in `object` will be removed and not contained in the returned object.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
@@ -1993,9 +1973,6 @@ prune <- function(object, control = list(), verb = TRUE) {
     stop("To prune, 'object' needs to be trained with a dataset comprising a size at least equal to 'min_size' in 'control'. Use design() to enrich the training set.", call. = FALSE)
   }
 
-  if (!"internal_dims" %in% names(object[['specs']])) {
-    stop("'object' must be an instance of the 'dgp' class generated by dgp() with 'struc = NULL'.", call. = FALSE)
-  } else {
     n_layer <- object$constructor_obj$n_layer
     if (object$constructor_obj$all_layer[[n_layer]][[1]]$type!='gp') {
       n_layer <- n_layer - 1
@@ -2010,7 +1987,6 @@ prune <- function(object, control = list(), verb = TRUE) {
         }
       }
     }
-  }
 
   is.finish <- FALSE
   cropping_times <- 0
@@ -2271,3 +2247,16 @@ upcase2 <- function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
   x
 }
+
+get_docs_url <- function() {
+  pkg_version <- as.character(utils::packageVersion("dgpsi"))
+
+  is_dev <- grepl("\\.9000$", pkg_version)
+
+  if (is_dev) {
+    "https://mingdeyu.github.io/dgpsi-R/dev/"
+  } else {
+    "https://mingdeyu.github.io/dgpsi-R/"
+  }
+}
+

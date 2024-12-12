@@ -2,36 +2,36 @@
 % Please edit documentation in R/utils.R
 \name{window}
 \alias{window}
-\title{Trim the sequences of model parameters of a DGP emulator}
+\title{Trim the sequence of hyperparameter estimates within a DGP emulator}
 \usage{
 window(object, start, end = NULL, thin = 1)
 }
 \arguments{
 \item{object}{an instance of the S3 class \code{dgp}.}
 
-\item{start}{the first iteration before which all iterations are trimmed from the sequences.}
+\item{start}{the first iteration before which all iterations are trimmed from the sequence.}
 
-\item{end}{the last iteration after which all iterations are trimmed from the sequences.
+\item{end}{the last iteration after which all iterations are trimmed from the sequence.
 Set to \code{NULL} to keep all iterations after (including) \code{start}. Defaults to \code{NULL}.}
 
-\item{thin}{the interval between the \code{start} and \code{end} iterations to thin out the sequences.
+\item{thin}{the interval between the \code{start} and \code{end} iterations to thin out the sequence.
 Defaults to 1.}
 }
 \value{
-An updated \code{object} with trimmed sequences of model parameters.
+An updated \code{object} with a trimmed sequence of hyperparameters.
 }
 \description{
-This function trim the sequences of model parameters of a DGP emulator
-that are generated during the training.
+This function trims the sequence of hyperparameter estimates within a DGP emulator
+generated during training.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 \itemize{
 \item This function is useful when a DGP emulator has been trained and one wants to trim
-the sequences of model parameters and use the trimmed sequences to generate the point estimates
-of DGP model parameters for predictions.
+the sequence of hyperparameters estimated and to use the trimmed sequence to generate point estimates
+of the DGP model parameters for prediction.
 \item The following slots:
 \itemize{
 \item \code{loo} and \code{oos} created by \code{\link[=validate]{validate()}}; and

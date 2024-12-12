@@ -51,9 +51,9 @@
 #' * if `object` is an instance of the `bundle` class, `y_test` is a matrix with each row representing the outputs for the corresponding row of `x_test` and each column representing the output of the different emulators in the bundle.
 #'
 #' Set to `NULL` for LOO-based emulator validation. Defaults to `NULL`. This argument is only used if `eval = NULL`.
-#' @param reset A boolean or a vector of booleans indicating whether to reset the hyperparameters of the emulator(s) to their initial values (as set during initial construction) before re-fitting.
+#' @param reset A bool or a vector of bools indicating whether to reset the hyperparameters of the emulator(s) to their initial values (as set during initial construction) before re-fitting.
 #'     The re-fitting occurs based on the frequency specified by `freq[1]`. This option is useful when hyperparameters are suspected to have converged to a local optimum affecting validation performance.
-#' - If a single boolean is provided, it applies to every iteration of the sequential design.
+#' - If a single bool is provided, it applies to every iteration of the sequential design.
 #' - If a vector is provided, its length must equal `N` (even if the re-fit frequency specified in `freq[1]` is not 1) and it will apply to the corresponding iterations of the sequential design.
 #'
 #' Defaults to `FALSE`.
@@ -91,18 +91,18 @@
 #'
 #' If no custom function is provided, a built-in evaluation metric (RMSE or log-loss, in the case of DGP emulators with categorical likelihoods) will be used.
 #' Defaults to `NULL`. See the *Note* section below for additional details.
-#' @param verb a boolean indicating if trace information will be printed during the sequential design.
+#' @param verb a bool indicating if trace information will be printed during the sequential design.
 #'     Defaults to `TRUE`.
 #' @param autosave a list that contains configuration settings for the automatic saving of the emulator:
-#' * `switch`: a boolean indicating whether to enable automatic saving of the emulator during sequential design. When set to `TRUE`,
+#' * `switch`: a bool indicating whether to enable automatic saving of the emulator during sequential design. When set to `TRUE`,
 #'   the emulator in the final iteration is always saved. Defaults to `FALSE`.
 #' * `directory`: a string specifying the directory path where the emulators will be stored. Emulators will be stored in a sub-directory
 #'   of `directory` named 'emulator-`id`'. Defaults to './check_points'.
 #' * `fname`: a string representing the base name for the saved emulator files. Defaults to 'check_point'.
 #' * `save_freq`: an integer indicating the frequency of automatic saves, measured in the number of iterations. Defaults to `5`.
-#' * `overwrite`: a boolean value controlling the file saving behavior. When set to `TRUE`, each new automatic save overwrites the previous one,
+#' * `overwrite`: a bool value controlling the file saving behavior. When set to `TRUE`, each new automatic save overwrites the previous one,
 #'   keeping only the latest version. If `FALSE`, each automatic save creates a new file, preserving all previous versions. Defaults to `FALSE`.
-#' @param new_wave a boolean indicating whether the current call to [design()] will create a new wave of sequential designs or add the next sequence of designs to the most recent wave.
+#' @param new_wave a bool indicating whether the current call to [design()] will create a new wave of sequential designs or add the next sequence of designs to the most recent wave.
 #'     This argument is relevant only if waves already exist in the emulator. Creating new waves can improve the visualization of sequential design performance across different calls
 #'     to [design()] via [draw()], and allows for specifying a different evaluation frequency in `freq`. However, disabling this option can help limit the number of waves visualized
 #'     in [draw()] to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to `TRUE`.
@@ -123,9 +123,9 @@
 #'     if the DGP emulator was constructed without the Vecchia approximation. Otherwise, the number of processes is set to `max physical cores available %/% 2`.
 #'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components
 #'     is computationally expensive. Defaults to `1`.
-#' @param pruning a boolean indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
+#' @param pruning a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
 #'     design points exceeds `min_size` in `control`. The argument is only applicable to DGP emulators (i.e., `object` is an instance of `dgp` class)
-#'     produced by `dgp()` with `struc = NULL`. Defaults to `TRUE`.
+#'     produced by `dgp()`. Defaults to `TRUE`.
 #' @param control a list that can supply any of the following components to control the dynamic pruning of the DGP emulator:
 #' * `min_size`, the minimum number of design points required to trigger dynamic pruning. Defaults to 10 times the number of input dimensions.
 #' * `threshold`, the \eqn{R^2} value above which a GP node is considered redundant. Defaults to `0.97`.
@@ -156,8 +156,8 @@
 #'     If `target` is not `NULL`, the following additional elements are also included:
 #'     - `target`: the target evaluating metric computed by the `eval` or built-in function to stop the sequential design.
 #'     - `reached`: indicates whether the `target` was reached at the end of the sequential design:
-#'        - a boolean if `object` is an instance of the `gp` or `dgp` class.
-#'        - a vector of booleans if `object` is an instance of the `bundle` class, with its length determined as follows:
+#'        - a bool if `object` is an instance of the `gp` or `dgp` class.
+#'        - a vector of bools if `object` is an instance of the `bundle` class, with its length determined as follows:
 #'          - equal to the number of emulators in the bundle when `eval = NULL`.
 #'          - equal to the length of the output from `eval` when a custom `eval` function is provided.
 #'   - a slot called `type` that gives the type of validation:
@@ -201,7 +201,7 @@
 #'   within `f` are handled by appropriately returning `NA`s.
 #' * When defining `eval`, the output metric needs to be positive if [draw()] is used with `log = T`. And one needs to ensure that a lower metric value indicates
 #'   a better emulation performance if `target` is set.
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #'
 #' @examples
 #' \dontrun{
@@ -3237,10 +3237,6 @@ check_reset <- function(reset, N){
 check_auto <- function(object){
   auto_pruning <- T
   # exclude user-defined structure
-  if (!"internal_dims" %in% names(object[['specs']])) {
-    auto_pruning <- F
-    return(auto_pruning)
-  } else {
     n_layer <- object$constructor_obj$n_layer
     if (object$constructor_obj$all_layer[[n_layer]][[1]]$type!='gp') {
       n_layer <- n_layer - 1
@@ -3257,7 +3253,7 @@ check_auto <- function(object){
         }
       }
     }
-  }
+
   return(auto_pruning)
 }
 
@@ -3342,24 +3338,24 @@ reverse_minmax <- function(normalized_data, limits) {
   return(original_data)
 }
 
-generic_wrapper <- function(r_func) {
-  function(...) {
-    # Capture the arguments
-    args <- list(...)
-
-    # Convert Python-native arguments to R-native if necessary
-    args <- lapply(args, function(arg) {
-      if (inherits(arg, "python.builtin.object")) {
-        reticulate::py_to_r(arg)
-      } else {
-        arg
-      }
-    })
-
-    # Call the user-provided R function with converted arguments
-    result <- do.call(r_func, args)
-
-    # Convert the result back to Python-native types
-    reticulate::r_to_py(result)
-  }
-}
+#generic_wrapper <- function(r_func) {
+#  function(...) {
+#    # Capture the arguments
+#    args <- list(...)
+#
+#    # Convert Python-native arguments to R-native if necessary
+#    args <- lapply(args, function(arg) {
+#      if (inherits(arg, "python.builtin.object")) {
+#        reticulate::py_to_r(arg)
+#      } else {
+#        arg
+#      }
+#    })
+#
+#    # Call the user-provided R function with converted arguments
+#    result <- do.call(r_func, args)
+#
+#    # Convert the result back to Python-native types
+#    reticulate::r_to_py(result)
+#  }
+#}

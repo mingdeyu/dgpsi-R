@@ -48,18 +48,18 @@ articles:
   - seq_design
 
 - title: Sequential Design II
-  desc: Sequential design for a bundle of DGP emulators with the stopping rule.
+  desc: Sequential design for a bundle of DGP emulators with a stopping rule.
   navbar: ~
   contents:
   - seq_design_2
 
-- title: Large-scale DGP Emulation
+- title: Large-scale Emulation with the Vecchia Approximation
   desc: Large-scale DGP emulation using a Vecchia implementation under the SI.
   navbar: ~
   contents:
   - large_scale_emulation
 
-- title: DGP Classification using Stochastic Imputation
+- title: DGP Classification using dgpsi
   desc: DGP classification of the iris data set.
   navbar: ~
   contents:

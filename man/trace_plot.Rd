@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{trace_plot}
 \alias{trace_plot}
-\title{Plot of DGP model parameter traces}
+\title{Trace plot for DGP hyperparameters}
 \usage{
 trace_plot(object, layer = NULL, node = 1)
 }
@@ -18,11 +18,11 @@ corresponding layer.}
 A \code{ggplot} object.
 }
 \description{
-This function plots the traces of model parameters of a chosen GP node
+This function draws trace plots for the hyperparameters of a chosen GP node
 in a DGP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

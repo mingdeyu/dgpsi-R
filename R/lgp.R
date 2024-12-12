@@ -32,9 +32,9 @@
 #'   If the same emulator is used multiple times within the linked system, the list must contain distinct copies
 #'   of that emulator, each with a unique ID stored in their `id` slot. Use the [set_id()] function to produce copies with different IDs
 #'   to ensure each instance can be uniquely referenced.
-#' @param Bthe number of imputations used for prediction. Increase the value to refine representation of
+#' @param B the number of imputations used for prediction. Increase the value to refine representation of
 #'     imputation uncertainty. If the system consists of only GP emulators, `B` is set to `1` automatically. Defaults to `10`.
-#' @param activate `r new_badge("new")` a boolean indicating whether the initialized linked emulator should be activated:
+#' @param activate `r new_badge("new")` a bool indicating whether the initialized linked emulator should be activated:
 #' - If `activate = FALSE`, [lgp()] returns an inactive linked emulator, allowing inspection of its structure using [summary()].
 #' - If `activate = TRUE`, [lgp()] returns an active linked emulator, ready for prediction and validation using [predict()] and [validate()], respectively.
 #'
@@ -72,7 +72,7 @@
 #' * [summary()] to summarize the constructed linked (D)GP emulator.
 #' * [write()] to save the linked (D)GP emulator to a `.pkl` file.
 #'
-#' @details See further examples and tutorials at <https://mingdeyu.github.io/dgpsi-R/>.
+#' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
 #'
