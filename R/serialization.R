@@ -4,7 +4,7 @@
 #'
 #' `r new_badge("new")`
 #'
-#' This function serialize the constructed emulator.
+#' This function serializes the constructed emulator.
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be serialized.
@@ -23,34 +23,34 @@
 #' library(future.apply)
 #' library(dgpsi)
 #'
-#' # Model
+#' # model
 #' f <- function(x) {
 #'  (sin(7.5*x)+1)/2
 #' }
 #'
-#' # Training data
+#' # training data
 #' X <- seq(0, 1, length = 10)
 #' Y <- sapply(X, f)
 #'
-#' # Training a DGP emulator
+#' # train a DGP emulator
 #' m <- dgp(X, Y, name = "matern2.5")
 #'
-#  Testing input data
+#' # testing input data
 #' X_dgp <- seq(0, 1, length = 100)
 #'
-#' # Serialize the DGP emulator
+#' # serialize the DGP emulator
 #' m_serialized <- serialize(m)
 #'
-#' # Start a multi-session with three cores for parallel predictions
+#' # start a multi-session with three cores for parallel predictions
 #' plan(multisession, workers = 3)
 #'
-#' # Perform parallel predictions
+#' # perform parallel predictions
 #' results <- future_lapply(1:length(X_dgp), function(i) {
 #'   m_deserialized <- deserialize(m_serialized)
 #'   mean_i <- predict(m_deserialized, X_dgp[i])$results$mean
 #' }, future.seed = TRUE)
 #'
-#' # Reset the future plan to sequential
+#' # reset the future plan to sequential
 #' plan(sequential)
 #'
 #' # combine mean predictions
@@ -120,34 +120,34 @@ serialize <- function(object, light = TRUE) {
 #' library(future.apply)
 #' library(dgpsi)
 #'
-#' # Model
+#' # model
 #' f <- function(x) {
 #'  (sin(7.5*x)+1)/2
 #' }
 #'
-#' # Training data
+#' # training data
 #' X <- seq(0, 1, length = 10)
 #' Y <- sapply(X, f)
 #'
-#' # Training a DGP emulator
+#' # train a DGP emulator
 #' m <- dgp(X, Y, name = "matern2.5")
 #'
-#  Testing input data
+#' # testing input data
 #' X_dgp <- seq(0, 1, length = 100)
 #'
-#' # Serialize the DGP emulator
+#' # serialize the DGP emulator
 #' m_serialized <- serialize(m)
 #'
-#' # Start a multi-session with three cores for parallel predictions
+#' # start a multi-session with three cores for parallel predictions
 #' plan(multisession, workers = 3)
 #'
-#' # Perform parallel predictions
+#' # perform parallel predictions
 #' results <- future_lapply(1:length(X_dgp), function(i) {
 #'   m_deserialized <- deserialize(m_serialized)
 #'   mean_i <- predict(m_deserialized, X_dgp[i])$results$mean
 #' }, future.seed = TRUE)
 #'
-#' # Reset the future plan to sequential
+#' # reset the future plan to sequential
 #' plan(sequential)
 #'
 #' # combine mean predictions
