@@ -63,7 +63,7 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/shubert.png){width=100%}
 
-From the figure above, we can observe that the Shubert function has several local minima and two global minima located at $(0.1437, 0.2999)$ and $(0.2999, 0.1437)$, both with values around $-186.7309$. In the remainder of this vignette, we will use Expected Improvement (EI) as the acquisition function to identify the global minima.
+From the figure above, we can observe that the Shubert function has several local minima and two global minima located at (0.1437, 0.2999) and (0.2999, 0.1437), both with values around -186.7309. In the remainder of this vignette, we will use Expected Improvement (EI) as the acquisition function to identify the global minima.
 
 ## Initial emulator construction
 
@@ -206,7 +206,7 @@ m <- design(m, N = 80, limits = lim, f = shubert, method = ei, eval = opt_monito
 ##  * Metric: -186.728582
 ```
 
-During the Bayesian optimization, our dynamic pruning mechanism transitioned the DGP emulator to a GP emulator at iteration 6, leading to faster optimizations in the remaining iterations while maintaining the emulator's quality. After 80 iterations, we identified a minimum of the Shubert function with a value of $-186.7286$, which is very close to the global minimum of $-186.7309$. We can inspect the progress of the minima search conducted by `design()` by applying `draw()` to `m`:
+During the Bayesian optimization, our dynamic pruning mechanism transitioned the DGP emulator to a GP emulator at iteration 6, leading to faster optimizations in the remaining iterations while maintaining the emulator's quality. After 80 iterations, we identified a minimum of the Shubert function with a value of -186.7286, which is very close to the global minimum of -186.7309. We can inspect the progress of the minima search conducted by `design()` by applying `draw()` to `m`:
 
 ```{r}
 draw(m) +
@@ -227,7 +227,7 @@ draw(m) +
 
 ![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/bo_tracker.png){width=100%}
 
-The figure above shows that Bayesian optimization using our (D)GP emulator quickly identifies a low value of the Shubert function within 5 iterations. Notably, the lowest value, $-186.7286$, was achieved by `design()` after 48 iterations.
+The figure above shows that Bayesian optimization using our (D)GP emulator quickly identifies a low value of the Shubert function within 5 iterations. Notably, the lowest value, -186.7286, was achieved by `design()` after 48 iterations.
 
 We can also inspect the locations identified during the process by applying `draw()` to `m` with `type = 'design'`:
 
