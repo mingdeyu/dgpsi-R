@@ -14,8 +14,9 @@
 #'
 #' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @note Since the constructed emulators are 'python' objects, they cannot be directly exported to other R processes for parallel
-#'     processing in multi-session workers. This function provides a way to convert the emulators into serialized objects, which can be
-#'     restored using [deserialize()] for multi-session processing.
+#'    processing in multi-session workers created through spawning. This function provides a solution by converting the emulators
+#'    into serialized objects, which can be restored using [deserialize()] for multi-session processing. Note that in forking,
+#'    serialization is generally not required.
 #' @examples
 #' \dontrun{
 #'
@@ -113,6 +114,7 @@ serialize <- function(object, light = TRUE) {
 #' @return The S3 class of a GP emulator, a DGP emulator, a linked (D)GP emulator, or a bundle of (D)GP emulators.
 #'
 #' @details See further examples and tutorials at <`r get_docs_url()`>.
+#' @note See the *Note* section in [serialize()].
 #' @examples
 #' \dontrun{
 #'

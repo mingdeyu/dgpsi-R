@@ -25,8 +25,9 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/de
 }
 \note{
 Since the constructed emulators are 'python' objects, they cannot be directly exported to other R processes for parallel
-processing in multi-session workers. This function provides a way to convert the emulators into serialized objects, which can be
-restored using \code{\link[=deserialize]{deserialize()}} for multi-session processing.
+processing in multi-session workers created through spawning. This function provides a solution by converting the emulators
+into serialized objects, which can be restored using \code{\link[=deserialize]{deserialize()}} for multi-session processing. Note that in forking,
+serialization is generally not required.
 }
 \examples{
 \dontrun{

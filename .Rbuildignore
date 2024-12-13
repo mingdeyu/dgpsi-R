@@ -16,4 +16,5 @@
 ^vignettes/linked_DGP.Rmd$
 ^vignettes/seq_design.Rmd$
 ^vignettes/seq_design_2.Rmd$
+^vignettes/bayes_opt.Rmd$
 ^LICENSE\.md$

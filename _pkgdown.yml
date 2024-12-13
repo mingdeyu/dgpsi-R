@@ -23,47 +23,24 @@ development:
   mode: auto
 
 articles:
-- title: DGP Emulation with the Heteroskedastic Gaussian Likelihood
-  desc: DGP modeling of the motorcycle accident data.
-  navbar: ~
-  contents:
-  - motorcycle
-
 - title: A Quick Guide to dgpsi
-  desc: A quick guide to dgpsi by emulating a step function.
+  desc: A quick introduction to dgpsi by emulating a step function.
   navbar: ~
   contents:
   - dgpsi
 
-- title: Linked (D)GP Emulation
-  desc: Linked (D)GP emulation of a synthetic system of three linked computer models.
-  navbar: ~
-  contents:
-  - linked_DGP
-
-- title: Sequential Design I
-  desc: Sequential design and dynamic pruning for the DGP emulator of a non-stationary simulator.
-  navbar: ~
-  contents:
-  - seq_design
-
-- title: Sequential Design II
-  desc: Sequential design for a bundle of DGP emulators with a stopping rule.
-  navbar: ~
-  contents:
-  - seq_design_2
-
-- title: Large-scale Emulation with the Vecchia Approximation
-  desc: Large-scale DGP emulation using a Vecchia implementation under the SI.
+- title: A Deep Dive to dgpsi
+  desc: >
+    These articles provide an in-depth exploration of dgpsi and its diverse capabilities.
   navbar: ~
   contents:
   - large_scale_emulation
-
-- title: DGP Classification using dgpsi
-  desc: DGP classification of the iris data set.
-  navbar: ~
-  contents:
+  - linked_DGP
+  - motorcycle
   - classification
+  - seq_design
+  - seq_design_2
+  - bayes_opt
 
 reference:
 - title: "Initalization"

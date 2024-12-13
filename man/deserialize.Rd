@@ -20,6 +20,9 @@ This function restores the serialized emulator created by \code{\link[=serialize
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
+\note{
+See the \emph{Note} section in \code{\link[=serialize]{serialize()}}.
+}
 \examples{
 \dontrun{
 
