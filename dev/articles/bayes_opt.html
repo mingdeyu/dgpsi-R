@@ -110,7 +110,7 @@ package.</p>
 <div class="section level2">
 <h2 id="define-the-target-function">Define the target function<a class="anchor" aria-label="anchor" href="#define-the-target-function"></a>
 </h2>
-<p>We consider a version of the Shubert function <span class="citation">(Surjanovic and Bingham, n.d.)</span> defined over the
+<p>We consider a version of the Shubert function <span class="citation">(Surjanovic and Bingham 2013)</span> defined over the
 domain
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><annotation encoding="application/x-tex">[0,1]^2</annotation></semantics></math>
 as follows:</p>
@@ -141,14 +141,10 @@ we generate the contour of the Shubert function:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_continuous.html" class="external-link">scale_fill_continuous</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"viridis"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/shubert.png" style="width:100.0%"></p>
 <p>From the figure above, we can observe that the Shubert function has
-several local minima and two global minima located at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.1437</mn><mo>,</mo><mn>0.2999</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0.1437, 0.2999)</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.2999</mn><mo>,</mo><mn>0.1437</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0.2999, 0.1437)</annotation></semantics></math>,
-both with values around
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>186.7309</mn></mrow><annotation encoding="application/x-tex">-186.7309</annotation></semantics></math>.
-In the remainder of this vignette, we will use Expected Improvement (EI)
-as the acquisition function to identify the global minima.</p>
+several local minima and two global minima located at (0.1437, 0.2999)
+and (0.2999, 0.1437), both with values around -186.7309. In the
+remainder of this vignette, we will use Expected Improvement (EI) as the
+acquisition function to identify the global minima.</p>
 </div>
 <div class="section level2">
 <h2 id="initial-emulator-construction">Initial emulator construction<a class="anchor" aria-label="anchor" href="#initial-emulator-construction"></a>
@@ -290,13 +286,10 @@ optimization using <code><a href="../reference/design.html">design()</a></code> 
 transitioned the DGP emulator to a GP emulator at iteration 6, leading
 to faster optimizations in the remaining iterations while maintaining
 the emulator’s quality. After 80 iterations, we identified a minimum of
-the Shubert function with a value of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>186.7286</mn></mrow><annotation encoding="application/x-tex">-186.7286</annotation></semantics></math>,
-which is very close to the global minimum of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>186.7309</mn></mrow><annotation encoding="application/x-tex">-186.7309</annotation></semantics></math>.
-We can inspect the progress of the minima search conducted by
-<code><a href="../reference/design.html">design()</a></code> by applying <code><a href="../reference/draw.html">draw()</a></code> to
-<code>m</code>:</p>
+the Shubert function with a value of -186.7286, which is very close to
+the global minimum of -186.7309. We can inspect the progress of the
+minima search conducted by <code><a href="../reference/design.html">design()</a></code> by applying
+<code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html" class="external-link">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">'Bayesian Optimization Tracker'</span><span class="op">)</span> <span class="op">+</span></span>
@@ -315,9 +308,8 @@ We can inspect the progress of the minima search conducted by
 <p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/bo_tracker.png" style="width:100.0%"></p>
 <p>The figure above shows that Bayesian optimization using our (D)GP
 emulator quickly identifies a low value of the Shubert function within 5
-iterations. Notably, the lowest value,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>186.7286</mn></mrow><annotation encoding="application/x-tex">-186.7286</annotation></semantics></math>,
-was achieved by <code><a href="../reference/design.html">design()</a></code> after 48 iterations.</p>
+iterations. Notably, the lowest value, -186.7286, was achieved by
+<code><a href="../reference/design.html">design()</a></code> after 48 iterations.</p>
 <p>We can also inspect the locations identified during the process by
 applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code> with
 <code>type = 'design'</code>:</p>
@@ -347,7 +339,7 @@ locations.</p>
 </h3>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-surjanovic" class="csl-entry">
-Surjanovic, Simon, and Derek Bingham. n.d. <span>“Virtual Library of
+Surjanovic, Simon, and Derek Bingham. 2013. <span>“Virtual Library of
 Simulation Experiments: Test Functions and Datasets.”</span> <a href="https://www.sfu.ca/~ssurjano/index.html" class="external-link uri">https://www.sfu.ca/~ssurjano/index.html</a>.
 </div>
 </div>
