@@ -34,7 +34,7 @@ The `dgpsi` package offers a flexible toolbox for Gaussian process (GP), deep Ga
 
 ## Load the package
 
-```{r}
+```{r, eval = FALSE}
 library(dgpsi)
 ```
 
@@ -42,13 +42,13 @@ library(dgpsi)
 
 `dgpsi` provides a function `init_py()` that helps us set up, initialize, re-install, or uninstall the underlying Python environment. We could run `init_py()` every time after `dgpsi` is loaded to manually initiate the Python environment. Alternatively, we could activate the Python environment by simply executing a function from `dgpsi`. For example, the Python environment will be automatically loaded after we run `set_seed()` from the package to specify a seed for reproducibility:
 
-```{r}
+```{r, eval = FALSE}
 set_seed(9999)
 ```
 
 Define the step function:
 
-```{r}
+```{r, eval = FALSE}
 f <- function(x) {
   if (x < 0.5) return(-1)
   if (x >= 0.5) return(1)
@@ -57,7 +57,7 @@ f <- function(x) {
 
 and generate ten training data points:
 
-```{r}
+```{r, eval = FALSE}
 X <- seq(0, 1, length = 10)
 Y <- sapply(X, f)
 ```
@@ -66,7 +66,7 @@ Y <- sapply(X, f)
 
 We now build and train a DGP emulator with three layers:
 
-```{r}
+```{r, eval = FALSE}
 m <- dgp(X, Y, depth = 3)
 ```
 
@@ -82,7 +82,7 @@ The progress bar displayed shows how long it takes to finish training. We are ab
 
 The trained DGP emulator can be visualized using the `summary()` function:
 
-```{r}
+```{r, eval = FALSE}
 summary(m)
 ```
 
@@ -96,7 +96,7 @@ At this point, you could use `write()` to save the emulator `m` to a local file 
 
 After we have the emulator, we can validate it by drawing the validation plots. There are two types of validation plots provided by the package. The first one is the Leave-One-Out (LOO) cross validation plot:
 
-```{r}
+```{r, eval = FALSE}
 plot(m)
 ```
 
@@ -110,14 +110,14 @@ plot(m)
 
 The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points:
 
-```{r}
+```{r, eval = FALSE}
 oos_x <- sample(seq(0, 1, length = 200), 10)
 oos_y <- sapply(oos_x, f)
 ```
 
 We can now perform OOS validation:
 
-```{r}
+```{r, eval = FALSE}
 plot(m,oos_x,oos_y)
 ```
 
@@ -135,20 +135,20 @@ Note that the `style` argument to the `plot()` function can be used to draw diff
 
 Once the validation is done, we can make predictions from the DGP emulator. We generate 200 data points from the step function over $[0,1]$:
 
-```{r}
+```{r, eval = FALSE}
 test_x <- seq(0, 1, length = 200)
 test_y <- sapply(test_x, f)
 ```
 
 and predict at these locations:
 
-```{r}
+```{r, eval = FALSE}
 m <- predict(m, x = test_x)
 ```
 
 The `predict()` function returns an updated DGP emulator `m` that contains a slot named `results` that gives the posterior predictive means and variances at testing positions. We can extract this information and plot the emulation results to check the predictive performance of our constructed DGP emulator:
 
-```{r}
+```{r, eval = FALSE}
 mu <- m$results$mean # extract the predictive means 
 sd <- sqrt(m$results$var) # extract the predictive variance and compute the predictive standard deviations
 # compute predictive bounds which are two predictive standard deviations above and below the predictive means
