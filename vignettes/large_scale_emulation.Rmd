@@ -1,12 +1,12 @@
 ---
 title: >
-  Large-scale Emulation with the Vecchia Approximation
+  Large-Scale DGP Emulation
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
-  Large-scale DGP emulation using a Vecchia implementation under the SI.
+  Large-scale DGP emulation using Vecchia approximations under the Stochastic Imputation.
 vignette: >
-  %\VignetteIndexEntry{Large-scale DGP Emulation}
+  %\VignetteIndexEntry{Large-Scale DGP Emulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

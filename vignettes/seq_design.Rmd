@@ -3,7 +3,7 @@ title: "Sequential Design I"
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
-  Sequential design and dynamic pruning for the DGP emulator of a non-stationary simulator.
+  Sequential design and dynamic pruning for DGP emulation of a non-stationary simulator.
 vignette: >
   %\VignetteIndexEntry{Sequential Design I}
   %\VignetteEngine{knitr::rmarkdown}

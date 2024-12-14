@@ -1,11 +1,11 @@
 ---
-title: "Customized Sequential Design for Bayesian Optimization"
+title: "Bayesian Optimization"
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
   Customized sequential design to implement Bayesian optimization for the Shubert function.
 vignette: >
-  %\VignetteIndexEntry{Customized Sequential Design for Bayesian Optimization}
+  %\VignetteIndexEntry{Bayesian Optimization}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -1,12 +1,12 @@
 ---
 title: >
-  DGP Classification using dgpsi
+  DGP Classification
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
-  DGP classification of the iris data set.
+  DGP classification of the iris data set using dgpsi.
 vignette: >
-  %\VignetteIndexEntry{DGP Classification using dgpsi}
+  %\VignetteIndexEntry{DGP Classification}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

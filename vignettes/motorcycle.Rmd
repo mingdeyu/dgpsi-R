@@ -1,11 +1,11 @@
 ---
-title: DGP Emulation with the Heteroskedastic Gaussian Likelihood
+title: Non-Gaussian Emulation
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
-  DGP emulation of the motorcycle accident data.
+  DGP emulation of the motorcycle accident data under a Heteroskedastic Gaussian Likelihood.
 vignette: >
-  %\VignetteIndexEntry{DGP Emulation with the Heteroskedastic Gaussian Likelihood}
+  %\VignetteIndexEntry{Non-Gaussian Emulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
