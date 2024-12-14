@@ -33,7 +33,7 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 \examples{
 \dontrun{
 
-# load packages and the Python env
+# load packages
 library(lhs)
 library(dgpsi)
 
@@ -53,8 +53,8 @@ validate_x <- maximinLHS(30,1)
 validate_y <- f(validate_x)
 
 # training a 2-layered DGP emulator with respect to each output with the global connection off
-m1 <- dgp(X, Y[,1], connect=F)
-m2 <- dgp(X, Y[,2], connect=F)
+m1 <- dgp(X, Y[,1], connect = F)
+m2 <- dgp(X, Y[,2], connect = F)
 
 # specify the range of the input dimension
 lim <- c(0, 1)
@@ -62,24 +62,17 @@ lim <- c(0, 1)
 # pack emulators to form an emulator bundle
 m <- pack(m1, m2)
 
-# 1st wave of the sequential design with 10 steps with target RMSE 0.01
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, target = 0.01)
+# 1st wave of the sequential design with 10 iterations and the target RMSE of 0.01
+m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, target = 0.01)
 
-# 2rd wave of the sequential design with 10 steps, the same target, and the aggregation
-# function that takes the average of the criterion scores across the two outputs
-g <- function(x){
-  return(rowMeans(x))
-}
-m <- design(m, N=10, limits = lim, f = f, x_test = validate_x,
-                    y_test = validate_y, aggregate = g, target = 0.01)
+# 2rd wave of the sequential design with additional 10 iterations and the same target
+m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, target = 0.01)
 
 # draw sequential designs of the two packed emulators
-draw(m, emulator = 1, type = 'design')
-draw(m, emulator = 2, type = 'design')
+draw(m, type = 'design')
 
 # inspect the traces of RMSEs of the two packed emulators
-draw(m, emulator = 1, type = 'rmse')
-draw(m, emulator = 2, type = 'rmse')
+draw(m, type = 'rmse')
 
 # write and read the constructed emulator bundle
 write(m, 'bundle_dgp')
