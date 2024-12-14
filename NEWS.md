@@ -1,4 +1,4 @@
-# dgpsi 2.4.0-9000 (development version)
+# dgpsi 2.5.0
 - Training times for DGP emulators are now approximately 30%-40% faster.
 - The computation of (D)GP predictions and Leave-One-Out (LOO) evaluations is now 6-7 times faster.
 - The `nb_parallel` argument has been removed from relevant functions, as multi-threading is now integrated by default.

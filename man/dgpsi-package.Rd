@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Interface to the 'python' package 'dgpsi' for Gaussian process, deep Gaussian process, and linked deep Gaussian process emulations of computer models and networks using stochastic imputation (SI). The implementations follow Ming & Guillas (2021) \doi{10.1137/20M1323771} and Ming, Williamson, & Guillas (2023) \doi{10.1080/00401706.2022.2124311} and Ming & Williamson (2023) \href{https://arxiv.org/abs/2306.01212}{arXiv:2306.01212}. To get started with the package, see \url{https://mingdeyu.github.io/dgpsi-R/}.
+Interface to the 'python' package 'dgpsi' for Gaussian process, deep Gaussian process, and linked deep Gaussian process emulations of computer models and networks using stochastic imputation (SI). The implementations follow Ming & Guillas (2021) \doi{10.1137/20M1323771} and Ming, Williamson, & Guillas (2023) \doi{10.1080/00401706.2022.2124311} and Ming & Williamson (2023) \doi{10.48550/arXiv.2306.01212}. To get started with the package, see \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \seealso{
 Useful links:

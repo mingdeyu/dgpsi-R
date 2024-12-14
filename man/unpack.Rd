@@ -18,7 +18,7 @@ This function unpacks a bundle of (D)GP emulators safely so that any further man
 will not impact those in the bundle.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \examples{
 \dontrun{

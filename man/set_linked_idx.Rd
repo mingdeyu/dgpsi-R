@@ -22,7 +22,7 @@ This function is deprecated and will be removed in the next release. The updated
 for (D)GP emulators.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 This function is useful when different models are emulated by different teams. Each team can create their (D)GP emulator

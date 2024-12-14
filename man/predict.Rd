@@ -198,7 +198,7 @@ The \code{results} slot will also include:
 This function implements prediction from GP, DGP, or linked (D)GP emulators.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \examples{
 \dontrun{

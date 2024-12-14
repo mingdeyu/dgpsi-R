@@ -143,7 +143,7 @@ A \code{patchwork} object.
 This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

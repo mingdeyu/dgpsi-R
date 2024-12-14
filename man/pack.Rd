@@ -28,7 +28,7 @@ This function packs GP emulators and DGP emulators into a \code{bundle} class fo
 sequential designs if each emulator emulates one output dimension of the underlying simulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \examples{
 \dontrun{

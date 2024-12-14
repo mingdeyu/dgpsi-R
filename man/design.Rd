@@ -368,7 +368,7 @@ a bundle of (D)GP emulators, supporting an array of popular methods as well as u
 It can also be used as a wrapper for Bayesian optimization methods.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

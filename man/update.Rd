@@ -73,7 +73,7 @@ An updated \code{object}.
 This function updates the training input and output of a GP or DGP emulator with an option to refit the emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

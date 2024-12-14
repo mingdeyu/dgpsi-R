@@ -6,7 +6,7 @@
 [![Download](https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen)](https://CRAN.R-project.org/package=dgpsi)
 [![R-CMD-check](https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml)
 [![DOC](https://img.shields.io/badge/DOC-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
-[![python](https://img.shields.io/badge/Python-dgpsi%20v2.4.0-informational)](https://github.com/mingdeyu/DGP)
+[![python](https://img.shields.io/badge/Python-dgpsi%20v2.5.0-informational)](https://github.com/mingdeyu/DGP)
 <!-- badges: end -->
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations using stochastic imputation (SI). 
@@ -29,8 +29,9 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 * Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 * Automatic pruning of DGP emulators, both statically and dynamically.
-* [![Feature Badge](https://img.shields.io/badge/New-In%20Dev%20Version-orange)](https://mingdeyu.github.io/dgpsi-R/dev/) [Large-scale GP, DGP, and Linked (D)GP emulations](https://mingdeyu.github.io/dgpsi-R/dev/articles/large_scale_emulation.html).
-* [![Feature Badge](https://img.shields.io/badge/New-In%20Dev%20Version-orange)](https://mingdeyu.github.io/dgpsi-R/dev/) [Scalable DGP classification using Stochastic Imputation](https://mingdeyu.github.io/dgpsi-R/dev/articles/classification.html).
+* [![Feature Badge](https://img.shields.io/badge/New-In%20v2.5.0-orange)](https://mingdeyu.github.io/dgpsi-R/) [Large-scale GP, DGP, and Linked (D)GP emulations](https://mingdeyu.github.io/dgpsi-R/articles/large_scale_emulation.html).
+* [![Feature Badge](https://img.shields.io/badge/New-In%20v2.5.0-orange)](https://mingdeyu.github.io/dgpsi-R/) [Scalable DGP classification using Stochastic Imputation](https://mingdeyu.github.io/dgpsi-R/articles/classification.html).
+* [![Feature Badge](https://img.shields.io/badge/New-In%20v2.5.0-orange)](https://mingdeyu.github.io/dgpsi-R/) [Bayesian optimization](https://mingdeyu.github.io/dgpsi-R/articles/bayes_opt.html).
 
 ## Getting started
 * Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
@@ -55,7 +56,7 @@ After the installation, run
 library(dgpsi)
 ```
 
-to load the package. To install or activate the required Python environment automatically, simply run a function from the package. That's it, the package is now ready to use!
+to load the package. To install or activate the required Python environment automatically, you can either run `dgpsi::init_py()` explicitly or simply call any function from the package. That's it - the package is ready to use!
 
 > **Note**  
 > After loading `dgpsi`, the package may take some time to compile and initiate the underlying Python environment the first

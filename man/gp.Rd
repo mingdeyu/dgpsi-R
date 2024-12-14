@@ -166,7 +166,7 @@ The returned \code{gp} object can be used by
 This function builds and trains a GP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 Any R vector detected in \code{X} and \code{Y} will be treated as a column vector and automatically converted into a single-column

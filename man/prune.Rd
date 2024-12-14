@@ -24,7 +24,7 @@ An updated \code{object} that could be an instance of \code{gp}, \code{dgp}, or 
 This function implements static pruning for a DGP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

@@ -18,7 +18,7 @@ An updated \code{object} with the information of \code{B} incorporated.
 This function resets the number of imputations for prediction from a DGP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

@@ -46,7 +46,7 @@ This function adds or removes the Vecchia approximation from a GP, DGP or linked
 constructed by \code{\link[=gp]{gp()}}, \code{\link[=dgp]{dgp()}} or \code{\link[=lgp]{lgp()}}.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 This function is useful for quickly switching between Vecchia and non-Vecchia approximations for an existing emulator
