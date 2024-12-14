@@ -208,7 +208,7 @@ and visually check the relationships between emulators by applying `summary()` t
 summary(m_link)
 ```
 
-<iframe src="https://mingdeyu.github.io/dgpsi-R/linked_emu.html" width="100%" height="410" style="border: none;"></iframe>
+<iframe src="htmls/linked_emu.html" width="100%" height="410" style="border: none;"></iframe>
 
 If everything looks correct, we can then activate the linked emulator for prediction:
 

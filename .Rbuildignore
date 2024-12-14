@@ -10,6 +10,7 @@
 ^CRAN-SUBMISSION$
 ^RESEARCH-NOTICE\.md$
 ^vignettes/images
+^vignettes/htmls
 ^vignettes/motorcycle.Rmd$
 ^vignettes/classification.Rmd$
 ^vignettes/large_scale_emulation.Rmd$
