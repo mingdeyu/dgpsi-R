@@ -5,73 +5,76 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="Sequential design for a bundle of DGP emulators with the stopping rule.
-">
 <title>Sequential Design II • dgpsi</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sequential Design II">
-<meta property="og:description" content="Sequential design for a bundle of DGP emulators with the stopping rule.
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sequential Design II">
+<meta name="description" content="Sequential design for a bundle of DGP emulators with a stopping rule.
 ">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<meta property="og:description" content="Sequential design for a bundle of DGP emulators with a stopping rule.
+">
+<meta property="og:image" content="http://mingdeyu.github.io/dgpsi-R/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.5.0</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/dgpsi.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/dgpsi.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/motorcycle.html">DGP Emulation with the Heteroskedastic Gaussian Likelihood
-</a>
-    <a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a>
-    <a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a>
-    <a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation
+    </a></li>
+    <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
+    <li><a class="dropdown-item" href="../articles/motorcycle.html">Non-Gaussian Emulation</a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification
+    </a></li>
+    <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
+    <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
+    <li><a class="dropdown-item" href="../articles/bayes_opt.html">Bayesian Optimization</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/mingdeyu/dgpsi-R/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/mingdeyu/dgpsi-R/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
 </li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -80,10 +83,10 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Sequential Design II</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Sequential Design II</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/HEAD/vignettes/seq_design_2.Rmd" class="external-link"><code>vignettes/seq_design_2.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mingdeyu/dgpsi-R/blob/master/vignettes/seq_design_2.Rmd" class="external-link"><code>vignettes/seq_design_2.Rmd</code></a></small>
       <div class="d-none name"><code>seq_design_2.Rmd</code></div>
     </div>
 
@@ -113,10 +116,10 @@ between <code>[0, 1]</code> and a three-dimensional output.</p>
 <span>  <span class="va">y3</span> <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">7.5</span><span class="op">*</span><span class="va">x</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span>, <span class="va">y3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>Note that the function is defined in such a way that both its input
-<code>x</code> and output are matrices. The following figure shows the
+<p>Note that the function is defined in such a way that both its input,
+<code>x</code>, and output are matrices. The following figure shows the
 true functional forms of the three outputs of the simulator over
-<code>[0, 1]</code>:</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dense_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">dense_y</span> <span class="op">&lt;-</span> <span class="fu">f</span><span class="op">(</span><span class="va">dense_x</span><span class="op">)</span></span>
@@ -127,12 +130,12 @@ true functional forms of the three outputs of the simulator over
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">output2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">'#E31A1C'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">'Output 2'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">output3</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">'green4'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">'Output 3'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">wrap_plots</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, <span class="va">p3</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html" class="external-link">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">'Synthetic Simulator'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/seq2_fct.png"></p>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_fct.png" style="width:100.0%"></p>
 <p>We now specify a seed with <code><a href="../reference/set_seed.html">set_seed()</a></code> from the package
 for reproducibility</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">999</span><span class="op">)</span></span></code></pre></div>
-<p>and generate an initial design with 5 design points using the maximin
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">9999</span><span class="op">)</span></span></code></pre></div>
+<p>and generate an initial design with 5 design points using a maximin
 Latin hypercube sampler:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lhs/man/maximinLHS.html" class="external-link">maximinLHS</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -172,15 +175,15 @@ independently:</p>
 <span><span class="co">## Imputing ... done</span></span></code></pre>
 <p>Note that we have the global connection turned off for the first two
 DGP emulators because we found that this yields better emulation
-performances. We then build a bundle of the three DGP emulators using
+performance. We then build a bundle of the three DGP emulators using
 <code><a href="../reference/pack.html">pack()</a></code>:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pack.html">pack</a></span><span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span>, <span class="va">m3</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="sequential-designs-of-the-bundle-emulator">Sequential designs of the bundle emulator<a class="anchor" aria-label="anchor" href="#sequential-designs-of-the-bundle-emulator"></a>
+<h2 id="sequential-design-for-the-emulator-bundle">Sequential design for the emulator bundle<a class="anchor" aria-label="anchor" href="#sequential-design-for-the-emulator-bundle"></a>
 </h2>
-<p>To start with the sequential design, we specify the limit of the
+<p>To begin sequential design, we first specify the limit of each
 input:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
@@ -189,55 +192,54 @@ input:</p>
 <code class="sourceCode R"><span><span class="va">target</span> <span class="op">&lt;-</span> <span class="fl">0.01</span></span></code></pre></div>
 <p>Here we choose <code>0.01</code> because it is equivalent to
 <code>1%</code> normalized error given that the ranges of both outputs
-are <code>[0,1]</code>. We can of course set different targets for
-different outputs, e.g., by setting
+are <code>[0,1]</code>. We can set different targets for different
+outputs, e.g., by setting
 <code>target &lt;- c(0.005, 0.02, 0.01)</code>.</p>
 <p>We start the first-wave of the sequential design with 10 steps:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1st wave of the sequential design with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, target <span class="op">=</span> <span class="va">target</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.340553 0.158352 0.019125</span></span>
+<span><span class="co">##  *  RMSE: 0.383722, RMSE: 0.154689, RMSE: 0.008984</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.467905</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.003782</span></span>
-<span><span class="co">##  * Next design point (Emulator3): 0.997096</span></span>
-<span><span class="co">##  - Updating and re-fitting ... done</span></span>
-<span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.309701 0.158634 0.006056</span></span>
-<span><span class="co">## Iteration 2:</span></span>
-<span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.997773</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.997773</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.207895</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.235873</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.291350 0.159032 0.006056</span></span>
+<span><span class="co">##  *  RMSE: 0.337517, RMSE: 0.155087, RMSE: 0.008984</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.198829</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.311879</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.430889</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.479682</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.190766 0.014075 0.006056</span></span>
-<span><span class="co">## Targets are not reached for all emulators at the end of the sequential design.</span></span></code></pre>
-<p>It can be seen that at the second step, the DGP emulator for the
-third output has already reached the target, so for the rest of the
-steps no further refinements (i.e., additions of design points to the
-third DGP emulator) are performed. At the end of the first wave, the DGP
-emulators for both the first and second outputs have not reached the
-target yet. At this point, we can proceed to a second wave by repeating
-the command above, but we show below an alternative way, in which we
-define an aggregation function that aggregates criterion scores across
-the three outputs such that the same design points are added to the
-three emulators at each step (instead of different design points for
-each emulator). We define the aggregation function <code>g</code> that
-aggregate scores by calculating their weighted average:</p>
+<span><span class="co">##  *  RMSE: 0.120320, RMSE: 0.062365, RMSE: 0.008984</span></span>
+<span><span class="co">## Targets not reached for all emulators at the end of the sequential design.</span></span></code></pre>
+<p>It can be seen that at the first step, the DGP emulator for the third
+output has already reached the target, so no further refinements (i.e.,
+additions of design points to the third DGP emulator) are performed for
+the remaining steps. By the end of the first wave, the DGP emulators for
+the first and second outputs have not yet reached the target. At this
+point, we can proceed to a second wave by repeating the command above.
+However, we demonstrate an alternative approach below, where we define
+an aggregation function (applicable to all built-in <code>method</code>
+functions of <code><a href="../reference/design.html">design()</a></code>). This function aggregates criterion
+scores across the three outputs, ensuring that the same design points
+are added to all three emulators at each step, instead of selecting
+different design points for each emulator. Using the aggregation
+approach can be advantageous if the different outputs exhibit similar
+behavior with respect to the input, as it reduces number of simulations
+required at each iteration. However, if the outputs behave differently,
+it may be more effective to add distinct design points to each emulator
+to achieve lower errors more quickly.</p>
+<p>We define the aggregation function <code>g</code> to compute a
+weighted average of the scores:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">weight</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">*</span><span class="va">weight</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
@@ -246,59 +248,68 @@ aggregate scores by calculating their weighted average:</p>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Since the third emulator has already reached the target, we assign
-zero weights to it and weights of 0.8 and 0.2 to the first and second
+zero weights to it and weights of 0.6 and 0.4 to the first and second
 emulators respectively:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<p>We now pass both the aggregate function <code>g()</code> and its
-<code>weight</code> argument to <code><a href="../reference/design.html">design()</a></code> for the second
-wave of the sequential design with a further 15 steps:</p>
+<code class="sourceCode R"><span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">0.4</span>, <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<p>We now pass both the aggregate function, <code>g()</code>, and its
+<code>weight</code> argument to <code><a href="../reference/design.html">design()</a></code> for a second wave
+of the sequential design with a further 15 steps:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 15 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">15</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, aggregate <span class="op">=</span> <span class="va">g</span>, target <span class="op">=</span> <span class="fl">0.01</span>, weight <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.190766 0.014075 0.006056</span></span>
-<span><span class="co">## Iteration 1:</span></span>
-<span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.263892</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.263892</span></span>
-<span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
-<span><span class="co">##  - Updating and re-fitting ... done</span></span>
-<span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.176965 0.009466 0.006056</span></span>
-<span><span class="co">## Iteration 2:</span></span>
-<span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.030840</span></span>
-<span><span class="co">##  * Next design point (Emulator2): None (target reached)</span></span>
-<span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
-<span><span class="co">##  - Updating and re-fitting ... done</span></span>
-<span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.204744 0.009466 0.006056</span></span>
-<span><span class="co">##  </span></span>
-<span><span class="co">##  ...</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Iteration 11:</span></span>
-<span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.105318</span></span>
-<span><span class="co">##  * Next design point (Emulator2): None (target reached)</span></span>
-<span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
-<span><span class="co">##  - Updating and re-fitting ... done</span></span>
-<span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.009740 0.009466 0.006056</span></span>
-<span><span class="co">## Target reached! The sequential design stops at step 11.</span></span></code></pre>
+<pre><code>## Initializing ... done
+##  *  RMSE: 0.120320, RMSE: 0.062365, RMSE: 0.008984
+## Iteration 1:
+##  - Locating ... done
+##  * Next design point (Emulator1): 0.062821
+##  * Next design point (Emulator2): 0.062821
+##  * Next design point (Emulator3): None (target reached)
+##  - Updating and re-fitting ... done
+##  - Validating ... done
+##  *  RMSE: 0.151946, RMSE: 0.061865, RMSE: 0.008984
+##  
+##  ...
+##  
+## Iteration 6:
+##  - Locating ... done
+##  * Next design point (Emulator1): 0.233155
+##  * Next design point (Emulator2): None (target reached)
+##  * Next design point (Emulator3): None (target reached)
+##  - Updating and re-fitting ... done
+##  - Validating ... done
+##  *  RMSE: 0.014147, RMSE: 0.004410, RMSE: 0.008984
+##  
+##  ...
+## 
+## Iteration 8:
+##  - Locating ... done
+##  * Next design point (Emulator1): 0.009688
+##  * Next design point (Emulator2): None (target reached)
+##  * Next design point (Emulator3): None (target reached)
+##  - Updating and re-fitting ... done
+##  - Validating ... done
+##  *  RMSE: 0.005913, RMSE: 0.004410, RMSE: 0.008984
+Target reached! Sequential design stopped at step 8.</code></pre>
 <p>The first and the second emulators reached the target after iteration
-11 and 1 of the second wave, respectively. The sequential designs of the
-three emulators can be plotted with <code><a href="../reference/draw.html">draw()</a></code>:</p>
+8 and 5 of the second wave, respectively. The sequential design points
+of the three emulators can be plotted with <code><a href="../reference/draw.html">draw()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1</span>, <span class="st">'design'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">2</span>, <span class="st">'design'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">3</span>, <span class="st">'design'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'bottom'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/seq2_design.png"></p>
-<p>The figure above shows that for the first emulator most of the design
-points are added below 0.5 whilst for the second emulator most of the
-design points concentrate around 0.5. For the third emulator, the
-resulting design is space-filling. It can be seen that these design
-point distributions are consistent with the functional complexities of
-the three outputs.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'design'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_design.png" style="width:100.0%"></p>
+<p>The figure above shows that, for the first emulator, most of the
+design points are added below 0.5, while for the second emulator, the
+design points are concentrated around 0.5. For the third emulator, the
+resulting design is space-filling. These design point distributions
+align with the functional complexities of the three outputs. However, in
+the second wave, which uses the aggregation function, additional points
+are added below 0.5 for the second emulator due to the higher weight
+assigned to the first emulator. These points may not be necessary for
+the second output, as its functional behavior does not require further
+refinement in that region. This observation aligns with the earlier
+argument that using the aggregation function to add the same design
+points to outputs with differing behaviors may not always be
+effective.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-to-dgp-emulators-with-space-filling-designs">Comparison to DGP emulators with space-filling designs<a class="anchor" aria-label="anchor" href="#comparison-to-dgp-emulators-with-space-filling-designs"></a>
@@ -345,52 +356,52 @@ static space-filling Latin hypercube designs (LHD) of size 10, 20, and
 <span><span class="va">m33</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">m33</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span>, verb <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="va">rmse_static_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="st">'N'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span>, <span class="st">'rmse'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">m13</span><span class="op">$</span><span class="va">oos</span><span class="op">$</span><span class="va">rmse</span>, <span class="va">m23</span><span class="op">$</span><span class="va">oos</span><span class="op">$</span><span class="va">rmse</span>, <span class="va">m33</span><span class="op">$</span><span class="va">oos</span><span class="op">$</span><span class="va">rmse</span><span class="op">)</span>, <span class="st">'LHD'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'lhd-10'</span>, <span class="st">'lhd-20'</span>, <span class="st">'lhd-30'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>and add them to the sequential design validation plot (in log-scale)
-for comparisons:</p>
+for comparison:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> </span>
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> </span>
+<span><span class="va">p</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">p</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rmse_static_1</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">N</span>, y <span class="op">=</span> <span class="va">rmse</span>, group <span class="op">=</span> <span class="va">LHD</span>, shape <span class="op">=</span> <span class="va">LHD</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">'#E69F00'</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="va">p</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">p</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rmse_static_2</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">N</span>, y <span class="op">=</span> <span class="va">rmse</span>, group <span class="op">=</span> <span class="va">LHD</span>, shape <span class="op">=</span> <span class="va">LHD</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">'#E69F00'</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, emulator <span class="op">=</span> <span class="fl">3</span>, type <span class="op">=</span> <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="va">p</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">p</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rmse_static_3</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">N</span>, y <span class="op">=</span> <span class="va">rmse</span>, group <span class="op">=</span> <span class="va">LHD</span>, shape <span class="op">=</span> <span class="va">LHD</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">'#E69F00'</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span> <span class="op">+</span> <span class="va">p3</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'bottom'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/seq2_rmse.png"></p>
-<p>It can be seen from the plot above that with the sequential design,
-emulators in the bundle can achieve higher or similar accuracy with
-smaller number of design points.</p>
+<span><span class="va">p</span></span></code></pre></div>
+<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_rmse.png" style="width:100.0%"></p>
+<p>It can be seen from the plot above that sequential design is more
+efficient than batch space-filling design, achieving similar RMSE with
+fat fewer design points, particularly for the first emulator in the
+bundle.</p>
 <div class="section level3">
 <h3 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h3>
-<p>See <a href="https://mingdeyu.github.io/dgpsi-R/articles/seq_design.html" class="external-link"><code>Sequential Design I</code></a>
-for the sequential design and automatic structure simplification of a
-DGP emulator on a 2D simulator.</p>
+<p>See <a href="https://mingdeyu.github.io/dgpsi-R/articles/seq_design.html" class="external-link">Sequential
+Design I</a> for the sequential design and automatic structure
+simplification of a DGP emulator on a 2D simulator.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Deyu Ming, Daniel Williamson.</p>
+  <p>Developed by <a href="https://mingdeyu.github.io" class="external-link">Deyu Ming</a>, <a href="https://experts.exeter.ac.uk/23142-daniel-williamson" class="external-link">Daniel Williamson</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
