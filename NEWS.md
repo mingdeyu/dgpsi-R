@@ -27,7 +27,7 @@
 - The default of the `refit` argument in the `update()` function has been changed from `FALSE` to `TRUE`.  
 - The `write()` function now allows `light = TRUE` for both GP emulators and bundles of GP emulators.  
 - Two new functions, `serialize()` and `deserialize()`, have been added to allow users to export emulators to multi-session workers for parallel processing.
-- Additional vignettes are available, showcasing large-scale DGP emulation and DGP classification.
+- Additional vignettes are available, showcasing large-scale DGP emulation, DGP classification, and Bayesian optimization using (D)GP emulators.
 - Enhanced clarity and consistency across the documentation.
 - Improved examples and explanations in vignettes for better user guidance.
 
