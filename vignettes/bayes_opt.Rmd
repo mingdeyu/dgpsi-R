@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette demonstrates how to utilize and repurpose my favorite `design()` function in `dgpsi` to implement Bayesian optimization using the (D)GP surrogate models provided by the package.
+This vignette demonstrates how to utilize and repurpose the `design()` function in `dgpsi` to implement Bayesian optimization using the (D)GP surrogate models provided by the package.
 
 ## Load the packages
 
@@ -164,7 +164,7 @@ opt_monitor <- function(object) {
 }
 ```
 
-The domain of the input parameters for our Bayesian optimization, within which the global minima are searched, is defined as $[0,1]^2$:
+The domain of the input for the Shubert function, within which the global minima are searched by the Bayesian optimization, is defined as $[0,1]^2$:
 
 ```{r}
 lim <- rbind(c(0, 1), c(0, 1))
