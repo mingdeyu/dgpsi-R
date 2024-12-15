@@ -92,7 +92,7 @@
 
     
     
-<p>This vignette demonstrates how to utilize and repurpose my favorite
+<p>This vignette demonstrates how to utilize and repurpose the
 <code><a href="../reference/design.html">design()</a></code> function in <code>dgpsi</code> to implement
 Bayesian optimization using the (D)GP surrogate models provided by the
 package.</p>
@@ -245,8 +245,8 @@ of <code><a href="../reference/design.html">design()</a></code>:</p>
 <code class="sourceCode R"><span><span class="va">opt_monitor</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>The domain of the input parameters for our Bayesian optimization,
-within which the global minima are searched, is defined as
+<p>The domain of the input for the Shubert function, within which the
+global minima are searched by the Bayesian optimization, is defined as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><annotation encoding="application/x-tex">[0,1]^2</annotation></semantics></math>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
