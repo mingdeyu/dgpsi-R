@@ -22,6 +22,6 @@ please use the updated \code{\link[=lgp]{lgp()}} function, which provides a simp
 approach to building (D)GP emulators.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \keyword{internal}

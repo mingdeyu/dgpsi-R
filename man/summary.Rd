@@ -46,7 +46,7 @@ This function provides a summary of key information for a GP, DGP, or linked (D)
 by generating either a table or an interactive plot of the emulator’s structure.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

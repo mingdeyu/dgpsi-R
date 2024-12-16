@@ -46,7 +46,7 @@ An updated \code{object}.
 This function implements additional training iterations for a DGP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 \itemize{

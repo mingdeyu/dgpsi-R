@@ -136,7 +136,7 @@ This function searches from a candidate set to locate the next design point(s) t
 or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 The first column of the matrix supplied to the first argument of \code{aggregate} must correspond to the first output dimension of the DGP emulator
