@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="index.html">dgpsi</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.4.0-9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.5.0-9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -110,9 +110,11 @@ You don’t need prior knowledge of Python to start using the package, all you n
 <li>Sequential designs for (D)GP emulators and bundles of (D)GP emulators.</li>
 <li>Automatic pruning of DGP emulators, both statically and dynamically.</li>
 <li>
-<a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link"><img src="https://img.shields.io/badge/New-In%20Dev%20Version-orange" alt="Feature Badge"></a> <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/large_scale_emulation.html" class="external-link">Large-scale GP, DGP, and Linked (D)GP emulations</a>.</li>
+<a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link"><img src="https://img.shields.io/badge/New-v2.5.0-orange" alt="Feature Badge"></a> <a href="https://mingdeyu.github.io/dgpsi-R/articles/large_scale_emulation.html" class="external-link">Large-scale GP, DGP, and Linked (D)GP emulations</a>.</li>
 <li>
-<a href="https://mingdeyu.github.io/dgpsi-R/dev/" class="external-link"><img src="https://img.shields.io/badge/New-In%20Dev%20Version-orange" alt="Feature Badge"></a> <a href="https://mingdeyu.github.io/dgpsi-R/dev/articles/classification.html" class="external-link">Scalable DGP classification using Stochastic Imputation</a>.</li>
+<a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link"><img src="https://img.shields.io/badge/New-v2.5.0-orange" alt="Feature Badge"></a> <a href="https://mingdeyu.github.io/dgpsi-R/articles/classification.html" class="external-link">Scalable DGP classification using Stochastic Imputation</a>.</li>
+<li>
+<a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link"><img src="https://img.shields.io/badge/New-v2.5.0-orange" alt="Feature Badge"></a> <a href="https://mingdeyu.github.io/dgpsi-R/articles/bayes_opt.html" class="external-link">Bayesian optimization</a>.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -135,7 +137,7 @@ You don’t need prior knowledge of Python to start using the package, all you n
 <p>After the installation, run</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mingdeyu/dgpsi-R" class="external-link">dgpsi</a></span><span class="op">)</span></span></code></pre></div>
-<p>to load the package. To install or activate the required Python environment automatically, simply run a function from the package. That’s it, the package is now ready to use!</p>
+<p>to load the package. To install or activate the required Python environment automatically, you can either run <code><a href="reference/init_py.html">dgpsi::init_py()</a></code> explicitly or simply call any function from the package. That’s it - the package is ready to use!</p>
 <blockquote>
 <p><strong>Note</strong><br>
 After loading <code>dgpsi</code>, the package may take some time to compile and initiate the underlying Python environment the first time a function from <code>dgpsi</code> is executed. Any subsequent function calls won’t require re-compiling or re-activation of the Python environment, and will be faster.</p>
@@ -211,7 +213,7 @@ After loading <code>dgpsi</code>, the package may take some time to compile and 
 <li><a href="https://CRAN.R-project.org/package=dgpsi" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/dgpsi?color=brightgreen" alt="Download"></a></li>
 <li><a href="https://github.com/mingdeyu/dgpsi-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mingdeyu/dgpsi_R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://mingdeyu.github.io/dgpsi-R/" class="external-link"><img src="https://img.shields.io/badge/DOC-release-brightgreen" alt="DOC"></a></li>
-<li><a href="https://github.com/mingdeyu/DGP" class="external-link"><img src="https://img.shields.io/badge/Python-dgpsi%20v2.4.0-informational" alt="python"></a></li>
+<li><a href="https://github.com/mingdeyu/DGP" class="external-link"><img src="https://img.shields.io/badge/Python-dgpsi%20v2.5.0-informational" alt="python"></a></li>
 </ul>
 </div>
 
