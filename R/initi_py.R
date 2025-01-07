@@ -148,7 +148,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
 
 install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = FALSE) {
   if (!reinsatll) message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
-  if (!reinsatll) reticulate::conda_create(envname = env_name, python_version = py_ver, conda = conda_path)
+  if (!reinsatll) reticulate::conda_create(envname = env_name, python_version = py_ver, conda = conda_path, forge = TRUE, additional_create_args = c('--strict-channel-priority'))
   if (reinsatll) {
     message("Re-installing the required Python packages ...")
   } else {
