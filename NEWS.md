@@ -1,4 +1,5 @@
 # dgpsi 2.5.0-9000 (development version)
+- Prediction speed enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.
 
 # dgpsi 2.5.0
 - Training times for DGP emulators are now approximately 30%-40% faster.
