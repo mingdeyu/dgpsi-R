@@ -4,11 +4,11 @@ CMD
 Challenor
 DGP
 DGPs
+EI
 ESS
 GPs
 Gu
 Guillas
-Heteroskedastic
 Katzfuss
 LHD
 MacKay
@@ -19,6 +19,7 @@ NRMSEs
 OOS
 RStudio
 Scalable
+Shubert
 Technometrics
 UUID
 VIGF
@@ -29,6 +30,7 @@ arXiv
 bool
 bools
 burnin
+conda
 doi
 et
 ggplots
@@ -39,6 +41,7 @@ lifecycle
 maximin
 oos
 reproducibility
+repurpose
 scalable
 softmax
 suboptimal

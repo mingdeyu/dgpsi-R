@@ -1247,13 +1247,13 @@ plot_style_1 <- function(dat, method, dim, isdup) {
     if ( method=="sampling" ){
       p <- p +
         ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
-        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
-                                    limits = c("Median and 95% CI", "Validation point outside CI", "Validation point inside CI"))
+        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point inside CI"="#E69F00"),
+                                    limits = c("Median and 95% CI", "Validation point inside CI"))
     } else if ( method=="mean_var" ) {
       p <- p +
         ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
-        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
-                                    limits = c("Mean and CI (+/-2SD)", "Validation point outside CI", "Validation point inside CI"))
+        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point inside CI"="#E69F00"),
+                                    limits = c("Mean and CI (+/-2SD)", "Validation point inside CI"))
     }
 
     p <- p +
@@ -1264,19 +1264,19 @@ plot_style_1 <- function(dat, method, dim, isdup) {
         legend.text = ggplot2::element_text(size = 7),
         legend.title = ggplot2::element_blank()
       ) +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank", "blank"))))
+      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank"))))
   } else if ( all(!coverage) ){
     p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation point outside CI"))
     if ( method=="sampling" ){
       p <- p +
         ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
-        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
-                                    limits = c("Median and 95% CI", "Validation point outside CI", "Validation point inside CI"))
+        ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point outside CI"="#D55E00"),
+                                    limits = c("Median and 95% CI", "Validation point outside CI"))
     } else if ( method=="mean_var" ) {
       p <- p +
         ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
-        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point outside CI"="#D55E00", "Validation point inside CI"="#E69F00"),
-                                    limits = c("Mean and CI (+/-2SD)", "Validation point outside CI", "Validation point inside CI"))
+        ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point outside CI"="#D55E00"),
+                                    limits = c("Mean and CI (+/-2SD)", "Validation point outside CI"))
     }
 
     p <- p +
@@ -1287,7 +1287,7 @@ plot_style_1 <- function(dat, method, dim, isdup) {
         legend.text = ggplot2::element_text(size = 7),
         legend.title = ggplot2::element_blank()
       ) +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank", "blank"))))
+      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank"))))
   } else {
     p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = ~coverage))
     if ( method=="sampling" ){
