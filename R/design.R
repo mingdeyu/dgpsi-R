@@ -1358,7 +1358,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
                 n_emulators <- length(object) - 1
                 if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
-                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$oos$rmse
                 }
                 if ( verb ) message(" done")
@@ -1658,7 +1658,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
                 n_emulators <- length(object) - 1
                 if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
                 for ( k in 1:n_emulators ){
-                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                  object[[paste('emulator',k,sep='')]] <- validate(object[[paste('emulator',k,sep='')]], x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE)
                   rmse[k] <- object[[paste('emulator',k,sep='')]]$oos$rmse
                 }
                 if ( verb ) message(" done")
@@ -1965,12 +1965,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
           } else {
             type <- 'oos'
             if ( inherits(obj_k,"gp") ) {
-              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val)
+              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val)
               object[[paste('emulator',k,sep='')]] <- obj_k
               rmse <- c(rmse, obj_k$oos$rmse)
             }
             if ( inherits(obj_k,"dgp") ) {
-              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, cores = cores, ...)
+              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, cores = cores, ...)
               object[[paste('emulator',k,sep='')]] <- obj_k
               if (is.categorical[k]) {
                 rmse <- c(rmse, obj_k$oos$log_loss)
@@ -2476,12 +2476,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                 if ( N_acq_ind[nrow(N_acq_ind),k]!=0 ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) {
-                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     rmse[k] <- obj_k$oos$rmse
                   }
                   if ( inherits(obj_k,"dgp") ) {
-                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     if (is.categorical[k]){
                       rmse[k] <- obj_k$oos$log_loss
@@ -2614,12 +2614,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
           } else {
             type <- 'oos'
             if ( inherits(obj_k,"gp") ) {
-              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val)
+              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val)
               object[[paste('emulator',k,sep='')]] <- obj_k
               rmse <- c(rmse, obj_k$oos$rmse)
             }
             if ( inherits(obj_k,"dgp") ) {
-              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, cores = cores, ...)
+              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, cores = cores, ...)
               object[[paste('emulator',k,sep='')]] <- obj_k
               if (is.categorical[k]){
                 rmse <- c(rmse, obj_k$oos$log_loss)
@@ -2923,12 +2923,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                 if ( is.null(target) ) {
                   obj_k <- object[[paste('emulator',k,sep='')]]
                   if ( inherits(obj_k,"gp") ) {
-                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     rmse[k] <- obj_k$oos$rmse
                   }
                   if ( inherits(obj_k,"dgp") ) {
-                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     if (is.categorical[k]){
                       rmse[k] <- obj_k$oos$log_loss
@@ -2940,12 +2940,12 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                   if ( !istarget[k] ){
                     obj_k <- object[[paste('emulator',k,sep='')]]
                     if ( inherits(obj_k,"gp") ) {
-                      obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE)
+                      obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE)
                       object[[paste('emulator',k,sep='')]] <- obj_k
                       rmse[k] <- obj_k$oos$rmse
                     }
                     if ( inherits(obj_k,"dgp") ) {
-                      obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                      obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
                       object[[paste('emulator',k,sep='')]] <- obj_k
                       if (is.categorical[k]){
                         rmse[k] <- obj_k$oos$log_loss
@@ -3154,8 +3154,8 @@ extract_all <- function(X ,x_cand){
 
 #check argument x_test and y_test
 check_xy_test <- function(x_test, y_test, n_dim_X, n_dim_Y){
-  x_test <- unname(x_test)
-  y_test <- unname(y_test)
+  #x_test <- unname(x_test)
+  #y_test <- unname(y_test)
   if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x_test) ) {
@@ -3173,6 +3173,8 @@ check_xy_test <- function(x_test, y_test, n_dim_X, n_dim_Y){
     }
   }
   if ( nrow(x_test)!=nrow(y_test) ) stop("'x_test' and 'y_test' have different number of data points.", call. = FALSE)
+  rownames(x_test) <- NULL
+  rownames(y_test) <- NULL
   return(list(x_test, y_test))
 }
 

@@ -230,8 +230,10 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
     return(object)
     #For OOS
   } else if (!is.null(x_test) & !is.null(y_test)) {
-    x_test <- unname(x_test)
-    y_test <- unname(y_test)
+    rownames(x_test) <- NULL
+    rownames(y_test) <- NULL
+    #x_test <- unname(x_test)
+    #y_test <- unname(y_test)
     if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
     if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
     if ( is.vector(x_test) ) {
@@ -299,8 +301,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
       dat[["std"]] <- sqrt(res[[2]][rep,,drop=FALSE])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["rmse"]] <- sqrt(mean((dat$mean-dat$y_test)^2))
-      dat[["nrmse"]] <- dat$rmse/(max(dat$y_test)-min(dat$y_test))
+      dat[["rmse"]] <- unname(sqrt(mean((dat$mean-dat$y_test)^2)))
+      dat[["nrmse"]] <- unname(dat$rmse/(max(dat$y_test)-min(dat$y_test)))
     } else if ( method == 'sampling' ){
       quant <- t(pkg.env$np$quantile(res, c(0.025, 0.5, 0.975), axis=1L))[rep,,drop=FALSE]
       std <- pkg.env$np$std(res, axis=1L, keepdims=TRUE)[rep,,drop=FALSE]
@@ -308,8 +310,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
       dat[["std"]] <- std
       dat[["lower"]] <- quant[,1,drop=F]
       dat[["upper"]] <- quant[,3,drop=F]
-      dat[["rmse"]] <- sqrt(mean((dat$median-dat$y_test)^2))
-      dat[["nrmse"]] <- dat$rmse/(max(dat$y_test)-min(dat$y_test))
+      dat[["rmse"]] <- unname(sqrt(mean((dat$median-dat$y_test)^2)))
+      dat[["nrmse"]] <- unname(dat$rmse/(max(dat$y_test)-min(dat$y_test)))
     }
     dat[["M"]] <- M
     if (method == "sampling"){
@@ -453,7 +455,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         dat[["std"]] <- t(std)
         dat[["lower"]] <- as.matrix(quant[1,,])
         dat[["upper"]] <- as.matrix(quant[3,,])
-        dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_train)^2))
+        dat[["rmse"]] <- unname(sqrt(colMeans((dat$median-dat$y_train)^2)))
         dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
       }
     } else if ( method == 'mean_var' ) {
@@ -461,7 +463,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
       dat[["std"]] <- sqrt(res[[2]])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["rmse"]] <- sqrt(colMeans((dat$mean-dat$y_train)^2))
+      dat[["rmse"]] <- unname(sqrt(colMeans((dat$mean-dat$y_train)^2)))
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
     }
     dat[["M"]] <- M
@@ -475,8 +477,10 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     return(object)
     #For OOS
   } else if (!is.null(x_test) & !is.null(y_test)) {
-    x_test <- unname(x_test)
-    y_test <- unname(y_test)
+    rownames(x_test) <- NULL
+    rownames(y_test) <- NULL
+    #x_test <- unname(x_test)
+    #y_test <- unname(y_test)
     if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
     if ( !is.matrix(y_test)&!is.vector(y_test) ) stop("'y_test' must be a vector or a matrix.", call. = FALSE)
     if ( is.vector(x_test) ) {
@@ -578,7 +582,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         dat[["std"]] <- t(std)[rep,,drop=F]
         dat[["lower"]] <- as.matrix(quant[1,,])[rep,,drop=F]
         dat[["upper"]] <- as.matrix(quant[3,,])[rep,,drop=F]
-        dat[["rmse"]] <- sqrt(colMeans((dat$median-dat$y_test)^2))
+        dat[["rmse"]] <- unname(sqrt(colMeans((dat$median-dat$y_test)^2)))
         dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
       }
     } else if ( method == 'mean_var' ) {
@@ -586,7 +590,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
       dat[["std"]] <- sqrt(res[[2]][rep,,drop=F])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
-      dat[["rmse"]] <- sqrt(colMeans((dat$mean-dat$y_test)^2))
+      dat[["rmse"]] <- unname(sqrt(colMeans((dat$mean-dat$y_test)^2)))
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
     }
     dat[["M"]] <- M
@@ -639,7 +643,8 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     #check testing input
     if ( "metadata" %in% names(object$specs) ){
       if ( !is.matrix(x_test)&!is.vector(x_test) ) stop("'x_test' must be a vector or a matrix.", call. = FALSE)
-      x_test <- unname(x_test)
+      rownames(x_test) <- NULL
+      #x_test <- unname(x_test)
       global_dim <- unique(subset(object$specs$struc, object$specs$struc[["From_Emulator"]] == "Global")$From_Output)
       if ( is.vector(x_test) ) {
         if ( global_dim!=1 ){
@@ -791,7 +796,8 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
           emu_num <- nrow(final_layer_emulators)
           if ( emu_num!=1 ) stop(sprintf("The linked system contains %d emulators in its final layer. 'y_test' must be a list of %d vectors or matrices.",
                                          emu_num, emu_num), call. = FALSE)
-          y_test <- unname(y_test)
+          rownames(y_test) <- NULL
+          #y_test <- unname(y_test)
           if ( is.vector(y_test) ) {
             output_dim <- final_layer_emulators$Total_Output_Dims
             if (output_dim==1){
@@ -814,7 +820,8 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
           if ( !is.matrix(y_test[[l]])&!is.vector(y_test[[l]]) ) {
             stop(sprintf("The element %i of 'y_test' must be a vector or a matrix.", l), call. = FALSE)
           } else {
-            y_test[[l]] <- unname(y_test[[l]])
+            rownames(y_test[[l]]) <- NULL
+            #y_test[[l]] <- unname(y_test[[l]])
             if ( is.vector(y_test[[l]]) ) {
               emu_cont <- subset(final_layer_emulators, final_layer_emulators[["Pos_in_Layer"]] == l)
               emu_cont_output_dim <- emu_cont$Total_Output_Dims
@@ -950,7 +957,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         std_lst[[l]] <- t(std)
         lower_lst[[l]] <- as.matrix(quant[1,,])
         upper_lst[[l]] <- as.matrix(quant[3,,])
-        rmse_lst[[l]] <- sqrt(colMeans((median_lst[[l]]-y_test[[l]])^2))
+        rmse_lst[[l]] <- unname(sqrt(colMeans((median_lst[[l]]-y_test[[l]])^2)))
         nrmse_lst[[l]] <- rmse_lst[[l]]/(pkg.env$np$amax(y_test[[l]], axis=0L)-pkg.env$np$amin(y_test[[l]], axis=0L))
       }
       dat[["median"]] <- median_lst
@@ -971,7 +978,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         std_lst[[l]] <- sqrt(res[[2]][[l]])
         lower_lst[[l]] <- mean_lst[[l]]-2*std_lst[[l]]
         upper_lst[[l]] <- mean_lst[[l]]+2*std_lst[[l]]
-        rmse_lst[[l]] <- sqrt(colMeans((mean_lst[[l]]-y_test[[l]])^2))
+        rmse_lst[[l]] <- unname(sqrt(colMeans((mean_lst[[l]]-y_test[[l]])^2)))
         nrmse_lst[[l]] <- rmse_lst[[l]]/(pkg.env$np$amax(y_test[[l]], axis=0L)-pkg.env$np$amin(y_test[[l]], axis=0L))
       }
       dat[["mean"]] <- mean_lst

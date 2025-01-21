@@ -131,8 +131,8 @@ pack <- function(..., id = NULL) {
     if ( !identical(res[[i]]$data$X, training_input) ) stop("The function can only pack emulators with common training input data.", call. = FALSE)
     Y_dim <- ncol(res[[i]]$data$Y)
     if ( Y_dim!=1 ) stop(sprintf("The function is only applicable to emulators with 1D output. Your emulator %i has %i output dimensions.", i, Y_dim), call. = FALSE)
-    X_all[[paste('emulator', i ,sep="")]] <- unname(training_input)
-    Y_all[[paste('emulator', i ,sep="")]] <- unname(res[[i]]$data$Y)
+    X_all[[paste('emulator', i ,sep="")]] <- training_input
+    Y_all[[paste('emulator', i ,sep="")]] <- res[[i]]$data$Y
     names(res)[i] <- paste('emulator', i, sep="")
   }
   res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id

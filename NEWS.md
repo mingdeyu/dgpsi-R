@@ -1,6 +1,9 @@
 # dgpsi 2.5.0-9000 (development version)
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.
 - The Python environment now installs packages exclusively from conda-forge whenever possible. Packages from other channels will only be used if they are unavailable on conda-forge.
+- A bug in `vigf()`, affecting a bundle of emulators that includes GP emulators, has now been fixed.
+- The column names from the training input and output provided to `gp()` and `dgp()` are retained in the relevant slots of the returned objects, as well as in any updated objects produced by the downstream functions that operate on them.
+- The column names from the testing input and output supplied to `validate()` and `design()` are retained in the relevant slots of the returned objects.
 
 # dgpsi 2.5.0
 - Training times for DGP emulators are now approximately 30%-40% faster.

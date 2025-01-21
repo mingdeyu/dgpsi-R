@@ -25,15 +25,13 @@ See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/de
 }
 \note{
 Since the constructed emulators are 'python' objects, they cannot be directly exported to other R processes for parallel
-processing in multi-session workers created through spawning. This function provides a solution by converting the emulators
-into serialized objects, which can be restored using \code{\link[=deserialize]{deserialize()}} for multi-session processing. Note that in forking,
-serialization is generally not required.
+processing. This function provides a solution by converting the emulators into serialized objects, which can be restored
+using \code{\link[=deserialize]{deserialize()}} for multi-process parallel implementation.
 }
 \examples{
 \dontrun{
 
-library(future)
-library(future.apply)
+library(parallel)
 library(dgpsi)
 
 # model
@@ -54,17 +52,25 @@ X_dgp <- seq(0, 1, length = 100)
 # serialize the DGP emulator
 m_serialized <- serialize(m)
 
-# start a multi-session with three cores for parallel predictions
-plan(multisession, workers = 3)
+# create a cluster with 3 workers for parallel predictions
+cl <- makeCluster(8)
+
+# export objects to the cluster
+clusterExport(cl, varlist = c("m_serialized", "X_dgp"))
+
+# initialize deserialized object on each worker
+res <- clusterEvalQ(cl, {
+  library(dgpsi)
+  assign("m_deserialized", deserialize(m_serialized), envir = .GlobalEnv)
+})
 
 # perform parallel predictions
-results <- future_lapply(1:length(X_dgp), function(i) {
-  m_deserialized <- deserialize(m_serialized)
+results <- parLapply(cl, 1:length(X_dgp), function(i) {
   mean_i <- predict(m_deserialized, X_dgp[i])$results$mean
-}, future.seed = TRUE)
+})
 
-# reset the future plan to sequential
-plan(sequential)
+# reset the cluster
+stopCluster(cl)
 
 # combine mean predictions
 pred_mean <- do.call(rbind, results)

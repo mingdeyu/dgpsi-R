@@ -142,8 +142,10 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
 
   new_object <- list()
   new_object[['id']] <- object$id
-  new_object[['data']][['X']] <- unname(X)
-  new_object[['data']][['Y']] <- unname(Y)
+  rownames(X) <- NULL
+  rownames(Y) <- NULL
+  new_object[['data']][['X']] <- X
+  new_object[['data']][['Y']] <- Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
   new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
   new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
@@ -217,8 +219,10 @@ update.gp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ..
 
   new_object <- list()
   new_object[['id']] <- object$id
-  new_object[['data']][['X']] <- unname(X)
-  new_object[['data']][['Y']] <- unname(Y)
+  rownames(X) <- NULL
+  rownames(Y) <- NULL
+  new_object[['data']][['X']] <- X
+  new_object[['data']][['Y']] <- Y
   new_object[['specs']] <- extract_specs(constructor_obj_cp, "gp")
   new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
   new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]

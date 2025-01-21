@@ -26,41 +26,6 @@ See the \emph{Note} section in \code{\link[=serialize]{serialize()}}.
 \examples{
 \dontrun{
 
-library(future)
-library(future.apply)
-library(dgpsi)
-
-# model
-f <- function(x) {
- (sin(7.5*x)+1)/2
-}
-
-# training data
-X <- seq(0, 1, length = 10)
-Y <- sapply(X, f)
-
-# train a DGP emulator
-m <- dgp(X, Y, name = "matern2.5")
-
-# testing input data
-X_dgp <- seq(0, 1, length = 100)
-
-# serialize the DGP emulator
-m_serialized <- serialize(m)
-
-# start a multi-session with three cores for parallel predictions
-plan(multisession, workers = 3)
-
-# perform parallel predictions
-results <- future_lapply(1:length(X_dgp), function(i) {
-  m_deserialized <- deserialize(m_serialized)
-  mean_i <- predict(m_deserialized, X_dgp[i])$results$mean
-}, future.seed = TRUE)
-
-# reset the future plan to sequential
-plan(sequential)
-
-# combine mean predictions
-pred_mean <- do.call(rbind, results)
+# See serialize() for an example.
 }
 }

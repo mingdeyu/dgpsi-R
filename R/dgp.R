@@ -626,8 +626,10 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
   res <- list()
   res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
-  res[['data']][['X']] <- unname(X)
-  res[['data']][['Y']] <- unname(Y)
+  rownames(X) <- NULL
+  rownames(Y) <- NULL
+  res[['data']][['X']] <- X
+  res[['data']][['Y']] <- Y
   res[['specs']] <- extract_specs(est_obj, "dgp")
   res[['specs']][['internal_dims']] <- if( is.null(internal_input_idx) ) 1:n_dim_X else as.integer(reticulate::py_to_r(internal_input_idx)+1)
   res[['specs']][['external_dims']] <- if( is.null(internal_input_idx) ) FALSE else as.integer(reticulate::py_to_r(external_input_idx)+1)

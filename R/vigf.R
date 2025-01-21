@@ -695,7 +695,7 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
             initials = x_cand[[i]],
             lb = reticulate::np_array(lower),
             up = reticulate::np_array(upper),
-            args = reticulate::tuple('VIGF', obj_i$constructor_obj, 1., M, TRUE),
+            args = if ( inherits(obj_i,"gp") ) {reticulate::tuple('VIGF', 1., M, TRUE)} else {reticulate::tuple('VIGF', obj_i$constructor_obj, 1., M, TRUE)},
             method = "L-BFGS-B",
             core_num = workers,
             out_dim = -1L,
@@ -731,7 +731,11 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
             x[int] <- round(x[int])
             for (i in 1:n_emulators){
               obj_i <- object[[paste('emulator',i,sep='')]]
-              scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = obj_i$constructor_obj, m = m, score_only = TRUE)
+              if ( inherits(obj_i,"gp") ){
+                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', m = m, score_only = TRUE)
+              } else {
+                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = obj_i$constructor_obj, m = m, score_only = TRUE)
+              }
               scores[[i]] <- if(ncol(scores_i) == 1) as.vector(scores_i) else rowMeans(scores_i)
             }
             scores <- do.call(cbind, scores)
@@ -757,7 +761,11 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
             x[int] <- round(x[int])
             for (i in 1:n_emulators){
               obj_i <- object[[paste('emulator',i,sep='')]]
-              scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = obj_i$constructor_obj, m = m, score_only = TRUE)
+              if ( inherits(obj_i,"gp") ){
+                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', m = m, score_only = TRUE)
+              } else {
+                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = obj_i$constructor_obj, m = m, score_only = TRUE)
+              }
               scores[[i]] <- if(ncol(scores_i) == 1) as.vector(scores_i) else rowMeans(scores_i)
             }
             scores <- do.call(cbind, scores)
@@ -867,7 +875,7 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
               initials = x_cand[[j]],
               lb = reticulate::np_array(lower),
               up = reticulate::np_array(upper),
-              args = reticulate::tuple('VIGF', constructor_obj_list[[j]], 1., M, TRUE),
+              args = if ( inherits(object[[paste('emulator',j,sep='')]],"gp") ) {reticulate::tuple('VIGF', 1., M, TRUE)} else {reticulate::tuple('VIGF', constructor_obj_list[[j]], 1., M, TRUE)},
               method = "L-BFGS-B",
               core_num = workers,
               out_dim = -1L,
@@ -886,7 +894,11 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
             scores <- vector('list', n_emulators)
             x[int] <- round(x[int])
             for (k in 1:n_emulators){
-              scores_k <- emulator_obj_list[[k]]$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = constructor_obj_list[[k]], m = m, score_only = TRUE)
+              if ( inherits(object[[paste('emulator',k,sep='')]],"gp") ){
+                scores_k <- emulator_obj_list[[k]]$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', m = m, score_only = TRUE)
+              } else{
+                scores_k <- emulator_obj_list[[k]]$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = constructor_obj_list[[k]], m = m, score_only = TRUE)
+              }
               scores[[k]] <- if(ncol(scores_k) == 1) as.vector(scores_k) else rowMeans(scores_k)
             }
             scores <- do.call(cbind, scores)
