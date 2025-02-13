@@ -156,7 +156,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
   }
   if (Sys.info()[["sysname"]] == "Darwin" & Sys.info()[["machine"]] == "arm64"){
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*accelerate"') , conda = conda_path, forge = TRUE, additional_install_args = c('--strict-channel-priority'))
-  } else if (grepl("Intel",benchmarkme::get_cpu()$model_name)){
+  } else if (length(benchmarkme::get_cpu()$model_name) != 0 && grepl("Intel",benchmarkme::get_cpu()$model_name)){
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"') , conda = conda_path, forge = TRUE, additional_install_args = c('--strict-channel-priority') )
     reticulate::conda_install(envname = env_name, packages = c('icc_rt') , channel = c("numba"), conda = conda_path)
   } else {
