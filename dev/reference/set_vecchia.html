@@ -75,15 +75,11 @@ constructed by <code><a href="gp.html">gp()</a></code>, <code><a href="dgp.html"
 
 
 <dt id="arg-vecchia">vecchia<a class="anchor" aria-label="anchor" href="#arg-vecchia"></a></dt>
-<dd><p>a bool or a list of bools to indicate the addition or removal of the Vecchia approximation:</p><ul><li><p>if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class, <code>vecchia</code> is a bool that indicates
+<dd><p>a bool to indicate the addition or removal of the Vecchia approximation:</p><ul><li><p>if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class, <code>vecchia</code> indicates
 either addition (<code>vecchia = TRUE</code>) or removal (<code>vecchia = FALSE</code>) of the Vecchia approximation from <code>object</code>.</p></li>
-<li><p>if <code>object</code> is an instance of the <code>lgp</code> class, <code>x</code> can be a bool or a list of bools:</p><ul><li><p>if <code>vecchia</code> is a bool, it indicates either addition (<code>vecchia = TRUE</code>) or removal (<code>vecchia = FALSE</code>) of
-the Vecchia approximation from all individual (D)GP emulators contained in <code>object</code>.</p></li>
-<li><p>if <code>vecchia</code> is a list of bools, it should have same shape as <code>struc</code> that was supplied to <code><a href="lgp.html">lgp()</a></code>. Each bool
-in the list indicates if the corresponding (D)GP emulator contained in <code>object</code> shall have the Vecchia approximation
-added or removed.</p></li>
-</ul></li>
-</ul></dd>
+<li><p>if <code>object</code> is an instance of the <code>lgp</code> class, <code>vecchia</code> indicates either addition (<code>vecchia = TRUE</code>)
+or removal (<code>vecchia = FALSE</code>) of the Vecchia approximation from all individual (D)GP emulators contained in <code>object</code>.</p></li>
+</ul><p>Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-m">M<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>

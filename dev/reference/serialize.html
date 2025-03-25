@@ -116,7 +116,7 @@ using <code><a href="deserialize.html">deserialize()</a></code> for multi-proces
 <span class="r-in"><span><span class="co"># serialize the DGP emulator</span></span></span>
 <span class="r-in"><span><span class="va">m_serialized</span> <span class="op">&lt;-</span> <span class="fu">serialize</span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># create a cluster with 3 workers for parallel predictions</span></span></span>
+<span class="r-in"><span><span class="co"># create a cluster with 8 workers for parallel predictions</span></span></span>
 <span class="r-in"><span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># export objects to the cluster</span></span></span>
