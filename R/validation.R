@@ -143,6 +143,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
   }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -338,6 +339,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)
@@ -619,12 +621,12 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   }
   #check class
   if ( !inherits(object,"lgp") ) stop("'object' must be an instance of the 'lgp' class.", call. = FALSE)
-
   if ( "metadata" %in% names(object$specs) ){
     if ( !("emulator_obj" %in% names(object)) ){
       stop("'object' is not activated for predictions. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
     }
   }
+  if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check core number
   if( !is.null(cores) ) {
     cores <- as.integer(cores)

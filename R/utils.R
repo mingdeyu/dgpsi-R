@@ -123,6 +123,7 @@ pack <- function(..., id = NULL) {
   training_output <- c()
   for ( i in 1:length(res) ){
     if ( !inherits(res[[i]],"gp") & !inherits(res[[i]],"dgp") ) stop("The function only accepts GP or DGP emulators as inputs.", call. = FALSE)
+    if ( reticulate::py_is_null_xptr(res[[i]]$constructor_obj) ) stop("The Python session originally associated with the provided emulators is no longer active. Please rebuild the emulators or, if they were saved using dgpsi::write(), load them into the R session with dgpsi::read(), and then repack.", call. = FALSE)
     #if ( inherits(res[[i]],"dgp") ){
     #  if ( res[[i]]$constructor_obj$all_layer[[res[[i]]$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
     #    stop("The function can only pack DGP emulators without likelihood layers.", call. = FALSE)
@@ -171,6 +172,7 @@ unpack <- function(object) {
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   }
+  if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   n_emulators <- length(object) - 1
   if ( "design" %in% names(object) ) n_emulators <- n_emulators - 1
   if ( "id" %in% names(object) ) n_emulators <- n_emulators - 1
@@ -218,15 +220,24 @@ write <- function(object, pkl_file, light = TRUE) {
   pkl_file <- tools::file_path_sans_ext(pkl_file)
   if (light) {
     if (inherits(object,"gp")){
+      if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
       object[['container_obj']] <- NULL
     } else if (inherits(object,"dgp")){
+      if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
       if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or produce a new version of 'object' by set_imp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
       object[['container_obj']] <- NULL
     } else if (inherits(object,"lgp")){
+      if ( "metadata" %in% names(object$specs) ){
+        if ( !("emulator_obj" %in% names(object)) ){
+          stop("To save 'object', please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
+        }
+      }
+      if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
       if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct and activate the 'object' by lgp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
     } else if (inherits(object,"bundle")){
+      if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the bundle of emulators.", call. = FALSE)
       N <- length(object) - 1
       if ( "id" %in% names(object) ) N <- N - 1
       if ( "design" %in% names(object) ) N <- N - 1
@@ -239,6 +250,19 @@ write <- function(object, pkl_file, light = TRUE) {
           object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
         }
       }
+    }
+  } else {
+    if (inherits(object,"bundle")){
+      if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the bundle of emulators.", call. = FALSE)
+    } else if (inherits(object,"lgp")) {
+      if ( "metadata" %in% names(object$specs) ){
+        if ( !("emulator_obj" %in% names(object)) ){
+          stop("To save 'object', please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
+        }
+      }
+      if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
+    } else {
+      if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
     }
   }
   label <- class(object)
@@ -621,7 +645,7 @@ summary.gp <- function(object, type = "plot", ...) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
-
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
   if (type == "table"){
@@ -815,6 +839,8 @@ summary.dgp <- function(object, type = "plot", ...) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
+
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
@@ -1445,15 +1471,13 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 #'     constructed by [gp()], [dgp()] or [lgp()].
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
-#' @param vecchia a bool or a list of bools to indicate the addition or removal of the Vecchia approximation:
-#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` is a bool that indicates
+#' @param vecchia a bool to indicate the addition or removal of the Vecchia approximation:
+#' * if `object` is an instance of the `gp` or `dgp` class, `vecchia` indicates
 #'   either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of the Vecchia approximation from `object`.
-#' * if `object` is an instance of the `lgp` class, `x` can be a bool or a list of bools:
-#'   - if `vecchia` is a bool, it indicates either addition (`vecchia = TRUE`) or removal (`vecchia = FALSE`) of
-#'     the Vecchia approximation from all individual (D)GP emulators contained in `object`.
-#'   - if `vecchia` is a list of bools, it should have same shape as `struc` that was supplied to [lgp()]. Each bool
-#'     in the list indicates if the corresponding (D)GP emulator contained in `object` shall have the Vecchia approximation
-#'     added or removed.
+#' * if `object` is an instance of the `lgp` class, `vecchia` indicates either addition (`vecchia = TRUE`)
+#'   or removal (`vecchia = FALSE`) of the Vecchia approximation from all individual (D)GP emulators contained in `object`.
+#'
+#' Defaults to `TRUE`.
 #' @param M the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to `25`.
 #' @param ord an R function that returns the ordering of the input to the (D)GP emulator for the Vecchia approximation. The
 #'    function must satisfy the following basic rules:
@@ -1477,6 +1501,7 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
+
   M <- as.integer(M)
   if ( !is.null(ord) ) {
     ord_wrapper <- function(x) {
@@ -1488,6 +1513,7 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
   }
 
   if ( inherits(object,"gp") ){
+    if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     if (vecchia){
       if (object$specs$vecchia) {
         return(object)
@@ -1509,6 +1535,7 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
       }
     }
   } else if ( inherits(object,"dgp") ) {
+    if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     if (vecchia){
       if (object$specs$vecchia) {
         return(object)
@@ -1532,6 +1559,12 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
       }
     }
   } else if ( inherits(object,"lgp") ) {
+    if ( "metadata" %in% names(object$specs) ){
+      if ( !("emulator_obj" %in% names(object)) ){
+        stop("'object' is not activated. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
+      }
+    }
+    if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     tryCatch({
       object$emulator_obj$set_vecchia(mode = vecchia)
     }, error = function(e) {
@@ -1624,6 +1657,9 @@ set_imp <- function(object, B = 5) {
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
+
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
+
   B <- as.integer(B)
 
   linked_idx <- object$container_obj$local_input_idx
@@ -1695,6 +1731,9 @@ window <- function(object, start, end = NULL, thin = 1) {
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
+
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
+
   if (length(start) != 1) stop("'start' must be an integer.", call. = FALSE)
   if ( !is.null(end) ){
     if (length(end) != 1) stop("'end' must be an integer.", call. = FALSE)
@@ -1778,6 +1817,7 @@ nllik <- function(object, x, y) {
     if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   if ( !is.matrix(x)&!is.vector(x) ) stop("'x' must be a vector or a matrix.", call. = FALSE)
   if ( !is.matrix(y)&!is.vector(y) ) stop("'y' must be a vector or a matrix.", call. = FALSE)
   if ( is.vector(x) ) {
@@ -1834,6 +1874,8 @@ trace_plot <- function(object, layer = NULL, node = 1) {
     if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
   all_layer <- object$constructor_obj$all_layer
 
@@ -1950,6 +1992,8 @@ prune <- function(object, control = list(), verb = TRUE) {
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
+
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
   n_dim_X <- ncol(object$data$X)
   con <- list(min_size = 10*n_dim_X, threshold = 0.97)

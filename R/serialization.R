@@ -40,7 +40,7 @@
 #' # serialize the DGP emulator
 #' m_serialized <- serialize(m)
 #'
-#' # create a cluster with 3 workers for parallel predictions
+#' # create a cluster with 8 workers for parallel predictions
 #' cl <- makeCluster(8)
 #'
 #' # export objects to the cluster
@@ -72,15 +72,24 @@ serialize <- function(object, light = TRUE) {
   }
   if (light) {
     if (inherits(object,"gp")){
+      if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
       object[['container_obj']] <- NULL
     } else if (inherits(object,"dgp")){
+      if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
       if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be serialized in light mode. To serialize, either set 'light = FALSE' or produce a new version of 'object' by set_imp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
       object[['container_obj']] <- NULL
     } else if (inherits(object,"lgp")){
+      if ( "metadata" %in% names(object$specs) ){
+        if ( !("emulator_obj" %in% names(object)) ){
+          stop("'object' must be activated for serialization. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
+        }
+      }
+      if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
       if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be serialized in light mode. To serialize, either set 'light = FALSE' or re-construct and activate the 'object' by lgp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
     } else if (inherits(object,"bundle")){
+      if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
       N <- length(object) - 1
       if ( "id" %in% names(object) ) N <- N - 1
       if ( "design" %in% names(object) ) N <- N - 1
@@ -93,6 +102,19 @@ serialize <- function(object, light = TRUE) {
           object[[paste('emulator',i, sep='')]][['container_obj']] <- NULL
         }
       }
+    }
+  } else {
+    if (inherits(object,"bundle")){
+      if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
+    } else if (inherits(object,"lgp")) {
+      if ( "metadata" %in% names(object$specs) ){
+        if ( !("emulator_obj" %in% names(object)) ){
+          stop("'object' must be activated for serialization. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
+        }
+      }
+      if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
+    } else {
+      if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     }
   }
   label <- class(object)

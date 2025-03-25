@@ -9,19 +9,15 @@ set_vecchia(object, vecchia = TRUE, M = 25, ord = NULL)
 \arguments{
 \item{object}{an instance of the S3 class \code{gp}, \code{dgp}, or \code{lgp}.}
 
-\item{vecchia}{a bool or a list of bools to indicate the addition or removal of the Vecchia approximation:
+\item{vecchia}{a bool to indicate the addition or removal of the Vecchia approximation:
 \itemize{
-\item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{vecchia} is a bool that indicates
+\item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{vecchia} indicates
 either addition (\code{vecchia = TRUE}) or removal (\code{vecchia = FALSE}) of the Vecchia approximation from \code{object}.
-\item if \code{object} is an instance of the \code{lgp} class, \code{x} can be a bool or a list of bools:
-\itemize{
-\item if \code{vecchia} is a bool, it indicates either addition (\code{vecchia = TRUE}) or removal (\code{vecchia = FALSE}) of
-the Vecchia approximation from all individual (D)GP emulators contained in \code{object}.
-\item if \code{vecchia} is a list of bools, it should have same shape as \code{struc} that was supplied to \code{\link[=lgp]{lgp()}}. Each bool
-in the list indicates if the corresponding (D)GP emulator contained in \code{object} shall have the Vecchia approximation
-added or removed.
+\item if \code{object} is an instance of the \code{lgp} class, \code{vecchia} indicates either addition (\code{vecchia = TRUE})
+or removal (\code{vecchia = FALSE}) of the Vecchia approximation from all individual (D)GP emulators contained in \code{object}.
 }
-}}
+
+Defaults to \code{TRUE}.}
 
 \item{M}{the size of the conditioning set for the Vecchia approximation in the (D)GP emulator training. Defaults to \code{25}.}
 

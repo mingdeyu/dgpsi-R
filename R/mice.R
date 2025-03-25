@@ -129,6 +129,7 @@ mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50,
   }
   #check class
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   training_input <- object$data$X
   training_output <- object$data$Y
   n_dim_X <- ncol(training_input)
@@ -220,6 +221,7 @@ mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50
   }
   #check class
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
   #  stop("The function is only applicable to DGP emulators without likelihood layers.", call. = FALSE)
   #}
@@ -363,6 +365,7 @@ mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M =
   }
   #check class
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check no of emulators
   n_emulators <- length(object)
   if ( "data" %in% names(object) ) n_emulators <- n_emulators - 1

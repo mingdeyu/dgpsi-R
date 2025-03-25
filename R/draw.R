@@ -48,6 +48,7 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
   if ( !inherits(object,"gp") ){
     stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   }
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
   if ( type == 'design' ) {
@@ -169,6 +170,7 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
   if ( !inherits(object,"dgp") ){
     stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   }
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
   if ( type == 'design' ) {
@@ -323,6 +325,7 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...
   if ( !inherits(object,"bundle") ){
     stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   }
+  if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   if ( !("design" %in% names(object)) ) stop("'object' must contain the 'design' slot created from design() to be used by draw().", call. = FALSE)
 
   if (is.null(emulator)){

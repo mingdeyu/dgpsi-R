@@ -442,6 +442,7 @@ validate_emulator_data <- function(struc, emulators) {
   }
 
   for (emulator in emulators) {
+    if ( reticulate::py_is_null_xptr(emulator$constructor_obj) ) stop("The Python session originally associated with 'emulators' is no longer active. Please rebuild the emulators or, if they were saved using dgpsi::write(), load them into the R session with dgpsi::read().", call. = FALSE)
     expected_dims <- ncol(emulator$data$X)
     emulator_id <- emulator$id
     # Filter struc for connections to this emulator

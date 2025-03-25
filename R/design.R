@@ -272,6 +272,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n
     if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
   object <- copy_in_design(object)
 
@@ -908,6 +909,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
     if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
   if (object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$name == "Categorical") {
     is.categorical <- TRUE
@@ -1781,6 +1783,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
     if (pkg.env$restart) return(invisible(NULL))
   }
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
+  if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
   if (lifecycle::is_present(n_cand)) {
     lifecycle::deprecate_warn("2.5.0", "design(n_cand)", "design(n_sample)")
@@ -2367,7 +2370,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             new_X_list <- vector('list', n_emulators)
             new_Y_list <- vector('list', n_emulators)
             for (k in 1:n_emulators){
-              extract0 <- k + seq(0, by = n_emulators, length = nrow(res))
+              extract0 <- k + seq(0, by = n_emulators, length = nrow(res[[1]]))
               extract <- rep(extract0, reps) +  rep(seq(0, by = nrow(new_X), length.out = reps), each = length(extract0))
               extracted_X <- new_X[extract0,,drop=FALSE]
               new_X_list[[k]] <- matrix( rep( t( extracted_X ) , reps ) , ncol = ncol(extracted_X) , byrow = TRUE )
@@ -2381,7 +2384,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             new_Y_list <- vector('list', n_emulators)
             for (k in 1:n_emulators){
               if (!istarget[k]){
-                extract0 <- ct + seq(0, by = active_emu, length = nrow(res))
+                extract0 <- ct + seq(0, by = active_emu, length = nrow(res[[1]]))
                 extract <- rep(extract0, reps) +  rep(seq(0, by = nrow(new_X), length.out = reps), each = length(extract0))
                 extracted_X <- new_X[extract0,,drop=FALSE]
                 new_X_list[[k]] <- matrix( rep( t( extracted_X ) , reps ) , ncol = ncol(extracted_X) , byrow = TRUE )

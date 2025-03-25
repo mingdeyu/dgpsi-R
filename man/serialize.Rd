@@ -52,7 +52,7 @@ X_dgp <- seq(0, 1, length = 100)
 # serialize the DGP emulator
 m_serialized <- serialize(m)
 
-# create a cluster with 3 workers for parallel predictions
+# create a cluster with 8 workers for parallel predictions
 cl <- makeCluster(8)
 
 # export objects to the cluster
