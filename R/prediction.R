@@ -190,6 +190,9 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
     }
   }
 
+  if ( mode!='label' & method!='proba' ) stop("'mode' can only be either 'label' or 'proba'.", call. = FALSE)
+  if (mode == 'proba') mode = 'prob'
+
   sample_size <- as.integer(sample_size)
   M <- as.integer(M)
   if( !is.null(chunks) ) {
