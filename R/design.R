@@ -573,22 +573,39 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n
 
         }
 
-        N_acq <- c(N_acq, nrow(new_X))
-
-        X <- rbind(X, new_X)
-        if ( !is.null(x_cand) ){
-          idx_x_acq <- c(idx_x_acq, idx_sub_cand[res])
-          idx_x_cand <- idx_x_cand0[-idx_x_acq]
-        }
+        existingData <- cbind(X, Y)
 
         if ( is.list(new_output) ){
-          Y <- rbind(Y, new_output[[1]])
-          if ( length(new_output)!=1 ){
-            updated_arg <- new_output[-1]
-            add_arg <- utils::modifyList(add_arg, updated_arg)
-          }
+          newData <- cbind(new_X, new_output[[1]])
         } else {
-          Y <- rbind(Y, new_output)
+          newData <- cbind(new_X, new_output)
+        }
+
+        newKeys <- do.call("paste", c(as.data.frame(newData), sep = "|"))
+        existingKeys <- do.call("paste", c(as.data.frame(existingData), sep = "|"))
+
+        # Identify rows in newData that are not duplicated in existingData
+        uniqueIdx <- !newKeys %in% existingKeys
+
+        if (any(uniqueIdx)) {
+          new_X <- new_X[uniqueIdx, , drop = FALSE]
+          N_acq <- c(N_acq, nrow(new_X))
+
+          X <- rbind(X, new_X)
+          if ( !is.null(x_cand) ){
+            idx_x_acq <- c(idx_x_acq, idx_sub_cand[res])
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
+          }
+
+          if ( is.list(new_output) ){
+            Y <- rbind(Y, new_output[[1]][uniqueIdx, , drop = FALSE])
+            if ( length(new_output)!=1 ){
+              updated_arg <- new_output[-1]
+              add_arg <- utils::modifyList(add_arg, updated_arg)
+            }
+          } else {
+            Y <- rbind(Y, new_output[uniqueIdx, , drop = FALSE])
+          }
         }
 
         if ( i %% freq[1]==0 ){
@@ -1256,22 +1273,39 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
 
         }
 
-        N_acq <- c(N_acq, nrow(new_X))
-
-        X <- rbind(X, new_X)
-        if ( !is.null(x_cand) ){
-          idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res)])
-          idx_x_cand <- idx_x_cand0[-idx_x_acq]
+        existingData <- cbind(X, Y)
+        if ( is.list(new_output) ){
+          newData <- cbind(new_X, new_output[[1]])
+        } else {
+          newData <- cbind(new_X, new_output)
         }
 
-        if ( is.list(new_output) ){
-          Y <- rbind(Y, new_output[[1]])
-          if ( length(new_output)!=1 ){
-            updated_coeff <- new_output[-1]
-            add_arg <- utils::modifyList(add_arg, updated_coeff)
+        newKeys <- do.call("paste", c(as.data.frame(newData), sep = "|"))
+        existingKeys <- do.call("paste", c(as.data.frame(existingData), sep = "|"))
+
+        # Identify rows in newData that are not duplicated in existingData
+        uniqueIdx <- !newKeys %in% existingKeys
+
+        if (any(uniqueIdx)) {
+          new_X <- new_X[uniqueIdx, , drop = FALSE]
+
+          N_acq <- c(N_acq, nrow(new_X))
+
+          X <- rbind(X, new_X)
+          if ( !is.null(x_cand) ){
+            idx_x_acq <- c(idx_x_acq, idx_sub_cand[unique(res)])
+            idx_x_cand <- idx_x_cand0[-idx_x_acq]
           }
-        } else {
-          Y <- rbind(Y, new_output)
+
+          if ( is.list(new_output) ){
+            Y <- rbind(Y, new_output[[1]][uniqueIdx, , drop = FALSE])
+            if ( length(new_output)!=1 ){
+              updated_coeff <- new_output[-1]
+              add_arg <- utils::modifyList(add_arg, updated_coeff)
+            }
+          } else {
+            Y <- rbind(Y, new_output[uniqueIdx, , drop = FALSE])
+          }
         }
 
         if ( i %% freq[1]==0 ){
@@ -2343,8 +2377,35 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             if ( !is.null(new_Y_list[[j]]) ){
               na.idx <- is.na(new_Y_list[[j]])
               if ( !all(na.idx) ){
-                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X_list[[j]][!na.idx,,drop=FALSE])
-                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y_list[[j]][!na.idx,,drop=FALSE])
+                # Extract new input and output rows that are not NA
+                newX <- new_X_list[[j]][!na.idx, , drop = FALSE]
+                newY <- new_Y_list[[j]][!na.idx, , drop = FALSE]
+
+                # Combine existing input and output matrices for this emulator
+                existingX <- X[[paste("emulator", j, sep = "")]]
+                existingY <- Y[[paste("emulator", j, sep = "")]]
+
+                # Combine new input and output into one matrix for key creation
+                newData <- cbind(newX, newY)
+                existingData <- cbind(existingX, existingY)
+
+                # Create composite keys using a vectorized paste approach
+                newKeys <- do.call("paste", c(as.data.frame(newData), sep = "|"))
+                existingKeys <- do.call("paste", c(as.data.frame(existingData), sep = "|"))
+
+                # Identify rows in newData that are not duplicated in existingData
+                uniqueIdx <- !newKeys %in% existingKeys
+
+                if (any(uniqueIdx)) {
+                  # Directly slice newX and newY using uniqueIdx
+                  newX_unique <- newX[uniqueIdx, , drop = FALSE]
+                  newY_unique <- newY[uniqueIdx, , drop = FALSE]
+
+                  # Append the unique rows to the existing matrices
+                  X[[paste("emulator", j, sep = "")]] <- rbind(existingX, newX_unique)
+                  Y[[paste("emulator", j, sep = "")]] <- rbind(existingY, newY_unique)
+                }
+
               }
             }
           }
@@ -2401,8 +2462,35 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             if ( !is.null(new_Y_list[[j]]) ){
               na.idx <- is.na(new_Y_list[[j]])
               if ( !all(na.idx) ){
-                X[[paste('emulator',j,sep="")]] <- rbind(X[[paste('emulator',j,sep="")]], new_X_list[[j]][!na.idx,,drop=FALSE])
-                Y[[paste('emulator',j,sep="")]] <- rbind(Y[[paste('emulator',j,sep="")]], new_Y_list[[j]][!na.idx,,drop=FALSE])
+                # Extract new input and output rows that are not NA
+                newX <- new_X_list[[j]][!na.idx, , drop = FALSE]
+                newY <- new_Y_list[[j]][!na.idx, , drop = FALSE]
+
+                # Combine existing input and output matrices for this emulator
+                existingX <- X[[paste("emulator", j, sep = "")]]
+                existingY <- Y[[paste("emulator", j, sep = "")]]
+
+                # Combine new input and output into one matrix for key creation
+                newData <- cbind(newX, newY)
+                existingData <- cbind(existingX, existingY)
+
+                # Create composite keys using a vectorized paste approach
+                newKeys <- do.call("paste", c(as.data.frame(newData), sep = "|"))
+                existingKeys <- do.call("paste", c(as.data.frame(existingData), sep = "|"))
+
+                # Identify rows in newData that are not duplicated in existingData
+                uniqueIdx <- !newKeys %in% existingKeys
+
+                if (any(uniqueIdx)) {
+                  # Directly slice newX and newY using uniqueIdx
+                  newX_unique <- newX[uniqueIdx, , drop = FALSE]
+                  newY_unique <- newY[uniqueIdx, , drop = FALSE]
+
+                  # Append the unique rows to the existing matrices
+                  X[[paste("emulator", j, sep = "")]] <- rbind(existingX, newX_unique)
+                  Y[[paste("emulator", j, sep = "")]] <- rbind(existingY, newY_unique)
+                }
+
               }
             }
           }
