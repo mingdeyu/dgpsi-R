@@ -606,6 +606,8 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n
           } else {
             Y <- rbind(Y, new_output[uniqueIdx, , drop = FALSE])
           }
+        } else {
+          N_acq <- c(N_acq, 0)
         }
 
         if ( i %% freq[1]==0 ){
@@ -1306,6 +1308,8 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
           } else {
             Y <- rbind(Y, new_output[uniqueIdx, , drop = FALSE])
           }
+        } else {
+          N_acq <- c(N_acq, 0)
         }
 
         if ( i %% freq[1]==0 ){
