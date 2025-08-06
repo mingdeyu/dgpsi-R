@@ -278,7 +278,7 @@ tos_handler <- function(...){
   tryCatch(...,
            error = function(r)
            { condition <- conditionMessage(r)
-           reg <- "creating conda environment 'r-reticulate'"
+           reg <- "Error creating conda environment"
            if(grepl(reg, condition)) {
              system(paste(reticulate::conda_binary(), "tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main"))
              system(paste(reticulate::conda_binary(), "tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r"))
