@@ -61,7 +61,8 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     #If the user would like to have the conda binary to be installed
     if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
       message("Installing the Conda binary...")
-      tos_handler(reticulate::install_miniconda())
+      Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
+      reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
       install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
       pkg.env$restart <- TRUE
@@ -268,23 +269,6 @@ warning_error_handler <- function(...){
            reg <- "failed to initialize requested version of Python"
            if(grepl(reg, condition)) {
              cat("NOTE: please clear your R workspace and delete the workspace image file '.RData' before restarting the R session.")
-           } else {
-             message(paste("ERROR in", condition))
-           }
-           })
-}
-
-tos_handler <- function(...){
-  tryCatch(...,
-           error = function(r)
-           { condition <- conditionMessage(r)
-           reg <- "Error creating conda environment"
-           if(grepl(reg, condition)) {
-             system(paste(reticulate::conda_binary(), "tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main"))
-             system(paste(reticulate::conda_binary(), "tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r"))
-             if (Sys.info()[["sysname"]]=='Windows'){
-               system(paste(reticulate::conda_binary(), "tos accept --override-channels --channel https://repo.anaconda.com/pkgs/msys2"))
-             }
            } else {
              message(paste("ERROR in", condition))
            }
