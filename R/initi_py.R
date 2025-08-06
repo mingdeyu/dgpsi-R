@@ -56,12 +56,12 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   }
   #Check if there is any conda binary installed, if not, request to install it.
   #restart <- FALSE
+  Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
     #If the user would like to have the conda binary to be installed
     if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
       message("Installing the Conda binary...")
-      Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
       reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
       install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
