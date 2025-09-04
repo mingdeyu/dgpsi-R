@@ -71,7 +71,7 @@
 <span>  nugget <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale_est <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  scale <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  connect <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  connect <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  likelihood <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  training <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -87,7 +87,8 @@
 <span>  B <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  id <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  decouple <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -148,10 +149,15 @@ The matrix should have its row number equal to <code>depth</code> if <code>likel
 
 
 <dt id="arg-nugget-est">nugget_est<a class="anchor" aria-label="anchor" href="#arg-nugget-est"></a></dt>
-<dd><p>a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
-provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of <code>ncol(Y)</code>) is provided, each
-bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the nugget of the corresponding GP in the final layer is fixed to the corresponding value defined in <code>nugget</code> (see below).</p></li>
-<li><p><code>TRUE</code>: the nugget of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in <code>nugget</code> (see below).</p></li>
+<dd><p>a bool or a bool vector indicating whether the nuggets of GP nodes in the final layer (or the
+layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
+If a bool vector is provided, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
+<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code></p></li>
+<li><p><code>1</code> if <code>likelihood</code> is <code>"Poisson"</code> or <code>"Categorical"</code> with two classes</p></li>
+<li><p>the number of classes if <code>likelihood</code> is <code>"Categorical"</code> with more than two classes.</p></li>
+</ul><p>Each element of the vector is applied to the corresponding GP node in the final layer (or the layer feeding the
+likelihood node). The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the nugget of the corresponding GP is fixed to the corresponding value defined in <code>nugget</code> (see below).</p></li>
+<li><p><code>TRUE</code>: the nugget of the corresponding GP will be estimated with the initial value given by the correspondence in <code>nugget</code> (see below).</p></li>
 </ul><p>Defaults to <code>FALSE</code>.</p></dd>
 
 
@@ -161,28 +167,37 @@ bool element in the vector will be applied to the corresponding GP node (if any)
 The vector should have a length of <code>depth</code> if <code>likelihood = NULL</code> or a length of <code>depth - 1</code> if <code>likelihood</code> is not <code>NULL</code>.</p></li>
 </ol><p>Set <code>nugget</code> to a small value and the bools in <code>nugget_est</code> to <code>FALSE</code> for deterministic emulation, where the emulator
 interpolates the training data points. Set <code>nugget</code> to a larger value and the bools in <code>nugget_est</code> to <code>TRUE</code> for stochastic emulation where
-the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-6</code> if <code>nugget_est = FALSE</code> and
-<code>0.01</code> if <code>nugget_est = TRUE</code>. If <code>likelihood</code> is not <code>NULL</code> and <code>nugget_est = FALSE</code>, the nuggets of GPs that feed into the likelihood layer default to
-<code>1e-4</code>.</p></dd>
+the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to <code>1e-6</code> if <code>likelihood</code> is <code>NULL</code>.
+If <code>likelihood</code> is not <code>NULL</code>, the nuggets of GPs that feed into the likelihood layer default to <code>1e-4</code>, while those of all other GPs default to <code>1e-6</code>.</p></dd>
 
 
 <dt id="arg-scale-est">scale_est<a class="anchor" aria-label="anchor" href="#arg-scale-est"></a></dt>
-<dd><p>a bool or a bool vector that indicates if the variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
-provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of <code>ncol(Y)</code>) is provided, each
-bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the variance of the corresponding GP in the final layer is fixed to the corresponding value defined in <code>scale</code> (see below).</p></li>
-<li><p><code>TRUE</code>: the variance of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in <code>scale</code> (see below).</p></li>
+<dd><p>a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
+layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
+If a bool vector is provided, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
+<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code></p></li>
+<li><p><code>1</code> if <code>likelihood</code> is <code>"Poisson"</code> or <code>"Categorical"</code> with two classes</p></li>
+<li><p>the number of classes if <code>likelihood</code> is <code>"Categorical"</code> with more than two classes.</p></li>
+</ul><p>The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the variance of the corresponding GP is fixed to the corresponding value defined in <code>scale</code> (see below).</p></li>
+<li><p><code>TRUE</code>: the variance of the corresponding GP will be estimated with the initial value given by the correspondence in <code>scale</code> (see below).</p></li>
 </ul><p>Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>the initial variance value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
-in the final layer. If it is a vector (which must have a length of <code>ncol(Y)</code>), each numeric in the vector will be applied to the corresponding GP node
-(if any) in the final layer. Defaults to <code>1</code>.</p></dd>
+<dd><p>the initial variance value(s) of GP nodes in the final layer (or the
+layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
+in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
+<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code></p></li>
+<li><p><code>1</code> if <code>likelihood</code> is <code>"Poisson"</code> or <code>"Categorical"</code> with two classes</p></li>
+<li><p>the number of classes if <code>likelihood</code> is <code>"Categorical"</code> with more than two classes.</p></li>
+</ul><p>Each numeric in the vector will be applied to the corresponding GP node.</p>
+<p>Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-connect">connect<a class="anchor" aria-label="anchor" href="#arg-connect"></a></dt>
-<dd><p>a bool indicating whether to implement global input connection to the DGP structure. Setting it to <code>FALSE</code> may produce a better emulator in some cases at
-the cost of slower training. Defaults to <code>TRUE</code>.</p></dd>
+<dd><p>a bool indicating whether to apply global input connections in the DGP structure. Setting this to <code>FALSE</code> may yield
+a better emulator in some cases. When set to <code>NULL</code>, the value defaults to <code>FALSE</code> if <code>likelihood = "Categorical"</code> and to <code>TRUE</code> otherwise.
+Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-likelihood">likelihood<a class="anchor" aria-label="anchor" href="#arg-likelihood"></a></dt>
@@ -192,7 +207,7 @@ the cost of slower training. Defaults to <code>TRUE</code>.</p></dd>
 <li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for emulation where the computer model outputs are counts and a Poisson distribution is used to model them.</p></li>
 <li><p><code>"NegBin"</code>: a negative Binomial likelihood layer is added for emulation where the computer model outputs are counts and a negative Binomial distribution is used to capture dispersion variability in input space.</p></li>
 <li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> <code>"Categorical"</code>: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.</p></li>
-</ol><p>When <code>likelihood</code> is not <code>NULL</code>, the value of <code>nugget_est</code> is overridden by <code>FALSE</code>. Defaults to <code>NULL</code>.</p></dd>
+</ol><p>Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-training">training<a class="anchor" aria-label="anchor" href="#arg-training"></a></dt>
@@ -291,6 +306,12 @@ to add linking information to the DGP emulator. Defaults to <code>NULL</code>.</
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>an ID to be assigned to the DGP emulator. If an ID is not provided (i.e., <code>id = NULL</code>), a UUID (Universally Unique Identifier) will be automatically generated
 and assigned to the emulator. Default to <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-decouple">decouple<a class="anchor" aria-label="anchor" href="#arg-decouple"></a></dt>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
+categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when <code>depth</code> is greater than 2.
+Defaults to <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -57,6 +57,18 @@
 <li>A bug in <code><a href="../reference/vigf.html">vigf()</a></code>, affecting a bundle of emulators that includes GP emulators, has now been fixed.</li>
 <li>The column names from the training input and output provided to <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> are retained in the relevant slots of the returned objects, as well as in any updated objects produced by the downstream functions that operate on them.</li>
 <li>The column names from the testing input and output supplied to <code><a href="../reference/validate.html">validate()</a></code> and <code><a href="../reference/design.html">design()</a></code> are retained in the relevant slots of the returned objects.</li>
+<li>Improved numerical stability and achieved ~30x faster speed for DGP emulators using heteroskedastic likelihoods with replicates, with or without the Vecchia approximation.</li>
+<li>Enhanced initialization of DGP emulators with heteroskedastic and categorical likelihoods for improved performance.</li>
+<li>Removed the <code>mode</code> argument from <code><a href="../reference/predict.html">predict()</a></code> for DGP emulators with categorical likelihoods. Predictions of class probabilities can now be obtained using either the <code>"mean_var"</code> or <code>"sampling"</code> method.</li>
+<li>Set the default <code>method</code> for <code><a href="../reference/predict.html">predict()</a></code>, <code><a href="../reference/validate.html">validate()</a></code>, and <code><a href="../reference/plot.html">plot()</a></code> to <code>"mean_var"</code>.</li>
+<li>Redesigned the output of <code><a href="../reference/validate.html">validate()</a></code> for <code>dgp</code> objects with <code>likelihood = "Categorical"</code>. See <code><a href="../reference/validate.html">validate()</a></code> documentation for details.</li>
+<li>Added support for the <code>nugget_est</code> argument in <code><a href="../reference/dgp.html">dgp()</a></code> to control whether nuggets of GP nodes feeding into the likelihood node are estimated when <code>likelihood</code> is not <code>NULL</code>.</li>
+<li>Updated initial nugget values when <code>nugget_est = TRUE</code> in <code><a href="../reference/dgp.html">dgp()</a></code>. If <code>likelihood = NULL</code>, all initial GP nuggets default to <code>1e-6</code>; otherwise, GP nodes feeding into the likelihood node default to <code>1e-4</code> and all others to <code>1e-6</code>.</li>
+<li>Added the <code>accuracy</code> metric to the figures produced by <code><a href="../reference/plot.html">plot()</a></code> for DGP emulators with categorical likelihoods.</li>
+<li>Fixed the confusion matrix visualization (<code>style = 2</code> in <code><a href="../reference/plot.html">plot()</a></code>) so that the diagonal is drawn from top-left to bottom-right.</li>
+<li>Updated <code><a href="../reference/init_py.html">init_py()</a></code> to handle errors related to TOS acceptance when installing Miniconda, and to automate TOS acceptance for required channels.</li>
+<li>Enabled use of the <code>newaccelerate</code> BLAS library on Apple Silicon machines running macOS &gt; 13.3.</li>
+<li>Added the <code>decouple</code> argument to <code><a href="../reference/dgp.html">dgp()</a></code> to allow likelihood parameters to be modeled using separate deep Gaussian process hierarchies when <code>depth &gt; 2</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.5.0" id="dgpsi-250">dgpsi 2.5.0<a class="anchor" aria-label="anchor" href="#dgpsi-250"></a></h2><p class="text-muted">CRAN release: 2024-12-14</p>

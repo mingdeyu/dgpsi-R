@@ -75,7 +75,7 @@
 <span>  <span class="va">object</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
 <span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -89,7 +89,7 @@
 <span>  <span class="va">object</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
 <span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -103,7 +103,7 @@
 <span>  <span class="va">object</span>,</span>
 <span>  x_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_test <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mean_var"</span>,</span>
 <span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -159,8 +159,7 @@ in the final layer.</p></li>
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> the prediction approach to use for validation: either the mean-variance approach (<code>"mean_var"</code>) or the sampling approach (<code>"sampling"</code>). For details see <code><a href="predict.html">predict()</a></code>.
-For DGP emulators with a categorical likelihood (<code>likelihood = "Categorical"</code> in <code><a href="dgp.html">dgp()</a></code>), only the sampling approach is supported.
-By default, the method is set to <code>"sampling"</code> for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and <code>"mean_var"</code> otherwise.</p></dd>
+Defaults to <code>"mean_var"</code>.</p></dd>
 
 
 <dt id="arg-sample-size">sample_size<a class="anchor" aria-label="anchor" href="#arg-sample-size"></a></dt>
@@ -223,15 +222,18 @@ dimensions. The max-min normalization uses the maximum and minimum values of the
 <li><p>an integer called <code>sample_size</code> that contains the number of samples used for validation if <code>method = "sampling"</code>.</p></li>
 </ul><p>The rows and columns of matrices (<code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, and <code>upper</code>) correspond to the validation positions and DGP emulator output
 dimensions, respectively.</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> If <code>object</code> is an instance of the <code>dgp</code> class with a categorical likelihood, an updated <code>object</code> is returned with an additional slot called <code>loo</code>
+<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> If <code>object</code> is an instance of the <code>dgp</code> class with a categorical likelihood, an updated <code>object</code> is returned with an additional slot called <code>loo</code>
 (for LOO cross validation) or <code>oos</code> (for OOS validation) that contains:</p><ul><li><p>two slots called <code>x_train</code> (or <code>x_test</code>) and <code>y_train</code> (or <code>y_test</code>) that contain the validation data points for LOO (or OOS).</p></li>
-<li><p>a matrix called <code>label</code> that contains predictive samples of labels from the DGP emulator at validation positions. The matrix has its rows
-corresponding to validation positions and columns corresponding to samples of labels.</p></li>
-<li><p>a list called <code>probability</code> that contains predictive samples of probabilities for each class from the DGP emulator at validation positions. The element in the list
-is a matrix that has its rows corresponding to validation positions and columns corresponding to samples of probabilities.</p></li>
-<li><p>a scalar called <code>log_loss</code> that represents the average log loss of the predicted labels in the DGP emulator across all validation positions. Log loss measures the
+<li><p>a vector called <code>label</code> that contains predictive labels from the DGP emulator at validation positions.</p></li>
+<li><p>a matrix called <code>probability</code> that contains mean predictive probabilities for each class from the DGP emulator at validation positions. The matrix has its rows corresponding
+to validation positions and columns corresponding to different classes.</p></li>
+<li><p>a scalar called <code>log_loss</code> that represents the log loss of the trained DGP classifier. Log loss measures the
 accuracy of probabilistic predictions, with lower values indicating better classification performance. <code>log_loss</code> ranges from <code>0</code> to positive infinity, where a
 value closer to <code>0</code> suggests more confident and accurate predictions.</p></li>
+<li><p>a scalar called <code>accuracy</code> that represents the accuracy of the trained DGP classifier. Accuracy measures the proportion of correctly classified instances among
+all predictions, with higher values indicating better classification performance. accuracy ranges from <code>0</code> to <code>1</code>, where a value closer to <code>1</code> suggests more
+reliable and precise predictions.</p></li>
+<li><p>a slot named <code>method</code> indicating whether the matrix in the <code>probability</code> slot were obtained using the <code>"mean-var"</code> method or the <code>"sampling"</code> method.</p></li>
 <li><p>an integer called <code>M</code> that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.</p></li>
 <li><p>an integer called <code>sample_size</code> that contains the number of samples used for validation.</p></li>
 </ul></li>
