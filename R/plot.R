@@ -79,7 +79,7 @@ NULL
 #' @rdname plot
 #' @method plot dgp
 #' @export
-plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, sample_size = 50, style = 1, min_max = TRUE, normalize = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_var", sample_size = 50, style = 1, min_max = TRUE, normalize = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -123,11 +123,10 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
         }
       }
       if (is.categorical){
-        samples_df <- as.data.frame(loo_res$label)
-        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
-        dat <- cbind(data.frame(idx = idx, y_validate = loo_res$y_train[,1]), samples_df)
-        p_list[[1]] <- plot_style_1_classify(dat, dim, isdup) +
-          ggplot2::ggtitle(sprintf("Log Loss = %.4f", loo_res$log_loss)) +
+        prob_df <- as.data.frame(loo_res$probability)
+        dat <- cbind(data.frame(idx = idx, y_validate = loo_res$y_train[,1]), prob_df)
+        p_list[[1]] <- plot_style_1_classify(dat, dim, isdup, colnames(x$data$X)) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f, Accuracy = %.2f%%", loo_res$log_loss, loo_res$accuracy*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
         for (l in 1:ncol(loo_res$y_train) ) {
@@ -147,11 +146,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
           dat[["y_validate"]] <- loo_res$y_train[,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
           if ( min_max ){
-            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
               ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
               ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -162,11 +161,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
         rep1 <- pkg.env$np$unique(loo_res$x_train, return_index=TRUE, axis=0L)
         rep2 <- pkg.env$np$unique(loo_res$x_train, return_inverse=TRUE, axis=0L)
         idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
-        samples_df <- as.data.frame(loo_res$label)
-        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
-        dat <- cbind(data.frame(idx = idx, y_validate = loo_res$y_train[,1]), samples_df)
+        label_df <- as.data.frame(loo_res$label)
+        colnames(label_df) <- "label"
+        dat <- cbind(data.frame(idx = idx, y_validate = loo_res$y_train[,1]), label_df)
         p_list[[1]] <- plot_style_2_classify(dat, color, normalize) +
-          ggplot2::ggtitle(sprintf("Log Loss = %.4f", loo_res$log_loss)) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f, Accuracy = %.2f%%", loo_res$log_loss, loo_res$accuracy*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
         for (l in 1:ncol(loo_res$y_train) ) {
@@ -286,11 +285,10 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
             isdup <- FALSE
           }
         }
-        samples_df <- as.data.frame(oos_res$label)
-        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
-        dat <- cbind(data.frame(idx = idx, y_validate = oos_res$y_test[,1]), samples_df)
-        p_list[[1]] <- plot_style_1_classify(dat, dim, isdup) +
-          ggplot2::ggtitle(sprintf("Log Loss = %.4f", oos_res$log_loss)) +
+        prob_df <- as.data.frame(oos_res$probability)
+        dat <- cbind(data.frame(idx = idx, y_validate = oos_res$y_test[,1]), prob_df)
+        p_list[[1]] <- plot_style_1_classify(dat, dim, isdup, colnames(x$data$X)) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f, Accuracy = %.2f%%", oos_res$log_loss, oos_res$accuracy*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
         # If input is 1d
@@ -378,11 +376,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
             dat[["y_validate"]] <- oos_res$y_test[,l]
             dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
             if ( min_max ) {
-              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
                 ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
                 ggplot2::theme(plot.title = ggplot2::element_text(size=10))
             } else {
-              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
                 ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
                 ggplot2::theme(plot.title = ggplot2::element_text(size=10))
             }
@@ -394,11 +392,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
         rep1 <- pkg.env$np$unique(oos_res$x_test, return_index=TRUE, axis=0L)
         rep2 <- pkg.env$np$unique(oos_res$x_test, return_inverse=TRUE, axis=0L)
         idx <- seq(1,length(rep1[[2]]))[pkg.env$np$argsort(pkg.env$np$argsort(rep1[[2]]))+1][rep2[[2]]+1]
-        samples_df <- as.data.frame(oos_res$label)
-        colnames(samples_df) <- paste0("sample_", 1:ncol(samples_df))
-        dat <- cbind(data.frame(idx = idx, y_validate = oos_res$y_test[,1]), samples_df)
+        label_df <- as.data.frame(oos_res$label)
+        colnames(label_df) <- "label"
+        dat <- cbind(data.frame(idx = idx, y_validate = oos_res$y_test[,1]), label_df)
         p_list[[1]] <- plot_style_2_classify(dat, color, normalize) +
-          ggplot2::ggtitle(sprintf("Log Loss = %.4f", oos_res$log_loss)) +
+          ggplot2::ggtitle(sprintf("Log Loss = %.4f, Accuracy = %.2f%%", oos_res$log_loss, oos_res$accuracy*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
         for (l in 1:ncol(oos_res$y_test) ) {
@@ -498,7 +496,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
 #' @rdname plot
 #' @method plot lgp
 #' @export
-plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, sample_size = 50, style = 1, min_max = TRUE, color = 'turbo', type = 'points', M = 50, verb = TRUE, force = FALSE, cores = 1, ...) {
+plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_var", sample_size = 50, style = 1, min_max = TRUE, color = 'turbo', type = 'points', M = 50, verb = TRUE, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -673,11 +671,11 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
           dat[["y_validate"]] <- y_test_list[[k]][,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
           if ( min_max ) {
-            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x_test)) +
               ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x_test)) +
               ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -776,7 +774,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL,
 #' @rdname plot
 #' @method plot gp
 #' @export
-plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, sample_size = 50, style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_var", sample_size = 50, style = 1, min_max = TRUE, color = 'turbo', type = 'points', verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -829,11 +827,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, 
       dat[["y_validate"]] <- loo_res$y_train[,1]
       dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
       if ( min_max ) {
-        p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
           ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
-        p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
           ggplot2::ggtitle(sprintf('RMSE = %.6f', loo_res$rmse)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
@@ -983,11 +981,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, 
         dat[["y_validate"]] <- oos_res$y_test[,1]
         dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
         if ( min_max ) {
-          p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+          p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
             ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p <- plot_style_1(as.data.frame(dat), method, dim, isdup) +
+          p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
             ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -1066,162 +1064,176 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = NULL, 
   }
 }
 
-plot_style_1_classify <- function(dat, dim, isdup) {
-  # Handle duplication logic
-  if (isTRUE(isdup)) {
-    dup <- duplicated(dat$idx)
-  } else {
-    dup <- as.logical(rep(0, length(dat$idx)))
-  }
+plot_style_1_classify <- function(dat, dim, isdup, dimnames) {
 
-  # Set x-axis label based on dim input
   if (is.null(dim)) {
     x_lab <- "Input position"
   } else {
-    x_lab <- sprintf("Input dimension %i", dim)
+    if (is.null(dimnames)){
+      x_lab <- sprintf("Input dimension %i", dim)
+    } else {
+      x_lab <- dimnames[dim]
+    }
   }
 
-  # Reshape the dataframe to long format (excluding duplicates)
-  df_long <- reshape2::melt(dat[!dup, ], id.vars = c("idx", "y_validate"),
-                            variable.name = "sample",
-                            value.name = "predicted_value")
+  # ---- choose rows for the heat layer (keep all rows for truth dots) ----
+  use_rows <- if (isTRUE(isdup)) !duplicated(dat$idx) else rep(TRUE, nrow(dat))
 
-  if (is.character(dat$y_validate)) {
-    dat$y_validate <- as.factor(dat$y_validate)
-  }
+  # ---- identify probability columns (everything except idx & y_validate) ----
+  prob_cols <- setdiff(names(dat), c("idx", "y_validate"))
 
-  if (is.character(df_long$predicted_value)) {
-    df_long$predicted_value <- as.factor(df_long$predicted_value)
-  }
+  # ---- long format for heat (using %>%) ----
+  df_long <- dat[use_rows, , drop = FALSE] %>%
+    tidyr::pivot_longer(
+      cols = dplyr::all_of(prob_cols),
+      names_to = "class",
+      values_to = "prob"
+    ) %>%
+    dplyr::mutate(prob = as.numeric(as.character(.data$prob)))
 
-  prop_df <- dplyr::group_by(df_long, .data$idx, .data$predicted_value)
-  prop_df <- dplyr::summarize(prop_df, count = dplyr::n(), .groups = 'drop')
-  prop_df <- dplyr::group_by(prop_df, .data$idx)
-  prop_df <- dplyr::mutate(prop_df, proportion = .data$count / sum(.data$count))
-  prop_df <- dplyr::ungroup(prop_df)
-
-  # Create the ggplot
-  ggplot2::ggplot() +
-
-    # Plot predicted value proportions from prop_df
-    ggplot2::geom_tile(data = prop_df,
-                       ggplot2::aes(x = .data$idx, y = .data$predicted_value, fill = .data$proportion),
-                       height = 0.1,
-                       alpha = 0.95) +   # Keep the height fixed
-
-    #ggplot2::geom_point(data = prop_df,
-    #                    ggplot2::aes(x = .data$idx, y = .data$predicted_value, color = .data$proportion), size = 2.5,
-    #                    shape = 15, alpha = 0.85) +
-
-    # Use a gradient color scale for proportions (continuous)
-    ggplot2::scale_fill_viridis_c("Predicted Label Proportion", option = 'G',
-                                   direction = -1,
-                                   breaks=seq(0,1,0.2),
-                                   labels=c('0.0','0.2','0.4','0.6','0.8','1.0'),
-                                   limits = c(0, 1)) +
-
-    # Plot true values (y_validate) from the original dataset 'dat'
-    ggplot2::geom_point(data = dat,
-                        ggplot2::aes(x = .data$idx, y = .data$y_validate, shape = "True labels"),
-                        color = "#FFD700", size = 1.1) +
-
-    # Use manual shape scale to differentiate true labels
-    ggplot2::scale_shape_manual(values = c("True labels" = 16), name = "True Labels") +
-
-    # Labels, axis, and theme settings
-    ggplot2::labs(x = x_lab, y = "Model output") +
-
-    ggplot2::theme(
-      legend.position = "bottom",
-      legend.key.width = ggplot2::unit(1, "cm"),
-      legend.text = ggplot2::element_text(size = 7),
-      legend.title = ggplot2::element_text(size = 7, hjust = 0.5)
+  # ---- plot ----
+  p <- ggplot2::ggplot() +
+    ggplot2::geom_tile(
+      data = df_long,
+      mapping = ggplot2::aes(
+        x = .data$idx,
+        y = .data$class,
+        fill = .data$prob
+      ),
+      height = 0.1,
+      alpha  = 0.95
     ) +
-
-    # Use guides() for color and shape, hide the item text for True Labels
+    ggplot2::scale_fill_viridis_c(
+      "Predicted Class Probability",
+      option    = "G",
+      direction = -1,
+      breaks = base::seq(0, 1, 0.2),
+      labels = c("0.0","0.2","0.4","0.6","0.8","1.0"),
+      limits = c(0, 1)
+    ) +
+    # golden dots for true labels
+    ggplot2::geom_point(
+      data = dat,
+      mapping = ggplot2::aes(
+        x = .data$idx,
+        y = factor(.data$y_validate, levels = prob_cols),
+        shape = "True labels"
+      ),
+      color = "#FFD700",
+      size  = 1.1
+    ) +
+    ggplot2::scale_shape_manual(
+      values = c("True labels" = 16),
+      name   = "True Labels"
+    ) +
+    ggplot2::scale_y_discrete(limits = prob_cols) +
+    ggplot2::labs(x = x_lab, y = "Model output") +
+    ggplot2::theme(
+      legend.position  = "bottom",
+      legend.key.width = grid::unit(1, "cm"),
+      legend.text      = ggplot2::element_text(size = 7),
+      legend.title     = ggplot2::element_text(size = 7, hjust = 0.5)
+    ) +
     ggplot2::guides(
-      fill = ggplot2::guide_colorbar(title.position = "top"),
-      shape = ggplot2::guide_legend(override.aes = list(size = 3),
-                                    title.position = "top",
-                                    title = "True Labels",
-                                    label = FALSE)  # Hide the item label
+      fill  = ggplot2::guide_colorbar(title.position = "top"),
+      shape = ggplot2::guide_legend(
+        override.aes = list(size = 3),
+        title.position = "top",
+        title = "True Labels",
+        label = FALSE
+      )
     )
+
+  return(p)
 }
 
 plot_style_2_classify <- function(dat, color, normalize) {
-  df_long <- reshape2::melt(dat, id.vars = c("idx", "y_validate"), variable.name = "sample", value.name = "predicted_value")
 
-  # Group by idx to collect true labels and predicted values
-  df_grouped <-
-    dplyr::summarize(dplyr::group_by(df_long, .data$idx),
-                     true_labels = list(unique(.data$y_validate)),          # Collect all true labels for each idx
-                     predicted_values = list(.data$predicted_value) # Collect all predicted values for each idx
+  chk <- dat %>%
+    dplyr::count(.data$idx, .data$y_validate) %>%
+    dplyr::count(.data$idx, name = "n_true_per_idx")
+  if (any(chk$n_true_per_idx > 1)) {
+    stop("The confusion matrix assumes a single true label per input location. Use 'style = 2' for visual diagnostics.")
+  }
+
+  # 1) One true label per idx
+  truth <- dat %>%
+    dplyr::group_by(.data$idx) %>%
+    dplyr::summarise(true = dplyr::first(.data$y_validate), .groups = "drop")
+
+  # 2) One predicted label per idx (majority vote if duplicates)
+  pred <- dat %>%
+    dplyr::count(.data$idx, .data$label, name = "n") %>%
+    dplyr::group_by(.data$idx) %>%
+    dplyr::slice_max(.data$n, n = 1, with_ties = FALSE) %>%
+    dplyr::ungroup() %>%
+    dplyr::transmute(idx = .data$idx, pred_label = .data$label)
+
+  # 3) Pair true & pred for each idx
+  pairs <- dplyr::left_join(truth, pred, by = "idx")
+
+  # 4) Class universe to stabilize axes and include zero cells
+  classes <- sort(unique(c(pairs$true, pairs$pred_label)))
+
+  conf_long <- pairs %>%
+    dplyr::count(.data$true, .data$pred_label, name = "n") %>%
+    tidyr::complete(true = classes, pred_label = classes, fill = list(n = 0L)) %>%
+    dplyr::arrange(.data$true, .data$pred_label)
+
+  # 5) Normalization (overall, to match your prior behavior)
+  conf_long <- if (normalize) {
+    total <- sum(conf_long$n)
+    dplyr::mutate(conf_long, val = if (total == 0) 0 else .data$n / total)
+  } else {
+    dplyr::mutate(conf_long, val = .data$n)
+  }
+
+  # 6) Prepare plot table (preserve your styling logic)
+  conf_plot <- conf_long %>%
+    dplyr::transmute(
+      true_labels      = factor(.data$true,       levels = classes),
+      predicted_values = factor(.data$pred_label, levels = classes),
+      fill_val         = .data$val,
+      label_str        = if (normalize) sprintf("%.2f", .data$val) else as.character(.data$n)
     )
 
-  # Unnest the predicted values and compare each predicted value to the true labels
-  df_expanded <-
-    dplyr::mutate(dplyr::rowwise(tidyr::unnest(df_grouped, "predicted_values")), match = ifelse(.data$predicted_values %in% unlist(.data$true_labels), "Match", "No Match"))  # Compare each predicted value
+  # 7) Plot (same styling; y reversed so (A,A) is top-left)
+  p <- ggplot2::ggplot(conf_plot,
+                       ggplot2::aes(x = .data$predicted_values, y = .data$true_labels, fill = .data$fill_val)) +
+    ggplot2::geom_tile(color = "black") +
+    ggplot2::geom_text(ggplot2::aes(label = .data$label_str),
+                       color = "white", show.legend = FALSE) +
+    ggplot2::labs(x = "Predicted label", y = "True label") +
+    ggplot2::scale_y_discrete(limits = base::rev(classes), drop = FALSE)
 
-  # Unnest the true labels so that we can attribute mismatches to all true labels of the idx
-  df_confusion <-
-    dplyr::mutate(tidyr::unnest(df_expanded, "true_labels"), final_label = ifelse(match == "No Match", .data$true_labels, .data$predicted_values))  # Mismatches contribute to all true labels
-
-  # Filter out rows where match is marked as "Match" but true and predicted values are not identical
-  df_confusion_filtered <-
-    dplyr::filter( df_confusion, !(.data$match == "Match" & .data$predicted_values != .data$true_labels))
-
-  # Create confusion matrix by counting how often each predicted value contributes to each true label
-  conf_matrix <-
-    dplyr::count(df_confusion_filtered, .data$true_labels, .data$predicted_values)
-
-  # Get all unique true labels and predicted values to ensure zero-counts are included
-  all_combinations <- expand.grid(
-    true_labels = unique(df_confusion_filtered$true_labels),
-    predicted_values = unique(df_confusion_filtered$predicted_values)
-  )
-
-  # Merge the actual confusion matrix with all possible combinations to include zero counts
-  conf_matrix_complete <-
-    tidyr::replace_na(dplyr::left_join(all_combinations, conf_matrix, by = c("true_labels", "predicted_values")), list(n = 0))  # Replace NA with 0 for missing counts
-
-  if (normalize){
-    conf_matrix_complete$n <- conf_matrix_complete$n / sum(conf_matrix_complete$n)
-  }
-  # Plot the confusion matrix using ggplot2
-  p <- ggplot2::ggplot(conf_matrix_complete, ggplot2::aes_(x =~predicted_values, y =~true_labels, fill =~n)) +
-    ggplot2::geom_tile(color = "black") +  # Add black border to each tile
-    ggplot2::geom_text(ggplot2::aes_(
-      label = ifelse(conf_matrix_complete$n %% 1 == 0,  # Check if the value is an integer
-                     as.character(conf_matrix_complete$n),  # If integer, show as is
-                     sprintf("%.2f", conf_matrix_complete$n)  # Otherwise, format to 2 decimal places
-      )
-    ), color = "white", show.legend = FALSE)+  # Add count labels
-    ggplot2::labs(x = "Predicted label", y = "True label")
-
-  if (normalize){
-    p <- p + ggplot2::scale_fill_viridis_c("Normalized Count", option = color, breaks=seq(0,1,0.2), labels=c('0.0','0.2','0.4','0.6','0.8','1.0'), limits = c(0, 1))
+  if (normalize) {
+    p <- p + ggplot2::scale_fill_viridis_c(
+      "Normalized Count", option = color,
+      breaks = base::seq(0, 1, 0.2),
+      labels = c("0.0","0.2","0.4","0.6","0.8","1.0"),
+      limits = c(0, 1)
+    )
   } else {
     p <- p + ggplot2::scale_fill_viridis_c("Count", option = color)
   }
 
   p <- p +
     ggplot2::theme(
-      axis.text.x = ggplot2::element_text(angle = 0, vjust = 0.5),  # Rotate x-axis labels for better readability
-      axis.text.y = ggplot2::element_text(angle = 0, hjust = 0.5),  # Keep y-axis labels aligned
-      axis.ticks = ggplot2::element_line(color = "black"),  # Add ticks to boundaries of cells
-      panel.grid = ggplot2::element_blank(),
-      legend.position = "bottom",
-      legend.key.width = ggplot2::unit(1, "cm"),
-      legend.text = ggplot2::element_text(size = 7),
-      legend.title = ggplot2::element_text(size = 7),
-      legend.title.align=0.5
+      axis.text.x = ggplot2::element_text(angle = 0, vjust = 0.5),
+      axis.text.y = ggplot2::element_text(angle = 0, hjust = 0.5),
+      axis.ticks  = ggplot2::element_line(color = "black"),
+      panel.grid  = ggplot2::element_blank(),
+      legend.position   = "bottom",
+      legend.key.width  = grid::unit(1, "cm"),
+      legend.text       = ggplot2::element_text(size = 7),
+      legend.title      = ggplot2::element_text(size = 7, hjust = 0.5)
     ) +
-    ggplot2::guides(fill = ggplot2::guide_colourbar(title.position="top"))
+    ggplot2::guides(fill = ggplot2::guide_colourbar(title.position = "top"))
 
   return(p)
 }
 
-plot_style_1 <- function(dat, method, dim, isdup) {
+plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
   if ( isTRUE(isdup) ){
     dup <- duplicated(dat$idx)
   } else {
@@ -1232,7 +1244,11 @@ plot_style_1 <- function(dat, method, dim, isdup) {
     x_lab <- "Input position"
   } else {
     if ( length(dim)==1 ){
-      x_lab <- sprintf("Input dimension %i", dim)
+      if ( is.null(dimnames) ){
+        x_lab <- sprintf("Input dimension %i", dim)
+      } else {
+        x_lab <- dimnames[dim]
+      }
     } else if ( length(dim)==2 ){
       x_lab <- sprintf("Input dimension %i of emulators in layer %i", dim[2], dim[1])
     } else if ( length(dim)==3 ){

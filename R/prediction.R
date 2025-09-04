@@ -27,12 +27,7 @@
 #'   corresponding to rows where the `From_Emulator` column is `"Global"`.
 #' @param method `r new_badge("updated")` the prediction approach to use: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`).
 #'     The mean-variance approach returns the means and variances of the predictive distributions, while the sampling approach generates samples from predictive distributions
-#'     using the derived means and variances. For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), `method` is only applicable
-#'     when `full_layer = TRUE`. In this case, the sampling approach generates samples from the GP nodes in all hidden layers using the derived means and variances,
-#'     and subsequently propagates these samples through the categorical likelihood. By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and
-#'     Categorical likelihoods, and to `"mean_var"` otherwise.
-#' @param mode `r new_badge("new")` whether to predict the classes (`"label"`) or probabilities (`"proba"`) of different classes when `object` is a DGP emulator with a categorical likelihood.
-#'      Defaults to `"label"`.
+#'     using the derived means and variances. Defaults to `"mean_var"`.
 #' @param full_layer a bool indicating whether to output the predictions of all layers. Defaults to `FALSE`. Only used when `object` is a DGP or a linked (D)GP emulator.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to `50`. This argument is only used if the emulator `object`
@@ -49,50 +44,26 @@
 #'      corresponding to testing positions (i.e., rows of `x`).
 #'   2. if `method = "sampling"`: an updated `object` is returned with an additional slot called `results` that contains a matrix whose rows correspond
 #'      to testing positions and columns correspond to `sample_size` number of samples drawn from the predictive distribution of GP.
-#' * If `object` is an instance of the `dgp` class:
+#' * `r new_badge("updated")` If `object` is an instance of the `dgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that contains two
 #'      matrices named `mean` for the predictive means and `var` for the predictive variances respectively. Each matrix has its rows corresponding to testing
-#'      positions and columns corresponding to DGP global output dimensions (i.e., the number of GP/likelihood nodes in the final layer).
+#'      positions and columns corresponding to DGP global output dimensions (i.e., the number of GP/likelihood nodes in the final layer). If the likelihood node
+#'      is categorical, the matrices contain the predictive means and variances of the class probabilities, with columns corresponding to different classes.
 #'   2. if `method = "mean_var"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains two
 #'      sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list contains *L* (i.e., the number of layers)
 #'      matrices named `layer1, layer2,..., layerL`. Each matrix has its rows corresponding to testing positions and columns corresponding to
-#'      output dimensions (i.e., the number of GP/likelihood nodes from the associated layer).
+#'      output dimensions (i.e., the number of GP/likelihood nodes from the associated layer). If the likelihood node is categorical, the matrices named `layerL`
+#'      in both `mean` and `var` contain the predictive means and variances of the class probabilities, respectively, with columns corresponding to different classes.
 #'   3. if `method = "sampling"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that contains *D* (i.e., the number
-#'      of GP/likelihood nodes in the final layer) matrices named `output1, output2,..., outputD`. Each matrix has its rows corresponding to testing positions and
-#'      columns corresponding to samples of size: `B * sample_size`, where `B` is the number of imputations specified in [dgp()].
+#'      of GP/likelihood nodes in the final layer) matrices named `output1, output2,..., outputD`. If the likelihood node in the final layer is categorical, `results`
+#'      contains *D* matrices (where *D* is the number of classes) of sampled class probabilities, each named according to its corresponding class label. Each matrix in `results`
+#'      has its rows corresponding to testing positions and columns corresponding to samples of size: `B * sample_size`, where `B` is the number of imputations specified in [dgp()].
 #'   4. if `method = "sampling"` and  `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
 #'      of layers) sub-lists named `layer1, layer2,..., layerL`. Each sub-list represents samples drawn from the GP/likelihood nodes in the corresponding layer,
-#'      and contains *D* (i.e., the number of GP/likelihood nodes in the corresponding layer) matrices named `output1, output2,..., outputD`. Each matrix gives samples
-#'      of the output from one of *D* GP/likelihood nodes, and has its rows corresponding to testing positions and columns corresponding to samples
+#'      and contains *D* (i.e., the number of GP/likelihood nodes in the corresponding layer) matrices named `output1, output2,..., outputD`. If the likelihood node in the final
+#'      layer is categorical, `layerL` contains *D* matrices (where *D* is the number of classes) of sampled class probabilities, each named according to its corresponding class
+#'      label. Each matrix has its rows corresponding to testing positions and columns corresponding to samples
 #'      of size: `B * sample_size`, where `B` is the number of imputations specified in [dgp()].
-#' * `r new_badge("new")` If `object` is an instance of the `dgp` class with a categorical likelihood:
-#'   1. if `full_layer = FALSE` and `mode = "label"`: an updated `object` is returned with an additional slot called `results` that contains one matrix named `label`.
-#'      The matrix has rows corresponding to testing positions and columns corresponding to sample labels of size: `B * sample_size`, where `B` is the number
-#'      of imputations specified in [dgp()].
-#'   2. if `full_layer = FALSE` and `mode = "proba"`, an updated `object` is returned with an additional slot called `results`. This slot contains *D* matrices (where
-#'      *D* is the number of classes in the training output), where each matrix gives probability samples for the corresponding class with its rows corresponding to testing
-#'      positions and columns containing probabilities. The number of columns of each matrix is `B * sample_size`, where `B` is the number of imputations
-#'      specified in the [dgp()] function.
-#'   3. if `method = "mean_var"` and `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
-#'      of layers) sub-lists named `layer1, layer2,..., layerL`. Each of first `L-1` sub-lists contains two matrices named `mean` for the predictive means and `var`
-#'      for the predictive variances of the GP nodes in the associated layer. Rows of each matrix correspond to testing positions.
-#'      - when `mode = "label"`, the sub-list `LayerL` contains one matrix named `label`. The matrix has its rows corresponding to testing positions and columns
-#'        corresponding to label samples of size: `B * sample_size`. `B` is the number of imputations specified in [dgp()].
-#'      - when `mode = "proba"`, the sub-list `LayerL` contains *D* matrices (where *D* is the number of classes in the training output), where each matrix gives probability
-#'        samples for the corresponding class with its rows corresponding to testing positions and columns containing probabilities. The number of columns of each matrix
-#'        is `B * sample_size`. `B` is the number of imputations specified in [dgp()].
-#'   4. if `method = "sampling"` and `full_layer = TRUE`: an updated `object` is returned with an additional slot called `results` that contains *L* (i.e., the number
-#'      of layers) sub-lists named `layer1, layer2,..., layerL`. Each of first `L-1` sub-lists represents samples drawn from the GP nodes in the
-#'      corresponding layer, and contains *D* (i.e., the number of GP nodes in the corresponding layer) matrices named `output1, output2,..., outputD`. Each matrix
-#'      gives samples of the output from one of *D* GP nodes, and has its rows corresponding to testing positions and columns corresponding to samples
-#'      of size: `B * sample_size`.
-#'      - when `mode = "label"`, the sub-list `LayerL` contains one matrix named `label`. The matrix has its rows corresponding to testing positions and columns
-#'        corresponding to label samples of size: `B * sample_size`.
-#'      - when `mode = "proba"`, the sub-list `LayerL` contains *D* matrices (where *D* is the number of classes in the training output), where each matrix gives probability
-#'        samples for the corresponding class with its rows corresponding to testing positions and columns containing probabilities. The number of columns of each matrix
-#'        is `B * sample_size`.
-#'
-#'      `B` is the number of imputations specified in [dgp()].
 #' * `r new_badge("updated")` If `object` is an instance of the `lgp` class:
 #'   1. if `method = "mean_var"` and  `full_layer = FALSE`: an updated `object` is returned with an additional slot called `results` that
 #'      contains two sub-lists named `mean` for the predictive means and `var` for the predictive variances respectively. Each sub-list
@@ -138,7 +109,7 @@ NULL
 #' @rdname predict
 #' @method predict dgp
 #' @export
-predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = FALSE, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
+predict.dgp <- function(object, x, method = "mean_var", full_layer = FALSE, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -159,39 +130,14 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
   final_node <- object$specs[[paste('layer', L, sep="")]][['node1']]
   if ("type" %in% names(final_node) && final_node$type == "Categorical") {
     is.categorical <- TRUE
-    is.Poisson <- FALSE
-    is.NegBin <- FALSE
     encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
     index_to_label <- as.character(encoder$classes_)
-  } else if ("type" %in% names(final_node) && final_node$type == "Poisson") {
-    is.categorical <- FALSE
-    is.Poisson <- TRUE
-    is.NegBin <- FALSE
-  } else if ("type" %in% names(final_node) && final_node$type == "NegBin") {
-    is.categorical <- FALSE
-    is.Poisson <- FALSE
-    is.NegBin <- TRUE
   } else {
     is.categorical <- FALSE
-    is.Poisson <- FALSE
-    is.NegBin <- FALSE
   }
 
-  if ( is.null(method) ){
-    if (is.categorical|is.Poisson|is.NegBin) {
-      method = 'sampling'
-    } else {
-      method = 'mean_var'
-    }
-  } else {
-    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-    if ( method=='mean_var' && is.categorical && !full_layer){
-      method = 'sampling'
-    }
-  }
 
-  if ( mode!='label' & method!='proba' ) stop("'mode' can only be either 'label' or 'proba'.", call. = FALSE)
-  if (mode == 'proba') mode = 'prob'
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   sample_size <- as.integer(sample_size)
   M <- as.integer(M)
@@ -209,61 +155,51 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
   rep <- rep_x[[2]] + 1
 
   if ( identical(cores,as.integer(1)) ){
-    if (is.categorical) {
-      res <- object$emulator_obj$classify(reticulate::np_array(x_unique), mode, method, full_layer, sample_size, M)
-    } else {
-      res <- object$emulator_obj$predict(x_unique, method, full_layer, sample_size, M)
-    }
+    res <- object$emulator_obj$predict(x_unique, method, full_layer, sample_size, M)
   } else {
-    if (is.categorical) {
-      res <- object$emulator_obj$pclassify(reticulate::np_array(x_unique), mode, method, full_layer, sample_size, M, chunks, cores)
-    } else {
-      res <- object$emulator_obj$ppredict(x_unique, method, full_layer, sample_size, M, chunks, cores)
-    }
+    res <- object$emulator_obj$ppredict(x_unique, method, full_layer, sample_size, M, chunks, cores)
   }
 
   if (method == 'mean_var'){
     if (full_layer) {
+      named_res <- list("mean" = res[[1]], "var" = res[[2]])
+      LL <- length(named_res$mean)
+      for (l in 1:LL) {
+        named_res$mean[[l]] <- named_res$mean[[l]][rep,,drop=F]
+        named_res$var[[l]] <- named_res$var[[l]][rep,,drop=F]
+        names(named_res$mean)[l] <- paste('layer', l, sep="")
+        names(named_res$var)[l] <- paste('layer', l, sep="")
+      }
       if (is.categorical){
-        named_res <- vector('list', L)
-        for (l in 1:(L-1)) {
-          names(named_res)[l] <- paste('layer', l, sep="")
-          named_res[[l]][[1]] <- res[[1]][[l]][rep,,drop=F]
-          named_res[[l]][[2]] <- res[[2]][[l]][rep,,drop=F]
-          names(named_res[[l]])[1] <- 'mean'
-          names(named_res[[l]])[2] <- 'var'
+        if (length(index_to_label)==2){
+          named_res$mean[[LL]] <- cbind(1-named_res$mean[[LL]], named_res$mean[[LL]])
+          named_res$var[[LL]] <- cbind(named_res$var[[LL]], named_res$var[[LL]])
         }
-        names(named_res)[L] <- paste('layer', L, sep="")
-        for (k in 1:length(res[[3]])) {
-          named_res[[L]][[k]] <- res[[3]][[k]][rep,,drop=F]
-          if ( mode == 'label' ){
-            names(named_res[[L]])[k] <- 'label'
-          } else {
-            names(named_res[[L]])[k] <- index_to_label[k]
-          }
-        }
-      } else {
-        named_res <- list("mean" = res[[1]], "var" = res[[2]])
-        for (l in 1:length(named_res$mean)) {
-          named_res$mean[[l]] <- named_res$mean[[l]][rep,,drop=F]
-          named_res$var[[l]] <- named_res$var[[l]][rep,,drop=F]
-          names(named_res$mean)[l] <- paste('layer', l, sep="")
-          names(named_res$var)[l] <- paste('layer', l, sep="")
-        }
+        colnames(named_res$mean[[LL]]) <- index_to_label
+        colnames(named_res$var[[LL]]) <- index_to_label
       }
     } else {
       named_res <- list("mean" = res[[1]][rep,,drop=F], "var" = res[[2]][rep,,drop=F])
+      if (is.categorical){
+        if (length(index_to_label)==2){
+          named_res$mean <- cbind(1-named_res$mean, named_res$mean)
+          named_res$var <- cbind(named_res$var, named_res$var)
+        }
+        colnames(named_res$mean) <- index_to_label
+        colnames(named_res$var) <- index_to_label
+      }
     }
   } else if (method == 'sampling') {
     if (full_layer) {
       named_res <- res
-      for (l in 1:length(named_res)) {
+      LL <- length(named_res)
+      for (l in 1:LL) {
         names(named_res)[l] <- paste('layer', l, sep="")
         for (k in 1:length(named_res[[l]])) {
           named_res[[l]][[k]] <- named_res[[l]][[k]][rep,,drop=F]
-          if ( l == length(named_res) && is.categorical ) {
-            if ( mode == 'label' ){
-              names(named_res[[l]])[k] <- 'label'
+          if ( l == LL && is.categorical ) {
+            if (length(index_to_label)==2){
+              names(named_res[[l]])[k] <- index_to_label[k+1]
             } else {
               names(named_res[[l]])[k] <- index_to_label[k]
             }
@@ -272,13 +208,17 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
           }
         }
       }
+      if (is.categorical && length(index_to_label)==2){
+        named_res[[LL]][[2]] <- 1 - named_res[[LL]][[1]]
+        names(named_res[[LL]])[2] <- index_to_label[1]
+      }
     } else {
       named_res <- res
       for (l in 1:length(named_res)) {
         named_res[[l]] <- named_res[[l]][rep,,drop=F]
         if ( is.categorical ) {
-          if ( mode == 'label' ){
-            names(named_res)[l] <- 'label'
+          if (length(index_to_label)==2){
+            names(named_res)[l] <- index_to_label[l+1]
           } else {
             names(named_res)[l] <- index_to_label[l]
           }
@@ -286,12 +226,16 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
           names(named_res)[l] <- paste('output', l, sep="")
         }
       }
+      if (is.categorical && length(index_to_label)==2){
+        named_res[[2]] <- 1 - named_res[[1]]
+        names(named_res)[2] <- index_to_label[1]
+      }
     }
   }
 
   object$results <- named_res
   object$results[["M"]] <- M
-  if (method == "sampling" | is.categorical){
+  if (method == "sampling"){
     object$results[["sample_size"]] <- sample_size
   }
   return(object)
@@ -301,7 +245,7 @@ predict.dgp <- function(object, x, method = NULL, mode = 'label', full_layer = F
 #' @rdname predict
 #' @method predict lgp
 #' @export
-predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
+predict.lgp <- function(object, x, method = "mean_var", full_layer = FALSE, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -448,12 +392,7 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
     }
   }
 
-
-  if ( is.null(method) ){
-    method = 'mean_var'
-  } else {
-    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-  }
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   sample_size <- as.integer(sample_size)
   M <- as.integer(M)
@@ -549,7 +488,7 @@ predict.lgp <- function(object, x, method = NULL, full_layer = FALSE, sample_siz
 #' @rdname predict
 #' @method predict gp
 #' @export
-predict.gp <- function(object, x, method = NULL, sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
+predict.gp <- function(object, x, method = "mean_var", sample_size = 50, M = 50, cores = 1, chunks = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -566,11 +505,7 @@ predict.gp <- function(object, x, method = NULL, sample_size = 50, M = 50, cores
   }
   if ( ncol(x) != ncol(object$data$X) ) stop("'x' must have the same number of dimensions as the training input.", call. = FALSE)
 
-  if ( is.null(method) ){
-    method = 'mean_var'
-  } else {
-    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-  }
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   sample_size <- as.integer(sample_size)
   M <- as.integer(M)

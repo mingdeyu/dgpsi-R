@@ -4,6 +4,18 @@
 - A bug in `vigf()`, affecting a bundle of emulators that includes GP emulators, has now been fixed.
 - The column names from the training input and output provided to `gp()` and `dgp()` are retained in the relevant slots of the returned objects, as well as in any updated objects produced by the downstream functions that operate on them.
 - The column names from the testing input and output supplied to `validate()` and `design()` are retained in the relevant slots of the returned objects.
+- Improved numerical stability and achieved ~30x faster speed for DGP emulators using heteroskedastic likelihoods with replicates, with or without the Vecchia approximation.
+- Enhanced initialization of DGP emulators with heteroskedastic and categorical likelihoods for improved performance.
+- Removed the `mode` argument from `predict()` for DGP emulators with categorical likelihoods. Predictions of class probabilities can now be obtained using either the `"mean_var"` or `"sampling"` method.
+- Set the default `method` for `predict()`, `validate()`, and `plot()` to `"mean_var"`.
+- Redesigned the output of `validate()` for `dgp` objects with `likelihood = "Categorical"`. See `validate()` documentation for details.
+- Added support for the `nugget_est` argument in `dgp()` to control whether nuggets of GP nodes feeding into the likelihood node are estimated when `likelihood` is not `NULL`.
+- Updated initial nugget values when `nugget_est = TRUE` in `dgp()`. If `likelihood = NULL`, all initial GP nuggets default to `1e-6`; otherwise, GP nodes feeding into the likelihood node default to `1e-4` and all others to `1e-6`.
+- Added the `accuracy` metric to the figures produced by `plot()` for DGP emulators with categorical likelihoods.
+- Fixed the confusion matrix visualization (`style = 2` in `plot()`) so that the diagonal is drawn from top-left to bottom-right.
+- Updated `init_py()` to handle errors related to TOS acceptance when installing Miniconda, and to automate TOS acceptance for required channels.
+- Enabled use of the `newaccelerate` BLAS library on Apple Silicon machines running macOS > 13.3.
+- Added the `decouple` argument to `dgp()` to allow likelihood parameters to be modeled using separate deep Gaussian process hierarchies when `depth > 2`.
 
 # dgpsi 2.5.0
 - Training times for DGP emulators are now approximately 30%-40% faster.

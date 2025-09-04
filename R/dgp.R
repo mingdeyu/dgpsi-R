@@ -35,11 +35,18 @@
 #'
 #' Defaults to `"ga"`.
 #' @param share a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to `TRUE`.
-#' @param nugget_est a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
-#'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
-#'     bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
-#' * `FALSE`: the nugget of the corresponding GP in the final layer is fixed to the corresponding value defined in `nugget` (see below).
-#' * `TRUE`: the nugget of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in `nugget` (see below).
+#' @param nugget_est a bool or a bool vector indicating whether the nuggets of GP nodes in the final layer (or the
+#'     layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
+#'     If a bool vector is provided, its length must match the number of GP nodes:
+#' - `ncol(Y)` if `likelihood = NULL`
+#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+#' - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two classes
+#' - the number of classes if `likelihood` is `"Categorical"` with more than two classes.
+#'
+#' Each element of the vector is applied to the corresponding GP node in the final layer (or the layer feeding the
+#'    likelihood node). The value of a bool has following effects:
+#' * `FALSE`: the nugget of the corresponding GP is fixed to the corresponding value defined in `nugget` (see below).
+#' * `TRUE`: the nugget of the corresponding GP will be estimated with the initial value given by the correspondence in `nugget` (see below).
 #'
 #' Defaults to `FALSE`.
 #' @param nugget the initial nugget value(s) of GP nodes (if any) in each layer:
@@ -49,21 +56,35 @@
 #'
 #' Set `nugget` to a small value and the bools in `nugget_est` to `FALSE` for deterministic emulation, where the emulator
 #'    interpolates the training data points. Set `nugget` to a larger value and the bools in `nugget_est` to `TRUE` for stochastic emulation where
-#'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6` if `nugget_est = FALSE` and
-#'    `0.01` if `nugget_est = TRUE`. If `likelihood` is not `NULL` and `nugget_est = FALSE`, the nuggets of GPs that feed into the likelihood layer default to
-#'    `1e-4`.
-#' @param scale_est a bool or a bool vector that indicates if the variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
-#'     provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of `ncol(Y)`) is provided, each
-#'     bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
-#' * `FALSE`: the variance of the corresponding GP in the final layer is fixed to the corresponding value defined in `scale` (see below).
-#' * `TRUE`: the variance of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in `scale` (see below).
+#'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6` if `likelihood` is `NULL`.
+#'    If `likelihood` is not `NULL`, the nuggets of GPs that feed into the likelihood layer default to `1e-4`, while those of all other GPs default to `1e-6`.
+#' @param scale_est a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
+#'     layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
+#'     If a bool vector is provided, its length must match the number of GP nodes:
+#' - `ncol(Y)` if `likelihood = NULL`
+#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+#' - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two classes
+#' - the number of classes if `likelihood` is `"Categorical"` with more than two classes.
+#'
+#' The value of a bool has following effects:
+#' * `FALSE`: the variance of the corresponding GP is fixed to the corresponding value defined in `scale` (see below).
+#' * `TRUE`: the variance of the corresponding GP will be estimated with the initial value given by the correspondence in `scale` (see below).
 #'
 #' Defaults to `TRUE`.
-#' @param scale the initial variance value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
-#'    in the final layer. If it is a vector (which must have a length of `ncol(Y)`), each numeric in the vector will be applied to the corresponding GP node
-#'    (if any) in the final layer. Defaults to `1`.
-#' @param connect a bool indicating whether to implement global input connection to the DGP structure. Setting it to `FALSE` may produce a better emulator in some cases at
-#'    the cost of slower training. Defaults to `TRUE`.
+#' @param scale the initial variance value(s) of GP nodes in the final layer (or the
+#'    layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
+#'    in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:
+#' - `ncol(Y)` if `likelihood = NULL`
+#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+#' - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two classes
+#' - the number of classes if `likelihood` is `"Categorical"` with more than two classes.
+#'
+#' Each numeric in the vector will be applied to the corresponding GP node.
+#'
+#' Defaults to `1`.
+#' @param connect a bool indicating whether to apply global input connections in the DGP structure. Setting this to `FALSE` may yield
+#'     a better emulator in some cases. When set to `NULL`, the value defaults to `FALSE` if `likelihood = "Categorical"` and to `TRUE` otherwise.
+#'     Defaults to `NULL`.
 #' @param likelihood the likelihood type of a DGP emulator:
 #' 1. `NULL`: no likelihood layer is included in the emulator.
 #' 2. `"Hetero"`: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
@@ -72,7 +93,7 @@
 #' 4. `"NegBin"`: a negative Binomial likelihood layer is added for emulation where the computer model outputs are counts and a negative Binomial distribution is used to capture dispersion variability in input space.
 #' 5. `r new_badge("new")` `"Categorical"`: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.
 #'
-#' When `likelihood` is not `NULL`, the value of `nugget_est` is overridden by `FALSE`. Defaults to `NULL`.
+#' Defaults to `NULL`.
 #' @param training a bool indicating if the initialized DGP emulator will be trained.
 #'     When set to `FALSE`, [dgp()] returns an untrained DGP emulator, to which one can apply [summary()] to inspect its specifications
 #'     or apply [predict()] to check its emulation performance before training. Defaults to `TRUE`.
@@ -132,6 +153,9 @@
 #' to add linking information to the DGP emulator. Defaults to `NULL`.
 #' @param id an ID to be assigned to the DGP emulator. If an ID is not provided (i.e., `id = NULL`), a UUID (Universally Unique Identifier) will be automatically generated
 #'    and assigned to the emulator. Default to `NULL`.
+#' @param decouple `r new_badge("new")` A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
+#'    categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when `depth` is greater than 2.
+#'    Defaults to `FALSE`.
 #'
 #' @return An S3 class named `dgp` that contains five slots:
 #' * `id`: A number or character string assigned through the `id` argument.
@@ -231,9 +255,9 @@
 #' @md
 #' @export
 dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
-                nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = TRUE,
+                nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = NULL,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
-                ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
+                ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL, decouple = FALSE) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -260,15 +284,11 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
   }
 
   if (  is.null(nugget) ) {
-    if ( all(nugget_est) ) {
-      nugget = 0.01
+    if ( is.null(likelihood) ) {
+      nugget = 1e-6
     } else {
-        if ( is.null(likelihood) ) {
-          nugget = 1e-6
-        } else {
-          nugget = c(rep(1e-6, depth-2), 1e-4)
-        }
-      }
+      nugget = c(rep(1e-6, depth-2), 1e-4)
+    }
   }
 
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)
@@ -286,6 +306,13 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
   if ( !is.null(likelihood) ){
     if (likelihood!='Hetero' &  likelihood!='Poisson' & likelihood!='NegBin' & likelihood!='Categorical' ) stop("The provided 'likelihood' is not supported.", call. = FALSE)
+    if (likelihood=='Categorical'){
+      connect <- FALSE
+    } else {
+      connect <- TRUE
+    }
+  } else {
+    connect <- TRUE
   }
 
   N <- as.integer(N)
@@ -429,7 +456,15 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
       if ( likelihood == 'Hetero'|likelihood == 'NegBin' ) {
         #nugget <- rep(1e-6, 2)
-        nugget_est <- rep(FALSE, 2)
+        #nugget_est <- rep(FALSE, 2)
+        if ( length(nugget_est)==1 ) {
+          nugget_est <- rep(nugget_est, 2)
+        } else {
+          if ( length(nugget_est)!=2 ) {
+            stop(sprintf("length(nugget_est) should equal %i.", 2), call. = FALSE)
+          }
+        }
+
         if ( length(scale_est)==1 ) {
           scale_est <- rep(scale_est, 2)
         } else {
@@ -447,17 +482,28 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
         }
       } else if ( likelihood == 'Poisson' ) {
         #nugget <- 1e-6
-        nugget_est <- FALSE
+        if ( length(nugget_est)!=1 ) {
+          stop(sprintf("length(nugget_est) should equal %i.", 1), call. = FALSE)
+        }
         if ( length(scale_est)!=1 ) stop(sprintf("length(scale_est) should equal %i.", 1), call. = FALSE)
         if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal %i.", 1), call. = FALSE)
       } else if ( likelihood == 'Categorical' ) {
         num_class <- length(unique(Y[,1]))
         if (num_class==2) {
-          nugget_est <- FALSE
+          if ( length(nugget_est)!=1 ) {
+            stop(sprintf("length(nugget_est) should equal %i.", 1), call. = FALSE)
+          }
           if ( length(scale_est)!=1 ) stop(sprintf("length(scale_est) should equal %i.", 1), call. = FALSE)
           if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal %i.", 1), call. = FALSE)
         } else {
-          nugget_est <- rep(FALSE, num_class)
+          if ( length(nugget_est)==1 ) {
+            nugget_est <- rep(nugget_est, num_class)
+          } else {
+            if ( length(nugget_est)!=num_class ) {
+              stop(sprintf("length(nugget_est) should equal %i.", num_class), call. = FALSE)
+            }
+          }
+
           if ( length(scale_est)==1 ) {
             scale_est <- rep(scale_est, num_class)
           } else {
@@ -532,15 +578,29 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
                 idx <- reticulate::py_to_r(internal_input_idx)+1
                 connect_info <- c(connect_info[idx],connect_info[-idx])
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
-                                                   connect = reticulate::np_array(connect_info) )
+              if ( (likelihood == 'Hetero' && decouple) ||
+                   (likelihood == 'NegBin' && decouple) ||
+                   (likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2)){
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
+                                                     input_dim = reticulate::np_array(as.integer(((1+(k-1)*node):(k*node)) - 1)), connect = reticulate::np_array(connect_info) )
+              } else {
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
+                                                     connect = reticulate::np_array(connect_info) )
+              }
             } else {
               if ( isTRUE(share) ){
                 length_scale <- lengthscale[l]
               } else {
                 length_scale <- rep(lengthscale[l], node)
               }
-              layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k])
+              if ( (likelihood == 'Hetero' && decouple) ||
+                   (likelihood == 'NegBin' && decouple) ||
+                   (likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2)){
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
+                                                     input_dim = reticulate::np_array(as.integer(((1+(k-1)*node):(k*node)) - 1)))
+              } else {
+                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k])
+              }
             }
           }
         } else {
@@ -550,8 +610,22 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
               } else {
                 length_scale <- rep(lengthscale[l], n_dim_X)
               }
+              if ( (likelihood == 'Hetero' && decouple) ||
+                   (likelihood == 'NegBin' && decouple) ){
+                  layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                       input_dim = internal_input_idx, connect = external_input_idx)
+                  layer_l[[k + no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                       input_dim = internal_input_idx, connect = external_input_idx)
+              } else if ( likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2 ){
+                num_cat <- length(unique(Y[,1]))
+                for (i in 1:num_cat){
+                  layer_l[[k+(i-1)*no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                       input_dim = internal_input_idx, connect = external_input_idx)
+                }
+              } else {
               layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
                                                    input_dim = internal_input_idx, connect = external_input_idx)
+              }
             } else {
               if ( connect ) {
                 if ( isTRUE(share) ){
@@ -564,15 +638,43 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
                   idx <- reticulate::py_to_r(internal_input_idx)+1
                   connect_info <- c(connect_info[idx],connect_info[-idx])
                 }
-                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
-                                                     connect = reticulate::np_array(connect_info))
+                if ( (likelihood == 'Hetero' && decouple) ||
+                     (likelihood == 'NegBin' && decouple) ){
+                  layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                       input_dim = reticulate::np_array(as.integer((1:no_kerenl) - 1)), connect = reticulate::np_array(connect_info))
+                  layer_l[[k + no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                                   input_dim = reticulate::np_array(as.integer(((1+no_kerenl):(2*no_kerenl)) - 1)), connect = reticulate::np_array(connect_info))
+                } else if ( likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2 ){
+                  num_cat <- length(unique(Y[,1]))
+                  for (i in 1:num_cat){
+                    layer_l[[k+(i-1)*no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                                         input_dim = reticulate::np_array(as.integer(((1+(i-1)*no_kerenl):(i*no_kerenl)) - 1)), connect = reticulate::np_array(connect_info))
+                  }
+                } else {
+                  layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                       connect = reticulate::np_array(connect_info))
+                }
               } else {
                 if ( isTRUE(share) ){
                   length_scale <- lengthscale[l]
                 } else {
                   length_scale <- rep(lengthscale[l], node)
                 }
-                layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l])
+                if ( (likelihood == 'Hetero' && decouple) ||
+                     (likelihood == 'NegBin' && decouple) ){
+                  layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                       input_dim = reticulate::np_array(as.integer((1:no_kerenl) - 1)))
+                  layer_l[[k + no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                                   input_dim = reticulate::np_array(as.integer(((1+no_kerenl):(2*no_kerenl)) - 1)))
+                } else if ( likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2 ){
+                  num_cat <- length(unique(Y[,1]))
+                  for (i in 1:num_cat){
+                    layer_l[[k+(i-1)*no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                                         input_dim = reticulate::np_array(as.integer(((1+(i-1)*no_kerenl):(i*no_kerenl)) - 1)))
+                  }
+                } else {
+                  layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l])
+                }
               }
             }
           }

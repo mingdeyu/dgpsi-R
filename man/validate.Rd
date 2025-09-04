@@ -24,7 +24,7 @@ validate(
   object,
   x_test = NULL,
   y_test = NULL,
-  method = NULL,
+  method = "mean_var",
   sample_size = 50,
   verb = TRUE,
   M = 50,
@@ -37,7 +37,7 @@ validate(
   object,
   x_test = NULL,
   y_test = NULL,
-  method = NULL,
+  method = "mean_var",
   sample_size = 50,
   verb = TRUE,
   M = 50,
@@ -50,7 +50,7 @@ validate(
   object,
   x_test = NULL,
   y_test = NULL,
-  method = NULL,
+  method = "mean_var",
   sample_size = 50,
   verb = TRUE,
   M = 50,
@@ -111,8 +111,7 @@ in the final layer.
 \code{y_test} must be provided if \code{object} is an instance of the \code{lgp}. \code{y_test} must also be provided if \code{x_test} is provided. Defaults to \code{NULL}, in which case LOO validation is performed.}
 
 \item{method}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the prediction approach to use for validation: either the mean-variance approach (\code{"mean_var"}) or the sampling approach (\code{"sampling"}). For details see \code{\link[=predict]{predict()}}.
-For DGP emulators with a categorical likelihood (\code{likelihood = "Categorical"} in \code{\link[=dgp]{dgp()}}), only the sampling approach is supported.
-By default, the method is set to \code{"sampling"} for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and \code{"mean_var"} otherwise.}
+Defaults to \code{"mean_var"}.}
 
 \item{sample_size}{the number of samples to draw for each given imputation if \code{method = "sampling"}. Defaults to \code{50}.}
 
@@ -169,17 +168,20 @@ dimensions. The max-min normalization uses the maximum and minimum values of the
 
 The rows and columns of matrices (\code{mean}, \code{median}, \code{std}, \code{lower}, and \code{upper}) correspond to the validation positions and DGP emulator output
 dimensions, respectively.
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{object} is an instance of the \code{dgp} class with a categorical likelihood, an updated \code{object} is returned with an additional slot called \code{loo}
+\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} If \code{object} is an instance of the \code{dgp} class with a categorical likelihood, an updated \code{object} is returned with an additional slot called \code{loo}
 (for LOO cross validation) or \code{oos} (for OOS validation) that contains:
 \itemize{
 \item two slots called \code{x_train} (or \code{x_test}) and \code{y_train} (or \code{y_test}) that contain the validation data points for LOO (or OOS).
-\item a matrix called \code{label} that contains predictive samples of labels from the DGP emulator at validation positions. The matrix has its rows
-corresponding to validation positions and columns corresponding to samples of labels.
-\item a list called \code{probability} that contains predictive samples of probabilities for each class from the DGP emulator at validation positions. The element in the list
-is a matrix that has its rows corresponding to validation positions and columns corresponding to samples of probabilities.
-\item a scalar called \code{log_loss} that represents the average log loss of the predicted labels in the DGP emulator across all validation positions. Log loss measures the
+\item a vector called \code{label} that contains predictive labels from the DGP emulator at validation positions.
+\item a matrix called \code{probability} that contains mean predictive probabilities for each class from the DGP emulator at validation positions. The matrix has its rows corresponding
+to validation positions and columns corresponding to different classes.
+\item a scalar called \code{log_loss} that represents the log loss of the trained DGP classifier. Log loss measures the
 accuracy of probabilistic predictions, with lower values indicating better classification performance. \code{log_loss} ranges from \code{0} to positive infinity, where a
 value closer to \code{0} suggests more confident and accurate predictions.
+\item a scalar called \code{accuracy} that represents the accuracy of the trained DGP classifier. Accuracy measures the proportion of correctly classified instances among
+all predictions, with higher values indicating better classification performance. accuracy ranges from \code{0} to \code{1}, where a value closer to \code{1} suggests more
+reliable and precise predictions.
+\item a slot named \code{method} indicating whether the matrix in the \code{probability} slot were obtained using the \code{"mean-var"} method or the \code{"sampling"} method.
 \item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.
 \item an integer called \code{sample_size} that contains the number of samples used for validation.
 }

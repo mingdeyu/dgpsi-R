@@ -40,8 +40,7 @@
 #'
 #' `y_test` must be provided if `object` is an instance of the `lgp`. `y_test` must also be provided if `x_test` is provided. Defaults to `NULL`, in which case LOO validation is performed.
 #' @param method `r new_badge("updated")` the prediction approach to use for validation: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). For details see [predict()].
-#'      For DGP emulators with a categorical likelihood (`likelihood = "Categorical"` in [dgp()]), only the sampling approach is supported.
-#'      By default, the method is set to `"sampling"` for DGP emulators with Poisson, Negative Binomial, and Categorical likelihoods and `"mean_var"` otherwise.
+#'      Defaults to `"mean_var"`.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
 #' @param verb a bool indicating if trace information for validation should be printed during function execution.
 #'     Defaults to `TRUE`.
@@ -87,16 +86,19 @@
 #'
 #'   The rows and columns of matrices (`mean`, `median`, `std`, `lower`, and `upper`) correspond to the validation positions and DGP emulator output
 #' dimensions, respectively.
-#' * `r new_badge("new")` If `object` is an instance of the `dgp` class with a categorical likelihood, an updated `object` is returned with an additional slot called `loo`
+#' * `r new_badge("updated")` If `object` is an instance of the `dgp` class with a categorical likelihood, an updated `object` is returned with an additional slot called `loo`
 #'   (for LOO cross validation) or `oos` (for OOS validation) that contains:
 #'   - two slots called `x_train` (or `x_test`) and `y_train` (or `y_test`) that contain the validation data points for LOO (or OOS).
-#'   - a matrix called `label` that contains predictive samples of labels from the DGP emulator at validation positions. The matrix has its rows
-#'     corresponding to validation positions and columns corresponding to samples of labels.
-#'   - a list called `probability` that contains predictive samples of probabilities for each class from the DGP emulator at validation positions. The element in the list
-#'     is a matrix that has its rows corresponding to validation positions and columns corresponding to samples of probabilities.
-#'   - a scalar called `log_loss` that represents the average log loss of the predicted labels in the DGP emulator across all validation positions. Log loss measures the
+#'   - a vector called `label` that contains predictive labels from the DGP emulator at validation positions.
+#'   - a matrix called `probability` that contains mean predictive probabilities for each class from the DGP emulator at validation positions. The matrix has its rows corresponding
+#'     to validation positions and columns corresponding to different classes.
+#'   - a scalar called `log_loss` that represents the log loss of the trained DGP classifier. Log loss measures the
 #'     accuracy of probabilistic predictions, with lower values indicating better classification performance. `log_loss` ranges from `0` to positive infinity, where a
 #'     value closer to `0` suggests more confident and accurate predictions.
+#'   - a scalar called `accuracy` that represents the accuracy of the trained DGP classifier. Accuracy measures the proportion of correctly classified instances among
+#'     all predictions, with higher values indicating better classification performance. accuracy ranges from `0` to `1`, where a value closer to `1` suggests more
+#'     reliable and precise predictions.
+#'   - a slot named `method` indicating whether the matrix in the `probability` slot were obtained using the `"mean-var"` method or the `"sampling"` method.
 #'   - an integer called `M` that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.
 #'   - an integer called `sample_size` that contains the number of samples used for validation.
 #' * If `object` is an instance of the `lgp` class, an updated `object` is returned with an additional slot called `oos` (for OOS validation) that contains:
@@ -136,7 +138,7 @@ validate <- function(object, x_test, y_test, method, sample_size, verb, M, force
 #' @rdname validate
 #' @method validate gp
 #' @export
-validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -151,11 +153,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
   }
   M <- as.integer(M)
 
-  if ( is.null(method) ){
-    method = 'mean_var'
-  } else {
-    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-  }
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+
   sample_size <- as.integer(sample_size)
   #For LOO
   if (is.null(x_test) & is.null(y_test)){
@@ -332,7 +331,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sam
 #' @rdname validate
 #' @method validate dgp
 #' @export
-validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -351,34 +350,11 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   final_node <- object$specs[[paste('layer', L, sep="")]][['node1']]
   if ("type" %in% names(final_node) && final_node$type == "Categorical") {
     is.categorical <- TRUE
-    is.Poisson <- FALSE
-    is.NegBin <- FALSE
-  } else if ("type" %in% names(final_node) && final_node$type == "Poisson") {
-    is.categorical <- FALSE
-    is.Poisson <- TRUE
-    is.NegBin <- FALSE
-  } else if ("type" %in% names(final_node) && final_node$type == "NegBin") {
-    is.categorical <- FALSE
-    is.Poisson <- FALSE
-    is.NegBin <- TRUE
   } else {
     is.categorical <- FALSE
-    is.Poisson <- FALSE
-    is.NegBin <- FALSE
   }
 
-  if ( is.null(method) ){
-    if (is.categorical|is.Poisson|is.NegBin) {
-      method = 'sampling'
-    } else {
-      method = 'mean_var'
-    }
-  } else {
-    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-    if ( method=='mean_var' && is.categorical){
-      stop("'method' can only be 'sampling' for DGP emulators with categorical likelihoods.", call. = FALSE)
-    }
-  }
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
 
   sample_size <- as.integer(sample_size)
   #For LOO
@@ -391,13 +367,15 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         if ( isTRUE(verb) ) message(" LOO results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( (method == 'mean_var')&("mean" %in% names(object$loo)) & (M == object$loo$M) ){
+        if ( (method == 'mean_var')&(("mean" %in% names(object$loo)) ||
+                                     ("method" %in% names(object$loo) && object$loo$method == "mean_var")) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
-        } else if ( (method == 'sampling') & (any(c("median", "label") %in% names(object$loo)))  & (M == object$loo$M) ) {
+        } else if ( (method == 'sampling') & (("median" %in% names(object$loo)) ||
+                                              ("method" %in% names(object$loo) && object$loo$method == "sampling"))  & (M == object$loo$M) ) {
           if ( sample_size == object$loo$sample_size ) {
             if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
@@ -439,16 +417,21 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
       if ( is.categorical ) {
         encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
         prob_samp <- pkg.env$np$transpose(pkg.env$np$asarray(res), c(2L,1L,0L))
-        label_sample <- pkg.env$dgpsi$functions$categorical_sampler_3d(prob_samp)
-        original_label <- encoder$inverse_transform(pkg.env$np$ravel(label_sample))
-        original_label = pkg.env$np$reshape(original_label, pkg.env$np$shape(label_sample) )
-        dat[["label"]] <- original_label
-        index_to_label <- as.character(encoder$classes_)
-        names(res) <- index_to_label
-        dat[["probability"]] <- res
-        y_train_encode <- encoder$transform(pkg.env$np$ravel(dat$y_train))
-        dat[["log_loss"]] <- pkg.env$dgpsi$functions$logloss(prob_samp, as.integer(y_train_encode))
-        dat[["accuracy"]] <- mean(rowMeans(pkg.env$np$equal(original_label, dat$y_train)))
+        prob_samp_mean <- pkg.env$np$mean(prob_samp, 0L)
+        if (ncol(prob_samp_mean)==1){
+          encode_label <- as.integer(prob_samp_mean>=0.5)
+          dat[["probability"]] <- cbind(1-prob_samp_mean, prob_samp_mean)
+        } else {
+          encode_label <- as.integer(pkg.env$np$argmax(prob_samp_mean, 1L))
+          dat[["probability"]] <- prob_samp_mean
+        }
+        dat[["label"]] <- encoder$inverse_transform(encode_label)
+        colnames(dat[["probability"]]) <- as.character(encoder$classes_)
+        y_train_encode <- encoder$transform(as.vector(dat$y_train))
+        idx <- cbind(1:length(y_train_encode), y_train_encode + 1)
+        dat[["log_loss"]] <- -mean(log(dat[["probability"]][idx]))
+        dat[["accuracy"]] <- mean(dat[["label"]] ==  as.vector(dat$y_train))
+        dat[['method']] <- method
       } else {
         res_np <- pkg.env$np$array(res)
         quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
@@ -461,12 +444,30 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
       }
     } else if ( method == 'mean_var' ) {
+      if ( is.categorical ) {
+        encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
+        if (ncol(res[[1]])==1){
+          encode_label <- as.integer(res[[1]]>=0.5)
+          dat[["probability"]] <- cbind(1-res[[1]], res[[1]])
+        } else {
+          encode_label <- as.integer(pkg.env$np$argmax(res[[1]], 1L))
+          dat[["probability"]] <- res[[1]]
+        }
+        dat[["label"]] <- encoder$inverse_transform(encode_label)
+        colnames(dat[["probability"]]) <- as.character(encoder$classes_)
+        y_train_encode <- encoder$transform(as.vector(dat$y_train))
+        idx <- cbind(1:length(y_train_encode), y_train_encode + 1)
+        dat[["log_loss"]] <- -mean(log(dat[["probability"]][idx]))
+        dat[["accuracy"]] <- mean(dat[["label"]] ==  as.vector(dat$y_train))
+        dat[['method']] <- method
+      } else {
       dat[["mean"]] <- res[[1]]
       dat[["std"]] <- sqrt(res[[2]])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
       dat[["rmse"]] <- unname(sqrt(colMeans((dat$mean-dat$y_train)^2)))
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_train, axis=0L)-pkg.env$np$amin(dat$y_train, axis=0L))
+      }
     }
     dat[["M"]] <- M
     if (method == "sampling"){
@@ -509,13 +510,15 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         if ( isTRUE(verb) ) message(" OOS results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
         if ( isTRUE(verb) ) Sys.sleep(0.5)
-        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
+        if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&(("mean" %in% names(object$oos)) ||
+                                                                                                                   ("method" %in% names(object$oos) && object$oos$method == "mean_var")) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
           if ( isTRUE(verb) ) Sys.sleep(0.5)
           if ( isTRUE(verb) ) message(" done")
           return(object)
-        } else if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&(any(c("median", "label") %in% names(object$oos))) & (M == object$oos$M) ){
+        } else if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&(("median" %in% names(object$oos))||
+                                                                                                                          ("method" %in% names(object$oos) && object$oos$method == "sampling")) & (M == object$oos$M) ){
           if ( sample_size == object$oos$sample_size ){
             if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
@@ -544,17 +547,9 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
     rep <- rep_x[[2]] + 1
 
     if ( identical(cores,as.integer(1)) ){
-      if (is.categorical) {
-        res <- object$emulator_obj$classify(x = reticulate::np_array(x_test_unique), mode = 'prob', sample_size = sample_size, m = M)
-      } else {
         res <- object$emulator_obj$predict(x = x_test_unique, method = method, sample_size = sample_size, m = M)
-      }
     } else {
-      if (is.categorical) {
-        res <- object$emulator_obj$pclassify(x = reticulate::np_array(x_test_unique), mode = 'prob', sample_size = sample_size, m = M, core_num = cores)
-      } else {
         res <- object$emulator_obj$ppredict(x = x_test_unique, method = method, sample_size = sample_size, m = M, core_num = cores)
-      }
     }
     if ( isTRUE(verb) ) message(" done")
 
@@ -563,19 +558,23 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
       if ( is.categorical ) {
         encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
         prob_samp <- pkg.env$np$transpose(pkg.env$np$asarray(res), c(2L,1L,0L))
-        label_sample <- pkg.env$dgpsi$functions$categorical_sampler_3d(prob_samp)
-        original_label <- encoder$inverse_transform(pkg.env$np$ravel(label_sample))
-        original_label = pkg.env$np$reshape(original_label, pkg.env$np$shape(label_sample) )
-        dat[["label"]] <- original_label[rep,,drop=F]
-        index_to_label <- as.character(encoder$classes_)
-        for (k in 1:length(res)){
-          res[[k]] <- res[[k]][rep,,drop=F]
+        prob_samp_mean <- pkg.env$np$mean(prob_samp, 0L)
+        if (ncol(prob_samp_mean)==1){
+          encode_label <- as.integer(prob_samp_mean>=0.5)
+          dat[["probability"]] <- cbind(1-prob_samp_mean, prob_samp_mean)
+        } else {
+          encode_label <- as.integer(pkg.env$np$argmax(prob_samp_mean, 1L))
+          dat[["probability"]] <- prob_samp_mean
         }
-        names(res) <- index_to_label
-        dat[["probability"]] <- res
-        y_test_encode <- encoder$transform(pkg.env$np$ravel(dat$y_test))
-        dat[["log_loss"]] <- pkg.env$dgpsi$functions$logloss(prob_samp, as.integer(y_test_encode), as.integer(rep-1))
-        dat[["accuracy"]] <- mean(rowMeans(pkg.env$np$equal(dat[["label"]], dat$y_test)))
+        dat[["probability"]] <- dat[["probability"]][rep,,drop=F]
+        original_label <- encoder$inverse_transform(encode_label)
+        dat[["label"]] <- original_label[rep]
+        colnames(dat[["probability"]]) <- as.character(encoder$classes_)
+        y_test_encode <- encoder$transform(as.vector(dat$y_test))
+        idx <- cbind(1:length(y_test_encode), y_test_encode + 1)
+        dat[["log_loss"]] <- -mean(log(dat[["probability"]][idx]))
+        dat[["accuracy"]] <- mean(dat[["label"]] ==  as.vector(dat$y_test))
+        dat[['method']] <- method
       } else {
         res_np <- pkg.env$np$array(res)
         quant <- pkg.env$np$transpose(pkg.env$np$quantile(res_np, c(0.025, 0.5, 0.975), axis=2L),c(0L,2L,1L))
@@ -588,12 +587,32 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
         dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
       }
     } else if ( method == 'mean_var' ) {
+      if ( is.categorical ) {
+        encoder <- object$constructor_obj$all_layer[[L]][[1]]$class_encoder
+        if (ncol(res[[1]])==1){
+          encode_label <- as.integer(res[[1]]>=0.5)
+          dat[["probability"]] <- cbind(1-res[[1]], res[[1]])
+        } else {
+          encode_label <- as.integer(pkg.env$np$argmax(res[[1]], 1L))
+          dat[["probability"]] <- res[[1]]
+        }
+        dat[["probability"]] <- dat[["probability"]][rep,,drop=F]
+        original_label <- encoder$inverse_transform(encode_label)
+        dat[["label"]] <- original_label[rep]
+        colnames(dat[["probability"]]) <- as.character(encoder$classes_)
+        y_test_encode <- encoder$transform(as.vector(dat$y_test))
+        idx <- cbind(1:length(y_test_encode), y_test_encode + 1)
+        dat[["log_loss"]] <- -mean(log(dat[["probability"]][idx]))
+        dat[["accuracy"]] <- mean(dat[["label"]] == as.vector(dat$y_test))
+        dat[['method']] <- method
+      } else {
       dat[["mean"]] <- res[[1]][rep,,drop=F]
       dat[["std"]] <- sqrt(res[[2]][rep,,drop=F])
       dat[["lower"]] <- dat$mean-2*dat$std
       dat[["upper"]] <- dat$mean+2*dat$std
       dat[["rmse"]] <- unname(sqrt(colMeans((dat$mean-dat$y_test)^2)))
       dat[["nrmse"]] <- dat$rmse/(pkg.env$np$amax(dat$y_test, axis=0L)-pkg.env$np$amin(dat$y_test, axis=0L))
+      }
     }
     dat[["M"]] <- M
     if (method == "sampling"){
@@ -614,7 +633,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
 #' @rdname validate
 #' @method validate lgp
 #' @export
-validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -634,11 +653,8 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = NULL, sa
   }
   M <- as.integer(M)
 
-  if ( is.null(method) ){
-    method = 'mean_var'
-  } else {
-    if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
-  }
+  if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
+
   sample_size <- as.integer(sample_size)
   #For OOS
   if (!is.null(x_test) & !is.null(y_test)) {

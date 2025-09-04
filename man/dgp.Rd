@@ -18,7 +18,7 @@ dgp(
   nugget = NULL,
   scale_est = TRUE,
   scale = 1,
-  connect = TRUE,
+  connect = NULL,
   likelihood = NULL,
   training = TRUE,
   verb = TRUE,
@@ -34,7 +34,8 @@ dgp(
   B = 10,
   internal_input_idx = NULL,
   linked_idx = NULL,
-  id = NULL
+  id = NULL,
+  decouple = FALSE
 )
 }
 \arguments{
@@ -88,12 +89,21 @@ Defaults to \code{"ga"}.}
 
 \item{share}{a bool indicating if all input dimensions of a GP node share a common lengthscale. Defaults to \code{TRUE}.}
 
-\item{nugget_est}{a bool or a bool vector that indicates if the nuggets of GP nodes (if any) in the final layer are to be estimated. If a single bool is
-provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each
-bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
+\item{nugget_est}{a bool or a bool vector indicating whether the nuggets of GP nodes in the final layer (or the
+layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
+If a bool vector is provided, its length must match the number of GP nodes:
 \itemize{
-\item \code{FALSE}: the nugget of the corresponding GP in the final layer is fixed to the corresponding value defined in \code{nugget} (see below).
-\item \code{TRUE}: the nugget of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in \code{nugget} (see below).
+\item \code{ncol(Y)} if \code{likelihood = NULL}
+\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"}
+\item \code{1} if \code{likelihood} is \code{"Poisson"} or \code{"Categorical"} with two classes
+\item the number of classes if \code{likelihood} is \code{"Categorical"} with more than two classes.
+}
+
+Each element of the vector is applied to the corresponding GP node in the final layer (or the layer feeding the
+likelihood node). The value of a bool has following effects:
+\itemize{
+\item \code{FALSE}: the nugget of the corresponding GP is fixed to the corresponding value defined in \code{nugget} (see below).
+\item \code{TRUE}: the nugget of the corresponding GP will be estimated with the initial value given by the correspondence in \code{nugget} (see below).
 }
 
 Defaults to \code{FALSE}.}
@@ -107,26 +117,44 @@ The vector should have a length of \code{depth} if \code{likelihood = NULL} or a
 
 Set \code{nugget} to a small value and the bools in \code{nugget_est} to \code{FALSE} for deterministic emulation, where the emulator
 interpolates the training data points. Set \code{nugget} to a larger value and the bools in \code{nugget_est} to \code{TRUE} for stochastic emulation where
-the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6} if \code{nugget_est = FALSE} and
-\code{0.01} if \code{nugget_est = TRUE}. If \code{likelihood} is not \code{NULL} and \code{nugget_est = FALSE}, the nuggets of GPs that feed into the likelihood layer default to
-\code{1e-4}.}
+the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6} if \code{likelihood} is \code{NULL}.
+If \code{likelihood} is not \code{NULL}, the nuggets of GPs that feed into the likelihood layer default to \code{1e-4}, while those of all other GPs default to \code{1e-6}.}
 
-\item{scale_est}{a bool or a bool vector that indicates if the variance of GP nodes (if any) in the final layer are to be estimated. If a single bool is
-provided, it will be applied to all GP nodes (if any) in the final layer. If a bool vector (which must have a length of \code{ncol(Y)}) is provided, each
-bool element in the vector will be applied to the corresponding GP node (if any) in the final layer. The value of a bool has following effects:
+\item{scale_est}{a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
+layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
+If a bool vector is provided, its length must match the number of GP nodes:
 \itemize{
-\item \code{FALSE}: the variance of the corresponding GP in the final layer is fixed to the corresponding value defined in \code{scale} (see below).
-\item \code{TRUE}: the variance of the corresponding GP in the final layer will be estimated with the initial value given by the correspondence in \code{scale} (see below).
+\item \code{ncol(Y)} if \code{likelihood = NULL}
+\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"}
+\item \code{1} if \code{likelihood} is \code{"Poisson"} or \code{"Categorical"} with two classes
+\item the number of classes if \code{likelihood} is \code{"Categorical"} with more than two classes.
+}
+
+The value of a bool has following effects:
+\itemize{
+\item \code{FALSE}: the variance of the corresponding GP is fixed to the corresponding value defined in \code{scale} (see below).
+\item \code{TRUE}: the variance of the corresponding GP will be estimated with the initial value given by the correspondence in \code{scale} (see below).
 }
 
 Defaults to \code{TRUE}.}
 
-\item{scale}{the initial variance value(s) of GP nodes (if any) in the final layer. If it is a single numeric value, it will be applied to all GP nodes (if any)
-in the final layer. If it is a vector (which must have a length of \code{ncol(Y)}), each numeric in the vector will be applied to the corresponding GP node
-(if any) in the final layer. Defaults to \code{1}.}
+\item{scale}{the initial variance value(s) of GP nodes in the final layer (or the
+layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
+in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:
+\itemize{
+\item \code{ncol(Y)} if \code{likelihood = NULL}
+\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"}
+\item \code{1} if \code{likelihood} is \code{"Poisson"} or \code{"Categorical"} with two classes
+\item the number of classes if \code{likelihood} is \code{"Categorical"} with more than two classes.
+}
 
-\item{connect}{a bool indicating whether to implement global input connection to the DGP structure. Setting it to \code{FALSE} may produce a better emulator in some cases at
-the cost of slower training. Defaults to \code{TRUE}.}
+Each numeric in the vector will be applied to the corresponding GP node.
+
+Defaults to \code{1}.}
+
+\item{connect}{a bool indicating whether to apply global input connections in the DGP structure. Setting this to \code{FALSE} may yield
+a better emulator in some cases. When set to \code{NULL}, the value defaults to \code{FALSE} if \code{likelihood = "Categorical"} and to \code{TRUE} otherwise.
+Defaults to \code{NULL}.}
 
 \item{likelihood}{the likelihood type of a DGP emulator:
 \enumerate{
@@ -138,7 +166,7 @@ the cost of slower training. Defaults to \code{TRUE}.}
 \item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} \code{"Categorical"}: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.
 }
 
-When \code{likelihood} is not \code{NULL}, the value of \code{nugget_est} is overridden by \code{FALSE}. Defaults to \code{NULL}.}
+Defaults to \code{NULL}.}
 
 \item{training}{a bool indicating if the initialized DGP emulator will be trained.
 When set to \code{FALSE}, \code{\link[=dgp]{dgp()}} returns an untrained DGP emulator, to which one can apply \code{\link[=summary]{summary()}} to inspect its specifications
@@ -217,6 +245,10 @@ to add linking information to the DGP emulator. Defaults to \code{NULL}.}
 
 \item{id}{an ID to be assigned to the DGP emulator. If an ID is not provided (i.e., \code{id = NULL}), a UUID (Universally Unique Identifier) will be automatically generated
 and assigned to the emulator. Default to \code{NULL}.}
+
+\item{decouple}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
+categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when \code{depth} is greater than 2.
+Defaults to \code{FALSE}.}
 }
 \value{
 An S3 class named \code{dgp} that contains five slots:

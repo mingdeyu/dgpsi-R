@@ -55,8 +55,10 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
     design_data <- object$data$X
     total_N <- nrow(design_data)
     design_data <- as.data.frame(design_data)
-    for (l in 1:length(design_data)) {
-      names(design_data)[l] <- paste('X', l, sep="")
+    if (is.null(colnames(object$data$X))){
+      for (l in 1:length(design_data)) {
+        names(design_data)[l] <- paste('X', l, sep="")
+      }
     }
     wave <- c()
     seq_N <- 0
@@ -77,8 +79,10 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
       title = 'Sequential Design',
+      if (is.null(colnames(object$data$X))){
       caption =
         'Xi = Input dimension i of the GP emulator'
+      }
     )
   } else if ( type == 'rmse' ){
     total_N <- nrow(object$data$X)
@@ -177,8 +181,10 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     design_data <- object$data$X
     total_N <- nrow(design_data)
     design_data <- as.data.frame(design_data)
-    for (l in 1:length(design_data)) {
-      names(design_data)[l] <- paste('X', l, sep="")
+    if (is.null(colnames(object$data$X))){
+      for (l in 1:length(design_data)) {
+        names(design_data)[l] <- paste('X', l, sep="")
+      }
     }
     wave <- c()
     seq_N <- 0
@@ -199,8 +205,10 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
         title = 'Sequential Design',
+        if (is.null(colnames(object$data$X))){
         caption =
           'Xi = Input dimension i of the DGP emulator'
+        }
       )
   } else if ( type == 'rmse' ){
     if (object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$name == "Categorical") {
@@ -339,8 +347,10 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...
       design_data <- object$data$X[[paste('emulator', emulator[emu], sep="")]]
       total_N <- nrow(design_data)
       design_data <- as.data.frame(design_data)
-      for (l in 1:length(design_data)) {
-        names(design_data)[l] <- paste('X', l, sep="")
+      if (is.null(colnames(object$data$X[[paste('emulator', emulator[emu], sep="")]]))){
+        for (l in 1:length(design_data)) {
+          names(design_data)[l] <- paste('X', l, sep="")
+        }
       }
       wave <- c()
       seq_N <- 0

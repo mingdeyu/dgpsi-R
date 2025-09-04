@@ -118,9 +118,46 @@ serialize <- function(object, light = TRUE) {
     }
   }
   label <- class(object)
+  if (inherits(object,"bundle")) {
+    X_train_name <- colnames(object$data$X[[1]])
+    Y_train_name <- colnames(object$data$Y[[1]])
+  } else if (inherits(object,"gp") || inherits(object,"dgp")) {
+    X_train_name <- colnames(object$data$X)
+    Y_train_name <- colnames(object$data$Y)
+  } else {
+    X_train_name <- NULL
+    Y_train_name <- NULL
+  }
+
+  if (is.null(X_train_name)){
+    X_train_name <- 'None'
+  }
+
+  if (is.null(Y_train_name)){
+    Y_train_name <- 'None'
+  }
+
+  if (inherits(object, "dgp")){
+    L = object$constructor_obj$n_layer
+    final_node <- object$specs[[paste('layer', L, sep="")]][['node1']]
+    if ("type" %in% names(final_node) && final_node$type == "Categorical") {
+      class_name <- as.character(object$constructor_obj$all_layer[[L]][[1]]$class_encoder$classes_)
+    } else {
+      class_name <- NULL
+    }
+  } else {
+    class_name <- NULL
+  }
+
+  if (is.null(class_name)){
+    class_name <- 'None'
+  }
+
   lst <- unclass(object)
   lst[['label']] <- label
-
+  lst[['X_train_name']] <- X_train_name
+  lst[['Y_train_name']] <- Y_train_name
+  lst[['class_name']] <- class_name
   serialized_binary <- pkg.env$dill$dumps(lst)
 
   # Encode the binary string as a Base64 string
@@ -158,8 +195,19 @@ deserialize <- function(object) {
   }
   serialized_binary <- pkg.env$base64$b64decode(object)
   res <- pkg.env$dill$loads(serialized_binary)
-
   if ('label' %in% names(res)){
+    if ('X_train_name' %in% names(res)){
+      X_train_name <- if (identical(res$X_train_name, "None")) NULL else res$X_train_name
+      Y_train_name <- if (identical(res$Y_train_name, "None")) NULL else res$Y_train_name
+      class_name <- if (identical(res$class_name, "None")) NULL else res$class_name
+      res$X_train_name <- NULL
+      res$Y_train_name <- NULL
+      res$class_name <- NULL
+    } else {
+      X_train_name <- NULL
+      Y_train_name <- NULL
+      class_name <- NULL
+    }
     label <- res$label
     res$label <- NULL
     if (label == "gp"){
@@ -169,6 +217,8 @@ deserialize <- function(object) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
         }
+        colnames(res[['data']][['X']]) <- X_train_name
+        colnames(res[['data']][['Y']]) <- Y_train_name
         class(res) <- "gp"
       } else {
         est_obj <- res$constructor_obj$export()
@@ -183,6 +233,8 @@ deserialize <- function(object) {
         }
         res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+        colnames(res[['data']][['X']]) <- X_train_name
+        colnames(res[['data']][['Y']]) <- Y_train_name
         class(res) <- "gp"
       }
     } else if (label == "dgp"){
@@ -191,6 +243,25 @@ deserialize <- function(object) {
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
+        }
+        colnames(res[['data']][['X']]) <- X_train_name
+        colnames(res[['data']][['Y']]) <- Y_train_name
+        if (!is.null(class_name)){
+          if ("loo" %in% names(res)) {
+            colnames(res$loo$probability) <- class_name
+          }
+          if ("oos" %in% names(res)){
+            colnames(res$oos$probability) <- class_name
+          }
+          if ("results" %in% names(res)){
+            if (is.list(res$results$mean)){
+              colnames(res[['results']][['mean']][[paste0('layer',length(res[['results']][['mean']]))]]) <- class_name
+              colnames(res[['results']][['var']][[paste0('layer',length(res[['results']][['mean']]))]]) <- class_name
+            } else {
+              colnames(res$results$mean) <- class_name
+              colnames(res$results$var) <- class_name
+            }
+          }
         }
         class(res) <- "dgp"
       } else {
@@ -211,6 +282,25 @@ deserialize <- function(object) {
         res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
         res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
+        colnames(res[['data']][['X']]) <- X_train_name
+        colnames(res[['data']][['Y']]) <- Y_train_name
+        if (!is.null(class_name)){
+          if ("loo" %in% names(res)) {
+            colnames(res$loo$probability) <- class_name
+          }
+          if ("oos" %in% names(res)){
+            colnames(res$oos$probability) <- class_name
+          }
+          if ("results" %in% names(res)){
+            if (is.list(res$results$mean)){
+              colnames(res[['results']][['mean']][[paste0('layer',length(res[['results']][['mean']]))]]) <- class_name
+              colnames(res[['results']][['var']][[paste0('layer',length(res[['results']][['mean']]))]]) <- class_name
+            } else {
+              colnames(res$results$mean) <- class_name
+              colnames(res$results$var) <- class_name
+            }
+          }
+        }
         class(res) <- "dgp"
       }
     } else if (label == "lgp"){
@@ -240,12 +330,18 @@ deserialize <- function(object) {
       if ( "design" %in% names(res) ) N <- N - 1
       class(res) <- "bundle"
       for ( i in 1:N ){
+        colnames(res[['data']][['X']][[paste('emulator',i, sep='')]]) <- X_train_name
+        colnames(res[['data']][['Y']][[paste('emulator',i, sep='')]]) <- Y_train_name
         if ('emulator_obj' %in% names(res[[paste('emulator',i, sep='')]])) {
           type <- pkg.env$py_buildin$type(res[[paste('emulator',i, sep='')]]$emulator_obj)$'__name__'
           if ( type=='emulator' ) {
+            colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
+            colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
             class(res[[paste('emulator',i, sep='')]]) <- "dgp"
           } else if ( type=='gp' ) {
             if ('container_obj' %in% names(res[[paste('emulator',i, sep='')]])){
+              colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
+              colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
               class(res[[paste('emulator',i, sep='')]]) <- "gp"
             } else {
               est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$export()
@@ -255,6 +351,8 @@ deserialize <- function(object) {
                 linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
               }
               res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+              colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
+              colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
               class(res[[paste('emulator',i, sep='')]]) <- "gp"
             }
           }
@@ -271,6 +369,8 @@ deserialize <- function(object) {
           set_seed(res[[paste('emulator',i, sep='')]]$specs$seed)
           res[[paste('emulator',i, sep='')]][['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
           res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+          colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
+          colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"
         }
         if (!'id' %in% names(res[[paste('emulator',i, sep='')]])) res[[paste('emulator',i, sep='')]][['id']] <- uuid::UUIDgenerate()
