@@ -45,7 +45,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     ##For devel version
     dgpsi_ver <- c('cython>=0.29.30', 'dill>=0.3.2, <=0.3.5.1', 'jupyter>=1.0.0', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
                    'numpy >=1.18.2', 'pathos ==0.2.9', 'multiprocess ==0.70.13', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
-                   'scikit-build >=0.15.0', 'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4')
+                   'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4')
     env_name <- 'dgp_si_R_2_5_0_9000'
     ##For release version
     #dgpsi_ver <- 'dgpsi==2.5.0'
