@@ -70,6 +70,7 @@
 <span>  scale <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  training <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  check_rep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  vecchia <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">25</span>,</span>
 <span>  ord <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -147,6 +148,11 @@ When set to <code>FALSE</code>, <code>gp()</code> returns an untrained GP emulat
 <dt id="arg-verb">verb<a class="anchor" aria-label="anchor" href="#arg-verb"></a></dt>
 <dd><p>a bool indicating if the trace information on GP emulator construction and training will be printed during function execution.
 Defaults to <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-check-rep">check_rep<a class="anchor" aria-label="anchor" href="#arg-check-rep"></a></dt>
+<dd><p>a bool indicating whether to check for repetitions in the dataset, i.e., if one input
+position has multiple outputs. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-vecchia">vecchia<a class="anchor" aria-label="anchor" href="#arg-vecchia"></a></dt>
