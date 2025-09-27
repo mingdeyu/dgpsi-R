@@ -38,6 +38,8 @@
 #'     When set to `FALSE`, [gp()] returns an untrained GP emulator, to which one can apply [summary()] to inspect its specification or apply [predict()] to check its emulation performance before the training. Defaults to `TRUE`.
 #' @param verb a bool indicating if the trace information on GP emulator construction and training will be printed during function execution.
 #'     Defaults to `TRUE`.
+#' @param check_rep a bool indicating whether to check for repetitions in the dataset, i.e., if one input
+#'     position has multiple outputs. Defaults to `TRUE`.
 #' @param vecchia `r new_badge("new")` a bool indicating whether to use Vecchia approximation for large-scale GP emulator construction and prediction. Defaults to `FALSE`.
 #'     The Vecchia approximation implemented for the GP emulation largely follows Katzfuss et al. (2022). See reference below.
 #' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the GP emulator training. Defaults to `25`.
@@ -151,7 +153,7 @@
 #'
 #' @md
 #' @export
-gp <- function(X, Y, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-8), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, vecchia = FALSE, M = 25, ord = NULL, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
+gp <- function(X, Y, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NULL, prior = 'ref', nugget_est = FALSE, nugget = ifelse(nugget_est, 0.01, 1e-8), scale_est = TRUE, scale = 1., training = TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, internal_input_idx = NULL, linked_idx = NULL, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -248,7 +250,7 @@ gp <- function(X, Y, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NU
 
   if ( verb ) message("Initializing the GP emulator ...", appendLF = FALSE)
 
-  obj <- pkg.env$dgpsi$gp(X, Y, struc, vecchia, M, ord_wrapper)
+  obj <- pkg.env$dgpsi$gp(X, Y, struc, check_rep, vecchia, M, ord_wrapper)
 
   if ( verb ) {
     Sys.sleep(0.5)

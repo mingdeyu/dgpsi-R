@@ -1204,7 +1204,7 @@ plot_style_2_classify <- function(dat, color, normalize) {
     ggplot2::geom_text(ggplot2::aes(label = .data$label_str),
                        color = "white", show.legend = FALSE) +
     ggplot2::labs(x = "Predicted label", y = "True label") +
-    ggplot2::scale_y_discrete(limits = base::rev(classes), drop = FALSE)
+    ggplot2::scale_y_discrete(limits = factor(base::rev(classes)), drop = FALSE)
 
   if (normalize) {
     p <- p + ggplot2::scale_fill_viridis_c(

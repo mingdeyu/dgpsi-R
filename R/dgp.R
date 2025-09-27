@@ -306,13 +306,17 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
   if ( !is.null(likelihood) ){
     if (likelihood!='Hetero' &  likelihood!='Poisson' & likelihood!='NegBin' & likelihood!='Categorical' ) stop("The provided 'likelihood' is not supported.", call. = FALSE)
-    if (likelihood=='Categorical'){
-      connect <- FALSE
-    } else {
-      connect <- TRUE
+    if (is.null(connect)){
+      if (likelihood=='Categorical'){
+        connect <- FALSE
+      } else {
+        connect <- TRUE
+      }
     }
   } else {
-    connect <- TRUE
+    if (is.null(connect)){
+      connect <- TRUE
+    }
   }
 
   N <- as.integer(N)

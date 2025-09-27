@@ -17,6 +17,7 @@ gp(
   scale = 1,
   training = TRUE,
   verb = TRUE,
+  check_rep = TRUE,
   vecchia = FALSE,
   M = 25,
   ord = NULL,
@@ -79,6 +80,9 @@ When set to \code{FALSE}, \code{\link[=gp]{gp()}} returns an untrained GP emulat
 
 \item{verb}{a bool indicating if the trace information on GP emulator construction and training will be printed during function execution.
 Defaults to \code{TRUE}.}
+
+\item{check_rep}{a bool indicating whether to check for repetitions in the dataset, i.e., if one input
+position has multiple outputs. Defaults to \code{TRUE}.}
 
 \item{vecchia}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating whether to use Vecchia approximation for large-scale GP emulator construction and prediction. Defaults to \code{FALSE}.
 The Vecchia approximation implemented for the GP emulation largely follows Katzfuss et al. (2022). See reference below.}

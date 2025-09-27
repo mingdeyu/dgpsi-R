@@ -16,6 +16,7 @@
 - Updated `init_py()` to handle errors related to TOS acceptance when installing Miniconda, and to automate TOS acceptance for required channels.
 - Enabled use of the `newaccelerate` BLAS library on Apple Silicon machines running macOS > 13.3.
 - Added the `decouple` argument to `dgp()` to allow likelihood parameters to be modeled using separate deep Gaussian process hierarchies when `depth > 2`.
+- Inference for (D)GPs with homogeneous noise and replicates in the training data has been significantly enhanced, achieving over 10× speed-up.
 
 # dgpsi 2.5.0
 - Training times for DGP emulators are now approximately 30%-40% faster.
