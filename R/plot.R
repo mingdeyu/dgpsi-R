@@ -1396,10 +1396,10 @@ plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
 
     if (type == 'line') {
       p <- p +
-        ggplot2::geom_line(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
+        ggplot2::geom_line(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Function"), linetype="solid", linewidth=0.5, alpha=0.9)
     }
 
-    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes(y=.data$median, color="Pred. Median"), linetype="dashed", size=0.5, alpha=0.9)
+    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes(y=.data$median, color="Pred. Median"), linetype="dashed", linewidth=0.5, alpha=0.9)
 
     if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes(x=.data$x_train, y=.data$y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
 
@@ -1434,10 +1434,10 @@ plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
 
     if (type == 'line') {
       p <- p +
-        ggplot2::geom_line(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
+        ggplot2::geom_line(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Function"), linetype="solid", linewidth=0.5, alpha=0.9)
     }
 
-    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes(y=.data$mean, color="Pred. Mean"),linetype="dashed", size=0.5, alpha=0.9)
+    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes(y=.data$mean, color="Pred. Mean"),linetype="dashed", linewidth=0.5, alpha=0.9)
 
     if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes(x=.data$x_train, y=.data$y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
 

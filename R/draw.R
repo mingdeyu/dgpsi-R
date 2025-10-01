@@ -202,7 +202,6 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     }
     wave <- c(rep("Initial", total_N-seq_N), wave)
     design_data$Design <- wave
-
     p <- pair_design(design_data)
 
     p_patch <- patchwork::wrap_plots(p) +
@@ -509,7 +508,7 @@ pair_design <- function(dat){
            "darkorange4", "brown")
   p <- ggplot2::ggplot(dat) +
     ggplot2::geom_point(ggplot2::aes(x = .panel_x, y = .panel_y, shape=.data$Design, color =.data$Design)) +
-    ggforce::facet_matrix(ggplot2::vars(names(dat)[1:(length(dat)-1)])) +
+    ggforce::facet_matrix(ggplot2::vars(names(dat)[1:(length(dat)-1)]), labeller = ggplot2::label_value) +
     ggplot2::scale_shape_manual(values = c(17,rep(16,length(unique(dat$Design))-1)), breaks=unique(dat$Design)) +
     ggplot2::scale_colour_manual(values = ggplot2::alpha(c25,0.7), breaks=unique(dat$Design)) +
     ggplot2::theme(
@@ -531,7 +530,7 @@ draw_seq_design <- function(dat, log, target, cust, is.categorical = FALSE) {
 
   if ( !is.null(target) ) {
     p <- p +
-      ggplot2::geom_hline(data = target, mapping = ggplot2::aes(yintercept=.data$val, group=.data$Target, linetype=.data$Target), alpha=0.8, color="gray20", size = 0.5) +
+      ggplot2::geom_hline(data = target, mapping = ggplot2::aes(yintercept=.data$val, group=.data$Target, linetype=.data$Target), alpha=0.8, color="gray20", linewidth = 0.5) +
       ggplot2::scale_linetype_manual(values=c("dashed", "dotdash", "twodash", "dotted", "solid", "longdash"))
   }
 
