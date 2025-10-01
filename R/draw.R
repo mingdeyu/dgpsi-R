@@ -1,3 +1,4 @@
+.panel_x <- .panel_y <- NULL
 #' @title Validation and diagnostic plots for a sequential design
 #'
 #' @description
@@ -370,13 +371,13 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...
       design_data$Design <- wave
       p_list[[emu]] <- pair_design(design_data) +
         ggplot2::ggtitle(sprintf("Emulator %i", emulator[emu])) +
-        ggplot2::theme(plot.title = ggplot2::element_text(size=10))
+        ggplot2::theme(plot.title = ggplot2::element_text(size=10)) +
+        ggplot2::theme(legend.position = "bottom")
 
     }
 
     p_patch <- patchwork::wrap_plots(p_list) +
-      patchwork::plot_layout() +
-      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
+      patchwork::plot_layout()
 
     p_patch <- p_patch +
       patchwork::plot_annotation(
