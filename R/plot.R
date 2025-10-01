@@ -201,7 +201,8 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
         patchwork::plot_annotation(
           title = 'Leave-One-Out (LOO) Cross Validation'
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     } else {
       if ( method == "mean_var" ){
         p_patch <- patchwork::wrap_plots(p_list) +
@@ -227,7 +228,8 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
               }
             }
           ) +
-          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+          patchwork::plot_layout(guides = 'collect') +
+          patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
       } else if ( method == "sampling" ){
         p_patch <- patchwork::wrap_plots(p_list) +
           patchwork::plot_annotation(
@@ -252,7 +254,8 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
               }
             }
           ) +
-          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+          patchwork::plot_layout(guides = 'collect') +
+          patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
       }
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
@@ -432,7 +435,8 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
         patchwork::plot_annotation(
           title = 'Out-Of-Sample (OOS) Cross Validation'
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     } else {
       if ( method == "mean_var" ){
         p_patch <- patchwork::wrap_plots(p_list) +
@@ -458,7 +462,8 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
               }
             }
           ) +
-          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+          patchwork::plot_layout(guides = 'collect') +
+          patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
       } else if ( method == "sampling" ){
         p_patch <- patchwork::wrap_plots(p_list) +
           patchwork::plot_annotation(
@@ -483,7 +488,8 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
               }
             }
           ) +
-          patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+          patchwork::plot_layout(guides = 'collect') +
+          patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
       }
     }
 
@@ -739,7 +745,8 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
           }
         }
       ) +
-      patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      patchwork::plot_layout(guides = 'collect') +
+      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
   } else if ( method == "sampling" ){
     p_patch <- patchwork::wrap_plots(p_list) +
       patchwork::plot_annotation(
@@ -764,7 +771,8 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
           }
         }
       ) +
-      patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      patchwork::plot_layout(guides = 'collect') +
+      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
   }
   if ( isTRUE(verb) ) Sys.sleep(0.5)
   if ( isTRUE(verb) ) message(" done")
@@ -880,7 +888,8 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
             }
           }
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     } else if ( method == "sampling" ){
       p_patch <- patchwork::wrap_plots(p) +
         patchwork::plot_annotation(
@@ -901,7 +910,8 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
             }
           }
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -1035,7 +1045,8 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
             }
           }
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     } else if ( method == "sampling" ){
       p_patch <- patchwork::wrap_plots(p) +
         patchwork::plot_annotation(
@@ -1056,7 +1067,8 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
             }
           }
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     }
     if ( isTRUE(verb) ) Sys.sleep(0.5)
     if ( isTRUE(verb) ) message(" done")
@@ -1259,15 +1271,15 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
   coverage <- dat$coverage
 
   if ( all(coverage) ){
-    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation point inside CI"))
+    p <- ggplot2::ggplot(dat, ggplot2::aes(x=.data$idx, y=.data$y_validate, color = "Validation point inside CI"))
     if ( method=="sampling" ){
       p <- p +
-        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes(x=.data$idx, y=.data$median, ymin=.data$lower, ymax=.data$upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
         ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point inside CI"="#E69F00"),
                                     limits = c("Median and 95% CI", "Validation point inside CI"))
     } else if ( method=="mean_var" ) {
       p <- p +
-        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes(x=.data$idx, y=.data$mean, ymin=.data$lower, ymax=.data$upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
         ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point inside CI"="#E69F00"),
                                     limits = c("Mean and CI (+/-2SD)", "Validation point inside CI"))
     }
@@ -1282,15 +1294,15 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
       ) +
       ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank"))))
   } else if ( all(!coverage) ){
-    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = "Validation point outside CI"))
+    p <- ggplot2::ggplot(dat, ggplot2::aes(x=.data$idx, y=.data$y_validate, color = "Validation point outside CI"))
     if ( method=="sampling" ){
       p <- p +
-        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes(x=.data$idx, y=.data$median, ymin=.data$lower, ymax=.data$upper, color = "Median and 95% CI"), fatten = 1.5, size = 0.3) +
         ggplot2::scale_color_manual(name = "", values = c("Median and 95% CI"="#52854C", "Validation point outside CI"="#D55E00"),
                                     limits = c("Median and 95% CI", "Validation point outside CI"))
     } else if ( method=="mean_var" ) {
       p <- p +
-        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes(x=.data$idx, y=.data$mean, ymin=.data$lower, ymax=.data$upper, color = "Mean and CI (+/-2SD)"), fatten = 1.5, size = 0.3) +
         ggplot2::scale_color_manual(name = "", values = c("Mean and CI (+/-2SD)"="#52854C", "Validation point outside CI"="#D55E00"),
                                     limits = c("Mean and CI (+/-2SD)", "Validation point outside CI"))
     }
@@ -1305,14 +1317,14 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
       ) +
       ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(linetype = c("solid", "blank"))))
   } else {
-    p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~idx, y=~y_validate, color = ~coverage))
+    p <- ggplot2::ggplot(dat, ggplot2::aes(x=.data$idx, y=.data$y_validate, color = .data$coverage))
     if ( method=="sampling" ){
       p <- p +
-        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~median, ymin=~lower, ymax=~upper, color = "#52854C"), fatten = 1.5, size = 0.3) +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes(x=.data$idx, y=.data$median, ymin=.data$lower, ymax=.data$upper, color = "#52854C"), fatten = 1.5, size = 0.3) +
         ggplot2::scale_color_manual(name = "", labels = c("Median and 95% CI","Validation point outside CI", "Validation point inside CI"), values = c("#52854C", "#D55E00", "#E69F00"))
     } else if ( method=="mean_var" ) {
       p <- p +
-        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes_(x=~idx, y=~mean, ymin=~lower, ymax=~upper, color = "#52854C"), fatten = 1.5, size = 0.3) +
+        ggplot2::geom_pointrange(data=dat[!dup,], ggplot2::aes(x=.data$idx, y=.data$mean, ymin=.data$lower, ymax=.data$upper, color = "#52854C"), fatten = 1.5, size = 0.3) +
         ggplot2::scale_color_manual(name = "", labels=c( "Mean and CI (+/-2SD)", "Validation point outside CI", "Validation point inside CI"), values = c("#52854C","#D55E00", "#E69F00"))
     }
 
@@ -1336,18 +1348,18 @@ plot_style_2 <- function(dat, method, min_max, color) {
   std_max <- max(dat$std)
   if (isTRUE(min_max)){
     if ( method=="sampling" ){
-      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~(median-y_min)/(y_max-y_min), y=~(y_validate-y_min)/(y_max-y_min), color= ~(std-std_min)/(std_max-std_min))) +
+      p <- ggplot2::ggplot(dat, ggplot2::aes(x=(.data$median-y_min)/(y_max-y_min), y=(.data$y_validate-y_min)/(y_max-y_min), color= (.data$std-std_min)/(std_max-std_min))) +
         ggplot2::labs(x ="Normalized predictive median", y = "Normalized model output")
     } else if ( method=="mean_var" ) {
-      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~(mean-y_min)/(y_max-y_min), y=~(y_validate-y_min)/(y_max-y_min), color= ~(std-std_min)/(std_max-std_min))) +
+      p <- ggplot2::ggplot(dat, ggplot2::aes(x=(.data$mean-y_min)/(y_max-y_min), y=(.data$y_validate-y_min)/(y_max-y_min), color= (.data$std-std_min)/(std_max-std_min))) +
         ggplot2::labs(x ="Normalized predictive mean", y = "Normalized model output")
     }
   } else {
     if ( method=="sampling" ){
-      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~median, y=~y_validate, color=~std)) +
+      p <- ggplot2::ggplot(dat, ggplot2::aes(x=.data$median, y=.data$y_validate, color=.data$std)) +
         ggplot2::labs(x ="Predictive median", y = "Model output")
     } else if ( method=="mean_var" ) {
-      p <- ggplot2::ggplot(dat, ggplot2::aes_(x=~mean, y=~y_validate, color=~std)) +
+      p <- ggplot2::ggplot(dat, ggplot2::aes(x=.data$mean, y=.data$y_validate, color=.data$std)) +
         ggplot2::labs(x ="Predictive mean", y = "Model output")
     }
   }
@@ -1376,24 +1388,24 @@ plot_style_2 <- function(dat, method, min_max, color) {
 }
 
 plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
-  p <- ggplot2::ggplot(data=dat2, ggplot2::aes_(x=~range))
+  p <- ggplot2::ggplot(data=dat2, ggplot2::aes(x=.data$range))
 
   if ( method=="sampling" ){
     p <- p +
-      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes_(ymin=~lower, ymax=~upper, fill="95% CI"))
+      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes(ymin=.data$lower, ymax=.data$upper, fill="95% CI"))
 
     if (type == 'line') {
       p <- p +
-        ggplot2::geom_line(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
+        ggplot2::geom_line(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
     }
 
-    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes_(y=~median, color="Pred. Median"), linetype="dashed", size=0.5, alpha=0.9)
+    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes(y=.data$median, color="Pred. Median"), linetype="dashed", size=0.5, alpha=0.9)
 
-    if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes_(x=~x_train, y=~y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
+    if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes(x=.data$x_train, y=.data$y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
 
     if ( type == 'points' ){
       p <- p +
-        ggplot2::geom_point(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
+        ggplot2::geom_point(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
     }
     if (type == 'points') {
       if ( is.null(dat3) ){
@@ -1418,20 +1430,20 @@ plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
     }
   } else if ( method=="mean_var" ) {
     p <- p +
-      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes_(ymin=~lower, ymax=~upper, fill="CI (+/-2SD)"))
+      ggplot2::geom_ribbon(data=dat2, alpha=0.5, mapping=ggplot2::aes(ymin=.data$lower, ymax=.data$upper, fill="CI (+/-2SD)"))
 
     if (type == 'line') {
       p <- p +
-        ggplot2::geom_line(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
+        ggplot2::geom_line(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Function"), linetype="solid", size=0.5, alpha=0.9)
     }
 
-    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes_(y=~mean, color="Pred. Mean"),linetype="dashed", size=0.5, alpha=0.9)
+    p <- p + ggplot2::geom_line(data=dat2, ggplot2::aes(y=.data$mean, color="Pred. Mean"),linetype="dashed", size=0.5, alpha=0.9)
 
-    if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes_(x=~x_train, y=~y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
+    if ( !is.null(dat3) ) p <- p + ggplot2::geom_point(data=dat3, ggplot2::aes(x=.data$x_train, y=.data$y_train, color = "Training Point"), size=2, alpha=0.9, shape=19)
 
     if (type == 'points') {
       p <- p +
-        ggplot2::geom_point(data=dat1, ggplot2::aes_(x=~x_test, y=~y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
+        ggplot2::geom_point(data=dat1, ggplot2::aes(x=.data$x_test, y=.data$y_test, color = "Testing Point"), size=1.75, alpha=0.9, shape=17)
     }
 
     if (type == 'points') {

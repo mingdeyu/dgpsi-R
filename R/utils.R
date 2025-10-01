@@ -2007,7 +2007,7 @@ trace_plot <- function(object, layer = NULL, node = 1) {
     mm <- reshape2::melt(dat, id.var="Iteration")
 
     color <- c("#E69F00", rep("#56B4E9",n_para-2), "#009E73")
-    ggplot2::ggplot(mm, ggplot2::aes_(x = ~Iteration, y = ~value)) + ggplot2::geom_line(ggplot2::aes_(color = ~variable)) +
+    ggplot2::ggplot(mm, ggplot2::aes(x = .data$Iteration, y = .data$value)) + ggplot2::geom_line(ggplot2::aes(color = .data$variable)) +
       ggplot2::facet_grid(variable ~ ., scales = "free_y") + ggplot2::theme(legend.position = "none", plot.title = ggplot2::element_text(hjust = 0.5)) +
       ggplot2::labs(title=paste("Node ", node, " (of ", kernel_no, ")", " in Layer ", layer, " (of ", layer_no, ")", sep = ""), x ="Iteration", y = "Parameter value") +
       ggplot2::scale_color_manual(values = color)

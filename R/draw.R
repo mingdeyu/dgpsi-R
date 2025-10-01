@@ -147,14 +147,16 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
         patchwork::plot_annotation(
           title = 'Sequential Design Validation'
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     } else {
       p_patch <- p_patch +
         patchwork::plot_annotation(
           title = 'Sequential Design Validation',
           caption = 'RMSE = Root Mean Squared Error'
         ) +
-        patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+        patchwork::plot_layout(guides = 'collect') +
+        patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     }
   } else {
     stop("The provided 'type' is not supported.", call. = FALSE)
@@ -284,7 +286,8 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
       }
     }
     p_patch <- patchwork::wrap_plots(p_list) +
-      patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      patchwork::plot_layout(guides = 'collect') +
+      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     if ( cust ){
       if ( output_D==ncol(object$data$Y) ){
         p_patch <- p_patch +
@@ -372,7 +375,8 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...
     }
 
     p_patch <- patchwork::wrap_plots(p_list) +
-      patchwork::plot_layout() & ggplot2::theme(legend.position='bottom')
+      patchwork::plot_layout() +
+      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
 
     p_patch <- p_patch +
       patchwork::plot_annotation(
@@ -470,7 +474,8 @@ draw.bundle <- function(object, type = 'rmse', log = FALSE, emulator = NULL, ...
     }
 
     p_patch <- patchwork::wrap_plots(p_list) +
-      patchwork::plot_layout(guides = 'collect') & ggplot2::theme(legend.position='bottom')
+      patchwork::plot_layout(guides = 'collect') +
+      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
 
     if ( cust ){
       p_patch <- p_patch +
@@ -502,7 +507,7 @@ pair_design <- function(dat){
            "#CAB2D6", "#FDBF6F", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4", "yellow3",
            "darkorange4", "brown")
   p <- ggplot2::ggplot(dat) +
-    ggplot2::geom_point(ggplot2::aes_(x = ~.panel_x, y = ~.panel_y, shape=~Design, color =~Design)) +
+    ggplot2::geom_point(ggplot2::aes(x = .panel_x, y = .panel_y, shape=.data$Design, color =.data$Design)) +
     ggforce::facet_matrix(ggplot2::vars(names(dat)[1:(length(dat)-1)])) +
     ggplot2::scale_shape_manual(values = c(17,rep(16,length(unique(dat$Design))-1)), breaks=unique(dat$Design)) +
     ggplot2::scale_colour_manual(values = ggplot2::alpha(c25,0.7), breaks=unique(dat$Design)) +
@@ -525,13 +530,13 @@ draw_seq_design <- function(dat, log, target, cust, is.categorical = FALSE) {
 
   if ( !is.null(target) ) {
     p <- p +
-      ggplot2::geom_hline(data = target, mapping = ggplot2::aes_(yintercept=~val, group=~Target, linetype=~Target), alpha=0.8, color="gray20", size = 0.5) +
+      ggplot2::geom_hline(data = target, mapping = ggplot2::aes(yintercept=.data$val, group=.data$Target, linetype=.data$Target), alpha=0.8, color="gray20", size = 0.5) +
       ggplot2::scale_linetype_manual(values=c("dashed", "dotdash", "twodash", "dotted", "solid", "longdash"))
   }
 
   p <- p +
-    ggplot2::geom_line(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), alpha=0.8, stat = "unique") +
-    ggplot2::geom_point(dat, mapping=ggplot2::aes_(x=~N, y=~rmse, group=~Design, color=~Design), size=1.5, alpha=0.8, stat = "unique") +
+    ggplot2::geom_line(dat, mapping=ggplot2::aes(x=.data$N, y=.data$rmse, group=.data$Design, color=.data$Design), alpha=0.8, stat = "unique") +
+    ggplot2::geom_point(dat, mapping=ggplot2::aes(x=.data$N, y=.data$rmse, group=.data$Design, color=.data$Design), size=1.5, alpha=0.8, stat = "unique") +
     ggplot2::scale_colour_manual(values = c24, breaks=unique(dat$Design))
 
   p <- p + ggplot2::theme(
