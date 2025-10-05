@@ -88,7 +88,8 @@
 <span>  internal_input_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linked_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  decouple <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  decouple <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  link <span class="op">=</span> <span class="st">"logit"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -312,6 +313,11 @@ and assigned to the emulator. Default to <code>NULL</code>.</p></dd>
 <dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
 categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when <code>depth</code> is greater than 2.
 Defaults to <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-link">link<a class="anchor" aria-label="anchor" href="#arg-link"></a></dt>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> the link function used for binary classification when <code>likelihood = "Categorical"</code>. Supported options are <code>"logit"</code> and <code>"probit"</code>.
+Defaults to <code>"logit"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
