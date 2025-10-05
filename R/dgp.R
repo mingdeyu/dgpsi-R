@@ -156,6 +156,8 @@
 #' @param decouple `r new_badge("new")` A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
 #'    categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when `depth` is greater than 2.
 #'    Defaults to `FALSE`.
+#' @param link `r new_badge("new")` the link function used for binary classification when `likelihood = "Categorical"`. Supported options are `"logit"` and `"probit"`.
+#'    Defaults to `"logit"`.
 #'
 #' @return An S3 class named `dgp` that contains five slots:
 #' * `id`: A number or character string assigned through the `id` argument.
@@ -257,7 +259,7 @@
 dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = NULL,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
-                ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL, decouple = FALSE) {
+                ess_burn = 10, burnin = NULL, B = 10, internal_input_idx = NULL, linked_idx = NULL, id = NULL, decouple = FALSE, link = "logit") {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -499,6 +501,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
           }
           if ( length(scale_est)!=1 ) stop(sprintf("length(scale_est) should equal %i.", 1), call. = FALSE)
           if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal %i.", 1), call. = FALSE)
+          if ( link!='logit' & link!='probit' ) stop("'link' can only be either 'logit' or 'probit'.", call. = FALSE)
         } else {
           if ( length(nugget_est)==1 ) {
             nugget_est <- rep(nugget_est, num_class)
@@ -693,7 +696,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
       } else if ( likelihood == 'NegBin' ) {
         struc[[depth]] <- c(pkg.env$dgpsi$NegBin())
       } else if ( likelihood == 'Categorical' ) {
-        struc[[depth]] <- c(pkg.env$dgpsi$Categorical(num_class))
+        struc[[depth]] <- c(pkg.env$dgpsi$Categorical(num_class, link = link))
       }
     }
     if ( isTRUE(verb) ) {

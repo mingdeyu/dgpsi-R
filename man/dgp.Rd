@@ -35,7 +35,8 @@ dgp(
   internal_input_idx = NULL,
   linked_idx = NULL,
   id = NULL,
-  decouple = FALSE
+  decouple = FALSE,
+  link = "logit"
 )
 }
 \arguments{
@@ -249,6 +250,9 @@ and assigned to the emulator. Default to \code{NULL}.}
 \item{decouple}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
 categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when \code{depth} is greater than 2.
 Defaults to \code{FALSE}.}
+
+\item{link}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the link function used for binary classification when \code{likelihood = "Categorical"}. Supported options are \code{"logit"} and \code{"probit"}.
+Defaults to \code{"logit"}.}
 }
 \value{
 An S3 class named \code{dgp} that contains five slots:
