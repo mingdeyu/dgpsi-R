@@ -1,5 +1,5 @@
 ---
-title: Non-Gaussian Emulation
+title: "Non-Gaussian Emulation"
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >

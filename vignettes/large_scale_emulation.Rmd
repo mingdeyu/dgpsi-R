@@ -1,6 +1,5 @@
 ---
-title: >
-  Large-Scale DGP Emulation
+title: "Large-Scale DGP Emulation"
 output: rmarkdown::html_vignette
 bibliography: references.bib 
 description: >
