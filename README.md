@@ -29,9 +29,9 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
 * Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
 * Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 * Automatic pruning of DGP emulators, both statically and dynamically.
-* (https://mingdeyu.github.io/dgpsi-R/) [Large-scale GP, DGP, and Linked (D)GP emulations](https://mingdeyu.github.io/dgpsi-R/articles/large_scale_emulation.html).
-* (https://mingdeyu.github.io/dgpsi-R/) [Scalable DGP classification using Stochastic Imputation](https://mingdeyu.github.io/dgpsi-R/articles/classification.html).
-* (https://mingdeyu.github.io/dgpsi-R/) [Bayesian optimization](https://mingdeyu.github.io/dgpsi-R/articles/bayes_opt.html).
+* [Large-scale GP, DGP, and Linked (D)GP emulations](https://mingdeyu.github.io/dgpsi-R/articles/large_scale_emulation.html).
+* [Scalable DGP classification using Stochastic Imputation](https://mingdeyu.github.io/dgpsi-R/articles/classification.html).
+* [Bayesian optimization](https://mingdeyu.github.io/dgpsi-R/articles/bayes_opt.html).
 
 ## Getting started
 * Check [A Quick Guide to dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get started with the package.
