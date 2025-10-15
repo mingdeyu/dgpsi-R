@@ -68,7 +68,7 @@ p3 <- ggplot(data = output3, aes(x = x, y = y)) + geom_line(color = 'green4') + 
 wrap_plots(list(p1, p2, p3)) + plot_annotation(title = 'Synthetic Simulator')
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_fct.png){width=100%}
+![](./images/seq2_fct.png){width=100%}
 
 We now specify a seed with `set_seed()` from the package for reproducibility
 
@@ -164,23 +164,23 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ##  *  RMSE: 0.383722, RMSE: 0.154689, RMSE: 0.008984
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.207895
-##  * Next design point (Emulator2): 0.235873
+##  * Next design point (Emulator1): 0.208133
+##  * Next design point (Emulator2): 0.235860
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.337517, RMSE: 0.155087, RMSE: 0.008984
+##  *  RMSE: 0.307165, RMSE: 0.154614, RMSE: 0.008984
 ##  
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.430889
-##  * Next design point (Emulator2): 0.479682
+##  * Next design point (Emulator1): 0.309109
+##  * Next design point (Emulator2): 0.488460
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.120320, RMSE: 0.062365, RMSE: 0.008984
+##  *  RMSE: 0.096814, RMSE: 0.031681, RMSE: 0.008984
 ## Targets not reached for all emulators at the end of the sequential design.
 ```
 
@@ -197,10 +197,10 @@ g <- function(x, weight){
 }
 ```
 
-Since the third emulator has already reached the target, we assign zero weights to it and weights of 0.6 and 0.4 to the first and second emulators respectively:
+Since the third emulator has already reached the target, we assign zero weights to it and weights of 0.8 and 0.2 to the first and second emulators respectively:
 
 ```{r}
-weight <- c(0.6, 0.4, 0)
+weight <- c(0.8, 0.2, 0)
 ```
 
 We now pass both the aggregate function, `g()`, and its `weight` argument to `design()` for a second wave of the sequential design with a further 15 steps:
@@ -211,47 +211,52 @@ m <- design(m, N = 15, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  *  RMSE: 0.120320, RMSE: 0.062365, RMSE: 0.008984
+##  *  RMSE: 0.096814, RMSE: 0.031681, RMSE: 0.008984
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.062821
-##  * Next design point (Emulator2): 0.062821
+##  * Next design point (Emulator1): 0.063719
+##  * Next design point (Emulator2): 0.063719
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.151946, RMSE: 0.061865, RMSE: 0.008984
-##  
-##  ...
-##  
-## Iteration 6:
+##  *  RMSE: 0.268437, RMSE: 0.030712, RMSE: 0.008984
+## Iteration 2:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.233155
+##  * Next design point (Emulator1): 0.021174
+##  * Next design point (Emulator2): 0.021174
+##  * Next design point (Emulator3): None (target reached)
+##  - Updating and re-fitting ... done
+##  - Validating ... done
+##  *  RMSE: 0.091204, RMSE: 0.005310, RMSE: 0.008984
+## Iteration 3:
+##  - Locating ... done
+##  * Next design point (Emulator1): 0.379801
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.014147, RMSE: 0.004410, RMSE: 0.008984
+##  *  RMSE: 0.242991, RMSE: 0.005310, RMSE: 0.008984
 ##  
 ##  ...
 ## 
 ## Iteration 8:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.009688
+##  * Next design point (Emulator1): 0.010541
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.005913, RMSE: 0.004410, RMSE: 0.008984
-Target reached! Sequential design stopped at step 8.
+##  *  RMSE: 0.009013, RMSE: 0.005310, RMSE: 0.008984
+## Target reached! Sequential design stopped at step 8.
 ```
 
-The first and the second emulators reached the target after iteration 8 and 5 of the second wave, respectively. The sequential design points of the three emulators can be plotted with `draw()`:
+The first and the second emulators reached the target after iteration 8 and 2 of the second wave, respectively. The sequential design points of the three emulators can be plotted with `draw()`:
 
 ```{r}
 draw(m, 'design')
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_design.png){width=100%}
+![](./images/seq2_design.png){width=100%}
 
 The figure above shows that, for the first emulator, most of the design points are added below 0.5, while for the second emulator, the design points are concentrated around 0.5. For the third emulator, the resulting design is space-filling. These design point distributions align with the functional complexities of the three outputs. However, in the second wave, which uses the aggregation function, additional points are added below 0.5 for the second emulator due to the higher weight assigned to the first emulator. These points may not be necessary for the second output, as its functional behavior does not require further refinement in that region. This observation aligns with the earlier argument that using the aggregation function to add the same design points to outputs with differing behaviors may not always be effective.
 
@@ -322,7 +327,7 @@ p[[3]] <- p[[3]] +
 p
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq2_rmse.png){width=100%}
+![](./images/seq2_rmse.png){width=100%}
 
 It can be seen from the plot above that sequential design is more efficient than batch space-filling design, achieving similar RMSE with fat fewer design points, particularly for the first emulator in the bundle.
 

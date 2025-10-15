@@ -1,10 +1,6 @@
 #' @title Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
 #'
-#' @description
-#'
-#' `r new_badge("updated")`
-#'
-#' This function implements sequential design and active learning for a (D)GP emulator or
+#' @description This function implements sequential design and active learning for a (D)GP emulator or
 #'     a bundle of (D)GP emulators, supporting an array of popular methods as well as user-specified approaches.
 #'     It can also be used as a wrapper for Bayesian optimization methods.
 #'
@@ -17,11 +13,10 @@
 #'     from which the next design points are determined. Defaults to `NULL`.
 #' @param y_cand a matrix (with each row being a simulator evaluation and column being an output dimension) that gives the realizations
 #'    from the simulator at input positions in `x_cand`. Defaults to `NULL`.
-#' @param n_sample `r new_badge("new")` an integer that gives the size of a sub-set to be sampled from the candidate set `x_cand` at each step of the sequential design to determine the next
+#' @param n_sample an integer that gives the size of a sub-set to be sampled from the candidate set `x_cand` at each step of the sequential design to determine the next
 #'   design point, if `x_cand` is not `NULL`.
 #'
 #' Defaults to `200`.
-#' @param n_cand `r lifecycle::badge("deprecated")` this argument is deprecated. Use `n_sample` instead.
 #' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one
 #'     input dimension. If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input
 #'     dimensions, and its first and second columns correspond to the minimum and maximum values of the input dimensions. Set
@@ -63,7 +58,7 @@
 #' Defaults to `FALSE`.
 #' @param target a number or vector specifying the target evaluation metric value(s) at which the sequential design should terminate.
 #'     Defaults to `NULL`, in which case the sequential design stops after `N` steps. See the *Note* section below for further details about `target`.
-#' @param method `r new_badge("updated")` an R function that determines the next design points to be evaluated by `f`. The function must adhere to the following rules:
+#' @param method an R function that determines the next design points to be evaluated by `f`. The function must adhere to the following rules:
 #' - **First argument**: an emulator object, which can be one of the following:
 #'   - an instance of the `gp` class (produced by [gp()]);
 #'   - an instance of the `dgp` class (produced by [dgp()]);
@@ -80,7 +75,7 @@
 #'       represent the new design points for the corresponding emulator.
 #'
 #' See [alm()], [mice()], and [vigf()] for examples of built-in `method` functions. Defaults to [vigf()].
-#' @param batch_size `r new_badge("new")` an integer specifying the number of design points to select in a single iteration. Defaults to `1`.
+#' @param batch_size an integer specifying the number of design points to select in a single iteration. Defaults to `1`.
 #'     This argument is used by the built-in `method` functions [alm()], [mice()], and [vigf()].
 #'     If you provide a custom `method` function with an argument named `batch_size`, the value of `batch_size` will be passed to your function.
 #' @param eval an R function that computes a customized metric for evaluating emulator performance. The function must adhere to the following rules:
@@ -110,7 +105,7 @@
 #'     This argument is relevant only if waves already exist in the emulator. Creating new waves can improve the visualization of sequential design performance across different calls
 #'     to [design()] via [draw()], and allows for specifying a different evaluation frequency in `freq`. However, disabling this option can help limit the number of waves visualized
 #'     in [draw()] to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to `TRUE`.
-#' @param M_val `r new_badge("new")` an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
+#' @param M_val an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param cores an integer that gives the number of processes to be used for emulator validation. If set to `NULL`, the number of processes is set to
 #'     `max physical cores available %/% 2`. Defaults to `1`. This argument is only used if `eval = NULL`.
@@ -259,14 +254,14 @@
 #' @md
 #' @name design
 #' @export
-design <- function(object, N, x_cand, y_cand, n_sample, n_cand, limits, f, reps, freq, x_test, y_test, reset, target, method, batch_size, eval, verb, autosave, new_wave, M_val, cores, ...){
+design <- function(object, N, x_cand, y_cand, n_sample, limits, f, reps, freq, x_test, y_test, reset, target, method, batch_size, eval, verb, autosave, new_wave, M_val, cores, ...){
   UseMethod("design")
 }
 
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n_cand = lifecycle::deprecated(), limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -276,9 +271,6 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n
 
   object <- copy_in_design(object)
 
-  if (lifecycle::is_present(n_cand)) {
-    lifecycle::deprecate_warn("2.5.0", "design(n_cand)", "design(n_sample)")
-  }
   n_cand <- n_sample
 
   N <- check_N(N)
@@ -922,7 +914,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n_cand = lifecycle::deprecated(), limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1, pruning = TRUE, control = list(), ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1, pruning = TRUE, control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -937,9 +929,6 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
   }
   object <- copy_in_design(object)
 
-  if (lifecycle::is_present(n_cand)) {
-    lifecycle::deprecate_warn("2.5.0", "design(n_cand)", "design(n_sample)")
-  }
   n_cand <- n_sample
 
   N <- check_N(N)
@@ -1815,7 +1804,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, n_cand = lifecycle::deprecated(), limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1,  ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1,  ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1823,9 +1812,6 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
   if ( !inherits(object,"bundle") ) stop("'object' must be an instance of the 'bundle' class.", call. = FALSE)
   if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
 
-  if (lifecycle::is_present(n_cand)) {
-    lifecycle::deprecate_warn("2.5.0", "design(n_cand)", "design(n_sample)")
-  }
   n_cand <- n_sample
 
   N <- check_N(N)

@@ -13,8 +13,8 @@ init_py(
 )
 }
 \arguments{
-\item{py_ver}{a string that gives the 'python' version to be installed. If \code{py_ver = NULL}, the default 'python'
-version '3.9.13' will be installed.}
+\item{py_ver}{a string that gives the 'python' version to be installed. Supported versions are 3.10, 3.11, and 3.12.
+If \code{py_ver = NULL}, the default 'python' version '3.10' will be installed.}
 
 \item{dgpsi_ver}{a string that gives the 'python' version of 'dgpsi' to be used. If \code{dgpsi_ver = NULL},
 \itemize{
@@ -41,7 +41,7 @@ No return value, called to install required 'python' environment.
 This function initializes the 'python' environment for the package.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \examples{
 \dontrun{

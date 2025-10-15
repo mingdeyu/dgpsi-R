@@ -65,7 +65,7 @@ m <- dgp(X, Y, vecchia = TRUE)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 200: Layer 2: 100%|██████████| 200/200 [02:20<00:00,  1.43it/s]
+## Iteration 200: Layer 2: 100%|██████████| 200/200 [02:59<00:00,  1.12it/s]
 ## Imputing ... done
 ```
 
@@ -83,7 +83,7 @@ plot(m)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/vecchia_loo.png){width=100%}
+![](./images/vecchia_loo.png){width=100%}
 
 or the Out-Of-Sample (OOS) validation plot over `1000` randomly generated testing locations:
 
@@ -99,7 +99,7 @@ plot(m, oos_x, oos_y)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/vecchia_oos.png){width=100%}
+![](./images/vecchia_oos.png){width=100%}
 
 Note that `gp()` can also operate in Vecchia mode. For this problem, using `m_gp <- gp(X, Y, vecchia = TRUE)`, we found that the GP emulator `m_gp` achieved half the NRMSE of the DGP emulator `m`, but it had a few more points outside the credible intervals.
 

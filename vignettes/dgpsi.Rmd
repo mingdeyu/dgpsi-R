@@ -106,7 +106,7 @@ plot(m)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_loo.png){width=100%} 
+![](./images/step_fct_loo.png){width=100%} 
 
 The second validation plot is the Out-Of-Sample (OOS) validation plot that requires an out-of-sample testing data set. Here we generate an OOS data set that contains 10 testing data points:
 
@@ -127,7 +127,7 @@ plot(m,oos_x,oos_y)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_oos.png){width=100%}
+![](./images/step_fct_oos.png){width=100%}
 
 Note that the `style` argument to the `plot()` function can be used to draw different types of plot (see `?plot`).
 
@@ -162,4 +162,4 @@ lines(test_x, mu, type = 'l', lty = 2, lwd = 1.5, col = 'black')
 lines(X, Y, type = 'p', pch = 16, cex = 1, col = "#0072B2") # Training data points
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/step_fct_result.png){width=100%} 
+![](./images/step_fct_result.png){width=100%} 

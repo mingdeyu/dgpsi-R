@@ -24,5 +24,5 @@ This function computes the predictive negative log-likelihood from a
 DGP emulator with a likelihood layer.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }

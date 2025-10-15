@@ -63,14 +63,14 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
   scale_fill_continuous(type = "viridis")
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_fct.png){width=100%}
+![](./images/seq_fct.png){width=100%}
 
 We can see from the figure above that the synthetic simulator exhibits more fluctuations on the bottom left of its input space while in the top-right part, the simulator shows little variation. 
 
 We now specify a seed with `set_seed()` for reproducibility
 
 ```{r}
-set_seed(99)
+set_seed(999)
 ```
 
 and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
@@ -122,33 +122,33 @@ m <- design(m, N = 25, limits = lim, f = f, x_test = validate_x, y_test = valida
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.527337
+##  * RMSE: 0.487293
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.930278 0.033542
+##  * Next design point: 0.620583 1.000000
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.532428
+##  * RMSE: 0.388907
 ## 
 ## ...
 ## 
 ## Iteration 18:
 ##  - Locating ... done
-##  * Next design point: 0.706449 0.048681
+##  * Next design point: 0.198164 0.195029
 ##  - Updating and re-fitting ... done
 ##  - Pruning 1 node(s) in layer 1 ... done
 ##  - Re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.139819
+##  * RMSE: 0.052264
 ## 
 ## ...
 ## 
 ## Iteration 25:
 ##  - Locating ... done
-##  * Next design point: 0.000010 0.483511
+##  * Next design point: 0.248474 0.034358
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.071370
+##  * RMSE: 0.016924
 ```
 
 After the first wave we see that 1 GP node is removed from the first layer by automatic pruning of the DGP which leaves only one node in both the first and second layer of the DGP hierarchy respectively. This helps accelerate the inference of the DGP emulator in subsequent waves of the sequential design while maintaining accuracy. We now start the second wave of the sequential design:
@@ -159,22 +159,22 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.071370
+##  * RMSE: 0.016924
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.461239 0.415336
+##  * Next design point: 0.092643 0.352432
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.056827
+##  * RMSE: 0.013484
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.177935 0.459387
+##  * Next design point: 0.901510 0.989878
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.011508
+##  * RMSE: 0.007114
 ```
 Finally, we resume the second wave with 10 additional iterations:
 
@@ -186,19 +186,19 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ## Iteration 11:
 ##  - Locating ... done
-##  * Next design point: 0.029874 0.763962
+##  * Next design point: 0.016562 0.966263
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.014444
+##  * RMSE: 0.005308
 ##  
 ##  ...
 ##  
 ## Iteration 20:
 ##  - Locating ... done
-##  * Next design point: 0.829788 0.452129
+##  * Next design point: 0.982806 0.438261
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.004783
+##  * RMSE: 0.002383
 ```
 
 Resuming rather than adding an additional wave can be a useful feature, particularly for plotting using `draw()`. After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:
@@ -207,14 +207,14 @@ Resuming rather than adding an additional wave can be a useful feature, particul
 draw(m, 'design')
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_design.png){width=100%}
+![](./images/seq_design.png){width=100%}
 It can be seen from the figure above that most of the added design points concentrate at the bottom-left corner of the input space where the simulator `f` exhibits more variation and thus needs more data to be well-emulated. We can also visualize the improvement to RMSE during the sequential design:
 
 ```{r}
 draw(m, 'rmse')
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_rmse.png){width=100%}
+![](./images/seq_rmse.png){width=100%}
 
 ## Comparison to DGP emulators with space-filling designs
 
@@ -285,7 +285,7 @@ draw(m, 'rmse', log = T) +
   scale_shape_manual(values = c(2, 3, 4, 8, 15))
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_comparison.png){width=100%}
+![](./images/seq_comparison.png){width=100%}
 
 It can be seen from the plot above that with static space-filling designs, the quality of an emulator may not be improved as the design size increases. This is because increasing the size of a space-filling design may not capture regions where the simulator exhibits more variation, and thus cause emulators with higher RMSEs than those constructed through sequential design.
 

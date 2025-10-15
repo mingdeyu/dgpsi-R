@@ -4,16 +4,10 @@
 \alias{lgp}
 \title{Linked (D)GP emulator construction}
 \usage{
-lgp(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, id = NULL)
+lgp(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NULL)
 }
 \arguments{
-\item{struc}{the structure of the linked emulator, which can take one of two forms:
-\itemize{
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} a list contains \emph{L} (the number of layers in a systems of computer models) sub-lists,
-each of which represents a layer and contains (D)GP emulators (represented by
-instances of S3 class \code{gp} or \code{dgp}) of computer models. The sub-lists are placed in the list
-in the same order of the specified computer model system's hierarchy. \strong{This option is deprecated and will be removed in the next release.}
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a data frame that defines the connection structure between emulators in the linked system, with the following columns:
+\item{struc}{a data frame that defines the connection structure between emulators in the linked system, with the following columns:
 \itemize{
 \item \code{From_Emulator}: the ID of the emulator providing the output. This ID must match the \code{id} slot
 in the corresponding emulator object (produced by \code{\link[=gp]{gp()}} or \code{\link[=dgp]{dgp()}}) within \code{emulators} argument of \code{\link[=lgp]{lgp()}}, or it should
@@ -31,12 +25,9 @@ from the \code{From_Emulator}.
 
 Each row represents a single one-to-one connection between a specified output dimension of \code{From_Emulator}
 and a corresponding input dimension of \code{To_Emulator}. If multiple connections are required between
-two emulators, each connection should be specified in a separate row.
+two emulators, each connection should be specified in a separate row.}
 
-\strong{Note:} When using the data frame option for \code{struc}, the \code{emulators} argument must be provided.
-}}
-
-\item{emulators}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a list of emulator objects, each containing an \code{id} slot that uniquely identifies it within the
+\item{emulators}{a list of emulator objects, each containing an \code{id} slot that uniquely identifies it within the
 linked system. The \code{id} slot in each emulator object must match the \code{From_Emulator}/\code{To_Emulator} columns in \code{struc}.
 
 If the same emulator is used multiple times within the linked system, the list must contain distinct copies
@@ -46,16 +37,16 @@ to ensure each instance can be uniquely referenced.}
 \item{B}{the number of imputations used for prediction. Increase the value to refine representation of
 imputation uncertainty. If the system consists of only GP emulators, \code{B} is set to \code{1} automatically. Defaults to \code{10}.}
 
-\item{activate}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating whether the initialized linked emulator should be activated:
+\item{activate}{a bool indicating whether the initialized linked emulator should be activated:
 \itemize{
 \item If \code{activate = FALSE}, \code{\link[=lgp]{lgp()}} returns an inactive linked emulator, allowing inspection of its structure using \code{\link[=summary]{summary()}}.
 \item If \code{activate = TRUE}, \code{\link[=lgp]{lgp()}} returns an active linked emulator, ready for prediction and validation using \code{\link[=predict]{predict()}} and \code{\link[=validate]{validate()}}, respectively.
 }
 
-Defaults to \code{TRUE}. This argument is only applicable when \code{struc} is specified as a data frame.}
+Defaults to \code{TRUE}.}
 
-\item{verb}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} a bool indicating if the trace information on linked (D)GP emulator construction should be printed during the function call.
-Defaults to \code{TRUE}. This argument is only applicable when \code{struc} is specified as a data frame.}
+\item{verb}{a bool indicating if the trace information on linked (D)GP emulator construction should be printed during the function call.
+Defaults to \code{TRUE}.}
 
 \item{id}{an ID to be assigned to the linked (D)GP emulator. If an ID is not provided (i.e., \code{id = NULL}), a UUID
 (Universally Unique Identifier) will be automatically generated and assigned to the emulator. Defaults to \code{NULL}.}
@@ -72,10 +63,6 @@ An S3 class named \code{lgp} that contains three slots:
 when the linked (D)GP emulator (that was saved by \code{\link[=write]{write()}} with the light option \code{light = TRUE}) is loaded back
 to R by \code{\link[=read]{read()}}.
 \item \code{B}: the number of imputations used to generate the linked (D)GP emulator.
-}
-
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{struc} is a data frame, \code{specs} also includes:
-\enumerate{
 \item \code{metadata}: a data frame providing configuration details for each emulator in the linked system, with following columns:
 \itemize{
 \item \code{Emulator}: the ID of an emulator.
@@ -100,12 +87,10 @@ The returned \code{lgp} object can be used by
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
-
 This function constructs a linked (D)GP emulator for a model chain or network.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \examples{
 \dontrun{

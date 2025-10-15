@@ -16,12 +16,10 @@ Defaults to \code{TRUE}.}
 A serialized version of \code{object}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}}
-
 This function serializes the constructed emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 Since the constructed emulators are 'python' objects, they cannot be directly exported to other R processes for parallel

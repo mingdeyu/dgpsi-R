@@ -15,7 +15,7 @@
 #'     constructed. Use if it is suspected that a local mode for the hyperparameters has been reached through successive updates. Defaults to `FALSE`.
 #' @param verb a bool indicating if trace information will be printed during the function execution.
 #'     Defaults to `TRUE`.
-#' @param N `r new_badge("updated")` number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. If set to `NULL`,
+#' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. If set to `NULL`,
 #'     the number of iterations is set to `100` if the DGP emulator was constructed without the Vecchia approximation, and is set to `50`
 #'     if Vecchia approximation was used. Defaults to `NULL`.
 #' @param cores the number of processes to be used to re-fit GP components (in the same layer)
@@ -148,9 +148,6 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
   new_object[['data']][['X']] <- X
   new_object[['data']][['Y']] <- Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
@@ -226,9 +223,6 @@ update.gp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ..
   new_object[['data']][['X']] <- X
   new_object[['data']][['Y']] <- Y
   new_object[['specs']] <- extract_specs(constructor_obj_cp, "gp")
-  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp

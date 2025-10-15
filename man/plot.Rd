@@ -74,20 +74,11 @@
 
 \item{y_test}{same as that of \code{\link[=validate]{validate()}}.}
 
-\item{dim}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} if \code{dim = NULL}, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, \code{dim} indicates
+\item{dim}{if \code{dim = NULL}, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, \code{dim} indicates
 which dimension of an emulator's input will be shown on the x-axis in validation plots:
 \itemize{
 \item If \code{x} is an instance of the \code{gp} of \code{dgp} class, \code{dim} is an integer.
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} If \code{x} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} without specifying the \code{struc} argument in data frame form, \code{dim} can be:
-\enumerate{
-\item an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
-\item a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
-(specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
-system.
-}
-
-\strong{This option for linked (D)GP emulators is deprecated and will be removed in the next release.}
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{x} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} with argument \code{struc} in data frame form, \code{dim} is an integer referring
+\item If \code{x} is an instance of the \code{lgp} class, \code{dim} is an integer referring
 to the dimension of the global input to the linked emulator system.
 }
 
@@ -126,7 +117,7 @@ categorical likelihoods. Defaults to \code{'points'}}
 \item{verb}{a bool indicating if trace information on plotting will be printed during execution.
 Defaults to \code{TRUE}.}
 
-\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} same as that of \code{\link[=validate]{validate()}}.}
+\item{M}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{force}{same as that of \code{\link[=validate]{validate()}}.}
 
@@ -138,12 +129,10 @@ Defaults to \code{TRUE}.}
 A \code{patchwork} object.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
-
 This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

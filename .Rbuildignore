@@ -7,9 +7,13 @@
 ^cran-comments\.md$
 ^\.Rhistory$
 ^\.gitignore$
+^\.gitattributes$
 ^CRAN-SUBMISSION$
 ^RESEARCH-NOTICE\.md$
-^vignettes/images
+^vignettes/images/.*
+!^vignettes/images/step_fct_loo.png$
+!^vignettes/images/step_fct_oos.png$
+!^vignettes/images/step_fct_result.png$
 ^vignettes/htmls
 ^vignettes/motorcycle.Rmd$
 ^vignettes/classification.Rmd$

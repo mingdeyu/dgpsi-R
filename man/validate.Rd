@@ -70,24 +70,7 @@ validate(
 \item{x_test}{OOS testing input data:
 \itemize{
 \item if \code{object} is an instance of the \code{gp} or \code{dgp} class, \code{x_test} is a matrix where each row is a new input location to be used for validating the emulator and each column is an input dimension.
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} if \code{object} is an instance of the \code{lgp} class, \code{x_test} can be a matrix or a list:
-\itemize{
-\item if \code{x_test} is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
-The rows of \code{x_test} represent different input data points and the columns represent input dimensions across all emulators in
-the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
-emulators in the first layer and there is no global input to emulators in other layers.
-\item if \code{x_test} is a list, it should have \emph{L} (the number of layers in an emulator system) elements. The first element
-is a matrix that represents the global testing input data that feed into the emulators in the first layer of the system. The
-remaining \emph{L-1} elements are \emph{L-1} sub-lists, each of which contains a number (the same number of emulators in
-the corresponding layer) of matrices (rows being testing input data points and columns being input dimensions) that represent the
-global testing input data to the emulators in the corresponding layer. The matrices must be placed in the sub-lists based on how
-their corresponding emulators are placed in \code{struc} argument of \code{\link[=lgp]{lgp()}}. If there is no global input data to a certain emulator,
-set \code{NULL} in the corresponding sub-list of \code{x_test}.
-}
-
-\strong{This option for linked (D)GP emulators is deprecated and will be removed in the next release.}
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} If \code{object} is an instance of the \code{lgp} class created by \code{\link[=lgp]{lgp()}} with argument \code{struc} in data frame form,
-\code{x_test} must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
+\item if \code{object} is an instance of the \code{lgp} class, \code{x_test} must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
 The column indices in \code{x_test} must align with the indices specified in the \code{From_Output} column of the \code{struc} data frame (used in \code{\link[=lgp]{lgp()}}),
 corresponding to rows where the \code{From_Emulator} column is \code{"Global"}.
 }
@@ -118,7 +101,7 @@ Defaults to \code{"mean_var"}.}
 \item{verb}{a bool indicating if trace information for validation should be printed during function execution.
 Defaults to \code{TRUE}.}
 
-\item{M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the size of the conditioning set for the Vecchia approximation in emulator validation. This argument is only used if the emulator \code{object}
+\item{M}{the size of the conditioning set for the Vecchia approximation in emulator validation. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{force}{a bool indicating whether to force LOO or OOS re-evaluation when the \code{loo} or \code{oos} slot already exists in \code{object}. When \code{force = FALSE},
@@ -144,7 +127,7 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 \item a numeric value called \code{rmse} that contains the root mean/median squared error of the GP emulator.
 \item a numeric value called \code{nrmse} that contains the (max-min) normalized root mean/median squared error of the GP emulator. The max-min normalization
 uses the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer called \code{M} that contains the size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
+\item an integer called \code{M} that contains the size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
 \item an integer called \code{sample_size} that contains the number of samples used for validation if \code{method = "sampling"}.
 }
 
@@ -162,7 +145,7 @@ and below the predictive mean. If \code{method = "sampling"}, the upper and lowe
 dimensions.
 \item a vector called \code{nrmse} that contains the (max-min) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The max-min normalization uses the maximum and minimum values of the validation outputs contained in \code{y_train} (or \code{y_test}).
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
+\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.
 \item an integer called \code{sample_size} that contains the number of samples used for validation if \code{method = "sampling"}.
 }
 
@@ -196,7 +179,7 @@ deviations above and below the predictive mean. If \code{method = "sampling"}, t
 \item a list called \code{rmse} that contains the root mean/median squared errors of the linked (D)GP emulator.
 \item a list called \code{nrmse} that contains the (max-min) normalized root mean/median squared errors of the linked (D)GP emulator. The max-min normalization
 uses the maximum and minimum values of the validation outputs contained in \code{y_test}.
-\item \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.
+\item an integer called \code{M} that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.
 \item an integer called \code{sample_size} that contains the number of samples used for validation if \code{method = "sampling"}.
 }
 
@@ -208,7 +191,7 @@ emulator.
 This function calculates Leave-One-Out (LOO) cross validation or Out-Of-Sample (OOS) validation statistics for a constructed GP, DGP, or linked (D)GP emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

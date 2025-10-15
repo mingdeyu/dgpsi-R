@@ -1,10 +1,6 @@
 #' @title Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using MICE
 #'
-#' @description
-#'
-#' `r new_badge("updated")`
-#'
-#' This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
+#' @description This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 #'     or a bundle of (D)GP emulators using the Mutual Information for Computer Experiments (MICE), see the reference below.
 #'
 #' @param object can be one of the following:
@@ -19,16 +15,16 @@
 #'     This argument is used only when `x_cand` is `NULL`. Defaults to `200`.
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
-#' @param M `r new_badge("new")` the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
+#' @param M the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param nugget_s the value of the smoothing nugget term used by MICE. Defaults to `1e-6`.
 #' @param workers  the number of processes to be used for the criterion calculation. If set to `NULL`,
 #'     the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`.
-#' @param limits `r new_badge("new")` a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
+#' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
 #'     If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
 #'     first and second columns correspond to the minimum and maximum values of the input dimensions. This
 #'     argument is only used when `x_cand = NULL`. Defaults to `NULL`.
-#' @param int `r new_badge("new")` a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
+#' @param int a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
 #'     all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
 #'     input dimensions. This argument is only used when `x_cand = NULL`. Defaults to `FALSE`.
 #' @param aggregate an R function that aggregates scores of the MICE across different output dimensions (if `object` is an instance

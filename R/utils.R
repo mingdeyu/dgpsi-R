@@ -1,35 +1,3 @@
-#' @title Combine layers
-#'
-#' @description
-#'
-#' `r lifecycle::badge("deprecated")`
-#'
-#' This function is deprecated and will be removed in the next release, as it is
-#' simply a wrapper for the [list()] function. To construct linked (D)GP structures,
-#' please use the updated [lgp()] function, which provides a simpler and more efficient
-#' approach to building (D)GP emulators.
-#'
-#' @param ... a sequence of lists. Each list represents a system layer and contains emulators (produced by [gp()] or
-#'    [dgp()]) in that layer.
-#'
-#' @return A list defining a linked (D)GP structure to be passed to `struc` of [lgp()].
-#'
-#' @details See further examples and tutorials at <`r get_docs_url()`>.
-#' @md
-#' @keywords internal
-#' @export
-combine <- function(...) {
-  lifecycle::deprecate_warn(
-    when = "2.5.0",
-    what = "combine()",
-    details = c(i = "The function will be removed in the next release.",
-                i = "To construct linked (D)GP structure, please use the updated `lgp()` function instead."
-    )
-  )
-  res = list(...)
-  return(res)
-}
-
 #' @title Pack GP and DGP emulators into a bundle
 #'
 #' @description This function packs GP emulators and DGP emulators into a `bundle` class for
@@ -228,11 +196,9 @@ write <- function(object, pkl_file, light = TRUE) {
       object[['emulator_obj']] <- NULL
       object[['container_obj']] <- NULL
     } else if (inherits(object,"lgp")){
-      if ( "metadata" %in% names(object$specs) ){
         if ( !("emulator_obj" %in% names(object)) ){
           stop("To save 'object', please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
         }
-      }
       if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
       if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be saved in light mode. To save, either set 'light = FALSE' or re-construct and activate the 'object' by lgp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
@@ -255,11 +221,9 @@ write <- function(object, pkl_file, light = TRUE) {
     if (inherits(object,"bundle")){
       if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the bundle of emulators.", call. = FALSE)
     } else if (inherits(object,"lgp")) {
-      if ( "metadata" %in% names(object$specs) ){
         if ( !("emulator_obj" %in% names(object)) ){
           stop("To save 'object', please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
         }
-      }
       if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
     } else {
       if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator.", call. = FALSE)
@@ -339,11 +303,7 @@ set_seed <- function(seed) {
 
 #' @title Set Emulator ID
 #'
-#' @description
-#'
-#' `r new_badge("new")`
-#'
-#' This function assigns a unique identifier to an emulator.
+#' @description This function assigns a unique identifier to an emulator.
 #'
 #' @param object an emulator object to which the ID will be assigned.
 #' @param id a unique identifier for the emulator as either a numeric or character
@@ -371,11 +331,7 @@ set_id <- function(object, id) {
 
 #' @title Set the number of threads
 #'
-#' @description
-#'
-#' `r new_badge("new")`
-#'
-#' This function sets the number of threads for parallel computations involved
+#' @description This function sets the number of threads for parallel computations involved
 #'    in the package.
 #'
 #' @param num the number of threads. If it is greater than the maximum number of threads available, the
@@ -398,11 +354,7 @@ set_thread_num <- function(num) {
 
 #' @title Get the number of threads
 #'
-#' @description
-#'
-#' `r new_badge("new")`
-#'
-#' This function gets the number of threads used for parallel computations involved
+#' @description This function gets the number of threads used for parallel computations involved
 #'    in the package.
 #'
 #' @return the number of threads.
@@ -470,16 +422,11 @@ read <- function(pkl_file) {
         class(res) <- "gp"
       } else {
         est_obj <- res$constructor_obj$export()
-        if (is.null(res[['specs']][['linked_idx']])){
-          linked_idx <- NULL
-        } else {
-          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
-        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
         }
-        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL)
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         colnames(res[['data']][['X']]) <- X_train_name
         colnames(res[['data']][['Y']]) <- Y_train_name
@@ -517,18 +464,13 @@ read <- function(pkl_file) {
         est_obj <- res$constructor_obj$estimate(burnin)
         B <- res$specs$B
         isblock <- res$constructor_obj$block
-        if (is.null(res[['specs']][['linked_idx']])){
-          linked_idx <- NULL
-        } else {
-          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
-        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
         }
         set_seed(res$specs$seed)
         res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
-        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL, isblock)
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         colnames(res[['data']][['X']]) <- X_train_name
         colnames(res[['data']][['Y']]) <- Y_train_name
@@ -566,10 +508,8 @@ read <- function(pkl_file) {
         } else {
           if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         }
-        if ('metadata' %in% names(res$specs)){
           res$specs$metadata <- as.data.frame(res$specs$metadata)
           res$specs$struc <- as.data.frame(res$specs$struc)
-        }
         class(res) <- "lgp"
       }
     } else if (label == 'bundle'){
@@ -593,12 +533,7 @@ read <- function(pkl_file) {
               class(res[[paste('emulator',i, sep='')]]) <- "gp"
             } else {
               est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$export()
-              if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
-                linked_idx <- NULL
-              } else {
-                linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
-              }
-              res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+              res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL)
               colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
               colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
               class(res[[paste('emulator',i, sep='')]]) <- "gp"
@@ -609,14 +544,9 @@ read <- function(pkl_file) {
           est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$estimate(burnin)
           B <- res[[paste('emulator',i, sep='')]]$specs$B
           isblock <- res[[paste('emulator',i, sep='')]]$constructor_obj$block
-          if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
-            linked_idx <- NULL
-          } else {
-            linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
-          }
           set_seed(res[[paste('emulator',i, sep='')]]$specs$seed)
           res[[paste('emulator',i, sep='')]][['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
-          res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+          res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL, isblock)
           colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
           colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"
@@ -703,11 +633,7 @@ read <- function(pkl_file) {
 
 #' @title Summary of a constructed GP, DGP, or linked (D)GP emulator
 #'
-#' @description
-#'
-#' `r new_badge("updated")`
-#'
-#' This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
+#' @description This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
 #' by generating either a table or an interactive plot of the emulator’s structure.
 #'
 #' @param object can be one of the following:
@@ -716,8 +642,7 @@ read <- function(pkl_file) {
 #' * the S3 class `lgp`.
 #' @param type a character string, either `"table"` or `"plot"`, indicating the format of the output.
 #'     If set to `"table"`, the function returns a summary in table. If set to `"plot"`, the function
-#'     returns an interactive visualization. Defaults to `"plot"`. If the `object` was created with
-#'     [lgp()] where `struc` is not a data frame, `type` will automatically default to `"table"`.
+#'     returns an interactive visualization. Defaults to `"plot"`.
 #' @param group_size an integer specifying the number of consecutive layers to be grouped together
 #'     in the interactive visualization of linked emulators when `type = "plot"`.
 #'     This argument is only applicable if `object` is an instance of the `lgp` class.
@@ -1284,7 +1209,6 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 
   if ( type!='plot' & type!='table' ) stop("'type' can only be either 'plot' or 'table'.", call. = FALSE)
 
-  if ( "metadata" %in% names(object$specs) ){
     if (type == 'table') {
       struc <- object$specs$struc
       metadata <- object$specs$metadata
@@ -1555,21 +1479,11 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
       }
       network
     }
-  } else {
-    pkg.env$dgpsi$summary(object$emulator_obj, 'pretty')
-    if (type == 'plot') {
-      warning("'type' has been automatically set to 'table' because 'object' was created by lgp() with 'struc' not in data frame format.", call. = FALSE)
-    }
-  }
 }
 
 #' @title Add or remove the Vecchia approximation
 #'
-#' @description
-#'
-#' `r new_badge("new")`
-#'
-#' This function adds or removes the Vecchia approximation from a GP, DGP or linked (D)GP emulator
+#' @description This function adds or removes the Vecchia approximation from a GP, DGP or linked (D)GP emulator
 #'     constructed by [gp()], [dgp()] or [lgp()].
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, or `lgp`.
@@ -1661,11 +1575,9 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
       }
     }
   } else if ( inherits(object,"lgp") ) {
-    if ( "metadata" %in% names(object$specs) ){
       if ( !("emulator_obj" %in% names(object)) ){
         stop("'object' is not activated. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
       }
-    }
     if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     tryCatch({
       object$emulator_obj$set_vecchia(mode = vecchia)
@@ -1676,55 +1588,6 @@ set_vecchia <- function(object, vecchia = TRUE, M = 25, ord = NULL) {
     })
     return(object)
   }
-}
-
-
-#' @title Set linked indices
-#'
-#' @description
-#'
-#' `r lifecycle::badge("deprecated")`
-#'
-#' This function is deprecated and will be removed in the next release. The updated
-#' [lgp()] function now offers a simpler, more efficient way to specify linked information
-#' for (D)GP emulators.
-#'
-#' @param object an instance of the S3 class `gp` or `dgp`.
-#' @param idx same as the argument `linked_idx` of [gp()] and [dgp()].
-#'
-#' @return An updated `object` with the information of `idx` incorporated.
-#'
-#' @note This function is useful when different models are emulated by different teams. Each team can create their (D)GP emulator
-#'     even without knowing how different emulators are connected together. When this information is available and
-#'     different emulators are collected, the connection information between emulators can then be assigned to
-#'     individual emulators with this function.
-#' @details See further examples and tutorials at <`r get_docs_url()`>.
-#' @examples
-#' \dontrun{
-#'
-#' # See lgp() for an example.
-#' }
-#' @md
-#' @keywords internal
-#' @export
-set_linked_idx <- function(object, idx) {
-  if ( is.null(pkg.env$dgpsi) ) {
-    init_py(verb = F)
-    if (pkg.env$restart) return(invisible(NULL))
-  }
-
-  lifecycle::deprecate_warn(
-    when = "2.5.0",
-    what = "set_linked_idx()",
-    details = c(i = "The function will be removed in the next release.",
-                i = "Please use the updated `lgp()` function to specify linked information for (D)GP emulators."
-    )
-  )
-
-  idx_py <- linked_idx_r_to_py(idx)
-  object[['container_obj']] <- object$container_obj$set_local_input(idx_py, TRUE)
-  object[['specs']][['linked_idx']] <- if ( is.null(idx) ) FALSE else idx
-  return(object)
 }
 
 #' @title Reset number of imputations for a DGP emulator
@@ -1775,9 +1638,6 @@ set_imp <- function(object, B = 5) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
@@ -1876,9 +1736,6 @@ window <- function(object, start, end = NULL, thin = 1) {
   new_object[['data']][['X']] <- object$data$X
   new_object[['data']][['Y']] <- object$data$Y
   new_object[['specs']] <- extract_specs(est_obj, "dgp")
-  new_object[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-  new_object[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-  new_object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   new_object[['specs']][['vecchia']] <- object[['specs']][['vecchia']]
   new_object[['specs']][['M']] <- object[['specs']][['M']]
   new_object[['constructor_obj']] <- constructor_obj_cp
@@ -2209,14 +2066,10 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
         if (length(nodes)==1){
           if ( verb ) message(paste(" - Transiting to a GP emulator ...", collapse=" "), appendLF = FALSE)
           struc <- nodes[[1]]
-          struc$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
-          struc$connect <- if( isFALSE(object[['specs']][['external_dims']]) ) NULL else reticulate::np_array(as.integer(object[['specs']][['external_dims']]-1))
+          struc$input_dim <- reticulate::np_array(as.integer(seq_len(ncol(object$data$X)) - 1))
+          struc$connect <- NULL
           struc$input <- X[,struc$input_dim+1,drop=F]
-          if ( is.null(struc$connect) ){
-            struc$global_input <- NULL
-          } else {
-            struc$global_input <- X[,struc$connect+1,drop=F]
-          }
+          struc$global_input <- NULL
           if (length(struc$length)!=1) {
             length_dim <- ncol(X)
             struc$length <- utils::tail(struc$length, length_dim)
@@ -2229,9 +2082,6 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
           res[['data']][['X']] <- X
           res[['data']][['Y']] <- Y
           res[['specs']] <- extract_specs(obj, "gp")
-          res[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-          res[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-          res[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
           res[['specs']][['vecchia']] <- vecchia
           res[['specs']][['M']] <- M
           res[['constructor_obj']] <- obj
@@ -2245,14 +2095,10 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
           gp_list <- vector('list', length(nodes))
           for (j in 1:length(nodes)){
             struc <- nodes[[j]]
-            struc$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
-            struc$connect <- if( isFALSE(object[['specs']][['external_dims']]) ) NULL else reticulate::np_array(as.integer(object[['specs']][['external_dims']]-1))
+            struc$input_dim <- reticulate::np_array(as.integer(seq_len(ncol(object$data$X)) - 1))
+            struc$connect <- NULL
             struc$input <- X[,struc$input_dim+1,drop=F]
-            if ( is.null(struc$connect) ){
-              struc$global_input <- NULL
-            } else {
-              struc$global_input <- X[,struc$connect+1,drop=F]
-            }
+            struc$global_input <- NULL
             if (length(struc$length)!=1) {
               length_dim <- ncol(X)
               struc$length <- utils::tail(struc$length, length_dim)
@@ -2265,9 +2111,6 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             res_j[['data']][['X']] <- X
             res_j[['data']][['Y']] <- Y[,j,drop=F]
             res_j[['specs']] <- extract_specs(obj, "gp")
-            res_j[['specs']][['internal_dims']] <- object[['specs']][['internal_dims']]
-            res_j[['specs']][['external_dims']] <- object[['specs']][['external_dims']]
-            res_j[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
             res_j[['specs']][['vecchia']] <- vecchia
             res_j[['specs']][['M']] <- M
             res_j[['constructor_obj']] <- obj
@@ -2284,17 +2127,13 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
         if ( verb ) message(paste(c(" - Pruning all nodes below layer", sprintf("%i", i+1), "..."), collapse=" "), appendLF = FALSE)
         all_layer <- all_layer[-c(1:i)]
         for ( j in 1:length(all_layer[[1]]) ){
-          all_layer[[1]][[j]]$input_dim <- reticulate::np_array(as.integer(object[['specs']][['internal_dims']] - 1))
-          all_layer[[1]][[j]]$connect <- if( isFALSE(object[['specs']][['external_dims']]) ) NULL else reticulate::np_array(as.integer(object[['specs']][['external_dims']]-1))
+          all_layer[[1]][[j]]$input_dim <- reticulate::np_array(as.integer(seq_len(ncol(object$data$X)) - 1))
+          all_layer[[1]][[j]]$connect <- NULL
           all_layer[[1]][[j]]$input <- object$constructor_obj$X[,all_layer[[1]][[j]]$input_dim+1,drop=F]
           all_layer[[1]][[j]]$R2 <- NULL
-          if ( is.null(all_layer[[1]][[j]]$connect) ){
-            all_layer[[1]][[j]]$global_input <- NULL
-          } else {
-            all_layer[[1]][[j]]$global_input <- object$constructor_obj$X[,all_layer[[1]][[j]]$connect+1,drop=F]
-          }
+          all_layer[[1]][[j]]$global_input <- NULL
           if (length(all_layer[[1]][[j]]$length)!=1) {
-            length_dim <- ncol(all_layer[[1]][[j]]$input)+ifelse( is.null(all_layer[[1]][[j]]$global_input), 0, ncol(all_layer[[1]][[j]]$global_input) )
+            length_dim <- ncol(all_layer[[1]][[j]]$input)
             all_layer[[1]][[j]]$length <- utils::tail(all_layer[[1]][[j]]$length, length_dim)
           }
         }
@@ -2307,12 +2146,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
           with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores))
         }
         est_obj <- object$constructor_obj$estimate()
-        internal_dims <- object[['specs']][['internal_dims']]
-        external_dims <- object[['specs']][['external_dims']]
         object[['specs']] <- extract_specs(est_obj, "dgp")
-        object[['specs']][['internal_dims']] <- internal_dims
-        object[['specs']][['external_dims']] <- external_dims
-        object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
         object[['specs']][['vecchia']] <- vecchia
         object[['specs']][['M']] <- M
         id <- sample.int(100000, 1)
@@ -2348,12 +2182,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
     with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores))
   }
   est_obj <- object$constructor_obj$estimate()
-  internal_dims <- object[['specs']][['internal_dims']]
-  external_dims <- object[['specs']][['external_dims']]
   object[['specs']] <- extract_specs(est_obj, "dgp")
-  object[['specs']][['internal_dims']] <- internal_dims
-  object[['specs']][['external_dims']] <- external_dims
-  object[['specs']][['linked_idx']] <- if ( is.null(linked_idx) ) FALSE else linked_idx_py_to_r(linked_idx)
   object[['specs']][['vecchia']] <- vecchia
   object[['specs']][['M']] <- M
   id <- sample.int(100000, 1)

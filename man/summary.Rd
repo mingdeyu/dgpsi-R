@@ -23,8 +23,7 @@
 
 \item{type}{a character string, either \code{"table"} or \code{"plot"}, indicating the format of the output.
 If set to \code{"table"}, the function returns a summary in table. If set to \code{"plot"}, the function
-returns an interactive visualization. Defaults to \code{"plot"}. If the \code{object} was created with
-\code{\link[=lgp]{lgp()}} where \code{struc} is not a data frame, \code{type} will automatically default to \code{"table"}.}
+returns an interactive visualization. Defaults to \code{"plot"}.}
 
 \item{...}{Any arguments that can be passed to \code{\link[kableExtra:kbl]{kableExtra::kbl()}} when \code{type = "table"}.}
 
@@ -40,13 +39,11 @@ documents and the RStudio Viewer. The summary table can be further customized by
 The resulting \code{visNetwork} object can be saved as an HTML file using \code{\link[visNetwork:visSave]{visNetwork::visSave()}} from the \link[visNetwork:visNetwork]{visNetwork::visNetwork} package.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
-
 This function provides a summary of key information for a GP, DGP, or linked (D)GP emulator
 by generating either a table or an interactive plot of the emulator’s structure.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \examples{
 \dontrun{

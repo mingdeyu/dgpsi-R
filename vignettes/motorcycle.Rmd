@@ -54,7 +54,7 @@ ggplot(data = data.frame(X = X, Y = Y), aes(x = X, y = Y)) +
         axis.text = element_text(size = 13))
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_data.png){width=100%}
+![](./images/motorcycle_data.png){width=100%}
 
 Before constructing an emulator, we first specify a seed with `set_seed()` from the package for reproducibility
 
@@ -84,7 +84,7 @@ m_dgp <- dgp(train_X, train_Y, depth = 3, likelihood = "Hetero")
 ## Auto-generating a 3-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:14<00:00, 35.52it/s]
+## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:09<00:00, 53.85it/s]
 ## Imputing ... done
 ```
 
@@ -152,7 +152,7 @@ plot(m_gp, test_x, test_y)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_gp_oos.png){width=100%}
+![](./images/motorcycle_gp_oos.png){width=100%}
 
 and for the DGP emulator:
 
@@ -166,7 +166,7 @@ plot(m_dgp, test_x, test_y)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/motorcycle_dgp_oos.png){width=100%}
+![](./images/motorcycle_dgp_oos.png){width=100%}
 
 Note that we still need to provide `test_x` and `test_y` to `plot()` even they have already been provided to `validate()`. Otherwise, `plot()` will draw a LOO cross validation plot. The visualizations above show that the DGP emulator gives a better performance than the GP emulator on modeling the heteroskedastic noise embedded in the underlying data set, even though they have quite similar NRMSEs.
 

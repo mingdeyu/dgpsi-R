@@ -1,10 +1,6 @@
 #' @title Validation plots of a constructed GP, DGP, or linked (D)GP emulator
 #'
-#' @description
-#'
-#' `r new_badge("updated")`
-#'
-#' This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
+#' @description This function draws validation plots of a GP, DGP, or linked (D)GP emulator.
 #'
 #' @param x can be one of the following emulator classes:
 #' * the S3 class `gp`.
@@ -12,17 +8,10 @@
 #' * the S3 class `lgp`.
 #' @param x_test same as that of [validate()].
 #' @param y_test same as that of [validate()].
-#' @param dim `r new_badge("updated")` if `dim = NULL`, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
+#' @param dim if `dim = NULL`, the index of an emulator's input within the design will be shown on the x-axis in validation plots. Otherwise, `dim` indicates
 #'     which dimension of an emulator's input will be shown on the x-axis in validation plots:
 #' * If `x` is an instance of the `gp` of `dgp` class, `dim` is an integer.
-#' * `r lifecycle::badge("deprecated")` If `x` is an instance of the `lgp` class created by [lgp()] without specifying the `struc` argument in data frame form, `dim` can be:
-#'   1. an integer referring to the dimension of the global input to emulators in the first layer of a linked emulator system; or
-#'   2. a vector of three integers referring to the dimension (specified by the third integer) of the global input to an emulator
-#'   (specified by the second integer) in a layer (specified by the first integer) that is not the first layer of a linked emulator
-#'   system.
-#'
-#'   **This option for linked (D)GP emulators is deprecated and will be removed in the next release.**
-#' * `r new_badge("new")` If `x` is an instance of the `lgp` class created by [lgp()] with argument `struc` in data frame form, `dim` is an integer referring
+#' * If `x` is an instance of the `lgp` class, `dim` is an integer referring
 #'   to the dimension of the global input to the linked emulator system.
 #'
 #' This argument is only used when `style = 1`. Defaults to `NULL`.
@@ -49,7 +38,7 @@
 #'     categorical likelihoods. Defaults to `'points'`
 #' @param verb a bool indicating if trace information on plotting will be printed during execution.
 #'     Defaults to `TRUE`.
-#' @param M `r new_badge("new")` same as that of [validate()].
+#' @param M same as that of [validate()].
 #' @param force same as that of [validate()].
 #' @param cores same as that of [validate()].
 #' @param ... N/A.
@@ -508,14 +497,9 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
     if (pkg.env$restart) return(invisible(NULL))
   }
 
-  if ( "metadata" %in% names(x$specs) ){
     if ( !("emulator_obj" %in% names(x)) ){
       stop("'object' is not activated for plotting. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
     }
-    is.df <- TRUE
-  } else {
-    is.df <- FALSE
-  }
 
   if ( style!=1&style!=2 ) stop("'style' must be either 1 or 2.", call. = FALSE)
   if ( type!='points'&type!='line' ) stop("'type' must be either 'points' or 'line'.", call. = FALSE)
@@ -650,7 +634,6 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
         } else {
           if ( length(dim)==1 ){
             idx <- oos_res$x_test[,dim]
-            if (!is.df) dim <- c(1,dim)
           } else {
             stop("'dim' must be a vector of length 1. See documentation for details.", call. = FALSE)
           }
@@ -927,7 +910,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
         dat[["x_test"]] <- oos_res$x_test[,1]
         dat[["y_test"]] <- oos_res$y_test[,1]
         # extract training data points
-        dat_train <- list('x_train' = results$constructor_obj$X[,1], 'y_train' = results$constructor_obj$Y[,1])
+        dat_train <- list('x_train' = results$data$X[,1], 'y_train' = results$data$Y[,1])
         # construct a range for predictions
         dat_range <- list()
         if ( "mean" %in% names(oos_res) ){

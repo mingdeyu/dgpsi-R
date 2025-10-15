@@ -1,17 +1,8 @@
 #' @title Linked (D)GP emulator construction
 #'
-#' @description
+#' @description This function constructs a linked (D)GP emulator for a model chain or network.
 #'
-#' `r new_badge("updated")`
-#'
-#' This function constructs a linked (D)GP emulator for a model chain or network.
-#'
-#' @param struc the structure of the linked emulator, which can take one of two forms:
-#' - `r lifecycle::badge("deprecated")` a list contains *L* (the number of layers in a systems of computer models) sub-lists,
-#'     each of which represents a layer and contains (D)GP emulators (represented by
-#'     instances of S3 class `gp` or `dgp`) of computer models. The sub-lists are placed in the list
-#'     in the same order of the specified computer model system's hierarchy. **This option is deprecated and will be removed in the next release.**
-#' - `r new_badge("new")` a data frame that defines the connection structure between emulators in the linked system, with the following columns:
+#' @param struc a data frame that defines the connection structure between emulators in the linked system, with the following columns:
 #'   * `From_Emulator`: the ID of the emulator providing the output. This ID must match the `id` slot
 #'     in the corresponding emulator object (produced by [gp()] or [dgp()]) within `emulators` argument of [lgp()], or it should
 #'     be special value `"Global"`, indicating the global inputs to the model chain or network. The `id` slot
@@ -28,9 +19,7 @@
 #'   Each row represents a single one-to-one connection between a specified output dimension of `From_Emulator`
 #'   and a corresponding input dimension of `To_Emulator`. If multiple connections are required between
 #'   two emulators, each connection should be specified in a separate row.
-#'
-#'   **Note:** When using the data frame option for `struc`, the `emulators` argument must be provided.
-#' @param emulators `r new_badge("new")` a list of emulator objects, each containing an `id` slot that uniquely identifies it within the
+#' @param emulators a list of emulator objects, each containing an `id` slot that uniquely identifies it within the
 #'   linked system. The `id` slot in each emulator object must match the `From_Emulator`/`To_Emulator` columns in `struc`.
 #'
 #'   If the same emulator is used multiple times within the linked system, the list must contain distinct copies
@@ -38,13 +27,13 @@
 #'   to ensure each instance can be uniquely referenced.
 #' @param B the number of imputations used for prediction. Increase the value to refine representation of
 #'     imputation uncertainty. If the system consists of only GP emulators, `B` is set to `1` automatically. Defaults to `10`.
-#' @param activate `r new_badge("new")` a bool indicating whether the initialized linked emulator should be activated:
+#' @param activate a bool indicating whether the initialized linked emulator should be activated:
 #' - If `activate = FALSE`, [lgp()] returns an inactive linked emulator, allowing inspection of its structure using [summary()].
 #' - If `activate = TRUE`, [lgp()] returns an active linked emulator, ready for prediction and validation using [predict()] and [validate()], respectively.
 #'
-#' Defaults to `TRUE`. This argument is only applicable when `struc` is specified as a data frame.
-#' @param verb `r new_badge("new")` a bool indicating if the trace information on linked (D)GP emulator construction should be printed during the function call.
-#'     Defaults to `TRUE`. This argument is only applicable when `struc` is specified as a data frame.
+#' Defaults to `TRUE`.
+#' @param verb a bool indicating if the trace information on linked (D)GP emulator construction should be printed during the function call.
+#'     Defaults to `TRUE`.
 #' @param id an ID to be assigned to the linked (D)GP emulator. If an ID is not provided (i.e., `id = NULL`), a UUID
 #'    (Universally Unique Identifier) will be automatically generated and assigned to the emulator. Defaults to `NULL`.
 #'
@@ -57,9 +46,7 @@
 #'      when the linked (D)GP emulator (that was saved by [write()] with the light option `light = TRUE`) is loaded back
 #'      to R by [read()].
 #'   2. `B`: the number of imputations used to generate the linked (D)GP emulator.
-#'
-#'   `r new_badge("new")` If `struc` is a data frame, `specs` also includes:
-#'   1. `metadata`: a data frame providing configuration details for each emulator in the linked system, with following columns:
+#'   3. `metadata`: a data frame providing configuration details for each emulator in the linked system, with following columns:
 #'      - `Emulator`: the ID of an emulator.
 #'      - `Layer`: the layer in the linked system where the emulator is positioned. A lower `Layer` number indicates
 #'        a position closer to the input, with layer numbering increasing as you move away from the input.
@@ -67,7 +54,7 @@
 #'        indicates a position higher up in that layer.
 #'      - `Total_Input_Dims`: the total number of input dimensions of the emulator.
 #'      - `Total_Output_Dims`: the total number of output dimensions of the emulator.
-#'   2. `struc`: The linked system structure, as supplied by `struc`.
+#'   4. `struc`: The linked system structure, as supplied by `struc`.
 #'
 #' The returned `lgp` object can be used by
 #' * [predict()] for linked (D)GP predictions.
@@ -137,13 +124,12 @@
 #' }
 #' @md
 #' @export
-lgp <- function(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, id = NULL) {
+lgp <- function(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
   }
 
-  if ( is.data.frame(struc) ){
     #if ( mode!='validate' & mode!='activate' ) stop("'mode' can only be either 'validate' or 'activate'.", call. = FALSE)
     if ( verb ) message("Processing emulators ...", appendLF = FALSE)
     struc <- validate_emulator_data(struc, emulators)
@@ -155,20 +141,8 @@ lgp <- function(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, i
       Sys.sleep(0.5)
       message(" done")
     }
-  } else {
-    lifecycle::deprecate_warn(
-      when = "2.5.0",
-      what = I("Providing `struc` in list form"),
-      details = c(
-        i = "Support for providing `struc` as a list will be removed in the next release.",
-        i = "To maintain compatibility with future versions, please update your code to use the new
-            data frame format of `struc` and pass a list of emulators to the new `emulators` argument."
-      )
-    )
-    lgp_struc <- struc
-  }
 
-  if ( verb & is.data.frame(struc) ) message("Linking and synchronizing emulators ...", appendLF = FALSE)
+  if ( verb ) message("Linking and synchronizing emulators ...", appendLF = FALSE)
   B <- as.integer(B)
   L <- length(lgp_struc)
   extracted_struc <- list()
@@ -177,7 +151,6 @@ lgp <- function(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, i
     K <- length(lgp_struc[[l]])
     for (k in 1:K) {
       cont <- pkg.env$copy$deepcopy(lgp_struc[[l]][[k]]$container_obj)
-      if (is.data.frame(struc)){
         # check cont and restore link and input_dim in case old versions of emulators are used for the new option
         if (cont$type=='gp'){
           if ( !is.null(cont$structure$connect) ){
@@ -330,54 +303,15 @@ lgp <- function(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, i
            # }
           }
         }
-      # to be deprecated
-      } else {
-        if ( is.null(cont$local_input_idx) ){
-          stop(sprintf("Emulator %i in Layer %i has no 'linked_idx' specified. Use set_linked_idx() to specify this attribute.", k, l), call. = FALSE)
-        }
-        if ( l==1 ){
-          if (cont$type=='gp'){
-            if ( !is.null(cont$structure$connect) ){
-              inverse_order <- order(c(cont$structure$input_dim, cont$structure$connect) + 1)
-              cont$structure$input <- cbind(cont$structure$input, cont$structure$global_input)[,inverse_order,drop=F]
-              cont$structure$global_input <- NULL
-              cont$structure$input_dim <- (1:length(inverse_order))-1
-              cont$structure$connect <- NULL
-              if (length(cont$structure$length)!=1) cont$structure$length <- cont$structure$length[inverse_order]
-            }
-          } else {
-            exist.connect <- FALSE
-            for (item in cont$structure[[1]]){
-              if ( !is.null(item$connect) ){
-                exist.connect <- TRUE
-                break
-              }
-            }
-            if ( exist.connect ){
-              for (item in cont$structure[[1]]){
-                if ( !is.null(item$connect) ){
-                  inverse_order <- order(c(item$input_dim, item$connect) + 1)
-                  item$input <- cbind(item$input, item$global_input)[,inverse_order,drop=F]
-                  item$global_input <- NULL
-                  item$input_dim <- (1:length(inverse_order))-1
-                  item$connect <- NULL
-                  if (length(item$length)!=1) item$length <- item$length[inverse_order]
-                }
-              }
-            }
-          }
-        }
-      }
       layer[[k]] <- cont
     }
     extracted_struc[[l]] <- layer
   }
-  if ( verb & is.data.frame(struc) ) {
+  if ( verb ) {
     Sys.sleep(0.1)
     message(" done")
   }
 
-  if ( is.data.frame(struc) ){
     #if ( mode == "validate" ) {
     #  if ( verb ) message("Validating the linked emulator ...", appendLF = FALSE)
     #} else if ( mode == "activate" ){
@@ -402,23 +336,16 @@ lgp <- function(struc, emulators = NULL, B = 10, activate = TRUE, verb = TRUE, i
         message(" done")
       }
     }
-  } else {
-    res <- list(constructor_obj = extracted_struc)
-    res[['id']] <- if (is.null(id)) uuid::UUIDgenerate() else id
-    seed <- sample.int(100000, 1)
-    set_seed(seed)
-    obj <- pkg.env$dgpsi$lgp(all_layer = extracted_struc, N = B)
-    res[['emulator_obj']] <- obj
-    res[['specs']][['seed']] <- seed
-    res[['specs']][['B']] <- B
-  }
   class(res) <- "lgp"
   return(res)
 }
 
 validate_emulator_data <- function(struc, emulators) {
+  if (!is.data.frame(struc)) {
+    stop("`struc` must be a data frame.", call. = FALSE)
+  }
   if (is.null(emulators)) {
-    stop("When `struc` is a data frame, `emulators` must be supplied and not NULL.", call. = FALSE)
+    stop("`emulators` must be supplied and not NULL.", call. = FALSE)
   }
 
   # Ensure necessary columns are present in struc

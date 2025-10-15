@@ -31,7 +31,7 @@ library(dgpsi)
 We consider the following synthetic system
 
 <div style="text-align: center;">
-  <img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_model.png" width="60%">
+  <img src="./images/linked_model.png" width="60%">
 </div>
 
 that involves three models defined by:
@@ -101,7 +101,7 @@ plot(m1)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/model_1_loo.png){width=100%}
+![](./images/model_1_loo.png){width=100%}
 
 ## Emulation of Model 2
 
@@ -137,7 +137,7 @@ Post-processing LOO results ... done
 Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/model_2_loo.png){width=100%}
+![](./images/model_2_loo.png){width=100%}
 
 ## Emulation of Model 3
 
@@ -167,7 +167,7 @@ Post-processing LOO results ... done
 Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/model_3_loo.png){width=100%}
+![](./images/model_3_loo.png){width=100%}
 
 ## Emulation of Linked Model
 
@@ -257,7 +257,7 @@ plot(m_gp, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
   plot_annotation(title = 'GP Emulator', theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_result.png){width=100%}
+![](./images/linked_result.png){width=100%}
 
 ```{r}
 # Linked emulator
@@ -265,7 +265,7 @@ plot(m_link, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
   plot_annotation(title = 'Linked Emulator', theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_result_new.png){width=100%}
+![](./images/linked_result_new.png){width=100%}
 
 We see that the linked emulator outperforms the GP emulator with significantly better mean prediction and uncertainty quantification.
 
@@ -290,7 +290,7 @@ plot(m_gp, test_x_oos, test_y_oos, style = 2)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/gp_oos.png){width=100%}
+![](./images/gp_oos.png){width=100%}
 
 and the linked emulator:
 
@@ -304,6 +304,6 @@ plot(m_link, test_x_oos, test_y_oos, style = 2)
 ## Plotting ... done
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/linked_oos.png){width=100%}
+![](./images/linked_oos.png){width=100%}
 
 which show that the linked emulator outperforms the GP emulator with significantly better predictive accuracy and lower NRMSE.

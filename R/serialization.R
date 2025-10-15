@@ -1,10 +1,6 @@
 #' @title Serialize the constructed emulator
 #'
-#' @description
-#'
-#' `r new_badge("new")`
-#'
-#' This function serializes the constructed emulator.
+#' @description This function serializes the constructed emulator.
 #'
 #' @param object an instance of the S3 class `gp`, `dgp`, `lgp`, or `bundle`.
 #' @param light a bool indicating if a light version of the constructed emulator (that requires a small storage) will be serialized.
@@ -80,11 +76,9 @@ serialize <- function(object, light = TRUE) {
       object[['emulator_obj']] <- NULL
       object[['container_obj']] <- NULL
     } else if (inherits(object,"lgp")){
-      if ( "metadata" %in% names(object$specs) ){
         if ( !("emulator_obj" %in% names(object)) ){
           stop("'object' must be activated for serialization. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
         }
-      }
       if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
       if ( !"seed" %in% names(object$specs) ) stop("The supplied 'object' cannot be serialized in light mode. To serialize, either set 'light = FALSE' or re-construct and activate the 'object' by lgp().", call. = FALSE)
       object[['emulator_obj']] <- NULL
@@ -107,11 +101,9 @@ serialize <- function(object, light = TRUE) {
     if (inherits(object,"bundle")){
       if ( reticulate::py_is_null_xptr(object$emulator1$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulators in the bundle or, if the bundle was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     } else if (inherits(object,"lgp")) {
-      if ( "metadata" %in% names(object$specs) ){
         if ( !("emulator_obj" %in% names(object)) ){
           stop("'object' must be activated for serialization. Please set `activate = TRUE` in `lgp()` to activate the emulator.", call. = FALSE)
         }
-      }
       if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
     } else {
       if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
@@ -168,11 +160,7 @@ serialize <- function(object, light = TRUE) {
 
 #' @title Restore the serialized emulator
 #'
-#' @description
-#'
-#' `r new_badge("new")`
-#'
-#' This function restores the serialized emulator created by [serialize()].
+#' @description This function restores the serialized emulator created by [serialize()].
 #'
 #' @param object the serialized object of an emulator.
 #'
@@ -222,16 +210,11 @@ deserialize <- function(object) {
         class(res) <- "gp"
       } else {
         est_obj <- res$constructor_obj$export()
-        if (is.null(res[['specs']][['linked_idx']])){
-          linked_idx <- NULL
-        } else {
-          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
-        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
         }
-        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL)
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         colnames(res[['data']][['X']]) <- X_train_name
         colnames(res[['data']][['Y']]) <- Y_train_name
@@ -269,18 +252,13 @@ deserialize <- function(object) {
         est_obj <- res$constructor_obj$estimate(burnin)
         B <- res$specs$B
         isblock <- res$constructor_obj$block
-        if (is.null(res[['specs']][['linked_idx']])){
-          linked_idx <- NULL
-        } else {
-          linked_idx <- if ( isFALSE( res[['specs']][['linked_idx']]) ) {NULL} else {res[['specs']][['linked_idx']]}
-        }
         if (!'vecchia' %in% names(res$specs)) {
           res[['specs']][['vecchia']] <- FALSE
           res[['specs']][['M']] <- 25
         }
         set_seed(res$specs$seed)
         res[['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
-        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+        res[['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL, isblock)
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         colnames(res[['data']][['X']]) <- X_train_name
         colnames(res[['data']][['Y']]) <- Y_train_name
@@ -318,10 +296,8 @@ deserialize <- function(object) {
         } else {
           if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         }
-        if ('metadata' %in% names(res$specs)){
           res$specs$metadata <- as.data.frame(res$specs$metadata)
           res$specs$struc <- as.data.frame(res$specs$struc)
-        }
         class(res) <- "lgp"
       }
     } else if (label == 'bundle'){
@@ -345,12 +321,7 @@ deserialize <- function(object) {
               class(res[[paste('emulator',i, sep='')]]) <- "gp"
             } else {
               est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$export()
-              if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
-                linked_idx <- NULL
-              } else {
-                linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
-              }
-              res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx))
+              res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL)
               colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
               colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
               class(res[[paste('emulator',i, sep='')]]) <- "gp"
@@ -361,14 +332,9 @@ deserialize <- function(object) {
           est_obj <- res[[paste('emulator',i, sep='')]]$constructor_obj$estimate(burnin)
           B <- res[[paste('emulator',i, sep='')]]$specs$B
           isblock <- res[[paste('emulator',i, sep='')]]$constructor_obj$block
-          if (is.null(res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']])){
-            linked_idx <- NULL
-          } else {
-            linked_idx <- if ( isFALSE( res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]) ) {NULL} else {res[[paste('emulator',i, sep='')]][['specs']][['linked_idx']]}
-          }
           set_seed(res[[paste('emulator',i, sep='')]]$specs$seed)
           res[[paste('emulator',i, sep='')]][['emulator_obj']] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
-          res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, linked_idx_r_to_py(linked_idx), isblock)
+          res[[paste('emulator',i, sep='')]][['container_obj']] <- pkg.env$dgpsi$container(est_obj, NULL, isblock)
           colnames(res[[paste('emulator',i, sep='')]][['data']][['X']]) <- X_train_name
           colnames(res[[paste('emulator',i, sep='')]][['data']][['Y']]) <- Y_train_name
           class(res[[paste('emulator',i, sep='')]]) <- "dgp"

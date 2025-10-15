@@ -1,4 +1,4 @@
-# dgpsi 2.5.0-9000 (development version)
+# dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.
 - The Python environment now installs packages exclusively from conda-forge whenever possible. Packages from other channels will only be used if they are unavailable on conda-forge.
 - A bug in `vigf()`, affecting a bundle of emulators that includes GP emulators, has now been fixed.
@@ -16,6 +16,7 @@
 - Updated `init_py()` to handle errors related to TOS acceptance when installing Miniconda, and to automate TOS acceptance for required channels.
 - Enabled use of the `newaccelerate` BLAS library on Apple Silicon machines running macOS > 13.3.
 - Added the `decouple` argument to `dgp()` to allow likelihood parameters to be modeled using separate deep Gaussian process hierarchies when `depth > 2`.
+- Added the `link` argument to `dgp()` to support binary classification using either logit or probit link function when `likelihood = "Categorical"`.
 - Inference for (D)GPs with homogeneous noise and replicates in the training data has been significantly enhanced, achieving over 10× speed-up.
 
 # dgpsi 2.5.0

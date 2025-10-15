@@ -13,8 +13,8 @@ pkg.env$dill <- NULL
 #'
 #' @description This function initializes the 'python' environment for the package.
 #'
-#' @param py_ver a string that gives the 'python' version to be installed. If `py_ver = NULL`, the default 'python'
-#'     version '3.9.13' will be installed.
+#' @param py_ver a string that gives the 'python' version to be installed. Supported versions are 3.10, 3.11, and 3.12.
+#'    If `py_ver = NULL`, the default 'python' version '3.10' will be installed.
 #' @param dgpsi_ver a string that gives the 'python' version of 'dgpsi' to be used. If `dgpsi_ver = NULL`,
 #' * the latest 'python' version of 'dgpsi' will be used, if the package is installed from CRAN;
 #' * the development 'python' version of 'dgpsi' will be used, if the package is installed from GitHub.
@@ -40,16 +40,16 @@ pkg.env$dill <- NULL
 #' @md
 #' @export
 init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstall = FALSE, verb = TRUE) {
-  if ( is.null(py_ver) ) py_ver <- '3.9.13'
+  if ( is.null(py_ver) ) py_ver <- '3.10'
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
-    dgpsi_ver <- c('cython>=0.29.30', 'dill>=0.3.2, <=0.3.5.1', 'jupyter>=1.0.0', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
-                   'numpy >=1.18.2', 'pathos ==0.2.9', 'multiprocess ==0.70.13', 'psutil >=5.8.0', 'pybind11 >=2.10.0', 'pythran >=0.11.0',
-                   'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4')
-    env_name <- 'dgp_si_R_2_5_0_9000'
+    #dgpsi_ver <- c('dill>=0.3.2', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
+    #               'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
+    #               'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4')
+    #env_name <- 'dgp_si_R_2_5_0_9000'
     ##For release version
-    #dgpsi_ver <- 'dgpsi==2.5.0'
-    #env_name <- 'dgp_si_R_2_5_0'
+    dgpsi_ver <- 'dgpsi==2.6.0'
+    env_name <- 'dgp_si_R_2_6_0'
   } else {
     env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
     dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")

@@ -61,7 +61,7 @@ ggplot(dat, aes(x1, x2, fill = f)) + geom_tile() +
   scale_fill_continuous(type = "viridis")
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/shubert.png){width=100%}
+![](./images/shubert.png){width=100%}
 
 From the figure above, we can observe that the Shubert function has several local minima and two global minima located at (0.1437, 0.2999) and (0.2999, 0.1437), both with values around -186.7309. In the remainder of this vignette, we will use Expected Improvement (EI) as the acquisition function to identify the global minima.
 
@@ -120,7 +120,7 @@ ei <- function(object, limits, n_starts = 10, ...) {
     # Calculate Expected Improvement (EI)
     z <- improvement / sigma
     ei <- improvement * pnorm(z) + sigma * dnorm(z)
-    ei <- ifelse(ei < 0, 0, ei)  # Ensure non-negative EI
+    ei <- ifelse(ei < 1e-10, 0, ei)  # Ensure non-negative EI
     
     return(-ei)  # Return negative EI because `optim()` minimizes by default
   }
@@ -190,23 +190,23 @@ m <- design(m, N = 80, limits = lim, f = shubert, method = ei, eval = opt_monito
 ## 
 ## Iteration 6:
 ##  - Locating ... done
-##  * Next design point: 0.299331 0.125606
+##  * Next design point: 0.299327 0.125593
 ##  - Updating and re-fitting ... done
 ##  - Transiting to a GP emulator ... done
 ##  - Validating ... done
-##  * Metric: -186.039545
+##  * Metric: -186.041431
 ## 
 ## ...
 ## 
 ## Iteration 80:
 ##  - Locating ... done
-##  * Next design point: 0.907645 0.000000
+##  * Next design point: 0.333064 0.511119
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * Metric: -186.728582
+##  * Metric: -186.727548
 ```
 
-During the Bayesian optimization, our dynamic pruning mechanism transitioned the DGP emulator to a GP emulator at iteration 6, leading to faster optimizations in the remaining iterations while maintaining the emulator's quality. After 80 iterations, we identified a minimum of the Shubert function with a value of -186.7286, which is very close to the global minimum of -186.7309. We can inspect the progress of the minima search conducted by `design()` by applying `draw()` to `m`:
+During the Bayesian optimization, our dynamic pruning mechanism transitioned the DGP emulator to a GP emulator at iteration 6, leading to faster optimizations in the remaining iterations while maintaining the emulator's quality. After 80 iterations, we identified a minimum of the Shubert function with a value of -186.7275, which is very close to the global minimum of -186.7309. We can inspect the progress of the minima search conducted by `design()` by applying `draw()` to `m`:
 
 ```{r}
 draw(m) +
@@ -217,7 +217,7 @@ draw(m) +
     aes(yintercept = y, linetype = "Global Minimum"), # Global minimum
     data = data.frame(y = -186.7309),
     color = "#E31A1C",
-    size = 0.5
+    linewidth = 0.5
   ) +
   scale_linetype_manual(
     values = c("Global Minimum" = "dashed"),
@@ -225,9 +225,9 @@ draw(m) +
   )
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/bo_tracker.png){width=100%}
+![](./images/bo_tracker.png){width=100%}
 
-The figure above shows that Bayesian optimization using our (D)GP emulator quickly identifies a low value of the Shubert function within 5 iterations. Notably, the lowest value, -186.7286, was achieved by `design()` after 48 iterations.
+The figure above shows that Bayesian optimization using our (D)GP emulator quickly identifies a low value of the Shubert function within 5 iterations. Notably, the lowest value, -186.7275, was achieved by `design()` after 71 iterations.
 
 We can also inspect the locations identified during the process by applying `draw()` to `m` with `type = 'design'`:
 
@@ -249,7 +249,7 @@ draw(m, type = 'design') +
   )
 ```
 
-![](https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/bo_design.png){width=100%}
+![](./images/bo_design.png){width=100%}
 
 The figure above illustrates that Bayesian optimization successfully identifies the regions around the two global minima, represented as red inverted triangles, by adding design points concentrated near these two locations.
 

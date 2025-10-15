@@ -50,7 +50,7 @@ Defaults to \code{TRUE}.}
 
 \item{...}{N/A.}
 
-\item{N}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. If set to \code{NULL},
+\item{N}{number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. If set to \code{NULL},
 the number of iterations is set to \code{100} if the DGP emulator was constructed without the Vecchia approximation, and is set to \code{50}
 if Vecchia approximation was used. Defaults to \code{NULL}.}
 
@@ -73,7 +73,7 @@ An updated \code{object}.
 This function updates the training input and output of a GP or DGP emulator with an option to refit the emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

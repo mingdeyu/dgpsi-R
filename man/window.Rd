@@ -25,7 +25,7 @@ This function trims the sequence of hyperparameter estimates within a DGP emulat
 generated during training.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \note{
 \itemize{

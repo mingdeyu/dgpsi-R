@@ -1,11 +1,7 @@
 .panel_x <- .panel_y <- NULL
 #' @title Validation and diagnostic plots for a sequential design
 #'
-#' @description
-#'
-#' `r new_badge("updated")`
-#'
-#' This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
+#' @description This function draws diagnostic and validation plots for a sequential design of a (D)GP emulator or a bundle of (D)GP emulators.
 #'
 #' @param object can be one of the following emulator classes:
 #' * the S3 class `gp`.
@@ -18,7 +14,7 @@
 #' Defaults to `"rmse"`.
 #' @param log a bool indicating whether to plot RMSEs, log-losses (for DGP emulators with categorical likelihoods), or custom evaluation metrics on a log scale when `type = "rmse"`.
 #'     Defaults to `FALSE`.
-#' @param emulator `r new_badge("updated")` an index or vector of indices of emulators packed in `object`. This argument is only used if `object` is an instance of the `bundle` class. When set to `NULL`, all
+#' @param emulator an index or vector of indices of emulators packed in `object`. This argument is only used if `object` is an instance of the `bundle` class. When set to `NULL`, all
 #'     emulators in the bundle are drawn. Defaults to `NULL`.
 #' @param ... N/A.
 #'
@@ -77,13 +73,16 @@ draw.gp <- function(object, type = 'rmse', log = FALSE, ...){
 
     p <- pair_design(design_data)
 
+    caption_text <- if (is.null(colnames(object$data$X))) {
+      'Xi = Input dimension i of the GP emulator'
+    } else {
+      NULL
+    }
+
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
       title = 'Sequential Design',
-      if (is.null(colnames(object$data$X))){
-      caption =
-        'Xi = Input dimension i of the GP emulator'
-      }
+      caption = caption_text
     )
   } else if ( type == 'rmse' ){
     total_N <- nrow(object$data$X)
@@ -204,13 +203,16 @@ draw.dgp <- function(object, type = 'rmse', log = FALSE, ...){
     design_data$Design <- wave
     p <- pair_design(design_data)
 
+    caption_text <- if (is.null(colnames(object$data$X))) {
+      'Xi = Input dimension i of the DGP emulator'
+    } else {
+      NULL
+    }
+
     p_patch <- patchwork::wrap_plots(p) +
       patchwork::plot_annotation(
         title = 'Sequential Design',
-        if (is.null(colnames(object$data$X))){
-        caption =
-          'Xi = Input dimension i of the DGP emulator'
-        }
+        caption = caption_text
       )
   } else if ( type == 'rmse' ){
     if (object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$name == "Categorical") {
