@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.5.0-9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.6.0-9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,12 +45,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation
-    </a></li>
+<li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/motorcycle.html">Non-Gaussian Emulation</a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification
-    </a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
     <li><a class="dropdown-item" href="../articles/bayes_opt.html">Bayesian Optimization</a></li>
@@ -138,7 +136,7 @@ we generate the contour of the Shubert function:</p>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">mutate</span><span class="op">(</span><span class="va">dat</span>, f <span class="op">=</span> <span class="fu">shubert</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, fill <span class="op">=</span> <span class="va">f</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_continuous.html" class="external-link">scale_fill_continuous</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"viridis"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/shubert.png" style="width:100.0%"></p>
+<p><img src="images/shubert.png" style="width:100.0%"></p>
 <p>From the figure above, we can observe that the Shubert function has
 several local minima and two global minima located at (0.1437, 0.2999)
 and (0.2999, 0.1437), both with values around -186.7309. In the
@@ -196,7 +194,7 @@ adhering to the rules specified for the <code>method</code> argument in
 <span>    <span class="co"># Calculate Expected Improvement (EI)</span></span>
 <span>    <span class="va">z</span> <span class="op">&lt;-</span> <span class="va">improvement</span> <span class="op">/</span> <span class="va">sigma</span></span>
 <span>    <span class="va">ei</span> <span class="op">&lt;-</span> <span class="va">improvement</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">pnorm</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op">+</span> <span class="va">sigma</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span></span>
-<span>    <span class="va">ei</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">ei</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="va">ei</span><span class="op">)</span>  <span class="co"># Ensure non-negative EI</span></span>
+<span>    <span class="va">ei</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">ei</span> <span class="op">&lt;</span> <span class="fl">1e-10</span>, <span class="fl">0</span>, <span class="va">ei</span><span class="op">)</span>  <span class="co"># Ensure non-negative EI</span></span>
 <span>    </span>
 <span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">-</span><span class="va">ei</span><span class="op">)</span>  <span class="co"># Return negative EI because `optim()` minimizes by default</span></span>
 <span>  <span class="op">}</span></span>
@@ -267,25 +265,25 @@ optimization using <code><a href="../reference/design.html">design()</a></code> 
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 6:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.299331 0.125606</span></span>
+<span><span class="co">##  * Next design point: 0.299327 0.125593</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Transiting to a GP emulator ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * Metric: -186.039545</span></span>
+<span><span class="co">##  * Metric: -186.041431</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 80:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.907645 0.000000</span></span>
+<span><span class="co">##  * Next design point: 0.333064 0.511119</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * Metric: -186.728582</span></span></code></pre>
+<span><span class="co">##  * Metric: -186.727548</span></span></code></pre>
 <p>During the Bayesian optimization, our dynamic pruning mechanism
 transitioned the DGP emulator to a GP emulator at iteration 6, leading
 to faster optimizations in the remaining iterations while maintaining
 the emulator’s quality. After 80 iterations, we identified a minimum of
-the Shubert function with a value of -186.7286, which is very close to
+the Shubert function with a value of -186.7275, which is very close to
 the global minimum of -186.7309. We can inspect the progress of the
 minima search conducted by <code><a href="../reference/design.html">design()</a></code> by applying
 <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
@@ -298,17 +296,17 @@ minima search conducted by <code><a href="../reference/design.html">design()</a>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">y</span>, linetype <span class="op">=</span> <span class="st">"Global Minimum"</span><span class="op">)</span>, <span class="co"># Global minimum</span></span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="op">-</span><span class="fl">186.7309</span><span class="op">)</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"#E31A1C"</span>,</span>
-<span>    size <span class="op">=</span> <span class="fl">0.5</span></span>
+<span>    linewidth <span class="op">=</span> <span class="fl">0.5</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span></span>
 <span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Global Minimum"</span> <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span>,</span>
 <span>    name <span class="op">=</span> <span class="st">""</span> <span class="co"># Remove the legend title</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/bo_tracker.png" style="width:100.0%"></p>
+<p><img src="images/bo_tracker.png" style="width:100.0%"></p>
 <p>The figure above shows that Bayesian optimization using our (D)GP
 emulator quickly identifies a low value of the Shubert function within 5
-iterations. Notably, the lowest value, -186.7286, was achieved by
-<code><a href="../reference/design.html">design()</a></code> after 48 iterations.</p>
+iterations. Notably, the lowest value, -186.7275, was achieved by
+<code><a href="../reference/design.html">design()</a></code> after 71 iterations.</p>
 <p>We can also inspect the locations identified during the process by
 applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code> with
 <code>type = 'design'</code>:</p>
@@ -328,7 +326,7 @@ applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</co
 <span>    shape <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"#E31A1C"</span>           </span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/bo_design.png" style="width:100.0%"></p>
+<p><img src="images/bo_design.png" style="width:100.0%"></p>
 <p>The figure above illustrates that Bayesian optimization successfully
 identifies the regions around the two global minima, represented as red
 inverted triangles, by adding design points concentrated near these two

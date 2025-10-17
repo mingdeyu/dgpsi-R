@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.5.0-9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.6.0-9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +19,10 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation
-    </a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/motorcycle.html">Non-Gaussian Emulation</a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification
-    </a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
     <li><a class="dropdown-item" href="../articles/bayes_opt.html">Bayesian Optimization</a></li>
@@ -126,20 +124,7 @@
 
 <dt id="arg-x-test">x_test<a class="anchor" aria-label="anchor" href="#arg-x-test"></a></dt>
 <dd><p>OOS testing input data:</p><ul><li><p>if <code>object</code> is an instance of the <code>gp</code> or <code>dgp</code> class, <code>x_test</code> is a matrix where each row is a new input location to be used for validating the emulator and each column is an input dimension.</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> if <code>object</code> is an instance of the <code>lgp</code> class, <code>x_test</code> can be a matrix or a list:</p><ul><li><p>if <code>x_test</code> is a matrix, it is the global testing input data that feed into the emulators in the first layer of a system.
-The rows of <code>x_test</code> represent different input data points and the columns represent input dimensions across all emulators in
-the first layer of the system. In this case, it is assumed that the only global input to the system is the input to the
-emulators in the first layer and there is no global input to emulators in other layers.</p></li>
-<li><p>if <code>x_test</code> is a list, it should have <em>L</em> (the number of layers in an emulator system) elements. The first element
-is a matrix that represents the global testing input data that feed into the emulators in the first layer of the system. The
-remaining <em>L-1</em> elements are <em>L-1</em> sub-lists, each of which contains a number (the same number of emulators in
-the corresponding layer) of matrices (rows being testing input data points and columns being input dimensions) that represent the
-global testing input data to the emulators in the corresponding layer. The matrices must be placed in the sub-lists based on how
-their corresponding emulators are placed in <code>struc</code> argument of <code><a href="lgp.html">lgp()</a></code>. If there is no global input data to a certain emulator,
-set <code>NULL</code> in the corresponding sub-list of <code>x_test</code>.</p></li>
-</ul><p><strong>This option for linked (D)GP emulators is deprecated and will be removed in the next release.</strong></p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> If <code>object</code> is an instance of the <code>lgp</code> class created by <code><a href="lgp.html">lgp()</a></code> with argument <code>struc</code> in data frame form,
-<code>x_test</code> must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
+<li><p>if <code>object</code> is an instance of the <code>lgp</code> class, <code>x_test</code> must be a matrix representing the global input, where each row corresponds to a test data point and each column represents a global input dimension.
 The column indices in <code>x_test</code> must align with the indices specified in the <code>From_Output</code> column of the <code>struc</code> data frame (used in <code><a href="lgp.html">lgp()</a></code>),
 corresponding to rows where the <code>From_Emulator</code> column is <code>"Global"</code>.</p></li>
 </ul><p><code>x_test</code> must be provided if <code>object</code> is an instance of the <code>lgp</code>. <code>x_test</code> must also be provided if <code>y_test</code> is provided. Defaults to <code>NULL</code>, in which case LOO validation is performed.</p></dd>
@@ -172,7 +157,7 @@ Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-m">M<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> the size of the conditioning set for the Vecchia approximation in emulator validation. This argument is only used if the emulator <code>object</code>
+<dd><p>the size of the conditioning set for the Vecchia approximation in emulator validation. This argument is only used if the emulator <code>object</code>
 was constructed under the Vecchia approximation. Defaults to <code>50</code>.</p></dd>
 
 
@@ -204,7 +189,7 @@ and below the predictive mean. If <code>method = "sampling"</code>, the upper an
 <li><p>a numeric value called <code>rmse</code> that contains the root mean/median squared error of the GP emulator.</p></li>
 <li><p>a numeric value called <code>nrmse</code> that contains the (max-min) normalized root mean/median squared error of the GP emulator. The max-min normalization
 uses the maximum and minimum values of the validation outputs contained in <code>y_train</code> (or <code>y_test</code>).</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> an integer called <code>M</code> that contains the size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.</p></li>
+<li><p>an integer called <code>M</code> that contains the size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.</p></li>
 <li><p>an integer called <code>sample_size</code> that contains the number of samples used for validation if <code>method = "sampling"</code>.</p></li>
 </ul><p>The rows of matrices (<code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, and <code>upper</code>) correspond to the validation positions.</p></li>
 <li><p>If <code>object</code> is an instance of the <code>dgp</code> class, an updated <code>object</code> is returned with an additional slot called <code>loo</code> (for LOO cross validation) or
@@ -218,7 +203,7 @@ and below the predictive mean. If <code>method = "sampling"</code>, the upper an
 dimensions.</p></li>
 <li><p>a vector called <code>nrmse</code> that contains the (max-min) normalized root mean/median squared errors of the DGP emulator across different output
 dimensions. The max-min normalization uses the maximum and minimum values of the validation outputs contained in <code>y_train</code> (or <code>y_test</code>).</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> an integer called <code>M</code> that contains size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.</p></li>
+<li><p>an integer called <code>M</code> that contains size of the conditioning set used for the Vecchia approximation, if used, for emulator validation.</p></li>
 <li><p>an integer called <code>sample_size</code> that contains the number of samples used for validation if <code>method = "sampling"</code>.</p></li>
 </ul><p>The rows and columns of matrices (<code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, and <code>upper</code>) correspond to the validation positions and DGP emulator output
 dimensions, respectively.</p></li>
@@ -246,7 +231,7 @@ deviations above and below the predictive mean. If <code>method = "sampling"</co
 <li><p>a list called <code>rmse</code> that contains the root mean/median squared errors of the linked (D)GP emulator.</p></li>
 <li><p>a list called <code>nrmse</code> that contains the (max-min) normalized root mean/median squared errors of the linked (D)GP emulator. The max-min normalization
 uses the maximum and minimum values of the validation outputs contained in <code>y_test</code>.</p></li>
-<li><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> an integer called <code>M</code> that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.</p></li>
+<li><p>an integer called <code>M</code> that contains size of the conditioning set used for the Vecchia approximation, if used, in emulator validation.</p></li>
 <li><p>an integer called <code>sample_size</code> that contains the number of samples used for validation if <code>method = "sampling"</code>.</p></li>
 </ul><p>Each element in <code>mean</code>, <code>median</code>, <code>std</code>, <code>lower</code>, <code>upper</code>, <code>rmse</code>, and <code>nrmse</code> corresponds to a (D)GP emulator in the final layer of the linked (D)GP
 emulator.</p></li>

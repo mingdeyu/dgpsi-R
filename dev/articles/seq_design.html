@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dgpsi</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.5.0-9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.6.0-9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,12 +45,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation
-    </a></li>
+<li><a class="dropdown-item" href="../articles/large_scale_emulation.html">Large-Scale DGP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/linked_DGP.html">Linked (D)GP Emulation</a></li>
     <li><a class="dropdown-item" href="../articles/motorcycle.html">Non-Gaussian Emulation</a></li>
-    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification
-    </a></li>
+    <li><a class="dropdown-item" href="../articles/classification.html">DGP Classification</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design.html">Sequential Design I</a></li>
     <li><a class="dropdown-item" href="../articles/seq_design_2.html">Sequential Design II</a></li>
     <li><a class="dropdown-item" href="../articles/bayes_opt.html">Bayesian Optimization</a></li>
@@ -126,14 +124,14 @@ the function:</p>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">dat</span>, f <span class="op">=</span> <span class="fu">f</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, fill <span class="op">=</span> <span class="va">f</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_continuous.html" class="external-link">scale_fill_continuous</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"viridis"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_fct.png" style="width:100.0%"></p>
+<p><img src="images/seq_fct.png" style="width:100.0%"></p>
 <p>We can see from the figure above that the synthetic simulator
 exhibits more fluctuations on the bottom left of its input space while
 in the top-right part, the simulator shows little variation.</p>
 <p>We now specify a seed with <code><a href="../reference/set_seed.html">set_seed()</a></code> for
 reproducibility</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">99</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">999</span><span class="op">)</span></span></code></pre></div>
 <p>and generate an initial design with 5 design points using the maximin
 Latin hypercube sampler:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -181,33 +179,33 @@ on <code>m</code>:</p>
 <code class="sourceCode R"><span><span class="co"># 1st wave with 25 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">25</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.527337</span></span>
+<span><span class="co">##  * RMSE: 0.487293</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.930278 0.033542</span></span>
+<span><span class="co">##  * Next design point: 0.620583 1.000000</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.532428</span></span>
+<span><span class="co">##  * RMSE: 0.388907</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 18:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.706449 0.048681</span></span>
+<span><span class="co">##  * Next design point: 0.198164 0.195029</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Pruning 1 node(s) in layer 1 ... done</span></span>
 <span><span class="co">##  - Re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.139819</span></span>
+<span><span class="co">##  * RMSE: 0.052264</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 25:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.000010 0.483511</span></span>
+<span><span class="co">##  * Next design point: 0.248474 0.034358</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.071370</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.016924</span></span></code></pre>
 <p>After the first wave we see that 1 GP node is removed from the first
 layer by automatic pruning of the DGP which leaves only one node in both
 the first and second layer of the DGP hierarchy respectively. This helps
@@ -218,55 +216,56 @@ wave of the sequential design:</p>
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.071370</span></span>
+<span><span class="co">##  * RMSE: 0.016924</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.461239 0.415336</span></span>
+<span><span class="co">##  * Next design point: 0.092643 0.352432</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.056827</span></span>
+<span><span class="co">##  * RMSE: 0.013484</span></span>
 <span><span class="co">##   </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.177935 0.459387</span></span>
+<span><span class="co">##  * Next design point: 0.901510 0.989878</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.011508</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.007114</span></span></code></pre>
 <p>Finally, we resume the second wave with 10 additional iterations:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 additional steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, new_wave <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Iteration 11:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.029874 0.763962</span></span>
+<span><span class="co">##  * Next design point: 0.016562 0.966263</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.014444</span></span>
+<span><span class="co">##  * RMSE: 0.005308</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 20:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.829788 0.452129</span></span>
+<span><span class="co">##  * Next design point: 0.982806 0.438261</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.004783</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.002383</span></span></code></pre>
 <p>Resuming rather than adding an additional wave can be a useful
 feature, particularly for plotting using <code><a href="../reference/draw.html">draw()</a></code>. After the
 sequential design is done, we can inspect the enriched design by
 applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'design'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_design.png" style="width:100.0%"> It can be seen from the figure above that most
-of the added design points concentrate at the bottom-left corner of the
-input space where the simulator <code>f</code> exhibits more variation
-and thus needs more data to be well-emulated. We can also visualize the
-improvement to RMSE during the sequential design:</p>
+<p><img src="images/seq_design.png" style="width:100.0%"> It can be
+seen from the figure above that most of the added design points
+concentrate at the bottom-left corner of the input space where the
+simulator <code>f</code> exhibits more variation and thus needs more
+data to be well-emulated. We can also visualize the improvement to RMSE
+during the sequential design:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'rmse'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_rmse.png" style="width:100.0%"></p>
+<p><img src="images/seq_rmse.png" style="width:100.0%"></p>
 </div>
 <div class="section level2">
 <h2 id="comparison-to-dgp-emulators-with-space-filling-designs">Comparison to DGP emulators with space-filling designs<a class="anchor" aria-label="anchor" href="#comparison-to-dgp-emulators-with-space-filling-designs"></a>
@@ -323,7 +322,7 @@ for comparison:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'rmse'</span>, log <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rmse_static</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">N</span>, y <span class="op">=</span> <span class="va">rmse</span>, group <span class="op">=</span> <span class="va">LHD</span>, shape <span class="op">=</span> <span class="va">LHD</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">'#E69F00'</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">8</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="https://raw.githubusercontent.com/mingdeyu/dgpsi-R/master/vignettes/images/seq_comparison.png" style="width:100.0%"></p>
+<p><img src="images/seq_comparison.png" style="width:100.0%"></p>
 <p>It can be seen from the plot above that with static space-filling
 designs, the quality of an emulator may not be improved as the design
 size increases. This is because increasing the size of a space-filling
