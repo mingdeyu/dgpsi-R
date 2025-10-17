@@ -19,7 +19,7 @@ A serialized version of \code{object}.
 This function serializes the constructed emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 Since the constructed emulators are 'python' objects, they cannot be directly exported to other R processes for parallel

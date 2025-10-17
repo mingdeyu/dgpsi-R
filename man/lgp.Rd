@@ -90,7 +90,7 @@ The returned \code{lgp} object can be used by
 This function constructs a linked (D)GP emulator for a model chain or network.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

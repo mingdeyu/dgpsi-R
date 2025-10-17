@@ -20,7 +20,7 @@ The updated \code{object}, with the assigned ID stored in its \code{id} slot.
 This function assigns a unique identifier to an emulator.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

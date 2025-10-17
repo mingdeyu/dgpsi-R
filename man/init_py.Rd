@@ -41,7 +41,7 @@ No return value, called to install required 'python' environment.
 This function initializes the 'python' environment for the package.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

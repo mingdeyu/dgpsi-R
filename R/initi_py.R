@@ -43,13 +43,13 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   if ( is.null(py_ver) ) py_ver <- '3.10'
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
-    #dgpsi_ver <- c('dill>=0.3.2', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
-    #               'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
-    #               'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4')
-    #env_name <- 'dgp_si_R_2_5_0_9000'
+    dgpsi_ver <- c('dill>=0.3.2', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
+                   'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
+                   'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7')
+    env_name <- 'dgp_si_R_2_6_0_9000'
     ##For release version
-    dgpsi_ver <- 'dgpsi==2.6.0'
-    env_name <- 'dgp_si_R_2_6_0'
+    #dgpsi_ver <- 'dgpsi==2.6.0'
+    #env_name <- 'dgp_si_R_2_6_0'
   } else {
     env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
     dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
@@ -161,13 +161,17 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     current_version <- version_nums[1] + version_nums[2] / 10
     if (current_version>=13.3){
       reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*newaccelerate"') , conda = conda_path, forge = TRUE, additional_install_args = c('--strict-channel-priority'))
+      if (grepl('9000',env_name)) reticulate::conda_install(envname = env_name, packages = c('faiss-cpu') , channel = c("pytorch/label/nightly"), conda = conda_path)
     } else {
+      if (grepl('9000',env_name)) dgpsi_ver <- c(dgpsi_ver, 'faiss-cpu >=1.7.4')
       reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*accelerate"') , conda = conda_path, forge = TRUE, additional_install_args = c('--strict-channel-priority'))
     }
   } else if ( isTRUE(grepl("Intel",benchmarkme::get_cpu()$model_name)) ){
+    if (grepl('9000',env_name)) dgpsi_ver <- c(dgpsi_ver, 'faiss-cpu >=1.7.4')
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"') , conda = conda_path, forge = TRUE, additional_install_args = c('--strict-channel-priority') )
     reticulate::conda_install(envname = env_name, packages = c('icc_rt') , channel = c("numba"), conda = conda_path)
   } else {
+    if (grepl('9000',env_name)) dgpsi_ver <- c(dgpsi_ver, 'faiss-cpu >=1.7.4')
     reticulate::conda_install(envname = env_name, packages = c(dgpsi_ver) , conda = conda_path, forge = TRUE, additional_install_args = c('--strict-channel-priority'))
   }
   if (grepl('9000',env_name)) {

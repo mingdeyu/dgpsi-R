@@ -22,7 +22,7 @@ No return value. \code{object} will be saved to a local \code{.pkl} file specifi
 This function saves the constructed emulator to a \code{.pkl} file.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
 Since emulators built from the package are 'python' objects, \code{\link[=save]{save()}} from R will not work as it would for R objects. If \code{object}

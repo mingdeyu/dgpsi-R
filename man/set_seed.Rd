@@ -17,7 +17,7 @@ This function initializes a random number generator that sets the random seed in
 to ensure reproducible results from the package.
 }
 \details{
-See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/}.
+See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \examples{
 \dontrun{

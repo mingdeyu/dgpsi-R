@@ -1,3 +1,5 @@
+# dgpsi 2.6.0-9000 (development version)
+
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.
 - The Python environment now installs packages exclusively from conda-forge whenever possible. Packages from other channels will only be used if they are unavailable on conda-forge.
