@@ -8,6 +8,13 @@
 [![DOC](https://img.shields.io/badge/DOC-release-brightgreen)](https://mingdeyu.github.io/dgpsi-R/)
 [![python](https://img.shields.io/badge/Python-dgpsi%20v2.6.0-informational)](https://github.com/mingdeyu/DGP)
 <!-- badges: end -->
+
+> <h3 style="margin-top:0">⚠ Important Bug Fix for CRAN Release 2.6.0</h3>
+>
+> If you encounter Python import errors related to `libstdc++.so.6` on Linux or `libcblas.so.3` on Intel-based machines with CRAN release 2.6.0, the issue is **fixed in the development version** (2.6.0-9000).
+> Please install the development version following the [installation instructions](#installation) below.
+> The next CRAN release will include this fix.
+> 
   
 The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian process emulations using stochastic imputation (SI). 
 
