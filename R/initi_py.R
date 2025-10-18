@@ -201,7 +201,10 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     libstdc_path <- paste(gsub("bin.*$", "", conda_dgpsi_path), 'lib', sep = '')
 
     # Construct the export command
-    export_command <- paste0("export LD_LIBRARY_PATH=", libstdc_path, ":$LD_LIBRARY_PATH")
+    export_command <- sprintf(
+      'export R_LD_LIBRARY_PATH="%s${R_LD_LIBRARY_PATH:+:${R_LD_LIBRARY_PATH}}"',
+      libstdc_path
+    )
 
     # Detect the user's shell
     shell <- Sys.getenv("SHELL")
@@ -215,7 +218,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     }
 
     # Inform the user
-    message("To use the package properly, we need to update your LD_LIBRARY_PATH.")
+    message("To use the package properly, we need to update your R_LD_LIBRARY_PATH.")
     permission <- readline(prompt = "Can we automatically update this in your shell configuration file? (Y/N) ")
 
     if (tolower(permission) == 'y' || tolower(permission) == 'yes') {
@@ -229,8 +232,11 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
         # Read the content of the rc file
         rc_content <- readLines(rc_file_path)
 
-        # Identify lines that match the existing LD_LIBRARY_PATH export command
-        matching_lines <- grepl("LD_LIBRARY_PATH=.*dgp_si_R", rc_content)
+        # Identify lines that match the existing R_LD_LIBRARY_PATH export command
+        matching_lines <- grepl(
+          "^[[:space:]]*export[[:space:]]+(R_)?LD_LIBRARY_PATH[[:space:]]*=.*dgp_si_R",
+          rc_content
+        )
 
         # Remove any existing export commands with the pattern "dgp_si_R"
         rc_content_cleaned <- rc_content[!matching_lines]

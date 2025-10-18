@@ -1,5 +1,6 @@
 # dgpsi 2.6.0-9000 (development version)
 - Resolved Python environment import failure on Intel CPUs when using MKL BLAS.
+- Fixed Python import errors on Linux caused by `libstdc++.so.6` by prompting users during `init_py()` to update `R_LD_LIBRARY_PATH` (automatically or manually) to prioritize the Python environment's `lib`.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.
