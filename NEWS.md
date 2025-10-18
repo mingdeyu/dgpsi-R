@@ -1,4 +1,5 @@
 # dgpsi 2.6.0-9000 (development version)
+- Resolved Python environment import failure on Intel CPUs when using MKL BLAS.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.

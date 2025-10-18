@@ -167,7 +167,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     }
   } else if ( isTRUE(grepl("Intel",benchmarkme::get_cpu()$model_name)) ){
     if (Sys.info()[["sysname"]] %in% c("Windows", "Linux")) dgpsi_ver <- c(dgpsi_ver, 'intel-cmplr-lib-rt')
-    if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"'),
+    if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"', 'mkl>=2022'),
                                              python_version = py_ver, conda = conda_path, forge = TRUE, additional_create_args = c('--strict-channel-priority'))
   } else {
     if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver),
