@@ -103,6 +103,32 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     } else {
       if ( uninstall ){
         reticulate::conda_remove(envname = env_name, conda = conda_path)
+
+        if (Sys.info()[["sysname"]] == 'Linux') {
+          shell <- Sys.getenv("SHELL")
+          if (grepl("bash", shell)) {
+            rc_file <- "~/.bashrc"
+          } else if (grepl("zsh", shell)) {
+            rc_file <- "~/.zshrc"
+          } else {
+            rc_file <- "~/.bashrc"
+          }
+
+          rc_file_path <- path.expand(rc_file)
+
+          if (file.exists(rc_file_path)) {
+            rc_content <- readLines(rc_file_path)
+
+            matching_lines <- grepl(
+              paste0("^[[:space:]]*export[[:space:]]+(R_)?LD_LIBRARY_PATH[[:space:]]*=.*", env_name),
+              rc_content
+            )
+
+            rc_content_cleaned <- rc_content[!matching_lines]
+            writeLines(rc_content_cleaned, rc_file_path)
+          }
+        }
+
         pkg.env$restart <- TRUE
         #message("Uninstallation finished. Please restart R and run 'init_py()' to reinstall the Python environment.")
         message("Uninstallation finished. Please restart R.")
