@@ -32,7 +32,7 @@ get_article_url <- function(article) {
 
 The `dgpsi` package offers a flexible toolbox for Gaussian process (GP), deep Gaussian process (DGP), and linked (D)GP emulation. In this guide, we show how to use the package to emulate a step function using a three-layered DGP structure. Additional examples showcasing the package's functionality are available in the [Articles](`r get_article_url("/articles/index.html")`) section of the package website. Topics include [linked DGPs](`r get_article_url("/articles/linked_DGP.html")`), [scalable DGPs](`r get_article_url("/articles/large_scale_emulation.html")`), [DGPs for classification](`r get_article_url("/articles/classification.html")`), [non-Gaussian problems](`r get_article_url("/articles/motorcycle.html")`), [sequential design and active learning for (D)GPs](`r get_article_url("/articles/seq_design.html")`), and [Bayesian optimization with (D)GPs](`r get_article_url("/articles/bayes_opt.html")`). A detailed reference for all available functions is provided in the [Reference](`r get_article_url("/reference/index.html")`) section of the package website.
 
-## Load the package
+## Load the packages
 
 ```{r, eval = FALSE}
 library(dgpsi)
