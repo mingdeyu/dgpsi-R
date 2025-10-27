@@ -109,9 +109,9 @@ to <code>NULL</code> where no bounds are specified for the lengthscales.</p></dd
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
-<dd><p>prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (<code>"ga"</code>), inverse gamma prior (<code>"inv_ga"</code>),
-or jointly robust prior (<code>"ref"</code>). Defaults to <code>"ref"</code>. See the reference below for the jointly
-robust prior.</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> prior to be used for Maximum a Posterior (MAP) estimation of the GP lengthscales and nugget: accepts no prior (<code>NULL</code>),
+a gamma prior (<code>"ga"</code>), an inverse-gamma prior (<code>"inv_ga"</code>), or a jointly robust reference prior (<code>"ref"</code>). Defaults to <code>"ref"</code>.
+See the reference below for the jointly robust prior.</p></dd>
 
 
 <dt id="arg-nugget-est">nugget_est<a class="anchor" aria-label="anchor" href="#arg-nugget-est"></a></dt>
