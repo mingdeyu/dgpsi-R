@@ -77,8 +77,9 @@ The matrix should have its row number equal to \code{depth} if \code{likelihood 
 
 Defaults to \code{NULL} where no bounds are specified for the lengthscales.}
 
-\item{prior}{prior to be used for MAP estimation of lengthscales and nuggets of all GP nodes in the DGP hierarchy:
+\item{prior}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} prior to be used for MAP estimation of lengthscales and nuggets of all GP nodes in the DGP hierarchy:
 \itemize{
+\item no prior (\code{NULL}),
 \item gamma prior (\code{"ga"}),
 \item inverse gamma prior (\code{"inv_ga"}), or
 \item jointly robust prior (\code{"ref"}).

@@ -18,9 +18,9 @@
 #' @param bounds the lower and upper bounds of lengthscales in the kernel function. It is a vector of length two where the first element is
 #'    the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
 #'    to `NULL` where no bounds are specified for the lengthscales.
-#' @param prior prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (`"ga"`), inverse gamma prior (`"inv_ga"`),
-#'     or jointly robust prior (`"ref"`). Defaults to `"ref"`. See the reference below for the jointly
-#'     robust prior.
+#' @param prior `r new_badge("updated")` prior to be used for Maximum a Posterior (MAP) estimation of the GP lengthscales and nugget: accepts no prior (`NULL`),
+#'    a gamma prior (`"ga"`), an inverse-gamma prior (`"inv_ga"`), or a jointly robust reference prior (`"ref"`). Defaults to `"ref"`.
+#'    See the reference below for the jointly robust prior.
 #' @param nugget_est a bool indicating if the nugget term is to be estimated:
 #' 1. `FALSE`: the nugget term is fixed to `nugget`.
 #' 2. `TRUE`: the nugget term will be estimated.
@@ -158,7 +158,9 @@ gp <- function(X, Y, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NU
   }
 
   if ( name!='sexp' & name!='matern2.5' ) stop("'name' can only be either 'sexp' or 'matern2.5'.", call. = FALSE)
-  if ( prior!='ga' & prior!='inv_ga' & prior!='ref') stop("'prior' can only be 'ga', 'inv_ga', or 'ref'.", call. = FALSE)
+  if ( !is.null(prior) ){
+    if ( prior!='ga' & prior!='inv_ga' & prior!='ref' ) stop("'prior' can only be NULL, 'ga', 'inv_ga', or 'ref'.", call. = FALSE)
+  }
 
   if ( verb ) message("Auto-generating a GP structure ...", appendLF = FALSE)
 

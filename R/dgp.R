@@ -32,7 +32,8 @@
 #'    The matrix should have its row number equal to `depth` if `likelihood = NULL` or to `depth - 1` if `likelihood` is not `NULL`.
 #'
 #' Defaults to `NULL` where no bounds are specified for the lengthscales.
-#' @param prior prior to be used for MAP estimation of lengthscales and nuggets of all GP nodes in the DGP hierarchy:
+#' @param prior `r new_badge("updated")` prior to be used for MAP estimation of lengthscales and nuggets of all GP nodes in the DGP hierarchy:
+#' * no prior (`NULL`),
 #' * gamma prior (`"ga"`),
 #' * inverse gamma prior (`"inv_ga"`), or
 #' * jointly robust prior (`"ref"`).
@@ -241,6 +242,10 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
     } else {
       nugget = c(rep(1e-6, depth-2), 1e-4)
     }
+  }
+
+  if ( !is.null(prior) ){
+    if ( prior!='ga' & prior!='inv_ga' & prior!='ref' ) stop("'prior' can only be NULL, 'ga', 'inv_ga', or 'ref'.", call. = FALSE)
   }
 
   if ( !is.matrix(X)&!is.vector(X) ) stop("'X' must be a vector or a matrix.", call. = FALSE)

@@ -44,9 +44,9 @@ Defaults to a vector of \code{0.1}.}
 the lower bound and the second element is the upper bound. The bounds will be applied to all lengthscales in the kernel function. Defaults
 to \code{NULL} where no bounds are specified for the lengthscales.}
 
-\item{prior}{prior to be used for Maximum a Posterior for lengthscales and nugget of the GP: gamma prior (\code{"ga"}), inverse gamma prior (\code{"inv_ga"}),
-or jointly robust prior (\code{"ref"}). Defaults to \code{"ref"}. See the reference below for the jointly
-robust prior.}
+\item{prior}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} prior to be used for Maximum a Posterior (MAP) estimation of the GP lengthscales and nugget: accepts no prior (\code{NULL}),
+a gamma prior (\code{"ga"}), an inverse-gamma prior (\code{"inv_ga"}), or a jointly robust reference prior (\code{"ref"}). Defaults to \code{"ref"}.
+See the reference below for the jointly robust prior.}
 
 \item{nugget_est}{a bool indicating if the nugget term is to be estimated:
 \enumerate{

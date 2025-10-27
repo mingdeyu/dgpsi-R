@@ -51,8 +51,8 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     #dgpsi_ver <- 'dgpsi==2.6.0'
     #env_name <- 'dgp_si_R_2_6_0'
   } else {
-    env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
     dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
+    env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
   }
   #Check if there is any conda binary installed, if not, request to install it.
   #restart <- FALSE
@@ -177,6 +177,35 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
   if (!reinsatll) message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
   if (reinsatll) {
     message("Re-installing the required Python packages ...")
+    if (!grepl('9000',env_name)){
+      reticulate::conda_remove(envname = env_name, conda = conda_path)
+
+      if (Sys.info()[["sysname"]] == 'Linux') {
+        shell <- Sys.getenv("SHELL")
+        if (grepl("bash", shell)) {
+          rc_file <- "~/.bashrc"
+        } else if (grepl("zsh", shell)) {
+          rc_file <- "~/.zshrc"
+        } else {
+          rc_file <- "~/.bashrc"
+        }
+
+        rc_file_path <- path.expand(rc_file)
+
+        if (file.exists(rc_file_path)) {
+          rc_content <- readLines(rc_file_path)
+
+          matching_lines <- grepl(
+            paste0("^[[:space:]]*export[[:space:]]+(R_)?LD_LIBRARY_PATH[[:space:]]*=.*", env_name),
+            rc_content
+          )
+
+          rc_content_cleaned <- rc_content[!matching_lines]
+          writeLines(rc_content_cleaned, rc_file_path)
+        }
+      }
+      reinsatll <- FALSE
+    }
   } else {
     message("Installing the required Python packages ...")
   }

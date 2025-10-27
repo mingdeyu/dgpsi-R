@@ -1,6 +1,10 @@
 # dgpsi 2.6.0-9000 (development version)
-- Resolved Python environment import failure on Intel CPUs when using MKL BLAS.
+- Resolved Python environment import failure relating to `libcblas.so.3` on Intel CPUs when using MKL BLAS.
 - Fixed Python import errors on Linux caused by `libstdc++.so.6` by prompting users during `init_py()` to update `R_LD_LIBRARY_PATH` (automatically or manually) to prioritize the Python environment's `lib`.
+- Fixed CRAN check error caused by missing vignette images.
+- Resolved compatibility issues when importing emulator objects saved from older releases.
+- Fixed a bug in `gp()` and `dgp()` affecting MAP estimation when `prior = "inv_ga"`.  
+- Added support for MAP estimation with no prior in `gp()` and `dgp()` by setting `prior = NULL`.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.
