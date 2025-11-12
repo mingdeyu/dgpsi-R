@@ -1,0 +1,280 @@
+# dgpsi
+
+> ### ⚠ Important Bug Fix for CRAN Release 2.6.0
+>
+> If you encounter Python import errors related to `libstdc++.so.6` on
+> Linux or `libcblas.so.3` on Intel-based machines with CRAN release
+> 2.6.0, the issue is **fixed in the development version** (2.6.0-9000).
+> Please install the development version following the [installation
+> instructions](#installation) below. The next CRAN release will include
+> this fix.
+
+The R package `dgpsi` provides R interface to Python package
+[`dgpsi`](https://github.com/mingdeyu/DGP) for deep and linked Gaussian
+process emulations using stochastic imputation (SI).
+
+> **Hassle-free Python Setup**  
+> You don’t need prior knowledge of Python to start using the package,
+> all you need is a single click in R (see [Installation](#installation)
+> section below) that automatically installs and activates the required
+> Python environment for you!
+
+## Features
+
+`dgpsi` currently has following features:
+
+- Gaussian process emulations with separable or non-separable squared
+  exponential and Matérn-2.5 kernels.
+- Deep Gaussian process emulations with flexible structures including:
+  - multiple layers;
+  - multiple GP nodes;
+  - separable or non-separable squared exponential and Matérn-2.5
+    kernels;
+  - global input connections;
+  - non-Gaussian likelihoods (Poisson, Negative-Binomial,
+    heteroskedastic Gaussian, and Categorical).
+- Linked emulations of feed-forward systems of computer models by
+  linking (D)GP emulators of deterministic individual computer models.
+- Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP,
+  DGP, and linked (D)GP emulators.
+- Multi-core predictions and validations for GP, DGP, and Linked (D)GP
+  emulators.
+- Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
+- Automatic pruning of DGP emulators, both statically and dynamically.
+- [Large-scale GP, DGP, and Linked (D)GP
+  emulations](https://mingdeyu.github.io/dgpsi-R/articles/large_scale_emulation.html).
+- [Scalable DGP classification using Stochastic
+  Imputation](https://mingdeyu.github.io/dgpsi-R/articles/classification.html).
+- [Bayesian
+  optimization](https://mingdeyu.github.io/dgpsi-R/articles/bayes_opt.html).
+
+## Getting started
+
+- Check [A Quick Guide to
+  dgpsi](https://mingdeyu.github.io/dgpsi-R/articles/dgpsi.html) to get
+  started with the package.
+- For experimental features, check out our [website for the development
+  version](https://mingdeyu.github.io/dgpsi-R/dev/).
+
+## Installation
+
+You can install the package from CRAN:
+
+``` r
+install.packages('dgpsi')
+```
+
+or its development version from GitHub:
+
+``` r
+devtools::install_github('mingdeyu/dgpsi-R')
+```
+
+After the installation, run
+
+``` r
+library(dgpsi)
+```
+
+to load the package. To install or activate the required Python
+environment automatically, you can either run
+[`dgpsi::init_py()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/init_py.md)
+explicitly or simply call any function from the package. That’s it - the
+package is ready to use!
+
+> **Note**  
+> After loading `dgpsi`, the package may take some time to compile and
+> initiate the underlying Python environment the first time a function
+> from `dgpsi` is executed. Any subsequent function calls won’t require
+> re-compiling or re-activation of the Python environment, and will be
+> faster.
+>
+> If you experience Python related issues while using the package,
+> please try to reinstall the Python environment:
+>
+> ``` r
+> dgpsi::init_py(reinstall = T)
+> ```
+>
+> Or uninstall completely the Python environment:
+>
+> ``` r
+> dgpsi::init_py(uninstall = T)
+> ```
+>
+> and then reinstall:
+>
+> ``` r
+> dgpsi::init_py()
+> ```
+
+## Research Notice
+
+This package is part of an ongoing research initiative. For detailed
+information about the research aspects and guidelines for use, please
+refer to our [Research
+Notice](https://github.com/mingdeyu/dgpsi-R/blob/master/RESEARCH-NOTICE.md).
+
+## References
+
+> [Ming, D. and Williamson, D. (2023) Linked deep Gaussian process
+> emulation for model networks.
+> arXiv:2306.01212](https://arxiv.org/abs/2306.01212)
+
+> [Ming, D., Williamson, D., and Guillas, S. (2023) Deep Gaussian
+> process emulation using stochastic imputation. *Technometrics*. 65(2),
+> 150-161.](https://doi.org/10.1080/00401706.2022.2124311)
+
+> [Ming, D. and Guillas, S. (2021) Linked Gaussian process emulation for
+> systems of computer models using Matérn kernels and adaptive design,
+> *SIAM/ASA Journal on Uncertainty Quantification*. 9(4),
+> 1615-1642.](https://doi.org/10.1137/20M1323771)
+
+# Package index
+
+## Initalization
+
+The function to initiate the underlying Python environment.
+
+- [`init_py()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/init_py.md)
+  : 'python' environment initialization
+
+## GP, DGP, and Linked (D)GP Emulations
+
+Functions to train, validate, and make predictions from GP, DGP, and
+Linked (D)GP emulators.
+
+- [`gp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.md)
+  **\[updated\]** : Gaussian process emulator construction
+- [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md)
+  **\[updated\]** : Deep Gaussian process emulator construction
+- [`lgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/lgp.md) :
+  Linked (D)GP emulator construction
+- [`continue()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/continue.md)
+  : Continue training a DGP emulator
+- [`predict(`*`<dgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/predict.md)
+  [`predict(`*`<lgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/predict.md)
+  [`predict(`*`<gp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/predict.md)
+  : Prediction from GP, DGP, or linked (D)GP emulators
+- [`validate()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/validate.md)
+  : Validate a constructed GP, DGP, or linked (D)GP emulator
+- [`plot(`*`<dgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)
+  [`plot(`*`<lgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)
+  [`plot(`*`<gp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)
+  : Validation plots of a constructed GP, DGP, or linked (D)GP emulator
+- [`prune()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/prune.md)
+  : Static pruning of a DGP emulator
+
+## Sequential Design
+
+Functions to implement sequential designs for (D)GP and bundles of (D)GP
+emulators.
+
+- [`design()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/design.md)
+  : Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
+- [`alm()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.md) :
+  Locate the next design point(s) for a (D)GP emulator or a bundle of
+  (D)GP emulators using Active Learning MacKay (ALM)
+- [`mice()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/mice.md) :
+  Locate the next design point for a (D)GP emulator or a bundle of (D)GP
+  emulators using MICE
+- [`vigf()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/vigf.md) :
+  Locate the next design point for a (D)GP emulator or a bundle of (D)GP
+  emulators using VIGF
+- [`update()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/update.md)
+  : Update a GP or DGP emulator
+- [`draw()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/draw.md) :
+  Validation and diagnostic plots for a sequential design
+- [`pack()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/pack.md) :
+  Pack GP and DGP emulators into a bundle
+- [`unpack()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/unpack.md)
+  : Unpack a bundle of (D)GP emulators
+
+## Helpers
+
+- [`summary(`*`<gp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
+  [`summary(`*`<dgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
+  [`summary(`*`<lgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
+  : Summary of a constructed GP, DGP, or linked (D)GP emulator
+- [`write()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/write.md)
+  : Save the constructed emulator
+- [`read()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/read.md) :
+  Load the stored emulator
+- [`set_seed()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_seed.md)
+  : Random seed generator
+- [`set_imp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_imp.md)
+  : Reset number of imputations for a DGP emulator
+- [`window()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/window.md)
+  : Trim the sequence of hyperparameter estimates within a DGP emulator
+- [`trace_plot()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/trace_plot.md)
+  : Trace plot for DGP hyperparameters
+- [`nllik()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/nllik.md)
+  : Calculate the predictive negative log-likelihood
+- [`set_thread_num()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_thread_num.md)
+  : Set the number of threads
+- [`get_thread_num()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/get_thread_num.md)
+  : Get the number of threads
+- [`set_vecchia()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_vecchia.md)
+  : Add or remove the Vecchia approximation
+- [`set_id()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_id.md)
+  : Set Emulator ID
+- [`serialize()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/serialize.md)
+  : Serialize the constructed emulator
+- [`deserialize()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/deserialize.md)
+  : Restore the serialized emulator
+
+# Articles
+
+### A Quick Guide to dgpsi
+
+A quick introduction to dgpsi by emulating a step function.
+
+- [A Quick Guide to
+  dgpsi](http://mingdeyu.github.io/dgpsi-R/dev/articles/dgpsi.md):
+
+  DGP emulation of a step function.
+
+### A Deep Dive to dgpsi
+
+These articles provide an in-depth exploration of dgpsi and its diverse
+capabilities.
+
+- [Large-Scale DGP
+  Emulation](http://mingdeyu.github.io/dgpsi-R/dev/articles/large_scale_emulation.md):
+
+  Large-scale DGP emulation using Vecchia approximations under the
+  Stochastic Imputation.
+
+- [Linked (D)GP
+  Emulation](http://mingdeyu.github.io/dgpsi-R/dev/articles/linked_DGP.md):
+
+  Linked (D)GP emulation of a synthetic system of three linked computer
+  models.
+
+- [Non-Gaussian
+  Emulation](http://mingdeyu.github.io/dgpsi-R/dev/articles/motorcycle.md):
+
+  DGP emulation of the motorcycle accident data under a Heteroskedastic
+  Gaussian Likelihood.
+
+- [DGP
+  Classification](http://mingdeyu.github.io/dgpsi-R/dev/articles/classification.md):
+
+  DGP classification of the iris data set using dgpsi.
+
+- [Sequential Design
+  I](http://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design.md):
+
+  Sequential design and dynamic pruning for DGP emulation of a
+  non-stationary simulator.
+
+- [Sequential Design
+  II](http://mingdeyu.github.io/dgpsi-R/dev/articles/seq_design_2.md):
+
+  Sequential design for a bundle of DGP emulators with a stopping rule.
+
+- [Bayesian
+  Optimization](http://mingdeyu.github.io/dgpsi-R/dev/articles/bayes_opt.md):
+
+  Customized sequential design to implement Bayesian optimization for
+  the Shubert function.

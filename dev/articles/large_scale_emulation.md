@@ -1,0 +1,102 @@
+# Large-Scale DGP Emulation
+
+This vignette gives a demonstration of the package on DGP emulation of
+large-scale datasets.
+
+## Load the packages
+
+``` r
+library(dgpsi)
+library(lhs)
+```
+
+## Construct a synthetic simulator
+
+We consider a 2-dimensional synthetic simulator with the following
+functional form defined over `[0, 1]` and `[0, 1]`:
+
+``` r
+f <- function(x) {
+  x1 <- x[,1,drop=F] * 4 -2
+  x2 <- x[,2,drop=F] * 4 -2
+  y <- 0.5 + ((sin(x1^2-x2^2))^2 - 0.5)/(1 + 0.001*(x1^2+x2^2))^2
+  return(y)
+ }
+```
+
+We now specify a seed with
+[`set_seed()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_seed.md)
+from the package for reproducibility
+
+``` r
+set_seed(9999)
+```
+
+and generate `3000` training data points:
+
+``` r
+X <- randomLHS(3000, 2)
+Y <- f(X)
+```
+
+## Training
+
+We now build and train a large-scale DGP emulator using a Vecchia
+implementation under our Stochastic Imputation (SI) framework:
+
+``` r
+m <- dgp(X, Y, vecchia = TRUE)
+```
+
+    ## Auto-generating a 2-layered DGP structure ... done
+    ## Initializing the DGP emulator ... done
+    ## Training the DGP emulator: 
+    ## Iteration 200: Layer 2: 100%|██████████| 200/200 [02:59<00:00,  1.12it/s]
+    ## Imputing ... done
+
+## Validation
+
+After we have the emulator, we can validate it by the Leave-One-Out
+(LOO) cross validation plot:
+
+``` r
+plot(m)
+```
+
+    ## Validating and computing ... done
+    ## Post-processing LOO results ... done
+    ## Plotting ... done
+
+![](images/vecchia_loo.png)
+
+or the Out-Of-Sample (OOS) validation plot over `1000` randomly
+generated testing locations:
+
+``` r
+oos_x <- randomLHS(1000, 2)
+oos_y <- f(oos_x)
+plot(m, oos_x, oos_y)
+```
+
+    ## Validating and computing ... done
+    ## Post-processing OOS results ... done
+    ## Plotting ... done
+
+![](images/vecchia_oos.png)
+
+Note that
+[`gp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.md) can also
+operate in Vecchia mode. For this problem, using
+`m_gp <- gp(X, Y, vecchia = TRUE)`, we found that the GP emulator `m_gp`
+achieved half the NRMSE of the DGP emulator `m`, but it had a few more
+points outside the credible intervals.
+
+### Performance tip
+
+The Vecchia implementation in the package leverages the multiple cores
+available on the machine for multi-thread computation. To optimize
+performance, we recommend experimenting with the number of threads using
+[`set_thread_num()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/set_thread_num.md).
+The current number of threads being used by the package can be checked
+with
+[`get_thread_num()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/get_thread_num.md).

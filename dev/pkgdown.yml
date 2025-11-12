@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   bayes_opt: bayes_opt.html
@@ -10,7 +10,7 @@ articles:
   motorcycle: motorcycle.html
   seq_design_2: seq_design_2.html
   seq_design: seq_design.html
-last_built: 2025-10-27T12:43Z
+last_built: 2025-11-12T21:43Z
 urls:
   reference: http://mingdeyu.github.io/dgpsi-R/reference
   article: http://mingdeyu.github.io/dgpsi-R/articles
