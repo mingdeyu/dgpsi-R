@@ -20,9 +20,6 @@
   [`gp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.md) and
   [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md) by
   setting `prior = NULL`.
-- Reverted to the `accelerate` BLAS on Apple Silicon (for all macOS
-  versions) due to performance issues observed with the `newaccelerate`
-  BLAS using the Vecchia approximation.
 
 ## dgpsi 2.6.0
 
