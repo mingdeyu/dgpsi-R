@@ -5,7 +5,6 @@
 - Resolved compatibility issues when importing emulator objects saved from older releases.
 - Fixed a bug in `gp()` and `dgp()` affecting MAP estimation when `prior = "inv_ga"`.  
 - Added support for MAP estimation with no prior in `gp()` and `dgp()` by setting `prior = NULL`.
-- Reverted to the `accelerate` BLAS on Apple Silicon (for all macOS versions) due to performance issues observed with the `newaccelerate` BLAS using the Vecchia approximation.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.

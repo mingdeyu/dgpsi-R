@@ -213,13 +213,13 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     macos_version <- system("sw_vers -productVersion", intern = TRUE)
     version_nums <- as.numeric(strsplit(macos_version, "\\.")[[1]])
     current_version <- version_nums[1] + version_nums[2] / 10
-    #if (current_version>=13.3){
-    #  if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*newaccelerate"'),
-    #                                           python_version = py_ver, conda = conda_path, forge = TRUE, additional_create_args = c('--strict-channel-priority'))
-    #} else {
-    if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*_accelerate"'),
+    if (current_version>=13.3){
+      if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*newaccelerate"'),
                                                python_version = py_ver, conda = conda_path, forge = TRUE, additional_create_args = c('--strict-channel-priority'))
-    #}
+    } else {
+      if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*accelerate"'),
+                                               python_version = py_ver, conda = conda_path, forge = TRUE, additional_create_args = c('--strict-channel-priority'))
+    }
   } else if ( isTRUE(grepl("Intel",benchmarkme::get_cpu()$model_name)) ){
     if (Sys.info()[["sysname"]] %in% c("Windows", "Linux")) dgpsi_ver <- c(dgpsi_ver, 'intel-cmplr-lib-rt')
     if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver, '"libblas=*=*mkl"', 'mkl>=2022'),
