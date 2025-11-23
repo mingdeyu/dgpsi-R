@@ -34,7 +34,7 @@ dgp(
   B = 10,
   id = NULL,
   decouple = FALSE,
-  link = "logit"
+  link = NULL
 )
 }
 \arguments{
@@ -218,8 +218,9 @@ and assigned to the emulator. Default to \code{NULL}.}
 categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when \code{depth} is greater than 2.
 Defaults to \code{FALSE}.}
 
-\item{link}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} the link function used for binary classification when \code{likelihood = "Categorical"}. Supported options are \code{"logit"} and \code{"probit"}.
-Defaults to \code{"logit"}.}
+\item{link}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} The link function used for classification when \code{likelihood = "Categorical"}. Supported options are \code{"logit"} and \code{"probit"} for binary classification,
+and \code{"softmax"} or \code{"robustmax"} for multi-class classification. If set to \code{NULL}, the default is \code{"logit"} for binary classification and \code{"softmax"} for multi-class classification.
+Defaults to \code{NULL}.}
 }
 \value{
 An S3 class named \code{dgp} that contains five slots:

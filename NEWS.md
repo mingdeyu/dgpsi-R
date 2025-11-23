@@ -5,6 +5,8 @@
 - Resolved compatibility issues when importing emulator objects saved from older releases.
 - Fixed a bug in `gp()` and `dgp()` affecting MAP estimation when `prior = "inv_ga"`.  
 - Added support for MAP estimation with no prior in `gp()` and `dgp()` by setting `prior = NULL`.
+- Added support for the `robustmax` link function for multi-class classification via the `link` argument in `dgp()`.
+- Introduced automatic error handling in `dgp()`, allowing up to three training retries instead of terminating the training process.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.

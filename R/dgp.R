@@ -133,8 +133,9 @@
 #' @param decouple `r new_badge("new")` A boolean indicating whether the model parameters for the heteroskedastic Gaussian likelihood, negative Binomial likelihood, and
 #'    categorical likelihood (when the number of categories is greater than 2) should be modeled using separate deep Gaussian process hierarchies when `depth` is greater than 2.
 #'    Defaults to `FALSE`.
-#' @param link `r new_badge("new")` the link function used for binary classification when `likelihood = "Categorical"`. Supported options are `"logit"` and `"probit"`.
-#'    Defaults to `"logit"`.
+#' @param link `r new_badge("new")` The link function used for classification when `likelihood = "Categorical"`. Supported options are `"logit"` and `"probit"` for binary classification,
+#'    and `"softmax"` or `"robustmax"` for multi-class classification. If set to `NULL`, the default is `"logit"` for binary classification and `"softmax"` for multi-class classification.
+#'    Defaults to `NULL`.
 #'
 #' @return An S3 class named `dgp` that contains five slots:
 #' * `id`: A number or character string assigned through the `id` argument.
@@ -230,7 +231,7 @@
 dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = NULL,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
-                ess_burn = 10, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = "logit") {
+                ess_burn = 10, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -456,6 +457,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
           if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal %i.", 1), call. = FALSE)
           if ( link!='logit' & link!='probit' ) stop("'link' can only be either 'logit' or 'probit'.", call. = FALSE)
         } else {
+          if ( link!='softmax' & link!='robustmax' ) stop("'link' can only be either 'softmax' or 'robustmax'.", call. = FALSE)
           if ( length(nugget_est)==1 ) {
             nugget_est <- rep(nugget_est, num_class)
           } else {
