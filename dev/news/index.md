@@ -20,6 +20,13 @@
   [`gp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.md) and
   [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md) by
   setting `prior = NULL`.
+- Added support for the `robustmax` link function for multi-class
+  classification via the `link` argument in
+  [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md).
+- Introduced automatic error handling in
+  [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md),
+  allowing up to three training retries instead of terminating the
+  training process.
 
 ## dgpsi 2.6.0
 

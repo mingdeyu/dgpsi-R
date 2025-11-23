@@ -88,7 +88,7 @@ This function builds and trains a DGP emulator."><meta property="og:image" conte
 <span>  B <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  decouple <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  link <span class="op">=</span> <span class="st">"logit"</span></span>
+<span>  link <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -286,8 +286,9 @@ Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-link">link<a class="anchor" aria-label="anchor" href="#arg-link"></a></dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> the link function used for binary classification when <code>likelihood = "Categorical"</code>. Supported options are <code>"logit"</code> and <code>"probit"</code>.
-Defaults to <code>"logit"</code>.</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#new" class="external-link"><img src="figures/lifecycle-new.svg" alt="[New]"></a> The link function used for classification when <code>likelihood = "Categorical"</code>. Supported options are <code>"logit"</code> and <code>"probit"</code> for binary classification,
+and <code>"softmax"</code> or <code>"robustmax"</code> for multi-class classification. If set to <code>NULL</code>, the default is <code>"logit"</code> for binary classification and <code>"softmax"</code> for multi-class classification.
+Defaults to <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

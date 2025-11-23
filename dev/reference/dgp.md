@@ -37,7 +37,7 @@ dgp(
   B = 10,
   id = NULL,
   decouple = FALSE,
-  link = "logit"
+  link = NULL
 )
 ```
 
@@ -381,9 +381,12 @@ dgp(
 
 - link:
 
-  **\[new\]** the link function used for binary classification when
+  **\[new\]** The link function used for classification when
   `likelihood = "Categorical"`. Supported options are `"logit"` and
-  `"probit"`. Defaults to `"logit"`.
+  `"probit"` for binary classification, and `"softmax"` or `"robustmax"`
+  for multi-class classification. If set to `NULL`, the default is
+  `"logit"` for binary classification and `"softmax"` for multi-class
+  classification. Defaults to `NULL`.
 
 ## Value
 

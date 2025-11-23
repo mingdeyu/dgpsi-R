@@ -56,6 +56,8 @@
 <li>Resolved compatibility issues when importing emulator objects saved from older releases.</li>
 <li>Fixed a bug in <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> affecting MAP estimation when <code>prior = "inv_ga"</code>.<br></li>
 <li>Added support for MAP estimation with no prior in <code><a href="../reference/gp.html">gp()</a></code> and <code><a href="../reference/dgp.html">dgp()</a></code> by setting <code>prior = NULL</code>.</li>
+<li>Added support for the <code>robustmax</code> link function for multi-class classification via the <code>link</code> argument in <code><a href="../reference/dgp.html">dgp()</a></code>.</li>
+<li>Introduced automatic error handling in <code><a href="../reference/dgp.html">dgp()</a></code>, allowing up to three training retries instead of terminating the training process.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.6.0" id="dgpsi-260">dgpsi 2.6.0<a class="anchor" aria-label="anchor" href="#dgpsi-260"></a></h2><p class="text-muted">CRAN release: 2025-10-15</p>
