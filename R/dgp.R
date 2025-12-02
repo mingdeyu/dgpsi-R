@@ -64,7 +64,7 @@
 #'    interpolates the training data points. Set `nugget` to a larger value and the bools in `nugget_est` to `TRUE` for stochastic emulation where
 #'    the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to `1e-6` if `likelihood` is `NULL`.
 #'    If `likelihood` is not `NULL`, the nuggets of GPs that feed into the likelihood layer default to `1e-4`, while those of all other GPs default to `1e-6`.
-#' @param scale_est a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
+#' @param scale_est `r new_badge("updated")` a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
 #'     layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 #'     If a bool vector is provided, its length must match the number of GP nodes:
 #' - `ncol(Y)` if `likelihood = NULL`
@@ -78,7 +78,7 @@
 #' * `TRUE`: the variance of the corresponding GP will be estimated with the initial value given by the correspondence in `scale` (see below).
 #'
 #' Defaults to `TRUE`.
-#' @param scale the initial variance value(s) of GP nodes in the final layer (or the
+#' @param scale `r new_badge("updated")` the initial variance value(s) of GP nodes in the final layer (or the
 #'    layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
 #'    in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:
 #' - `ncol(Y)` if `likelihood = NULL`
@@ -93,7 +93,7 @@
 #' @param connect a bool indicating whether to apply global input connections in the DGP structure. Setting this to `FALSE` may yield
 #'     a better emulator in some cases. When set to `NULL`, the value defaults to `FALSE` if `likelihood = "Categorical"` and to `TRUE` otherwise.
 #'     Defaults to `NULL`.
-#' @param likelihood the likelihood type of a DGP emulator:
+#' @param likelihood `r new_badge("updated")` the likelihood type of a DGP emulator:
 #' 1. `NULL`: no likelihood layer is included in the emulator.
 #' 2. `"Hetero"`: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
 #'    (i.e., the computer model outputs have input-dependent noise).

@@ -121,7 +121,7 @@ interpolates the training data points. Set \code{nugget} to a larger value and t
 the computer model outputs are assumed to follow a homogeneous Gaussian distribution. Defaults to \code{1e-6} if \code{likelihood} is \code{NULL}.
 If \code{likelihood} is not \code{NULL}, the nuggets of GPs that feed into the likelihood layer default to \code{1e-4}, while those of all other GPs default to \code{1e-6}.}
 
-\item{scale_est}{a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
+\item{scale_est}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
 layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 If a bool vector is provided, its length must match the number of GP nodes:
 \itemize{
@@ -140,7 +140,7 @@ The value of a bool has following effects:
 
 Defaults to \code{TRUE}.}
 
-\item{scale}{the initial variance value(s) of GP nodes in the final layer (or the
+\item{scale}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the initial variance value(s) of GP nodes in the final layer (or the
 layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
 in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:
 \itemize{
@@ -159,7 +159,7 @@ Defaults to \code{1}.}
 a better emulator in some cases. When set to \code{NULL}, the value defaults to \code{FALSE} if \code{likelihood = "Categorical"} and to \code{TRUE} otherwise.
 Defaults to \code{NULL}.}
 
-\item{likelihood}{the likelihood type of a DGP emulator:
+\item{likelihood}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the likelihood type of a DGP emulator:
 \enumerate{
 \item \code{NULL}: no likelihood layer is included in the emulator.
 \item \code{"Hetero"}: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
