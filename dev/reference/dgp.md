@@ -191,11 +191,11 @@ dgp(
 
 - scale_est:
 
-  a bool or a bool vector indicating whether the variances of GP nodes
-  in the final layer (or the layer feeding the likelihood node) should
-  be estimated. If a bool is provided, it is applied to all GP nodes in
-  that layer. If a bool vector is provided, its length must match the
-  number of GP nodes:
+  **\[updated\]** a bool or a bool vector indicating whether the
+  variances of GP nodes in the final layer (or the layer feeding the
+  likelihood node) should be estimated. If a bool is provided, it is
+  applied to all GP nodes in that layer. If a bool vector is provided,
+  its length must match the number of GP nodes:
 
   - `ncol(Y)` if `likelihood = NULL`
 
@@ -222,11 +222,11 @@ dgp(
 
 - scale:
 
-  the initial variance value(s) of GP nodes in the final layer (or the
-  layer feeding the likelihood node). If it is a single numeric value,
-  it will be applied to all GP nodes in the final layer (or the layer
-  feeding the likelihood node). If it is a vector, its length must match
-  the number of GP nodes:
+  **\[updated\]** the initial variance value(s) of GP nodes in the final
+  layer (or the layer feeding the likelihood node). If it is a single
+  numeric value, it will be applied to all GP nodes in the final layer
+  (or the layer feeding the likelihood node). If it is a vector, its
+  length must match the number of GP nodes:
 
   - `ncol(Y)` if `likelihood = NULL`
 
@@ -255,7 +255,7 @@ dgp(
 
 - likelihood:
 
-  the likelihood type of a DGP emulator:
+  **\[updated\]** the likelihood type of a DGP emulator:
 
   1.  `NULL`: no likelihood layer is included in the emulator.
 

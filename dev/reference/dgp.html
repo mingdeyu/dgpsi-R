@@ -174,7 +174,7 @@ If <code>likelihood</code> is not <code>NULL</code>, the nuggets of GPs that fee
 
 
 <dt id="arg-scale-est">scale_est<a class="anchor" aria-label="anchor" href="#arg-scale-est"></a></dt>
-<dd><p>a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
 layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 If a bool vector is provided, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
 <li><p><code>3</code> if <code>likelihood</code> is <code>"ZINB"</code></p></li>
@@ -187,7 +187,7 @@ If a bool vector is provided, its length must match the number of GP nodes:</p><
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>the initial variance value(s) of GP nodes in the final layer (or the
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> the initial variance value(s) of GP nodes in the final layer (or the
 layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
 in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
 <li><p><code>3</code> if <code>likelihood</code> is <code>"ZINB"</code></p></li>
@@ -205,7 +205,7 @@ Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-likelihood">likelihood<a class="anchor" aria-label="anchor" href="#arg-likelihood"></a></dt>
-<dd><p>the likelihood type of a DGP emulator:</p><ol><li><p><code>NULL</code>: no likelihood layer is included in the emulator.</p></li>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> the likelihood type of a DGP emulator:</p><ol><li><p><code>NULL</code>: no likelihood layer is included in the emulator.</p></li>
 <li><p><code>"Hetero"</code>: a heteroskedastic Gaussian likelihood layer is added for stochastic emulation where the computer model outputs are assumed to follow a heteroskedastic Gaussian distribution
 (i.e., the computer model outputs have input-dependent noise).</p></li>
 <li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for emulation where the computer model outputs are counts and a Poisson distribution is used to model them.</p></li>
