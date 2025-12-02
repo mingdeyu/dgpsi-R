@@ -47,7 +47,8 @@
 #'    - When `object` is an instance of the `dgp` class, a vector of length `batch_size * D` is returned, containing the positions
 #'      (row numbers) of the next design points from `x_cand` to be added to the DGP emulator.
 #'      * `D` is the number of output dimensions of the DGP emulator if no likelihood layer is included.
-#'      * For a DGP emulator with a `Hetero` or `NegBin` likelihood layer, `D = 2`.
+#'      * For a DGP emulator with a `Hetero` or `NegBin` or `ZIP` likelihood layer, `D = 2`.
+#'      * For a DGP emulator with a `ZINB` likelihood layer, `D = 3`.
 #'      * For a DGP emulator with a `Categorical` likelihood layer, `D = 1` for binary output or `D = K` for multi-class output with `K` classes.
 #'    - When `object` is an instance of the `bundle` class, a matrix is returned with `batch_size` rows and a column for each emulator in
 #'      the bundle, containing the positions (row numbers) of the next design points from `x_cand` for individual emulators.
@@ -55,7 +56,8 @@
 #'    - When `object` is an instance of the `gp` class, a matrix with `batch_size` rows is returned, giving the next design points to be evaluated.
 #'    - When `object` is an instance of the `dgp` class, a matrix with `batch_size * D` rows is returned, where:
 #'      - `D` is the number of output dimensions of the DGP emulator if no likelihood layer is included.
-#'      - For a DGP emulator with a `Hetero` or `NegBin` likelihood layer, `D = 2`.
+#'      - For a DGP emulator with a `Hetero` or `NegBin` or `ZIP` likelihood layer, `D = 2`.
+#'      - For a DGP emulator with a `ZINB` likelihood layer, `D = 3`.
 #'      - For a DGP emulator with a `Categorical` likelihood layer, `D = 1` for binary output or `D = K` for multi-class output with `K` classes.
 #'    - When `object` is an instance of the `bundle` class, a list is returned with a length equal to the number of emulators in the bundle. Each
 #'      element of the list is a matrix with `batch_size` rows, where each row represents a design point to be added to the corresponding emulator.

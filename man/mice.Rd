@@ -114,7 +114,8 @@ Set to \code{NULL} to disable aggregation. Defaults to \code{NULL}.}
 (row numbers) of the next design points from \code{x_cand} to be added to the DGP emulator.
 \itemize{
 \item \code{D} is the number of output dimensions of the DGP emulator if no likelihood layer is included.
-\item For a DGP emulator with a \code{Hetero} or \code{NegBin} likelihood layer, \code{D = 2}.
+\item For a DGP emulator with a \code{Hetero} or \code{NegBin} or \code{ZIP} likelihood layer, \code{D = 2}.
+\item For a DGP emulator with a \code{ZINB} likelihood layer, \code{D = 3}.
 \item For a DGP emulator with a \code{Categorical} likelihood layer, \code{D = 1} for binary output or \code{D = K} for multi-class output with \code{K} classes.
 }
 \item When \code{object} is an instance of the \code{bundle} class, a matrix is returned with \code{batch_size} rows and a column for each emulator in
@@ -126,7 +127,8 @@ the bundle, containing the positions (row numbers) of the next design points fro
 \item When \code{object} is an instance of the \code{dgp} class, a matrix with \code{batch_size * D} rows is returned, where:
 \itemize{
 \item \code{D} is the number of output dimensions of the DGP emulator if no likelihood layer is included.
-\item For a DGP emulator with a \code{Hetero} or \code{NegBin} likelihood layer, \code{D = 2}.
+\item For a DGP emulator with a \code{Hetero} or \code{NegBin} or \code{ZIP} likelihood layer, \code{D = 2}.
+\item For a DGP emulator with a \code{ZINB} likelihood layer, \code{D = 3}.
 \item For a DGP emulator with a \code{Categorical} likelihood layer, \code{D = 1} for binary output or \code{D = K} for multi-class output with \code{K} classes.
 }
 \item When \code{object} is an instance of the \code{bundle} class, a list is returned with a length equal to the number of emulators in the bundle. Each

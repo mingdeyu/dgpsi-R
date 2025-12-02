@@ -44,7 +44,8 @@
 #'     layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 #'     If a bool vector is provided, its length must match the number of GP nodes:
 #' - `ncol(Y)` if `likelihood = NULL`
-#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+#' - `3` if `likelihood` is `"ZINB"`
+#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"` or `"ZIP"`
 #' - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two classes
 #' - the number of classes if `likelihood` is `"Categorical"` with more than two classes.
 #'
@@ -67,7 +68,8 @@
 #'     layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 #'     If a bool vector is provided, its length must match the number of GP nodes:
 #' - `ncol(Y)` if `likelihood = NULL`
-#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+#' - `3` if `likelihood` is `"ZINB"`
+#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"` or `"ZIP"`
 #' - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two classes
 #' - the number of classes if `likelihood` is `"Categorical"` with more than two classes.
 #'
@@ -80,7 +82,8 @@
 #'    layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
 #'    in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:
 #' - `ncol(Y)` if `likelihood = NULL`
-#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+#' - `3` if `likelihood` is `"ZINB"`
+#' - `2` if `likelihood` is `"Hetero"` or `"NegBin"` or `"ZIP"`
 #' - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two classes
 #' - the number of classes if `likelihood` is `"Categorical"` with more than two classes.
 #'
@@ -96,7 +99,11 @@
 #'    (i.e., the computer model outputs have input-dependent noise).
 #' 3. `"Poisson"`: a Poisson likelihood layer is added for emulation where the computer model outputs are counts and a Poisson distribution is used to model them.
 #' 4. `"NegBin"`: a negative Binomial likelihood layer is added for emulation where the computer model outputs are counts and a negative Binomial distribution is used to capture dispersion variability in input space.
-#' 5. `"Categorical"`: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.
+#' 5. `"ZIP"`: a zero-inflated Poisson likelihood layer is added for emulation where the computer model outputs are counts with
+#'    excess zeros relative to a standard Poisson distribution, modeled via a mixture of structural zeros and a Poisson component.
+#' 6. `"ZINB"`: a zero-inflated negative Binomial likelihood layer is added for emulation where the computer model outputs are counts
+#'    exhibiting both over-dispersion and excess zeros, combining a structural-zero component with a negative Binomial component.
+#' 7. `"Categorical"`: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.
 #'
 #' Defaults to `NULL`.
 #' @param training a bool indicating if the initialized DGP emulator will be trained.
@@ -143,7 +150,8 @@
 #' * `specs`: a list that contains
 #'   1. *L* (i.e., the number of layers in the DGP hierarchy) sub-lists named `layer1, layer2,..., layerL`. Each sub-list contains *D*
 #'      (i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named `node1, node2,..., nodeD`. If a sub-list
-#'      corresponds to a likelihood node, it contains one element called `type` that gives the name (`Hetero`, `Poisson`, `NegBin`, or `Categorical`) of the likelihood node.
+#'      corresponds to a likelihood node, it contains one element called `type` that gives the name (`Hetero`, `Poisson`, `NegBin`,
+#'      `ZIP`, `ZINB`, or `Categorical`) of the likelihood node.
 #'      If a sub-list corresponds to a GP node, it contains four elements:
 #'      - `kernel`: the type of the kernel function used for the GP node.
 #'      - `lengthscales`: a vector of lengthscales in the kernel function.
@@ -263,7 +271,8 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
   if (rank_num < n_dim_X) stop("The input matrix is not full rank. This indicates perfect multicollinearity and redundant information. We recommend identifying and removing redundant columns.")
 
   if ( !is.null(likelihood) ){
-    if (likelihood!='Hetero' &  likelihood!='Poisson' & likelihood!='NegBin' & likelihood!='Categorical' ) stop("The provided 'likelihood' is not supported.", call. = FALSE)
+    allowed <- c("Hetero", "Poisson", "NegBin", "Categorical", "ZIP", "ZINB")
+    if (!(likelihood %in% allowed)) stop("The provided 'likelihood' is not supported.", call. = FALSE)
     if (is.null(connect)){
       if (likelihood=='Categorical'){
         connect <- FALSE
@@ -414,7 +423,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
         stop("'Y' must be a vector or a matrix with only one column when 'likelihood' is not NULL.", call. = FALSE)
       }
 
-      if ( likelihood == 'Hetero'|likelihood == 'NegBin' ) {
+      if ( likelihood == 'Hetero'|likelihood == 'NegBin'|likelihood == 'ZIP' ) {
         #nugget <- rep(1e-6, 2)
         #nugget_est <- rep(FALSE, 2)
         if ( length(nugget_est)==1 ) {
@@ -447,6 +456,30 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
         }
         if ( length(scale_est)!=1 ) stop(sprintf("length(scale_est) should equal %i.", 1), call. = FALSE)
         if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal %i.", 1), call. = FALSE)
+      } else if ( likelihood == 'ZINB' ){
+        if ( length(nugget_est)==1 ) {
+          nugget_est <- rep(nugget_est, 3)
+        } else {
+          if ( length(nugget_est)!=3 ) {
+            stop(sprintf("length(nugget_est) should equal %i.", 3), call. = FALSE)
+          }
+        }
+
+        if ( length(scale_est)==1 ) {
+          scale_est <- rep(scale_est, 3)
+        } else {
+          if ( length(scale_est)!=3 ) {
+            stop(sprintf("length(scale_est) should equal %i.", 3), call. = FALSE)
+          }
+        }
+
+        if ( length(scale)==1 ) {
+          scale <- rep(scale, 3)
+        } else {
+          if ( length(scale)!=3 ) {
+            stop(sprintf("length(scale) should equal %i.", 3), call. = FALSE)
+          }
+        }
       } else if ( likelihood == 'Categorical' ) {
         num_class <- length(unique(Y[,1]))
         if (num_class==2) {
@@ -526,6 +559,8 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
               if ( (likelihood == 'Hetero' && decouple) ||
                    (likelihood == 'NegBin' && decouple) ||
+                   (likelihood == 'ZIP' && decouple) ||
+                   (likelihood == 'ZINB' && decouple) ||
                    (likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2)){
                 layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                      input_dim = reticulate::np_array(as.integer(((1+(k-1)*node):(k*node)) - 1)), connect = reticulate::np_array(connect_info) )
@@ -541,6 +576,8 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
               }
               if ( (likelihood == 'Hetero' && decouple) ||
                    (likelihood == 'NegBin' && decouple) ||
+                   (likelihood == 'ZIP' && decouple) ||
+                   (likelihood == 'ZINB' && decouple) ||
                    (likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2)){
                 layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, scale = scale[k], scale_est = scale_est[k], nugget = nugget[l], nugget_est = nugget_est[k],
                                                      input_dim = reticulate::np_array(as.integer(((1+(k-1)*node):(k*node)) - 1)))
@@ -557,9 +594,14 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
                 length_scale <- rep(lengthscale[l], n_dim_X)
               }
               if ( (likelihood == 'Hetero' && decouple) ||
-                   (likelihood == 'NegBin' && decouple) ){
+                   (likelihood == 'NegBin' && decouple) ||
+                   (likelihood == 'ZIP' && decouple)){
                   layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l])
                   layer_l[[k + no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l])
+              } else if ( likelihood == 'ZINB' && decouple ) {
+                for (i in 1:3){
+                  layer_l[[k+(i-1)*no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l])
+                }
               } else if ( likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2 ){
                 num_cat <- length(unique(Y[,1]))
                 for (i in 1:num_cat){
@@ -578,11 +620,17 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
                 connect_info <- as.integer(1:n_dim_X - 1)
 
                 if ( (likelihood == 'Hetero' && decouple) ||
-                     (likelihood == 'NegBin' && decouple) ){
+                     (likelihood == 'NegBin' && decouple) ||
+                     (likelihood == 'ZIP' && decouple)){
                   layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
                                                        input_dim = reticulate::np_array(as.integer((1:no_kerenl) - 1)), connect = reticulate::np_array(connect_info))
                   layer_l[[k + no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
                                                                    input_dim = reticulate::np_array(as.integer(((1+no_kerenl):(2*no_kerenl)) - 1)), connect = reticulate::np_array(connect_info))
+                } else if ( likelihood == 'ZINB' && decouple ) {
+                  for (i in 1:3){
+                    layer_l[[k+(i-1)*no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                                         input_dim = reticulate::np_array(as.integer(((1+(i-1)*no_kerenl):(i*no_kerenl)) - 1)), connect = reticulate::np_array(connect_info))
+                  }
                 } else if ( likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2 ){
                   num_cat <- length(unique(Y[,1]))
                   for (i in 1:num_cat){
@@ -600,11 +648,17 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
                   length_scale <- rep(lengthscale[l], node)
                 }
                 if ( (likelihood == 'Hetero' && decouple) ||
-                     (likelihood == 'NegBin' && decouple) ){
+                     (likelihood == 'NegBin' && decouple) ||
+                     (likelihood == 'ZIP' && decouple)){
                   layer_l[[k]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
                                                        input_dim = reticulate::np_array(as.integer((1:no_kerenl) - 1)))
                   layer_l[[k + no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
                                                                    input_dim = reticulate::np_array(as.integer(((1+no_kerenl):(2*no_kerenl)) - 1)))
+                } else if ( likelihood == 'ZINB' && decouple ) {
+                  for (i in 1:3){
+                    layer_l[[k+(i-1)*no_kerenl]] <- pkg.env$dgpsi$kernel(length = reticulate::np_array(length_scale), bds = bds, name = name[l], prior_name = prior, nugget = nugget[l],
+                                                                         input_dim = reticulate::np_array(as.integer(((1+(i-1)*no_kerenl):(i*no_kerenl)) - 1)))
+                  }
                 } else if ( likelihood == 'Categorical' && decouple && length(unique(Y[,1])) > 2 ){
                   num_cat <- length(unique(Y[,1]))
                   for (i in 1:num_cat){
@@ -627,6 +681,10 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
         struc[[depth]] <- c(pkg.env$dgpsi$Hetero())
       } else if ( likelihood == 'NegBin' ) {
         struc[[depth]] <- c(pkg.env$dgpsi$NegBin())
+      } else if ( likelihood == 'ZIP' ) {
+        struc[[depth]] <- c(pkg.env$dgpsi$ZIP())
+      } else if ( likelihood == 'ZINB' ) {
+        struc[[depth]] <- c(pkg.env$dgpsi$ZINB())
       } else if ( likelihood == 'Categorical' ) {
         struc[[depth]] <- c(pkg.env$dgpsi$Categorical(num_class, link = link))
       }

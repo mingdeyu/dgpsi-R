@@ -7,6 +7,7 @@
 - Added support for MAP estimation with no prior in `gp()` and `dgp()` by setting `prior = NULL`.
 - Added support for the `robustmax` link function for multi-class classification via the `link` argument in `dgp()`.
 - Introduced automatic error handling in `dgp()`, allowing up to three training retries instead of terminating the training process.
+- Zero-inflated Poisson and zero-inflated Negative Binomial likelihoods have been added to the package and can be used in `dgp()` by setting `likelihood = "ZIP"` and `likelihood = "ZINB"`, respectively.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.

@@ -94,7 +94,8 @@ layer feeding the likelihood node) should be estimated. If a bool is provided, i
 If a bool vector is provided, its length must match the number of GP nodes:
 \itemize{
 \item \code{ncol(Y)} if \code{likelihood = NULL}
-\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"}
+\item \code{3} if \code{likelihood} is \code{"ZINB"}
+\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"} or \code{"ZIP"}
 \item \code{1} if \code{likelihood} is \code{"Poisson"} or \code{"Categorical"} with two classes
 \item the number of classes if \code{likelihood} is \code{"Categorical"} with more than two classes.
 }
@@ -125,7 +126,8 @@ layer feeding the likelihood node) should be estimated. If a bool is provided, i
 If a bool vector is provided, its length must match the number of GP nodes:
 \itemize{
 \item \code{ncol(Y)} if \code{likelihood = NULL}
-\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"}
+\item \code{3} if \code{likelihood} is \code{"ZINB"}
+\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"} or \code{"ZIP"}
 \item \code{1} if \code{likelihood} is \code{"Poisson"} or \code{"Categorical"} with two classes
 \item the number of classes if \code{likelihood} is \code{"Categorical"} with more than two classes.
 }
@@ -143,7 +145,8 @@ layer feeding the likelihood node). If it is a single numeric value, it will be 
 in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:
 \itemize{
 \item \code{ncol(Y)} if \code{likelihood = NULL}
-\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"}
+\item \code{3} if \code{likelihood} is \code{"ZINB"}
+\item \code{2} if \code{likelihood} is \code{"Hetero"} or \code{"NegBin"} or \code{"ZIP"}
 \item \code{1} if \code{likelihood} is \code{"Poisson"} or \code{"Categorical"} with two classes
 \item the number of classes if \code{likelihood} is \code{"Categorical"} with more than two classes.
 }
@@ -163,6 +166,10 @@ Defaults to \code{NULL}.}
 (i.e., the computer model outputs have input-dependent noise).
 \item \code{"Poisson"}: a Poisson likelihood layer is added for emulation where the computer model outputs are counts and a Poisson distribution is used to model them.
 \item \code{"NegBin"}: a negative Binomial likelihood layer is added for emulation where the computer model outputs are counts and a negative Binomial distribution is used to capture dispersion variability in input space.
+\item \code{"ZIP"}: a zero-inflated Poisson likelihood layer is added for emulation where the computer model outputs are counts with
+excess zeros relative to a standard Poisson distribution, modeled via a mixture of structural zeros and a Poisson component.
+\item \code{"ZINB"}: a zero-inflated negative Binomial likelihood layer is added for emulation where the computer model outputs are counts
+exhibiting both over-dispersion and excess zeros, combining a structural-zero component with a negative Binomial component.
 \item \code{"Categorical"}: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.
 }
 
@@ -231,7 +238,8 @@ An S3 class named \code{dgp} that contains five slots:
 \enumerate{
 \item \emph{L} (i.e., the number of layers in the DGP hierarchy) sub-lists named \verb{layer1, layer2,..., layerL}. Each sub-list contains \emph{D}
 (i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named \verb{node1, node2,..., nodeD}. If a sub-list
-corresponds to a likelihood node, it contains one element called \code{type} that gives the name (\code{Hetero}, \code{Poisson}, \code{NegBin}, or \code{Categorical}) of the likelihood node.
+corresponds to a likelihood node, it contains one element called \code{type} that gives the name (\code{Hetero}, \code{Poisson}, \code{NegBin},
+\code{ZIP}, \code{ZINB}, or \code{Categorical}) of the likelihood node.
 If a sub-list corresponds to a GP node, it contains four elements:
 \itemize{
 \item \code{kernel}: the type of the kernel function used for the GP node.
