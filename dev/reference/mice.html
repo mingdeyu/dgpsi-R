@@ -183,7 +183,8 @@ of the matrix equals to:</p><ul><li><p>the emulator output dimension if <code>ob
 (row numbers) of the next design points from <code>x_cand</code>.</p></li>
 <li><p>When <code>object</code> is an instance of the <code>dgp</code> class, a vector of length <code>batch_size * D</code> is returned, containing the positions
 (row numbers) of the next design points from <code>x_cand</code> to be added to the DGP emulator.</p><ul><li><p><code>D</code> is the number of output dimensions of the DGP emulator if no likelihood layer is included.</p></li>
-<li><p>For a DGP emulator with a <code>Hetero</code> or <code>NegBin</code> likelihood layer, <code>D = 2</code>.</p></li>
+<li><p>For a DGP emulator with a <code>Hetero</code> or <code>NegBin</code> or <code>ZIP</code> likelihood layer, <code>D = 2</code>.</p></li>
+<li><p>For a DGP emulator with a <code>ZINB</code> likelihood layer, <code>D = 3</code>.</p></li>
 <li><p>For a DGP emulator with a <code>Categorical</code> likelihood layer, <code>D = 1</code> for binary output or <code>D = K</code> for multi-class output with <code>K</code> classes.</p></li>
 </ul></li>
 <li><p>When <code>object</code> is an instance of the <code>bundle</code> class, a matrix is returned with <code>batch_size</code> rows and a column for each emulator in
@@ -191,7 +192,8 @@ the bundle, containing the positions (row numbers) of the next design points fro
 </ul></li>
 <li><p>If <code>x_cand</code> is <code>NULL</code>:</p><ul><li><p>When <code>object</code> is an instance of the <code>gp</code> class, a matrix with <code>batch_size</code> rows is returned, giving the next design points to be evaluated.</p></li>
 <li><p>When <code>object</code> is an instance of the <code>dgp</code> class, a matrix with <code>batch_size * D</code> rows is returned, where:</p><ul><li><p><code>D</code> is the number of output dimensions of the DGP emulator if no likelihood layer is included.</p></li>
-<li><p>For a DGP emulator with a <code>Hetero</code> or <code>NegBin</code> likelihood layer, <code>D = 2</code>.</p></li>
+<li><p>For a DGP emulator with a <code>Hetero</code> or <code>NegBin</code> or <code>ZIP</code> likelihood layer, <code>D = 2</code>.</p></li>
+<li><p>For a DGP emulator with a <code>ZINB</code> likelihood layer, <code>D = 3</code>.</p></li>
 <li><p>For a DGP emulator with a <code>Categorical</code> likelihood layer, <code>D = 1</code> for binary output or <code>D = K</code> for multi-class output with <code>K</code> classes.</p></li>
 </ul></li>
 <li><p>When <code>object</code> is an instance of the <code>bundle</code> class, a list is returned with a length equal to the number of emulators in the bundle. Each

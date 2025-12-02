@@ -27,6 +27,10 @@
   [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md),
   allowing up to three training retries instead of terminating the
   training process.
+- Zero-inflated Poisson and zero-inflated Negative Binomial likelihoods
+  have been added to the package and can be used in
+  [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md) by
+  setting `likelihood = "ZIP"` and `likelihood = "ZINB"`, respectively.
 
 ## dgpsi 2.6.0
 

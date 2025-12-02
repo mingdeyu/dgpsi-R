@@ -163,8 +163,10 @@ vigf(
       - `D` is the number of output dimensions of the DGP emulator if no
         likelihood layer is included.
 
-      - For a DGP emulator with a `Hetero` or `NegBin` likelihood layer,
-        `D = 2`.
+      - For a DGP emulator with a `Hetero` or `NegBin` or `ZIP`
+        likelihood layer, `D = 2`.
+
+      - For a DGP emulator with a `ZINB` likelihood layer, `D = 3`.
 
       - For a DGP emulator with a `Categorical` likelihood layer,
         `D = 1` for binary output or `D = K` for multi-class output with
@@ -187,8 +189,10 @@ vigf(
       - `D` is the number of output dimensions of the DGP emulator if no
         likelihood layer is included.
 
-      - For a DGP emulator with a `Hetero` or `NegBin` likelihood layer,
-        `D = 2`.
+      - For a DGP emulator with a `Hetero` or `NegBin` or `ZIP`
+        likelihood layer, `D = 2`.
+
+      - For a DGP emulator with a `ZINB` likelihood layer, `D = 3`.
 
       - For a DGP emulator with a `Categorical` likelihood layer,
         `D = 1` for binary output or `D = K` for multi-class output with

@@ -143,7 +143,9 @@ dgp(
 
   - `ncol(Y)` if `likelihood = NULL`
 
-  - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+  - `3` if `likelihood` is `"ZINB"`
+
+  - `2` if `likelihood` is `"Hetero"` or `"NegBin"` or `"ZIP"`
 
   - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two
     classes
@@ -197,7 +199,9 @@ dgp(
 
   - `ncol(Y)` if `likelihood = NULL`
 
-  - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+  - `3` if `likelihood` is `"ZINB"`
+
+  - `2` if `likelihood` is `"Hetero"` or `"NegBin"` or `"ZIP"`
 
   - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two
     classes
@@ -226,7 +230,9 @@ dgp(
 
   - `ncol(Y)` if `likelihood = NULL`
 
-  - `2` if `likelihood` is `"Hetero"` or `"NegBin"`
+  - `3` if `likelihood` is `"ZINB"`
+
+  - `2` if `likelihood` is `"Hetero"` or `"NegBin"` or `"ZIP"`
 
   - `1` if `likelihood` is `"Poisson"` or `"Categorical"` with two
     classes
@@ -267,7 +273,17 @@ dgp(
       negative Binomial distribution is used to capture dispersion
       variability in input space.
 
-  5.  `"Categorical"`: a categorical likelihood layer is added for
+  5.  `"ZIP"`: a zero-inflated Poisson likelihood layer is added for
+      emulation where the computer model outputs are counts with excess
+      zeros relative to a standard Poisson distribution, modeled via a
+      mixture of structural zeros and a Poisson component.
+
+  6.  `"ZINB"`: a zero-inflated negative Binomial likelihood layer is
+      added for emulation where the computer model outputs are counts
+      exhibiting both over-dispersion and excess zeros, combining a
+      structural-zero component with a negative Binomial component.
+
+  7.  `"Categorical"`: a categorical likelihood layer is added for
       emulation (classification), where the computer model output is
       categorical.
 
@@ -404,9 +420,9 @@ An S3 class named `dgp` that contains five slots:
       (i.e., the number of GP/likelihood nodes in the corresponding
       layer) sub-lists named `node1, node2,..., nodeD`. If a sub-list
       corresponds to a likelihood node, it contains one element called
-      `type` that gives the name (`Hetero`, `Poisson`, `NegBin`, or
-      `Categorical`) of the likelihood node. If a sub-list corresponds
-      to a GP node, it contains four elements:
+      `type` that gives the name (`Hetero`, `Poisson`, `NegBin`, `ZIP`,
+      `ZINB`, or `Categorical`) of the likelihood node. If a sub-list
+      corresponds to a GP node, it contains four elements:
 
       - `kernel`: the type of the kernel function used for the GP node.
 

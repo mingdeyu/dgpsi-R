@@ -153,7 +153,8 @@ The matrix should have its row number equal to <code>depth</code> if <code>likel
 <dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#updated" class="external-link"><img src="figures/lifecycle-updated.svg" alt="[Updated]"></a> a bool or a bool vector indicating whether the nuggets of GP nodes in the final layer (or the
 layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 If a bool vector is provided, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
-<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code></p></li>
+<li><p><code>3</code> if <code>likelihood</code> is <code>"ZINB"</code></p></li>
+<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code> or <code>"ZIP"</code></p></li>
 <li><p><code>1</code> if <code>likelihood</code> is <code>"Poisson"</code> or <code>"Categorical"</code> with two classes</p></li>
 <li><p>the number of classes if <code>likelihood</code> is <code>"Categorical"</code> with more than two classes.</p></li>
 </ul><p>Each element of the vector is applied to the corresponding GP node in the final layer (or the layer feeding the
@@ -176,7 +177,8 @@ If <code>likelihood</code> is not <code>NULL</code>, the nuggets of GPs that fee
 <dd><p>a bool or a bool vector indicating whether the variances of GP nodes in the final layer (or the
 layer feeding the likelihood node) should be estimated. If a bool is provided, it is applied to all GP nodes in that layer.
 If a bool vector is provided, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
-<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code></p></li>
+<li><p><code>3</code> if <code>likelihood</code> is <code>"ZINB"</code></p></li>
+<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code> or <code>"ZIP"</code></p></li>
 <li><p><code>1</code> if <code>likelihood</code> is <code>"Poisson"</code> or <code>"Categorical"</code> with two classes</p></li>
 <li><p>the number of classes if <code>likelihood</code> is <code>"Categorical"</code> with more than two classes.</p></li>
 </ul><p>The value of a bool has following effects:</p><ul><li><p><code>FALSE</code>: the variance of the corresponding GP is fixed to the corresponding value defined in <code>scale</code> (see below).</p></li>
@@ -188,7 +190,8 @@ If a bool vector is provided, its length must match the number of GP nodes:</p><
 <dd><p>the initial variance value(s) of GP nodes in the final layer (or the
 layer feeding the likelihood node). If it is a single numeric value, it will be applied to all GP nodes
 in the final layer (or the layer feeding the likelihood node). If it is a vector, its length must match the number of GP nodes:</p><ul><li><p><code>ncol(Y)</code> if <code>likelihood = NULL</code></p></li>
-<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code></p></li>
+<li><p><code>3</code> if <code>likelihood</code> is <code>"ZINB"</code></p></li>
+<li><p><code>2</code> if <code>likelihood</code> is <code>"Hetero"</code> or <code>"NegBin"</code> or <code>"ZIP"</code></p></li>
 <li><p><code>1</code> if <code>likelihood</code> is <code>"Poisson"</code> or <code>"Categorical"</code> with two classes</p></li>
 <li><p>the number of classes if <code>likelihood</code> is <code>"Categorical"</code> with more than two classes.</p></li>
 </ul><p>Each numeric in the vector will be applied to the corresponding GP node.</p>
@@ -207,6 +210,10 @@ Defaults to <code>NULL</code>.</p></dd>
 (i.e., the computer model outputs have input-dependent noise).</p></li>
 <li><p><code>"Poisson"</code>: a Poisson likelihood layer is added for emulation where the computer model outputs are counts and a Poisson distribution is used to model them.</p></li>
 <li><p><code>"NegBin"</code>: a negative Binomial likelihood layer is added for emulation where the computer model outputs are counts and a negative Binomial distribution is used to capture dispersion variability in input space.</p></li>
+<li><p><code>"ZIP"</code>: a zero-inflated Poisson likelihood layer is added for emulation where the computer model outputs are counts with
+excess zeros relative to a standard Poisson distribution, modeled via a mixture of structural zeros and a Poisson component.</p></li>
+<li><p><code>"ZINB"</code>: a zero-inflated negative Binomial likelihood layer is added for emulation where the computer model outputs are counts
+exhibiting both over-dispersion and excess zeros, combining a structural-zero component with a negative Binomial component.</p></li>
 <li><p><code>"Categorical"</code>: a categorical likelihood layer is added for emulation (classification), where the computer model output is categorical.</p></li>
 </ol><p>Defaults to <code>NULL</code>.</p></dd>
 
@@ -297,7 +304,8 @@ Defaults to <code>NULL</code>.</p></dd>
 <li><p><code>data</code>: a list that contains two elements: <code>X</code> and <code>Y</code> which are the training input and output data respectively.</p></li>
 <li><p><code>specs</code>: a list that contains</p><ol><li><p><em>L</em> (i.e., the number of layers in the DGP hierarchy) sub-lists named <code>layer1, layer2,..., layerL</code>. Each sub-list contains <em>D</em>
 (i.e., the number of GP/likelihood nodes in the corresponding layer) sub-lists named <code>node1, node2,..., nodeD</code>. If a sub-list
-corresponds to a likelihood node, it contains one element called <code>type</code> that gives the name (<code>Hetero</code>, <code>Poisson</code>, <code>NegBin</code>, or <code>Categorical</code>) of the likelihood node.
+corresponds to a likelihood node, it contains one element called <code>type</code> that gives the name (<code>Hetero</code>, <code>Poisson</code>, <code>NegBin</code>,
+<code>ZIP</code>, <code>ZINB</code>, or <code>Categorical</code>) of the likelihood node.
 If a sub-list corresponds to a GP node, it contains four elements:</p><ul><li><p><code>kernel</code>: the type of the kernel function used for the GP node.</p></li>
 <li><p><code>lengthscales</code>: a vector of lengthscales in the kernel function.</p></li>
 <li><p><code>scale</code>: the variance value in the kernel function.</p></li>
