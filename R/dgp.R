@@ -488,8 +488,10 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
           }
           if ( length(scale_est)!=1 ) stop(sprintf("length(scale_est) should equal %i.", 1), call. = FALSE)
           if ( length(scale)!=1 ) stop(sprintf("length(scale) should equal %i.", 1), call. = FALSE)
+          if (is.null(link)) link = 'logit'
           if ( link!='logit' & link!='probit' ) stop("'link' can only be either 'logit' or 'probit'.", call. = FALSE)
         } else {
+          if (is.null(link)) link = 'softmax'
           if ( link!='softmax' & link!='robustmax' ) stop("'link' can only be either 'softmax' or 'robustmax'.", call. = FALSE)
           if ( length(nugget_est)==1 ) {
             nugget_est <- rep(nugget_est, num_class)
