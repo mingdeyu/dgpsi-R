@@ -173,7 +173,7 @@ CRAN release: 2024-12-14
   [`plot()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)
   functions, allowing users to adjust the number of samples used for
   validation when the validation method is set to `sampling`.
-- [`combine()`](https://dplyr.tidyverse.org/reference/combine.html) and
+- [`combine()`](https://dplyr.tidyverse.org/reference/defunct.html) and
   `set_linked_idx()` are deprecated as of this version and will be
   removed in the next release. These two functions are no longer
   maintained. Please refer to the updated package documentation for
