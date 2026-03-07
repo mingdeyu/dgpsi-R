@@ -2075,7 +2075,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
             struc$length <- utils::tail(struc$length, length_dim)
             struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow=T)
           }
-          obj <- pkg.env$dgpsi$gp(X, Y, struc, vecchia, M)
+          obj <- pkg.env$dgpsi$gp(X, Y, kernel=struc, vecchia=vecchia, m=M)
           with(pkg.env$np$errstate(divide = 'ignore'), obj$train())
           res <- list()
           res[['id']] <- object$id
@@ -2104,7 +2104,7 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
               struc$length <- utils::tail(struc$length, length_dim)
               struc$para_path <- matrix(c(struc$scale, struc$length, struc$nugget), nrow = 1, byrow = T)
             }
-            obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], struc, vecchia, M)
+            obj <- pkg.env$dgpsi$gp(X, Y[,j,drop=F], kernel=struc, vecchia=vecchia, m=M)
             with(pkg.env$np$errstate(divide = 'ignore'), obj$train())
             res_j <- list()
             res_j[['id']] <- uuid::UUIDgenerate()

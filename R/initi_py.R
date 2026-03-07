@@ -47,12 +47,25 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
                    'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
                    'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4', 'tbb')
     env_name <- 'dgp_si_R_2_6_0_9000'
+
     ##For release version
     #dgpsi_ver <- 'dgpsi==2.6.0'
     #env_name <- 'dgp_si_R_2_6_0'
   } else {
-    dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
-    env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
+    ##For devel version
+    if (dgpsi_ver=='dev'){
+      dgpsi_ver <- c('dill>=0.3.2', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
+                     'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
+                     'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4', 'tbb')
+      env_name <- 'dgp_si_R_2_6_0_dev'
+    } else {
+      dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
+      env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
+    }
+
+    ##For release version
+    # dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
+    # env_name <- paste('dgp_si_R_', gsub(".", "_", dgpsi_ver,fixed=TRUE), sep = "")
   }
   #Check if there is any conda binary installed, if not, request to install it.
   #restart <- FALSE
@@ -177,7 +190,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
   if (!reinsatll) message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
   if (reinsatll) {
     message("Re-installing the required Python packages ...")
-    if (!grepl('9000',env_name)){
+    if (!grepl("9000|dev", env_name)){
       reticulate::conda_remove(envname = env_name, conda = conda_path)
 
       if (Sys.info()[["sysname"]] == 'Linux') {
@@ -228,7 +241,11 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
     if (!reinsatll) reticulate::conda_create(envname = env_name, packages = c(dgpsi_ver),
                                              python_version = py_ver, conda = conda_path, forge = TRUE, additional_create_args = c('--strict-channel-priority'))
   }
-  if (grepl('9000',env_name)) {
+  if (grepl("9000|dev", env_name)) {
+    git_path = "git+https://github.com/mingdeyu/DGP.git"
+    if (grepl("dev", env_name)){
+      git_path = paste0(git_path, '@dev')
+    }
     if (reinsatll) {
       reticulate::conda_install(
         envname  = env_name,
@@ -236,9 +253,9 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
         conda    = conda_path,
         forge = TRUE
       ) # only this dev version - remove after the next release
-      reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
+      reticulate::conda_install(envname = env_name, packages = c(git_path) , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
     } else {
-      reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps'))
+      reticulate::conda_install(envname = env_name, packages = c(git_path) , conda = conda_path, pip = TRUE, pip_options = c('--no-deps'))
     }
   }
   #if (Sys.info()[["sysname"]] == 'Linux' & !any(grepl("libstdc++.so.6.0.3",list.files("/usr/lib/x86_64-linux-gnu/"), fixed = TRUE))){

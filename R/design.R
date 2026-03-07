@@ -2300,11 +2300,11 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
 
               if ( is.null(target) ){
                 idx_x_acq <- Map(c, idx_x_acq, lapply(x_cand, find_matching_indices, mat2 = rep_new_X))
+                idx_x_cand <- lapply((1:n_emulators), function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
               } else {
                 idx_x_acq[!istarget] <- Map(c, idx_x_acq[!istarget], lapply(x_cand[!istarget], find_matching_indices, mat2 = rep_new_X))
+                idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
               }
-
-              idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
             }
             if ( verb ) {
               message(" - Re-Locating ...", appendLF = FALSE)
@@ -2348,6 +2348,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             new_X_list <- lapply(1:n_emulators, function(k) matrix(rep(new_X[k, ], reps), nrow = reps, byrow = TRUE))
             new_Y_list <- lapply(1:n_emulators, function(k) new_Y[seq(k, by = n_emulators, length = reps), k, drop = FALSE] )
             if ( !is.null(x_cand) ) idx_x_acq <- Map(c, idx_x_acq, lapply(Map(find_matching_indices, x_cand, new_X_list), unique))
+            if ( !is.null(x_cand) ) idx_x_cand <- lapply((1:n_emulators), function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
           } else {
             new_X_list <- vector('list', n_emulators)
             new_Y_list <- vector('list', n_emulators)
@@ -2360,8 +2361,8 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
               }
             }
             if ( !is.null(x_cand) ) idx_x_acq[!istarget] <- Map(c, idx_x_acq[!istarget], lapply(Map(find_matching_indices, x_cand[!istarget], new_X_list[!istarget]), unique))
+            if ( !is.null(x_cand) ) idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
           }
-          if ( !is.null(x_cand) ) idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
 
           for ( j in 1:n_emulators ){
             if ( !is.null(new_Y_list[[j]]) ){
@@ -2428,6 +2429,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
               new_Y_list[[k]] <- new_Y[extract,k,drop=FALSE]
             }
             if ( !is.null(x_cand) ) idx_x_acq <- Map(c, idx_x_acq, lapply(Map(find_matching_indices, x_cand, new_X_list), unique))
+            if ( !is.null(x_cand) ) idx_x_cand <- lapply((1:n_emulators), function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
           } else {
             ct <- 1
             active_emu <- sum(!istarget)
@@ -2445,8 +2447,8 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             }
 
             if ( !is.null(x_cand) ) idx_x_acq[!istarget] <- Map(c, idx_x_acq[!istarget], lapply(Map(find_matching_indices, x_cand[!istarget], new_X_list[!istarget]), unique))
+            if ( !is.null(x_cand) ) idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
           }
-          if ( !is.null(x_cand) ) idx_x_cand[!istarget] <- lapply((1:n_emulators)[!istarget], function(k) idx_x_cand0[[k]][-idx_x_acq[[k]]])
 
           for ( j in 1:n_emulators ){
             if ( !is.null(new_Y_list[[j]]) ){
