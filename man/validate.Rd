@@ -7,18 +7,7 @@
 \alias{validate.lgp}
 \title{Validate a constructed GP, DGP, or linked (D)GP emulator}
 \usage{
-validate(
-  object,
-  x_test,
-  y_test,
-  method,
-  sample_size,
-  verb,
-  M,
-  force,
-  cores,
-  ...
-)
+validate(object, x_test, y_test, method, sample_size, verb, M, force, ...)
 
 \method{validate}{gp}(
   object,
@@ -29,7 +18,6 @@ validate(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -42,7 +30,6 @@ validate(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -55,7 +42,6 @@ validate(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 }
@@ -107,9 +93,6 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 \item{force}{a bool indicating whether to force LOO or OOS re-evaluation when the \code{loo} or \code{oos} slot already exists in \code{object}. When \code{force = FALSE},
 \code{\link[=validate]{validate()}} will only re-evaluate the emulators if the \code{x_test} and \code{y_test} are not identical to the values in the \code{oos} slot. If the existing \code{loo} or \code{oos} validation used a different \code{M} in a Vecchia approximation or a different \code{method} to the one prescribed in this call, the emulator will be re-evaluated. Set \code{force} to \code{TRUE} when LOO or OOS re-evaluation
 is required. Defaults to \code{FALSE}.}
-
-\item{cores}{the number of processes to be used for validation. If set to \code{NULL}, the number of processes is set to \verb{max physical cores available \%/\% 2}.
-Defaults to \code{1}.}
 
 \item{...}{N/A.}
 }

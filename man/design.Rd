@@ -28,7 +28,6 @@ design(
   autosave,
   new_wave,
   M_val,
-  cores,
   ...
 )
 
@@ -53,7 +52,6 @@ design(
   autosave = list(),
   new_wave = TRUE,
   M_val = 50,
-  cores = 1,
   ...
 )
 
@@ -78,9 +76,7 @@ design(
   autosave = list(),
   new_wave = TRUE,
   M_val = 50,
-  cores = 1,
   train_N = NULL,
-  refit_cores = 1,
   pruning = TRUE,
   control = list(),
   ...
@@ -107,9 +103,7 @@ design(
   autosave = list(),
   new_wave = TRUE,
   M_val = 50,
-  cores = 1,
   train_N = NULL,
-  refit_cores = 1,
   ...
 )
 }
@@ -267,9 +261,6 @@ in \code{\link[=draw]{draw()}} to avoid issues such as running out of distinct c
 \item{M_val}{an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
-\item{cores}{an integer that gives the number of processes to be used for emulator validation. If set to \code{NULL}, the number of processes is set to
-\verb{max physical cores available \%/\% 2}. Defaults to \code{1}. This argument is only used if \code{eval = NULL}.}
-
 \item{...}{Any arguments with names that differ from those used in \code{\link[=design]{design()}} but are required by \code{f}, \code{method}, or \code{eval} can be passed here.
 \code{\link[=design]{design()}} will forward relevant arguments to \code{f}, \code{method}, and \code{eval} based on the names of the additional arguments provided.}
 
@@ -285,12 +276,6 @@ was constructed under the Vecchia approximation. Defaults to \code{50}.}
 }
 
 Defaults to \code{NULL}.}
-
-\item{refit_cores}{the number of processes to be used to re-fit GP components (in the same layer of a DGP emulator)
-at each M-step during the re-fitting. If set to \code{NULL}, the number of processes is set to \verb{(max physical cores available - 1)}
-if the DGP emulator was constructed without the Vecchia approximation. Otherwise, the number of processes is set to \verb{max physical cores available \%/\% 2}.
-Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components
-is computationally expensive. Defaults to \code{1}.}
 
 \item{pruning}{a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
 design points exceeds \code{min_size} in \code{control}. The argument is only applicable to DGP emulators (i.e., \code{object} is an instance of \code{dgp} class)

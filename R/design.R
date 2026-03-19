@@ -107,8 +107,6 @@
 #'     in [draw()] to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to `TRUE`.
 #' @param M_val an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
-#' @param cores an integer that gives the number of processes to be used for emulator validation. If set to `NULL`, the number of processes is set to
-#'     `max physical cores available %/% 2`. Defaults to `1`. This argument is only used if `eval = NULL`.
 #' @param train_N the number of training iterations to be used for re-fitting the DGP emulator at each step of the sequential design:
 #' - If `train_N` is an integer, the DGP emulator will be re-fitted at each step (based on the re-fit frequency specified in `freq[1]`) using `train_N` iterations.
 #' - If `train_N` is a vector, its length must be `N`, even if the re-fit frequency specified in `freq[1]` is not 1.
@@ -117,11 +115,6 @@
 #'   - `50` iterations if the Vecchia approximation was used.
 #'
 #' Defaults to `NULL`.
-#' @param refit_cores the number of processes to be used to re-fit GP components (in the same layer of a DGP emulator)
-#'     at each M-step during the re-fitting. If set to `NULL`, the number of processes is set to `(max physical cores available - 1)`
-#'     if the DGP emulator was constructed without the Vecchia approximation. Otherwise, the number of processes is set to `max physical cores available %/% 2`.
-#'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components
-#'     is computationally expensive. Defaults to `1`.
 #' @param pruning a bool indicating if dynamic pruning of DGP structures will be implemented during the sequential design after the total number of
 #'     design points exceeds `min_size` in `control`. The argument is only applicable to DGP emulators (i.e., `object` is an instance of `dgp` class)
 #'     produced by `dgp()`. Defaults to `TRUE`.
@@ -254,14 +247,14 @@
 #' @md
 #' @name design
 #' @export
-design <- function(object, N, x_cand, y_cand, n_sample, limits, f, reps, freq, x_test, y_test, reset, target, method, batch_size, eval, verb, autosave, new_wave, M_val, cores, ...){
+design <- function(object, N, x_cand, y_cand, n_sample, limits, f, reps, freq, x_test, y_test, reset, target, method, batch_size, eval, verb, autosave, new_wave, M_val, ...){
   UseMethod("design")
 }
 
 #' @rdname design
 #' @method design gp
 #' @export
-design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, ...) {
+design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -393,11 +386,11 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val)
           rmse <- object$loo$rmse
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val)
           rmse <- object$oos$rmse
         }
       } else {
@@ -617,13 +610,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
           if ( is.null(eval) ){
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, M = M_val, cores = cores)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, force = TRUE, M = M_val)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, M = M_val, cores = cores)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, force = TRUE, M = M_val)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
@@ -698,11 +691,11 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val)
           rmse <- object$loo$rmse
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val)
           rmse <- object$oos$rmse
         }
       } else {
@@ -821,13 +814,13 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
           if ( is.null(eval) ){
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores)
+              object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE)
               if ( verb ) message(" done")
               rmse <- object$loo$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
-              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, cores = cores)
+              object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE)
               if ( verb ) message(" done")
               rmse <- object$oos$rmse
               if ( verb ) message(paste(c(" * RMSE:", sprintf("%.06f", rmse)), collapse=" "))
@@ -914,7 +907,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
 #' @rdname design
 #' @method design dgp
 #' @export
-design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1, pruning = TRUE, control = list(), ...) {
+design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, train_N = NULL, pruning = TRUE, control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -936,10 +929,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
   reset <- check_reset(reset, N)
   if ( !is.null(train_N) ) train_N <- check_train_N(train_N, N)
   reps <- check_reps(reps)
-  if( !is.null(refit_cores) ) {
-    refit_cores <- as.integer(refit_cores)
-    if ( refit_cores < 1 ) stop("'refit_cores' must be >= 1.", call. = FALSE)
-  }
+
   n_cand <- check_n_cand(n_cand)
 
   X <- object$data$X
@@ -1081,7 +1071,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, ...)
           if (is.categorical){
             rmse <- object$loo$log_loss
           } else {
@@ -1089,7 +1079,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
           }
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores, ...)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, ...)
           if (is.categorical){
             rmse <- object$oos$log_loss
           } else {
@@ -1303,7 +1293,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
 
         if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
@@ -1326,7 +1316,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
               N_cropped <- N_cropped + sum(crop_id)
             }
             if (N_cropped!=0) {
-              object <- crop(object, crop_id_list, refit_cores, verb)
+              object <- crop(object, crop_id_list, verb)
               if ( inherits(object,"dgp") ) {
                 pruning <- check_auto(object)
                 if (pruning) drop_list <- create_drop_list(object)
@@ -1340,7 +1330,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, ...)
                 if (object$constructor_obj$all_layer[[length(object$constructor_obj$all_layer)]][[1]]$name == "Categorical"){
                   rmse <- object$loo$log_loss
                   if ( verb ) message(" done")
@@ -1368,7 +1358,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, ...)
                 if (object$constructor_obj$all_layer[[length(object$constructor_obj$all_layer)]][[1]]$name == "Categorical"){
                   rmse <- object$oos$log_loss
                   if ( verb ) message(" done")
@@ -1482,7 +1472,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
       if ( is.null(eval) ){
         if (is.null(x_test) & is.null(y_test)){
           type <- 'loo'
-          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
+          object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, ...)
           if (is.categorical){
             rmse <- object$loo$log_loss
           } else {
@@ -1490,7 +1480,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
           }
         } else {
           type <- 'oos'
-          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, cores = cores, ...)
+          object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, ...)
           if (is.categorical){
             rmse <- object$oos$log_loss
           } else {
@@ -1604,7 +1594,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
 
         if ( i %% freq[1]==0 ){
           if ( verb ) message(" - Updating and re-fitting ...", appendLF = FALSE)
-          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+          object <- update(object, X, Y, refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
           if ( verb ) message(" done")
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
@@ -1626,7 +1616,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
               N_cropped <- N_cropped + sum(crop_id)
             }
             if (N_cropped!=0) {
-              object <- crop(object, crop_id_list, refit_cores, verb)
+              object <- crop(object, crop_id_list, verb)
               if ( inherits(object,"dgp") ) {
                 pruning <- check_auto(object)
                 if (pruning) drop_list <- create_drop_list(object)
@@ -1640,7 +1630,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
             if (is.null(x_test) & is.null(y_test)){
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, ...)
                 if (object$constructor_obj$all_layer[[length(object$constructor_obj$all_layer)]][[1]]$name == "Categorical"){
                   rmse <- object$loo$log_loss
                   if ( verb ) message(" done")
@@ -1668,7 +1658,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
             } else {
               if ( verb ) message(" - Validating ...", appendLF = FALSE)
               if ( inherits(object,"dgp") ) {
-                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                object <- validate(object, x_test = x_test, y_test = y_test, verb = FALSE, M = M_val, force = TRUE, ...)
                 if (object$constructor_obj$all_layer[[length(object$constructor_obj$all_layer)]][[1]]$name == "Categorical"){
                   rmse <- object$oos$log_loss
                   if ( verb ) message(" done")
@@ -1773,7 +1763,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
       if (remaining_steps > 0){
         object <- design(object, remaining_steps, x_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[1]]}, y_cand = if (is.null(x_cand)) {NULL} else {xy_cand_list[[2]]},
                          n_sample = n_cand, limits = limits, f = f, reps = reps, freq = freq, x_test = x_test, y_test = y_test, reset = utils::tail(reset, remaining_steps), target = target,
-                         method = method, batch_size = batch_size, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, M_val = M_val, cores = cores, train_N = if(!is.null(train_N)) utils::tail(train_N, remaining_steps) else NULL, refit_cores = refit_cores, ...)
+                         method = method, batch_size = batch_size, eval = eval, verb = verb, autosave = autosave, new_wave = FALSE, M_val = M_val, train_N = if(!is.null(train_N)) utils::tail(train_N, remaining_steps) else NULL, ...)
         return(object)
       }
     }
@@ -1804,7 +1794,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
 #' @rdname design
 #' @method design bundle
 #' @export
-design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, cores = 1, train_N = NULL, refit_cores = 1,  ...) {
+design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, limits = NULL, f = NULL, reps = 1, freq = c(1, 1), x_test = NULL, y_test = NULL, reset = FALSE, target = NULL, method = vigf, batch_size = 1, eval = NULL, verb = TRUE, autosave = list(), new_wave = TRUE, M_val = 50, train_N = NULL,  ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -1819,10 +1809,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
   freq <- check_freq(freq)
   if( !is.null(train_N) ) train_N <- check_train_N(train_N, N)
   reps <- check_reps(reps)
-  if( !is.null(refit_cores) ) {
-    refit_cores <- as.integer(refit_cores)
-    if ( refit_cores < 1 ) stop("'refit_cores' must be >= 1.", call. = FALSE)
-  }
+
   n_cand <- check_n_cand(n_cand)
 
   X <- object$data$X
@@ -1981,7 +1968,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
               rmse <- c(rmse, obj_k$loo$rmse)
             }
             if ( inherits(obj_k,"dgp") ) {
-              obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
+              obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, ...)
               object[[paste('emulator',k,sep='')]] <- obj_k
               if (is.categorical[k]) {
                 rmse <- c(rmse, obj_k$loo$log_loss)
@@ -1997,7 +1984,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
               rmse <- c(rmse, obj_k$oos$rmse)
             }
             if ( inherits(obj_k,"dgp") ) {
-              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, cores = cores, ...)
+              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, ...)
               object[[paste('emulator',k,sep='')]] <- obj_k
               if (is.categorical[k]) {
                 rmse <- c(rmse, obj_k$oos$log_loss)
@@ -2497,7 +2484,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             if (N_acq_ind[nrow(N_acq_ind),k]!=0){
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
               object[[paste('emulator',k,sep='')]] <- obj_k
             }
           }
@@ -2528,7 +2515,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                     rmse[k] <- obj_k$loo$rmse
                   }
                   if ( inherits(obj_k,"dgp") ) {
-                    obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                    obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     if (is.categorical[k]){
                       rmse[k] <- obj_k$loo$log_loss
@@ -2564,7 +2551,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                     rmse[k] <- obj_k$oos$rmse
                   }
                   if ( inherits(obj_k,"dgp") ) {
-                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     if (is.categorical[k]){
                       rmse[k] <- obj_k$oos$log_loss
@@ -2686,7 +2673,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
               rmse <- c(rmse, obj_k$loo$rmse)
             }
             if ( inherits(obj_k,"dgp") ) {
-              obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, cores = cores, ...)
+              obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, ...)
               object[[paste('emulator',k,sep='')]] <- obj_k
               if (is.categorical[k]){
                 rmse <- c(rmse, obj_k$loo$log_loss)
@@ -2702,7 +2689,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
               rmse <- c(rmse, obj_k$oos$rmse)
             }
             if ( inherits(obj_k,"dgp") ) {
-              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, cores = cores, ...)
+              obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, ...)
               object[[paste('emulator',k,sep='')]] <- obj_k
               if (is.categorical[k]){
                 rmse <- c(rmse, obj_k$oos$log_loss)
@@ -2911,13 +2898,13 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
             if ( is.null(target) ){
               obj_k <- object[[paste('emulator',k,sep='')]]
               if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+              if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
               object[[paste('emulator',k,sep='')]] <- obj_k
             } else {
               if ( !istarget[k] ){
                 obj_k <- object[[paste('emulator',k,sep='')]]
                 if ( inherits(obj_k,"gp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, cores = refit_cores, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
+                if ( inherits(obj_k,"dgp") ) obj_k <- update(obj_k, X[[paste('emulator',k,sep="")]], Y[[paste('emulator',k,sep="")]], refit = TRUE, reset = reset[i-start_point], verb = FALSE, N = if(!is.null(train_N)) train_N[i-start_point] else NULL, B = ifelse(length(obj_k$emulator_obj$all_layer_set)<10, length(obj_k$emulator_obj$all_layer_set), 10), update_in_design = NULL)
                 object[[paste('emulator',k,sep='')]] <- obj_k
               }
             }
@@ -2957,7 +2944,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                     rmse[k] <- obj_k$loo$rmse
                   }
                   if ( inherits(obj_k,"dgp") ) {
-                    obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                    obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     if (is.categorical[k]){
                       rmse[k] <- obj_k$loo$log_loss
@@ -2974,7 +2961,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                       rmse[k] <- obj_k$loo$rmse
                     }
                     if ( inherits(obj_k,"dgp") ) {
-                      obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                      obj_k <- validate(obj_k, x_test = NULL, y_test = NULL, verb = FALSE, M = M_val, force = TRUE, ...)
                       object[[paste('emulator',k,sep='')]] <- obj_k
                       if (is.categorical[k]){
                         rmse[k] <- obj_k$loo$log_loss
@@ -3011,7 +2998,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                     rmse[k] <- obj_k$oos$rmse
                   }
                   if ( inherits(obj_k,"dgp") ) {
-                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                    obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, ...)
                     object[[paste('emulator',k,sep='')]] <- obj_k
                     if (is.categorical[k]){
                       rmse[k] <- obj_k$oos$log_loss
@@ -3028,7 +3015,7 @@ design.bundle <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 20
                       rmse[k] <- obj_k$oos$rmse
                     }
                     if ( inherits(obj_k,"dgp") ) {
-                      obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, cores = cores, ...)
+                      obj_k <- validate(obj_k, x_test = x_test, y_test = y_test[,k,drop=F], verb = FALSE, M = M_val, force = TRUE, ...)
                       object[[paste('emulator',k,sep='')]] <- obj_k
                       if (is.categorical[k]){
                         rmse[k] <- obj_k$oos$log_loss

@@ -34,8 +34,6 @@
 #' @param force a bool indicating whether to force LOO or OOS re-evaluation when the `loo` or `oos` slot already exists in `object`. When `force = FALSE`,
 #'     [validate()] will only re-evaluate the emulators if the `x_test` and `y_test` are not identical to the values in the `oos` slot. If the existing `loo` or `oos` validation used a different `M` in a Vecchia approximation or a different `method` to the one prescribed in this call, the emulator will be re-evaluated. Set `force` to `TRUE` when LOO or OOS re-evaluation
 #'     is required. Defaults to `FALSE`.
-#' @param cores the number of processes to be used for validation. If set to `NULL`, the number of processes is set to `max physical cores available %/% 2`.
-#'     Defaults to `1`.
 #' @param ... N/A.
 #'
 #' @return
@@ -116,14 +114,14 @@
 #' @md
 #' @name validate
 #' @export
-validate <- function(object, x_test, y_test, method, sample_size, verb, M, force, cores, ...){
+validate <- function(object, x_test, y_test, method, sample_size, verb, M, force, ...){
   UseMethod("validate")
 }
 
 #' @rdname validate
 #' @method validate gp
 #' @export
-validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -132,10 +130,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
   if ( !inherits(object,"gp") ) stop("'object' must be an instance of the 'gp' class.", call. = FALSE)
   if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check core number
-  if( !is.null(cores) ) {
-    cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
-  }
+
   M <- as.integer(M)
 
   if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
@@ -273,11 +268,8 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
     x_test_unique <- rep_x[[1]]
     rep <- rep_x[[2]] + 1
 
-    if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x_test_unique, method = method, sample_size = sample_size, m = M)
-    } else {
-      res <- object$emulator_obj$ppredict(x_test_unique, method = method, sample_size = sample_size, m = M, core_num = cores)
-    }
+    res <- object$emulator_obj$predict(x_test_unique, method = method, sample_size = sample_size, m = M)
+
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Saving results to the slot 'oos' in the gp object ...", appendLF = FALSE)
@@ -316,7 +308,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
 #' @rdname validate
 #' @method validate dgp
 #' @export
-validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -325,10 +317,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
   if ( !inherits(object,"dgp") ) stop("'object' must be an instance of the 'dgp' class.", call. = FALSE)
   if ( reticulate::py_is_null_xptr(object$constructor_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check core number
-  if( !is.null(cores) ) {
-    cores <- as.integer(cores)
-    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
-  }
+
   M <- as.integer(M)
 
   L = object$constructor_obj$n_layer
@@ -391,11 +380,9 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
-    if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$loo(X = reticulate::np_array(x_train), method = method, sample_size = sample_size, m = M)
-    } else {
-      res <- object$emulator_obj$ploo(X = reticulate::np_array(x_train), method = method, sample_size = sample_size, m = M, core_num = cores)
-    }
+
+    res <- object$emulator_obj$loo(X = reticulate::np_array(x_train), method = method, sample_size = sample_size, m = M)
+
     if ( isTRUE(verb) ) message(" done")
     if ( isTRUE(verb) ) message("Saving results to the slot 'loo' in the dgp object ...", appendLF = FALSE)
     if ( method == 'sampling' ){
@@ -531,11 +518,8 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     x_test_unique <- rep_x[[1]]
     rep <- rep_x[[2]] + 1
 
-    if ( identical(cores,as.integer(1)) ){
-        res <- object$emulator_obj$predict(x = x_test_unique, method = method, sample_size = sample_size, m = M)
-    } else {
-        res <- object$emulator_obj$ppredict(x = x_test_unique, method = method, sample_size = sample_size, m = M, core_num = cores)
-    }
+    res <- object$emulator_obj$predict(x = x_test_unique, method = method, sample_size = sample_size, m = M)
+
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Saving results to the slot 'oos' in the dgp object ...", appendLF = FALSE)
@@ -618,7 +602,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
 #' @rdname validate
 #' @method validate lgp
 #' @export
-validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, cores = 1, ...) {
+validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var", sample_size = 50, verb = TRUE, M = 50, force = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -630,10 +614,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     }
   if ( reticulate::py_is_null_xptr(object$emulator_obj) ) stop("The Python session originally associated with 'object' is no longer active. Please rebuild the emulator or, if it was saved using dgpsi::write(), load it into the R session with dgpsi::read().", call. = FALSE)
   #check core number
-  if( !is.null(cores) ) {
-    cores <- as.integer(cores)
-    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
-  }
+
   M <- as.integer(M)
 
   if ( method!='mean_var' & method!='sampling' ) stop("'method' can only be either 'mean_var' or 'sampling'.", call. = FALSE)
@@ -767,11 +748,9 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the OOS ...", appendLF = FALSE)
-    if ( identical(cores,as.integer(1)) ){
-      res <- object$emulator_obj$predict(x = x_test, method = method, sample_size = sample_size, m = M)
-    } else {
-      res <- object$emulator_obj$ppredict(x = x_test, method = method, sample_size = sample_size, m = M, core_num = cores)
-    }
+
+    res <- object$emulator_obj$predict(x = x_test, method = method, sample_size = sample_size, m = M)
+
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Saving results to the slot 'oos' in the lgp object ...", appendLF = FALSE)

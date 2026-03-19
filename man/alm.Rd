@@ -71,7 +71,7 @@ is only used when \code{x_cand} is \code{NULL}. Defaults to \code{20}.}
 \item{M}{the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
-\item{workers}{the number of processes to be used for design point selection. If set to \code{NULL},
+\item{workers}{the number of processes to be used for design point selection when \code{x_cand} is \code{NULL}. If set to \code{NULL},
 the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}. The argument does not currently support Windows machines when the \code{aggregate}
 function is provided, due to the significant overhead caused by initializing the Python environment for each worker under spawning.}
 

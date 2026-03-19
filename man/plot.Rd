@@ -22,7 +22,6 @@
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -40,7 +39,6 @@
   M = 50,
   verb = TRUE,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -58,7 +56,6 @@
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 }
@@ -120,8 +117,6 @@ Defaults to \code{TRUE}.}
 \item{M}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{force}{same as that of \code{\link[=validate]{validate()}}.}
-
-\item{cores}{same as that of \code{\link[=validate]{validate()}}.}
 
 \item{...}{N/A.}
 }

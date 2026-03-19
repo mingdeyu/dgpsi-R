@@ -16,7 +16,7 @@
 #' @param batch_size an integer that gives the number of design points to be chosen. Defaults to `1`.
 #' @param M the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
-#' @param workers the number of processes to be used for design point selection. If set to `NULL`,
+#' @param workers the number of processes to be used for design point selection when `x_cand` is `NULL`. If set to `NULL`,
 #'     the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`. The argument does not currently support Windows machines when the `aggregate`
 #'     function is provided, due to the significant overhead caused by initializing the Python environment for each worker under spawning.
 #' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
@@ -173,11 +173,8 @@ alm.gp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50, 
       )
       idx <- matrix(res, nrow = 1)
     } else {
-      if ( identical(workers,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = 'ALM', m = M)
-      } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = 'ALM', m = M, core_num = workers)
-      }
+      res = object$emulator_obj$metric(x_cand = x_cand, method = 'ALM', m = M)
+
       idx <- res[[1]]+1
     }
   } else {
@@ -210,11 +207,9 @@ alm.gp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50, 
       idx_x_cand <- idx_x_cand0
       constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
       for (i in 1:batch_size){
-        if ( identical(workers,as.integer(1)) ){
-          res = constructor_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', m = M)
-        } else {
-          res = constructor_obj_cp$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', m = M, core_num = workers)
-        }
+
+        res = constructor_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', m = M)
+
         idx_i <- res[[1]]+1
         X_new <- x_cand[idx_x_cand,,drop=F][idx_i,,drop=F]
         Y_new <- constructor_obj_cp$predict(X_new, m = M)[[1]]
@@ -393,11 +388,9 @@ alm.dgp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50,
         idx <- matrix(idx, nrow = 1)
       }
     } else {
-      if ( identical(workers,as.integer(1)) ){
-        res = object$emulator_obj$metric(x_cand = x_cand, method = 'ALM', m = M, score_only = TRUE)
-      } else {
-        res = object$emulator_obj$pmetric(x_cand = x_cand, method = 'ALM', m = M, score_only = TRUE, core_num = workers)
-      }
+
+      res = object$emulator_obj$metric(x_cand = x_cand, method = 'ALM', m = M, score_only = TRUE)
+
       if ( is.null(aggregate) ){
         idx <- pkg.env$np$argmax(res, axis=0L) + 1
       } else {
@@ -545,11 +538,9 @@ alm.dgp <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 50,
       burnin <- constructor_obj_cp$burnin
       isblock <- constructor_obj_cp$block
       for (i in 1:batch_size){
-        if ( identical(workers,as.integer(1)) ){
-          res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', m = M, score_only = TRUE)
-        } else {
-          res = emulator_obj_cp$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', m = M, score_only = TRUE, core_num = workers)
-        }
+
+        res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'ALM', m = M, score_only = TRUE)
+
         if ( is.null(aggregate) ){
           idx_i <- pkg.env$np$argmax(res, axis=0L) + 1
         } else {
@@ -789,11 +780,9 @@ alm.bundle <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 
           res = obj_i$emulator_obj$metric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'ALM', m = M, score_only = TRUE)
           scores[[i]] <- res
         } else {
-          if ( identical(workers,as.integer(1)) ){
-            res = obj_i$emulator_obj$metric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'ALM', m = M, score_only = TRUE)
-          } else {
-            res = obj_i$emulator_obj$pmetric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'ALM',  m = M, score_only = TRUE, core_num = workers)
-          }
+
+          res = obj_i$emulator_obj$metric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'ALM', m = M, score_only = TRUE)
+
           scores[[i]] <- if(ncol(res) == 1) res else rowMeans(res)
         }
       }
@@ -968,11 +957,9 @@ alm.bundle <- function(object, x_cand = NULL, n_start = 20, batch_size = 1, M = 
           res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'ALM', m = M, score_only = TRUE)
           scores[[j]] <- res
         } else {
-          if ( identical(workers,as.integer(1)) ){
-            res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'ALM', m = M, score_only = TRUE)
-          } else {
-            res = emulator_obj_list[[j]]$pmetric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'ALM', m = M, score_only = TRUE, core_num = workers)
-          }
+
+          res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'ALM', m = M, score_only = TRUE)
+
           scores[[j]] <- if(ncol(res) == 1) res else rowMeans(res)
         }
       }

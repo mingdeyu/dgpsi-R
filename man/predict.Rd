@@ -14,8 +14,6 @@
   full_layer = FALSE,
   sample_size = 50,
   M = 50,
-  cores = 1,
-  chunks = NULL,
   ...
 )
 
@@ -26,21 +24,10 @@
   full_layer = FALSE,
   sample_size = 50,
   M = 50,
-  cores = 1,
-  chunks = NULL,
   ...
 )
 
-\method{predict}{gp}(
-  object,
-  x,
-  method = "mean_var",
-  sample_size = 50,
-  M = 50,
-  cores = 1,
-  chunks = NULL,
-  ...
-)
+\method{predict}{gp}(object, x, method = "mean_var", sample_size = 50, M = 50, ...)
 }
 \arguments{
 \item{object}{an instance of the \code{gp}, \code{dgp}, or \code{lgp} class.}
@@ -63,12 +50,6 @@ using the derived means and variances. Defaults to \code{"mean_var"}.}
 
 \item{M}{the size of the conditioning set for the Vecchia approximation in the emulator prediction. Defaults to \code{50}. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation.}
-
-\item{cores}{the number of processes to be used for prediction. If set to \code{NULL}, the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
-
-\item{chunks}{the number of chunks that the testing input matrix \code{x} will be divided into for multi-cores to work on.
-Only used when \code{cores} is not \code{1}. If not specified (i.e., \code{chunks = NULL}), the number of chunks is set to the value of \code{cores}.
-Defaults to \code{NULL}.}
 
 \item{...}{N/A.}
 }

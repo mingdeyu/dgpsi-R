@@ -27,9 +27,8 @@ dgp(
   M = 25,
   ord = NULL,
   N = ifelse(vecchia, 200, 500),
-  cores = 1,
   blocked_gibbs = TRUE,
-  ess_burn = 10,
+  ess_burn = 5,
   burnin = NULL,
   B = 10,
   id = NULL,
@@ -200,16 +199,12 @@ If \code{ord = NULL}, the default random ordering is used. Defaults to \code{NUL
 
 \item{N}{number of iterations for the training. Defaults to \code{500} if \code{vecchia = FALSE} and \code{200} if \code{vecchia = TRUE}. This argument is only used when \code{training = TRUE}.}
 
-\item{cores}{the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to \code{NULL},
-the number of processes is set to \verb{(max physical cores available - 1)} if \code{vecchia = FALSE} and \verb{max physical cores available \%/\% 2} if \code{vecchia = TRUE}.
-Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
-
 \item{blocked_gibbs}{a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
 more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during Gibbs steps,
 especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to \code{TRUE}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
-at each I-step of the training. Defaults to \code{10}. This argument is only used when \code{training = TRUE}.}
+at each I-step of the training. Defaults to \code{5}. This argument is only used when \code{training = TRUE}.}
 
 \item{burnin}{the number of training iterations to be discarded for
 point estimates of model parameters. Must be smaller than the training iterations \code{N}. If this is not specified, only the last 25\% of iterations

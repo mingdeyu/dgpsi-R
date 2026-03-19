@@ -122,14 +122,11 @@
 #'
 #' If `ord = NULL`, the default random ordering is used. Defaults to `NULL`.
 #' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
-#' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
-#'     the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE` and `max physical cores available %/% 2` if `vecchia = TRUE`.
-#'     Only use multiple processes when there is a large number of GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param blocked_gibbs a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
 #'     more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during Gibbs steps,
 #'     especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to `TRUE`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
-#'     at each I-step of the training. Defaults to `10`. This argument is only used when `training = TRUE`.
+#'     at each I-step of the training. Defaults to `5`. This argument is only used when `training = TRUE`.
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates of model parameters. Must be smaller than the training iterations `N`. If this is not specified, only the last 25% of iterations
 #'     are used. Defaults to `NULL`. This argument is only used when `training = TRUE`.
@@ -238,8 +235,8 @@
 #' @export
 dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = NULL,
-                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), cores = 1, blocked_gibbs = TRUE,
-                ess_burn = 10, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = NULL) {
+                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), blocked_gibbs = TRUE,
+                ess_burn = 5, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -287,10 +284,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
   }
 
   N <- as.integer(N)
-  if( !is.null(cores) ) {
-    cores <- as.integer(cores)
-    if ( cores < 1 ) stop("The core number must be >= 1.", call. = FALSE)
-  }
+
   B <- as.integer(B)
   ess_burn <- as.integer(ess_burn)
 
@@ -713,11 +707,9 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
     } else {
       disable <- TRUE
     }
-    if ( identical(cores,as.integer(1)) ){
-      obj$train(N, ess_burn, disable)
-    } else {
-      obj$ptrain(N, ess_burn, disable, cores)
-    }
+
+    obj$train(N, ess_burn, disable)
+
     est_obj <- obj$estimate(burnin)
   } else {
     est_obj <- obj$estimate(NULL)
@@ -755,12 +747,8 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 #' @param object an instance of the `dgp` class.
 #' @param N additional number of iterations to train the DGP emulator. If set to `NULL`, the number of iterations is set to `500` if the DGP emulator
 #'     was constructed without the Vecchia approximation, and is set to `200` if Vecchia approximation was used. Defaults to `NULL`.
-#' @param cores the number of processes to be used to optimize GP components (in the same layer) at each M-step of the training. If set to `NULL`,
-#'     the number of processes is set to `(max physical cores available - 1)` if the DGP emulator was constructed without the Vecchia approximation.
-#'     Otherwise, the number of processes is set to `max physical cores available %/% 2`. Only use multiple processes when there is a large number of
-#'     GP components in different layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for ESS-within-Gibbs
-#'     at each I-step of the training. Defaults to `10`.
+#'     at each I-step of the training. Defaults to `5`.
 #' @param verb a bool indicating if a progress bar will be printed during training. Defaults to `TRUE`.
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates calculation. Must be smaller than the overall training iterations
@@ -787,7 +775,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 #' @md
 #' @export
 
-continue <- function(object, N = NULL, cores = 1, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
+continue <- function(object, N = NULL, ess_burn = 5, verb = TRUE, burnin = NULL, B = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -805,11 +793,6 @@ continue <- function(object, N = NULL, cores = 1, ess_burn = 10, verb = TRUE, bu
     }
   }
   N <- as.integer(N)
-
-  if( !is.null(cores) ) {
-    cores <- as.integer(cores)
-    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
-  }
 
   if ( is.null(B) ){
     B <- as.integer(length(object$emulator_obj$all_layer_set))
@@ -832,11 +815,9 @@ continue <- function(object, N = NULL, cores = 1, ess_burn = 10, verb = TRUE, bu
   linked_idx <- object$container_obj$local_input_idx
   constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
   isblock <- constructor_obj_cp$block
-  if ( identical(cores,as.integer(1)) ){
-    constructor_obj_cp$train(N, ess_burn, disable)
-  } else {
-    constructor_obj_cp$ptrain(N, ess_burn, disable, cores)
-  }
+
+  constructor_obj_cp$train(N, ess_burn, disable)
+
   est_obj <- constructor_obj_cp$estimate(burnin)
 
   if ( isTRUE(verb) ) message("Imputing ...", appendLF = FALSE)
