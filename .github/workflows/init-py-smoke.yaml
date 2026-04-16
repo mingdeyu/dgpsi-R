@@ -52,6 +52,14 @@ jobs:
 
           printf 'y\ny\ny\n' | Rscript first_linux.R
 
+      - name: Linux - inspect shell env after restart
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SHELL: /bin/bash
+        run: |
+          bash -ic 'echo "R_LD_LIBRARY_PATH=$R_LD_LIBRARY_PATH"; echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"; grep -n "R_LD_LIBRARY_PATH" ~/.bashrc || true'
+
       - name: Linux - second init_py() after shell restart
         if: runner.os == 'Linux'
         shell: bash
