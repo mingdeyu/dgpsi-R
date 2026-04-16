@@ -58,7 +58,28 @@ jobs:
         env:
           SHELL: /bin/bash
         run: |
-          bash -ic 'echo "R_LD_LIBRARY_PATH=$R_LD_LIBRARY_PATH"; echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"; grep -n "R_LD_LIBRARY_PATH" ~/.bashrc || true'
+          echo "===== ~/.bashrc line ====="
+          grep -n "R_LD_LIBRARY_PATH" ~/.bashrc || true
+
+          echo
+          echo "===== values seen by a restarted interactive bash ====="
+          bash -ic '
+            echo "R_LD_LIBRARY_PATH=$R_LD_LIBRARY_PATH"
+            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+            echo "Rscript=$(command -v Rscript)"
+          ' 2>/dev/null
+
+      - name: Linux - inspect R executable linking
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SHELL: /bin/bash
+        run: |
+          bash -ic '
+            echo "===== ldd on R executable ====="
+            ldd /opt/R/4.5.3/lib/R/bin/exec/R || true
+          ' 2>/dev/null
+
 
       - name: Linux - second init_py() after shell restart
         if: runner.os == 'Linux'
