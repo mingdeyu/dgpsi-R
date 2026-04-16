@@ -135,7 +135,7 @@ lgp <- function(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NUL
     struc <- validate_emulator_data(struc, emulators)
 
     struc <- struc %>%
-      dplyr::arrange(To_Emulator, From_Emulator != "Global", To_Input)
+      dplyr::arrange(.data$To_Emulator, .data$From_Emulator != "Global", .data$To_Input)
 
     metadata <- infer_metadata_from_struc(struc)
     metadata$Pos_in_Layer <- stats::ave(seq_along(metadata$Emulator), metadata$Layer, FUN = seq_along)

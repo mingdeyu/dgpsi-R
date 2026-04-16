@@ -85,7 +85,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
       message("Installing the Conda binary...")
       reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
-      install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+      install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
       pkg.env$restart <- TRUE
     } else{
       #stop("Please first install Miniforge, Miniconda, or Anaconda, and then re-initialize the Python environment.", call. = FALSE)
@@ -107,17 +107,17 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
         #  }
         #  message("Done.")
         #}
-        install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+        install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
         pkg.env$restart <- TRUE
       } else {
         ans <- readline(prompt="Is this your first time using the package? (Y/N) ")
         if ( tolower(ans)=='n'|tolower(ans)=='no' ){
               message("I am unable to find the required Python environment. It may be because your conda binary has changed.")
               cat("I am re-setting it for you now ...")
-              install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+              install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
               pkg.env$restart <- TRUE
               } else {
-                install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver)
+                install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
                 pkg.env$restart <- TRUE
               }
       }
@@ -155,7 +155,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
         message("Uninstallation finished. Please restart R.")
       } else {
         if (isTRUE(reinstall)) {
-          install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = TRUE)
+          install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes, reinsatll = TRUE)
           #if (grepl('9000',env_name)) {
           #  reticulate::conda_install(envname = env_name, packages = c("git+https://github.com/mingdeyu/DGP.git") , conda = conda_path, pip = TRUE, pip_options = c('--no-deps', '--force-reinstall'))
           #} else {
@@ -194,7 +194,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   }
 }
 
-install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = FALSE) {
+install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, auto_yes, reinsatll = FALSE) {
   if (!reinsatll) message(sprintf("Setting up the Python environment for %s ...\n", dgpsi_ver))
   if (reinsatll) {
     message("Re-installing the required Python packages ...")
