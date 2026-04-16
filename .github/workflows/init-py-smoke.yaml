@@ -1,0 +1,198 @@
+name: dgpsi init_py smoke test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgbuild
+
+      - name: Build and install dgpsi
+        shell: Rscript {0}
+        run: |
+          tarball <- pkgbuild::build(".")
+          install.packages(tarball, repos = NULL, type = "source")
+
+      ######################################################################
+      # LINUX
+      ######################################################################
+
+      - name: Linux - first init_py() on fresh machine
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SHELL: /bin/bash
+        run: |
+          cat > first_linux.R <<'RS'
+          library(dgpsi)
+          dgpsi::init_py(verb = TRUE)
+          RS
+
+          printf 'y\ny\ny\ny\ny\n' | Rscript first_linux.R
+
+      - name: Linux - second init_py() after shell restart
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SHELL: /bin/bash
+        run: |
+          cat > second_linux.R <<'RS'
+          library(dgpsi)
+          dgpsi::init_py(verb = TRUE)
+
+          cfg <- reticulate::py_config()
+          cat("Python in use:", cfg$python, "\n")
+
+          py_path <- gsub("\\\\", "/", cfg$python)
+          stopifnot(grepl("dgp_si_R", py_path, fixed = TRUE))
+          stopifnot(reticulate::py_module_available("dgpsi"))
+          RS
+
+          bash -ic "Rscript second_linux.R"
+
+      - name: Linux - run real dgpsi function after shell restart
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SHELL: /bin/bash
+        run: |
+          cat > smoke_linux.R <<'RS'
+          library(dgpsi)
+          dgpsi::init_py(verb = FALSE)
+
+          X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
+          Y <- sin(2 * pi * X)
+
+          m <- gp(X, Y, verb = FALSE)
+          m <- predict(m, matrix(0.5, ncol = 1))
+
+          print(p$results$mean)
+          RS
+
+          bash -ic "Rscript smoke_linux.R"
+
+      ######################################################################
+      # MACOS
+      ######################################################################
+
+      - name: macOS - first init_py() on fresh machine
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cat > first_macos.R <<'RS'
+          library(dgpsi)
+          dgpsi::init_py(verb = TRUE)
+          RS
+
+          printf 'y\ny\ny\ny\ny\n' | Rscript first_macos.R
+
+      - name: macOS - second init_py() after restart
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cat > second_macos.R <<'RS'
+          library(dgpsi)
+          dgpsi::init_py(verb = TRUE)
+
+          cfg <- reticulate::py_config()
+          cat("Python in use:", cfg$python, "\n")
+
+          py_path <- gsub("\\\\", "/", cfg$python)
+          stopifnot(grepl("dgp_si_R", py_path, fixed = TRUE))
+          stopifnot(reticulate::py_module_available("dgpsi"))
+          RS
+
+          Rscript second_macos.R
+
+      - name: macOS - run real dgpsi function
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cat > smoke_macos.R <<'RS'
+          library(dgpsi)
+          dgpsi::init_py(verb = FALSE)
+
+          X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
+          Y <- sin(2 * pi * X)
+
+          m <- gp(X, Y, verb = FALSE)
+          m <- predict(m, matrix(0.5, ncol = 1))
+
+          print(p$results$mean)
+          RS
+
+          Rscript smoke_macos.R
+
+      ######################################################################
+      # WINDOWS
+      ######################################################################
+
+      - name: Windows - first init_py() on fresh machine
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          @'
+          library(dgpsi)
+          dgpsi::init_py(verb = TRUE)
+          '@ | Set-Content -Path first_windows.R
+
+          "y`ny`ny`ny`ny`n" | Rscript first_windows.R
+
+      - name: Windows - second init_py() after restart
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          @'
+          library(dgpsi)
+          dgpsi::init_py(verb = TRUE)
+
+          cfg <- reticulate::py_config()
+          cat("Python in use:", cfg$python, "\n")
+
+          py_path <- gsub("\\\\", "/", cfg$python)
+          stopifnot(grepl("dgp_si_R", py_path, fixed = TRUE))
+          stopifnot(reticulate::py_module_available("dgpsi"))
+          '@ | Set-Content -Path second_windows.R
+
+          Rscript second_windows.R
+
+      - name: Windows - run real dgpsi function
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          @'
+          library(dgpsi)
+          dgpsi::init_py(verb = FALSE)
+
+          X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
+          Y <- sin(2 * pi * X)
+
+          m <- gp(X, Y, verb = FALSE)
+          m <- predict(m, matrix(0.5, ncol = 1))
+
+          print(p$results$mean)
+          '@ | Set-Content -Path smoke_windows.R
+
+          Rscript smoke_windows.R
