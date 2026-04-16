@@ -133,6 +133,10 @@ lgp <- function(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NUL
     #if ( mode!='validate' & mode!='activate' ) stop("'mode' can only be either 'validate' or 'activate'.", call. = FALSE)
     if ( verb ) message("Processing emulators ...", appendLF = FALSE)
     struc <- validate_emulator_data(struc, emulators)
+
+    struc <- struc %>%
+      dplyr::arrange(To_Emulator, From_Emulator != "Global", To_Input)
+
     metadata <- infer_metadata_from_struc(struc)
     metadata$Pos_in_Layer <- stats::ave(seq_along(metadata$Emulator), metadata$Layer, FUN = seq_along)
     lgp_struc <- process_emulators(emulators, metadata)
@@ -260,9 +264,9 @@ lgp <- function(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NUL
                   item$input_dim <- reticulate::np_array(as.integer(global_inputs - 1))
                   item$input <- item$input[,global_inputs,drop=F]
                   if (length(item$length)!=1) item$length <- item$length[global_inputs]
-                } else {
-                  if ( !is.null(item$connect) ) item$connect <- reticulate::np_array(as.integer(reorder_connect(item$connect + 1, global_inputs) - 1))
-                }
+                } # else {
+                 # if ( !is.null(item$connect) ) item$connect <- reticulate::np_array(as.integer(reorder_connect(item$connect + 1, global_inputs) - 1))
+                # }
               }
             }
             idx_py <- linked_idx_r_to_py(global_outputs)
@@ -294,7 +298,14 @@ lgp <- function(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NUL
                     item$input <- item$input[,other_emulator_inputs,drop=F]
                     if (length(item$length)!=1) item$length <- item$length[c(other_emulator_inputs, global_inputs)]
                   } else {
-                    if ( !is.null(item$connect) ) item$connect <- reticulate::np_array(as.integer(reorder_connect(item$connect + 1, c(other_emulator_inputs, global_inputs)) - 1))
+                    if (!is.null(item$connect)) {
+                      item$global_input <- item$global_input[, c(other_emulator_inputs, global_inputs), drop = F]
+                      if (length(item$length) != 1) {
+                        item$length <- reticulate::np_array(c(item$length[seq_len(ncol(item$input))],
+                                                              item$length[-seq_len(ncol(item$input))][c(other_emulator_inputs, global_inputs)]))
+                      }
+                    }
+                    # if ( !is.null(item$connect) ) item$connect <- reticulate::np_array(as.integer(reorder_connect(item$connect + 1, c(other_emulator_inputs, global_inputs)) - 1))
                   }
                 }
               }
