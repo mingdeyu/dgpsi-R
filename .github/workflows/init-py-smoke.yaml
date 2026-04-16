@@ -50,7 +50,7 @@ jobs:
           dgpsi::init_py(verb = TRUE)
           RS
 
-          printf 'y\ny\ny\ny\ny\n' | Rscript first_linux.R
+          printf 'y\ny\ny\n' | Rscript first_linux.R
 
       - name: Linux - second init_py() after shell restart
         if: runner.os == 'Linux'
@@ -80,7 +80,7 @@ jobs:
         run: |
           cat > smoke_linux.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = FALSE)
+          dgpsi::init_py(verb = TRUE)
 
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
@@ -88,7 +88,7 @@ jobs:
           m <- gp(X, Y, verb = FALSE)
           m <- predict(m, matrix(0.5, ncol = 1))
 
-          print(p$results$mean)
+          print(m$results$mean)
           RS
 
           bash -ic "Rscript smoke_linux.R"
@@ -106,7 +106,7 @@ jobs:
           dgpsi::init_py(verb = TRUE)
           RS
 
-          printf 'y\ny\ny\ny\ny\n' | Rscript first_macos.R
+          printf 'y\ny\ny\n' | Rscript first_macos.R
 
       - name: macOS - second init_py() after restart
         if: runner.os == 'macOS'
@@ -132,7 +132,7 @@ jobs:
         run: |
           cat > smoke_macos.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = FALSE)
+          dgpsi::init_py(verb = TRUE)
 
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
@@ -140,7 +140,7 @@ jobs:
           m <- gp(X, Y, verb = FALSE)
           m <- predict(m, matrix(0.5, ncol = 1))
 
-          print(p$results$mean)
+          print(m$results$mean)
           RS
 
           Rscript smoke_macos.R
@@ -158,7 +158,7 @@ jobs:
           dgpsi::init_py(verb = TRUE)
           '@ | Set-Content -Path first_windows.R
 
-          "y`ny`ny`ny`ny`n" | Rscript first_windows.R
+          printf 'y\ny\ny\n' | Rscript first_windows.R
 
       - name: Windows - second init_py() after restart
         if: runner.os == 'Windows'
@@ -184,7 +184,7 @@ jobs:
         run: |
           @'
           library(dgpsi)
-          dgpsi::init_py(verb = FALSE)
+          dgpsi::init_py(verb = TRUE)
 
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
@@ -192,7 +192,7 @@ jobs:
           m <- gp(X, Y, verb = FALSE)
           m <- predict(m, matrix(0.5, ncol = 1))
 
-          print(p$results$mean)
+          print(m$results$mean)
           '@ | Set-Content -Path smoke_windows.R
 
           Rscript smoke_windows.R

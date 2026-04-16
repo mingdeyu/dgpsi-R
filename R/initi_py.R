@@ -29,7 +29,13 @@ pkg.env$dill <- NULL
 #'     Defaults to `TRUE`.
 #'
 #' @return No return value, called to install required 'python' environment.
-#'
+#' @note
+#' On Linux, `init_py()` may ask for permission during installation to update your shell
+#' configuration file. To auto-accept this step in non-interactive settings,
+#' set the environment variable `DGPSI_AUTO_UPDATE_SHELL` to
+#' `"TRUE"` before calling [init_py()] for the first time. Accepted values
+#' include `"TRUE"`, `"true"`, `"yes"`, `"y"`, and
+#' `"1"`. If unset, [init_py()] will continue to ask interactively.
 #' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
@@ -70,6 +76,8 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   #Check if there is any conda binary installed, if not, request to install it.
   #restart <- FALSE
   Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
+  auto_yes <- identical(Sys.getenv("GITHUB_ACTIONS"), "true") ||
+    tolower(Sys.getenv("DGPSI_AUTO_UPDATE_SHELL", "")) %in% c("1", "true", "yes", "y")
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
     #If the user would like to have the conda binary to be installed
@@ -297,7 +305,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, reinsatll = F
 
     # Inform the user
     message("To use the package properly, we need to update your R_LD_LIBRARY_PATH.")
-    permission <- readline(prompt = "Can we automatically update this in your shell configuration file? (Y/N) ")
+    permission <- if (auto_yes) { "y" } else { readline(prompt = "Can we automatically update this in your shell configuration file? (Y/N) ") }
 
     if (tolower(permission) == 'y' || tolower(permission) == 'yes') {
       rc_file_path <- path.expand(rc_file)
