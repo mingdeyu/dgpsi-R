@@ -76,7 +76,8 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   #Check if there is any conda binary installed, if not, request to install it.
   #restart <- FALSE
   Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
-  auto_yes <- tolower(Sys.getenv("DGPSI_AUTO_UPDATE_SHELL", "")) %in% c("1", "true", "yes", "y")
+  auto_yes <- identical(Sys.getenv("GITHUB_ACTIONS"), "true") ||
+    tolower(Sys.getenv("DGPSI_AUTO_UPDATE_SHELL", "")) %in% c("1", "true", "yes", "y")
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
     ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
     #If the user would like to have the conda binary to be installed
@@ -289,11 +290,21 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, auto_yes, rei
     # Retrieve conda environment information
     conda_env_path <- reticulate::conda_list(conda = conda_path)
     conda_dgpsi_path <- conda_env_path$python[conda_env_path$name == env_name]
-    libstdc_path <- paste(gsub("bin.*$", "", conda_dgpsi_path), 'lib', sep = '')
+    libstdc_path <- normalizePath(
+      paste0(gsub("bin.*$", "", conda_dgpsi_path), "lib"),
+      winslash = "/",
+      mustWork = FALSE
+    )
 
     # Construct the export command
     export_command <- sprintf(
-      'export R_LD_LIBRARY_PATH="%s${R_LD_LIBRARY_PATH:+:${R_LD_LIBRARY_PATH}}"',
+      paste0(
+        "export R_LD_LIBRARY_PATH=\"",
+        "%s",
+        "$(R RHOME 2>/dev/null | sed 's#^#:#; s#$#/lib#')",
+        "${R_LD_LIBRARY_PATH:+:${R_LD_LIBRARY_PATH}}",
+        "\""
+      ),
       libstdc_path
     )
 

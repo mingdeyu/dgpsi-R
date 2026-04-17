@@ -39,29 +39,11 @@ jobs:
       # LINUX
       ######################################################################
 
-      - name: Linux - initial inspect shell env
-        if: runner.os == 'Linux'
-        shell: bash
-        env:
-          SHELL: /bin/bash
-        run: |
-          echo "===== ~/.bashrc line ====="
-          grep -n "R_LD_LIBRARY_PATH" ~/.bashrc || true
-
-          echo
-          echo "===== values seen by a restarted interactive bash ====="
-          bash -ic '
-            echo "R_LD_LIBRARY_PATH=$R_LD_LIBRARY_PATH"
-            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-            echo "Rscript=$(command -v Rscript)"
-          ' 2>/dev/null
-
       - name: Linux - first init_py() on fresh machine
         if: runner.os == 'Linux'
         shell: bash
         env:
           SHELL: /bin/bash
-          DGPSI_AUTO_UPDATE_SHELL: "FALSE"
         run: |
           cat > first_linux.R <<'RS'
           library(dgpsi)
@@ -82,6 +64,7 @@ jobs:
           echo
           echo "===== values seen by a restarted interactive bash ====="
           bash -ic '
+            echo "DGPSI_R_HOME=$(R RHOME 2>/dev/null)"
             echo "R_LD_LIBRARY_PATH=$R_LD_LIBRARY_PATH"
             echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
             echo "Rscript=$(command -v Rscript)"
