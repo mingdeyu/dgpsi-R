@@ -50,7 +50,7 @@ jobs:
         run: |
           cat > first_linux.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
           RS
 
           printf 'y\ny\ny\n' | Rscript first_linux.R
@@ -89,7 +89,7 @@ jobs:
         run: |
           cat > second_linux.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
 
           cfg <- reticulate::py_config()
           cat("Python in use:", cfg$python, "\n")
@@ -109,13 +109,14 @@ jobs:
         run: |
           cat > smoke_linux.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
+          set_seed(99)
 
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
 
           m <- gp(X, Y, verb = FALSE)
-          m <- predict(m, matrix(0.5, ncol = 1))
+          m <- predict(m, matrix(0.1, ncol = 1))
 
           print(m$results$mean)
           RS
@@ -132,7 +133,7 @@ jobs:
         run: |
           cat > first_macos.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
           RS
 
           printf 'y\ny\ny\n' | Rscript first_macos.R
@@ -143,7 +144,7 @@ jobs:
         run: |
           cat > second_macos.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
 
           cfg <- reticulate::py_config()
           cat("Python in use:", cfg$python, "\n")
@@ -161,13 +162,14 @@ jobs:
         run: |
           cat > smoke_macos.R <<'RS'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
+          set_seed(99)
 
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
 
           m <- gp(X, Y, verb = FALSE)
-          m <- predict(m, matrix(0.5, ncol = 1))
+          m <- predict(m, matrix(0.1, ncol = 1))
 
           print(m$results$mean)
           RS
@@ -184,7 +186,7 @@ jobs:
         run: |
           @'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
           '@ | Set-Content -Path first_windows.R
 
           printf 'y\ny\ny\n' | Rscript first_windows.R
@@ -195,7 +197,7 @@ jobs:
         run: |
           @'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
 
           cfg <- reticulate::py_config()
           cat("Python in use:", cfg$python, "\n")
@@ -213,13 +215,14 @@ jobs:
         run: |
           @'
           library(dgpsi)
-          dgpsi::init_py(verb = TRUE)
+          init_py(verb = TRUE)
+          set_seed(99)
 
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
 
           m <- gp(X, Y, verb = FALSE)
-          m <- predict(m, matrix(0.5, ncol = 1))
+          m <- predict(m, matrix(0.1, ncol = 1))
 
           print(m$results$mean)
           '@ | Set-Content -Path smoke_windows.R
