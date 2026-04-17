@@ -44,12 +44,12 @@ This function initializes the 'python' environment for the package.
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
 }
 \note{
-On Linux, \code{init_py()} may ask for permission during installation to update your shell
-configuration file. To auto-accept this step in non-interactive settings,
-set the environment variable \code{DGPSI_AUTO_UPDATE_SHELL} to
+On Linux, \code{init_py()} may ask for permission during installation. To
+auto-accept these prompts in non-interactive settings,
+set the environment variable \code{DGPSI_AUTO_YES} to
 \code{"TRUE"} before calling \code{\link[=init_py]{init_py()}} for the first time. Accepted values
 include \code{"TRUE"}, \code{"true"}, \code{"yes"}, \code{"y"}, and
-\code{"1"}. If unset, \code{\link[=init_py]{init_py()}} will continue to ask interactively.
+\code{"1"}. If unset, \code{\link[=init_py]{init_py()}} will continue to prompt interactively.
 }
 \examples{
 \dontrun{

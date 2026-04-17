@@ -30,12 +30,12 @@ pkg.env$dill <- NULL
 #'
 #' @return No return value, called to install required 'python' environment.
 #' @note
-#' On Linux, `init_py()` may ask for permission during installation to update your shell
-#' configuration file. To auto-accept this step in non-interactive settings,
-#' set the environment variable `DGPSI_AUTO_UPDATE_SHELL` to
+#' On Linux, `init_py()` may ask for permission during installation. To
+#' auto-accept these prompts in non-interactive settings,
+#' set the environment variable `DGPSI_AUTO_YES` to
 #' `"TRUE"` before calling [init_py()] for the first time. Accepted values
 #' include `"TRUE"`, `"true"`, `"yes"`, `"y"`, and
-#' `"1"`. If unset, [init_py()] will continue to ask interactively.
+#' `"1"`. If unset, [init_py()] will continue to prompt interactively.
 #' @details See further examples and tutorials at <`r get_docs_url()`>.
 #' @examples
 #' \dontrun{
@@ -77,11 +77,12 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   #restart <- FALSE
   Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
   auto_yes <- identical(Sys.getenv("GITHUB_ACTIONS"), "true") ||
-    tolower(Sys.getenv("DGPSI_AUTO_UPDATE_SHELL", "")) %in% c("1", "true", "yes", "y")
+    tolower(Sys.getenv("DGPSI_AUTO_YES", "")) %in% c("1", "true", "yes", "y")
   if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
-    ans <- readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
+    ans <- if (auto_yes) { "y" } else { readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ") }
+
     #If the user would like to have the conda binary to be installed
-    if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
+    if ( tolower(trimws(ans))=='y'|tolower(trimws(ans))=='yes' ){
       message("Installing the Conda binary...")
       reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
@@ -110,8 +111,9 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
         install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
         pkg.env$restart <- TRUE
       } else {
-        ans <- readline(prompt="Is this your first time using the package? (Y/N) ")
-        if ( tolower(ans)=='n'|tolower(ans)=='no' ){
+        ans <- if (auto_yes) { "y" } else { readline(prompt="Is this your first time using the package? (Y/N) ") }
+
+        if ( tolower(trimws(ans))=='n'|tolower(trimws(ans))=='no' ){
               message("I am unable to find the required Python environment. It may be because your conda binary has changed.")
               cat("I am re-setting it for you now ...")
               install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
@@ -317,7 +319,7 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, auto_yes, rei
     message("To use the package properly, we need to update your R_LD_LIBRARY_PATH.")
     permission <- if (auto_yes) { "y" } else { readline(prompt = "Can we automatically update this in your shell configuration file? (Y/N) ") }
 
-    if (tolower(permission) == 'y' || tolower(permission) == 'yes') {
+    if (tolower(trimws(permission)) == 'y' || tolower(trimws(permission)) == 'yes') {
       rc_file_path <- path.expand(rc_file)
 
       # Check if the rc file exists, if not create it
