@@ -52,36 +52,6 @@ jobs:
 
           printf 'y\ny\ny\n' | Rscript first_linux.R
 
-      - name: Linux - inspect shell env after restart
-        if: runner.os == 'Linux'
-        shell: bash
-        env:
-          SHELL: /bin/bash
-        run: |
-          echo "===== ~/.bashrc line ====="
-          grep -n "R_LD_LIBRARY_PATH" ~/.bashrc || true
-
-          echo
-          echo "===== values seen by a restarted interactive bash ====="
-          bash -ic '
-            echo "DGPSI_R_HOME=$(R RHOME 2>/dev/null)"
-            echo "R_LD_LIBRARY_PATH=$R_LD_LIBRARY_PATH"
-            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-            echo "Rscript=$(command -v Rscript)"
-          ' 2>/dev/null
-
-      - name: Linux - inspect R executable linking
-        if: runner.os == 'Linux'
-        shell: bash
-        env:
-          SHELL: /bin/bash
-        run: |
-          bash -ic '
-            echo "===== ldd on R executable ====="
-            ldd /opt/R/4.5.3/lib/R/bin/exec/R || true
-          ' 2>/dev/null
-
-
       - name: Linux - second init_py() after shell restart
         if: runner.os == 'Linux'
         shell: bash
@@ -90,13 +60,6 @@ jobs:
         run: |
           cat > second_linux.R <<'RS'
           library(dgpsi)
-
-          message("===== second R session =====")
-          message("R_LD_LIBRARY_PATH in running R: ", Sys.getenv("R_LD_LIBRARY_PATH", ""))
-          message("LD_LIBRARY_PATH in running R: ", Sys.getenv("LD_LIBRARY_PATH", ""))
-          message("R.home(): ", R.home())
-          message("R lib dir: ", file.path(R.home(), "lib"))
-
           dgpsi::init_py(verb = TRUE)
 
           cfg <- reticulate::py_config()

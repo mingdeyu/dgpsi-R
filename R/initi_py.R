@@ -281,12 +281,6 @@ install_dgpsi <- function(env_name, py_ver, conda_path, dgpsi_ver, auto_yes, rei
   #}
 
   if (Sys.info()[["sysname"]] == 'Linux') {
-
-    message("R_LD_LIBRARY_PATH in running R: ", Sys.getenv("R_LD_LIBRARY_PATH", ""))
-    message("LD_LIBRARY_PATH in running R: ", Sys.getenv("LD_LIBRARY_PATH", ""))
-    message("R.home(): ", R.home())
-    message("R lib dir: ", file.path(R.home(), "lib"))
-
     # Retrieve conda environment information
     conda_env_path <- reticulate::conda_list(conda = conda_path)
     conda_dgpsi_path <- conda_env_path$python[conda_env_path$name == env_name]
