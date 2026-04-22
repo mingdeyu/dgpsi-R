@@ -1,4 +1,4 @@
-name: dgpsi init_py smoke test
+name: dgpsi installation pipeline check
 
 on:
   push:
@@ -116,7 +116,7 @@ jobs:
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
 
-          m <- gp(X, Y, verb = FALSE)
+          m <- dgp(X, Y, verb = FALSE)
           m <- predict(m, matrix(0.1, ncol = 1))
 
           print(m$results$mean)
@@ -169,7 +169,7 @@ jobs:
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
 
-          m <- gp(X, Y, verb = FALSE)
+          m <- dgp(X, Y, verb = FALSE)
           m <- predict(m, matrix(0.1, ncol = 1))
 
           print(m$results$mean)
@@ -222,7 +222,7 @@ jobs:
           X <- matrix(seq(0, 1, length.out = 8), ncol = 1)
           Y <- sin(2 * pi * X)
 
-          m <- gp(X, Y, verb = FALSE)
+          m <- dgp(X, Y, verb = FALSE)
           m <- predict(m, matrix(0.1, ncol = 1))
 
           print(m$results$mean)

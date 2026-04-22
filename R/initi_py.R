@@ -18,6 +18,9 @@ pkg.env$dill <- NULL
 #' @param dgpsi_ver a string that gives the 'python' version of 'dgpsi' to be used. If `dgpsi_ver = NULL`,
 #' * the latest 'python' version of 'dgpsi' will be used, if the package is installed from CRAN;
 #' * the development 'python' version of 'dgpsi' will be used, if the package is installed from GitHub.
+#' @param conda optional path to a conda binary. If `NULL`, [init_py()]
+#'   attempts to locate conda automatically; see [reticulate::conda_binary()] for the search order.
+#'   If provided, the path is used directly and must point to an existing conda executable.
 #' @param reinstall a bool that indicates whether to reinstall the 'python' version of 'dgpsi' specified
 #'    in `dgpsi_ver` if it has already been installed. This argument is useful when the development version
 #'    of the R package is installed and one may want to regularly update the development 'python' version
@@ -27,6 +30,8 @@ pkg.env$dill <- NULL
 #'    is corrupted and one wants to completely uninstall and reinstall it. Defaults to `FALSE`.
 #' @param verb a bool indicating if trace information will be printed during function execution.
 #'     Defaults to `TRUE`.
+#' @param show_config a bool indicating whether to print the Python backend
+#'   configuration when `verb = TRUE`. Defaults to `FALSE`.
 #'
 #' @return No return value, called to install required 'python' environment.
 #' @note
@@ -45,7 +50,7 @@ pkg.env$dill <- NULL
 #'
 #' @md
 #' @export
-init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstall = FALSE, verb = TRUE) {
+init_py <- function(py_ver = NULL, dgpsi_ver = NULL, conda = NULL, reinstall = FALSE, uninstall = FALSE, verb = TRUE, show_config = FALSE) {
   if ( is.null(py_ver) ) py_ver <- '3.10'
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
@@ -78,8 +83,24 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
   Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
   auto_yes <- identical(Sys.getenv("GITHUB_ACTIONS"), "true") ||
     tolower(Sys.getenv("DGPSI_AUTO_YES", "")) %in% c("1", "true", "yes", "y")
-  if (is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))){
-    ans <- if (auto_yes) { "y" } else { readline(prompt="I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ") }
+  conda_missing <- if (is.null(conda)) {
+    is.null(tryCatch(reticulate::conda_binary(), error = function(e) NULL))
+  } else {
+    tryCatch(
+      { reticulate::conda_version(conda = conda); FALSE },
+      error = function(e) TRUE
+    )
+  }
+  if (conda_missing){
+    if (is.null(conda)) {
+      ans <- if (auto_yes) {
+        "y"
+      } else {
+        readline("I am unable to find a conda binary. Do you want me to install it for you? (Y/N) ")
+      }
+    } else {
+      stop("I am unable to find the specified conda binary. Please check the path supplied to `conda`.", call. = FALSE)
+    }
 
     #If the user would like to have the conda binary to be installed
     if ( tolower(trimws(ans))=='y'|tolower(trimws(ans))=='yes' ){
@@ -93,36 +114,15 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
       stop("Please first install Miniforge, Miniconda, or Anaconda, and then re-load the package.", call. = FALSE)
     }
   } else {
-    conda_path <- reticulate::conda_binary()
+    conda_path <- if (is.null(conda)) {
+      reticulate::conda_binary()
+    } else {
+      conda
+    }
     no_dgpsi <- inherits(tryCatch(reticulate::conda_python(envname = env_name, conda = conda_path), error = identity), "error")
     if (no_dgpsi){
-      if (any(grepl('^dgp_si_R', reticulate::conda_list(conda = conda_path)$name))){
-        #conda_list <- reticulate::conda_list(conda = conda_path)$name
-        #dgpsi_list <- conda_list[grepl('^dgp_si_R', conda_list)]
-        #cat("I found Python environment(s) for other versions of the package.")
-        #ans <- readline(prompt="Do you want me to remove them? (Y/N) ")
-        #if ( tolower(ans)=='y'|tolower(ans)=='yes' ){
-        #  message(sprintf("Removing Python environment(s): %s.\n", paste(dgpsi_list, collapse = ', ')))
-        #  for (item in dgpsi_list) {
-        #    reticulate::conda_remove(envname = item, conda = conda_path)
-        #  }
-        #  message("Done.")
-        #}
-        install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
-        pkg.env$restart <- TRUE
-      } else {
-        ans <- if (auto_yes) { "y" } else { readline(prompt="Is this your first time using the package? (Y/N) ") }
-
-        if ( tolower(trimws(ans))=='n'|tolower(trimws(ans))=='no' ){
-              message("I am unable to find the required Python environment. It may be because your conda binary has changed.")
-              cat("I am re-setting it for you now ...")
-              install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
-              pkg.env$restart <- TRUE
-              } else {
-                install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
-                pkg.env$restart <- TRUE
-              }
-      }
+      install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
+      pkg.env$restart <- TRUE
     } else {
       if ( uninstall ){
         reticulate::conda_remove(envname = env_name, conda = conda_path)
@@ -192,7 +192,19 @@ init_py <- function(py_ver = NULL, dgpsi_ver = NULL, reinstall = FALSE, uninstal
     pkg.env$thread_num <- pkg.env$dgpsi$get_thread()
     if ( verb ) message(" done")
     Sys.sleep(0.5)
-    if ( verb ) message("The Python environment for 'dgpsi' is successfully loaded.")
+    if ( verb ) {
+      message("The Python environment for 'dgpsi' is successfully loaded.")
+      if (show_config) {
+        cfg <- reticulate::py_config()
+        message(
+          "\n[dgpsi Python configuration]\n",
+          "  Conda binary      : ", conda_path, "\n",
+          "  Conda environment : ", env_name, "\n",
+          "  Python path       : ", cfg$python, "\n",
+          "  Python version    : ", cfg$version_string
+        )
+      }
+    }
   }
 }
 
