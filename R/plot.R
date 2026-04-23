@@ -130,11 +130,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
           dat[["y_validate"]] <- loo_res$y_train[,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
           if ( min_max ){
-            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[l]) +
               ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, loo_res$nrmse[l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+            p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[l]) +
               ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, loo_res$rmse[l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -324,11 +324,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
               dat_range[["upper"]] <- quant[3,,l]
             }
             if ( min_max ) {
-              p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
+              p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type, colnames(x$data$X)[1], colnames(x$data$Y)[l]) +
                 ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
                 ggplot2::theme(plot.title = ggplot2::element_text(size=10))
             } else {
-              p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
+              p_list[[l]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type, colnames(x$data$X)[1], colnames(x$data$Y)[l]) +
                 ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
                 ggplot2::theme(plot.title = ggplot2::element_text(size=10))
             }
@@ -361,11 +361,11 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
             dat[["y_validate"]] <- oos_res$y_test[,l]
             dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
             if ( min_max ) {
-              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[l]) +
                 ggplot2::ggtitle(sprintf("O%i: NRMSE = %.2f%%", l, oos_res$nrmse[l]*100)) +
                 ggplot2::theme(plot.title = ggplot2::element_text(size=10))
             } else {
-              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+              p_list[[l]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[l]) +
                 ggplot2::ggtitle(sprintf("O%i: RMSE = %.6f", l, oos_res$rmse[l])) +
                 ggplot2::theme(plot.title = ggplot2::element_text(size=10))
             }
@@ -588,11 +588,11 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
             dat_range[["upper"]] <- quant[3,,l]
           }
           if ( min_max ) {
-            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method, type) +
+            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method, type, colnames(x_test)[1], colnames(y_test_list[[k]])[l]) +
               ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method, type) +
+            p_list[[counter]] <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), NULL, method, type, colnames(x_test)[1], colnames(y_test_list[[k]])[l]) +
               ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -646,11 +646,11 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
           dat[["y_validate"]] <- y_test_list[[k]][,l]
           dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
           if ( min_max ) {
-            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x_test)) +
+            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x_test), colnames(y_test_list[[k]])[l]) +
               ggplot2::ggtitle(sprintf("E%iO%i: NRMSE = %.2f%%", k, l, oos_res$nrmse[[k]][l]*100)) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           } else {
-            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x_test)) +
+            p_list[[counter]] <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x_test), colnames(y_test_list[[k]])[l]) +
               ggplot2::ggtitle(sprintf("E%iO%i: RMSE = %.6f", k, l, oos_res$rmse[[k]][l])) +
               ggplot2::theme(plot.title = ggplot2::element_text(size=10))
           }
@@ -800,11 +800,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
       dat[["y_validate"]] <- loo_res$y_train[,1]
       dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
       if ( min_max ) {
-        p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[1]) +
           ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', loo_res$nrmse*100)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       } else {
-        p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+        p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[1]) +
           ggplot2::ggtitle(sprintf('RMSE = %.6f', loo_res$rmse)) +
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
@@ -919,11 +919,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
           dat_range[["upper"]] <- quant[,3]
         }
         if ( min_max ) {
-          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
+          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type, colnames(x$data$X)[1], colnames(x$data$Y)[1]) +
             ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type) +
+          p <- plot_style_1_1d(as.data.frame(dat), as.data.frame(dat_range), as.data.frame(dat_train), method, type, colnames(x$data$X)[1], colnames(x$data$Y)[1]) +
             ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -953,11 +953,11 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
         dat[["y_validate"]] <- oos_res$y_test[,1]
         dat[["coverage"]] <- (dat[["y_validate"]]<=dat[["upper"]]) & (dat[["y_validate"]]>=dat[["lower"]])
         if ( min_max ) {
-          p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+          p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[1]) +
             ggplot2::ggtitle(sprintf('NRMSE = %.2f%%', oos_res$nrmse*100)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         } else {
-          p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X)) +
+          p <- plot_style_1(as.data.frame(dat), method, dim, isdup, colnames(x$data$X), colnames(x$data$Y)[1]) +
             ggplot2::ggtitle(sprintf('RMSE = %.6f', oos_res$rmse)) +
             ggplot2::theme(plot.title = ggplot2::element_text(size=10))
         }
@@ -1207,7 +1207,7 @@ plot_style_2_classify <- function(dat, color, normalize) {
   return(p)
 }
 
-plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
+plot_style_1 <- function(dat, method, dim, isdup, dimnames, ydimname) {
   if ( isTRUE(isdup) ){
     dup <- duplicated(dat$idx)
   } else {
@@ -1215,7 +1215,15 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
   }
 
   if ( is.null(dim) ){
-    x_lab <- "Input position"
+    if ( is.null(dimnames) ){
+      x_lab <- "Input position"
+    } else {
+      if ( length(dimnames)==1 ){
+        x_lab <- dimnames
+      } else {
+        x_lab <- "Input position"
+      }
+    }
   } else {
     if ( length(dim)==1 ){
       if ( is.null(dimnames) ){
@@ -1228,6 +1236,12 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
     } else if ( length(dim)==3 ){
       x_lab <- sprintf("Global input dimension %i of emulator %i in layer %i", dim[3], dim[2], dim[1])
     }
+  }
+
+  if ( is.null(ydimname) ){
+    y_lab <- "Model output"
+  } else {
+    y_lab <- ydimname
   }
 
   coverage <- dat$coverage
@@ -1248,7 +1262,7 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
 
     p <- p +
       ggplot2::geom_point(size=0.8) +
-      ggplot2::labs(x =x_lab, y = "Model output") +
+      ggplot2::labs(x =x_lab, y = y_lab) +
       ggplot2::theme(
         legend.position = "bottom",
         legend.text = ggplot2::element_text(size = 7),
@@ -1271,7 +1285,7 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
 
     p <- p +
       ggplot2::geom_point(size=0.8) +
-      ggplot2::labs(x =x_lab, y = "Model output") +
+      ggplot2::labs(x =x_lab, y = y_lab) +
       ggplot2::theme(
         legend.position = "bottom",
         legend.text = ggplot2::element_text(size = 7),
@@ -1292,7 +1306,7 @@ plot_style_1 <- function(dat, method, dim, isdup, dimnames) {
 
     p <- p +
       ggplot2::geom_point(size=0.8) +
-      ggplot2::labs(x =x_lab, y = "Model output") +
+      ggplot2::labs(x =x_lab, y = y_lab) +
       ggplot2::theme(
         legend.position = "bottom",
         legend.text = ggplot2::element_text(size = 7),
@@ -1349,7 +1363,19 @@ plot_style_2 <- function(dat, method, min_max, color) {
   return(p)
 }
 
-plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
+plot_style_1_1d <- function(dat1, dat2, dat3, method, type, xdimname, ydimname) {
+  if ( is.null(xdimname) ){
+    x_lab <- "Input position"
+  } else {
+    x_lab <- xdimname
+  }
+
+  if ( is.null(ydimname) ){
+    y_lab <- "Model output"
+  } else {
+    y_lab <- ydimname
+  }
+
   p <- ggplot2::ggplot(data=dat2, ggplot2::aes(x=.data$range))
 
   if ( method=="sampling" ){
@@ -1438,7 +1464,7 @@ plot_style_1_1d <- function(dat1, dat2, dat3, method, type) {
       legend.title = ggplot2::element_blank(),
       legend.spacing.x = ggplot2::unit(4, "pt")
     ) +
-    ggplot2::labs(x ="Input position", y = "Model output")
+    ggplot2::labs(x =x_lab, y = y_lab)
 
   if ( is.null(dat3) ){
     if (type == 'points') {

@@ -8,6 +8,12 @@
 - Added support for the `robustmax` link function for multi-class classification via the `link` argument in `dgp()`.
 - Introduced automatic error handling in `dgp()`, allowing up to three training retries instead of terminating the training process.
 - Zero-inflated Poisson and zero-inflated Negative Binomial likelihoods have been added to the package and can be used in `dgp()` by setting `likelihood = "ZIP"` and `likelihood = "ZINB"`, respectively.
+- Removed the multi-process parallel option in favour of automatic Numba-based parallelisation in the Python backend.
+- Reduced the default value of `ess_burn` from `10` to `5`.
+- Fixed a bug in `lgp()` when linked DGPs use `connect = TRUE`.
+- Added `conda` and `show_config` arguments to `init_py()`, allowing users to specify the path to a conda binary and optionally display the Python backend configuration.
+- Updated `plot()` to use column names from the training inputs and outputs supplied to `gp()` and `dgp()`, and from the testing inputs and outputs supplied to `lgp()`, as x- and y-axis labels in relevant validation plots.
+- Various bug fixes.
 
 # dgpsi 2.6.0
 - Prediction speed with `predict()` enhanced for small testing data sets by reducing overhead caused by the multi-threading implementation.

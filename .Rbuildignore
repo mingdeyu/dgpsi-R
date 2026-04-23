@@ -20,3 +20,5 @@
 ^vignettes/seq_design_2.Rmd$
 ^vignettes/bayes_opt.Rmd$
 ^LICENSE\.md$
+^test$
+^class_data$
