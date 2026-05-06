@@ -50,13 +50,13 @@ pkg.env$dill <- NULL
 #'
 #' @md
 #' @export
-init_py <- function(py_ver = NULL, dgpsi_ver = 'dev', conda = NULL, reinstall = FALSE, uninstall = FALSE, verb = TRUE, show_config = FALSE) {
+init_py <- function(py_ver = NULL, dgpsi_ver = NULL, conda = NULL, reinstall = FALSE, uninstall = FALSE, verb = TRUE, show_config = FALSE) {
   if ( is.null(py_ver) ) py_ver <- '3.10'
   if ( is.null(dgpsi_ver) ) {
     ##For devel version
     dgpsi_ver <- c('dill>=0.3.2', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
                    'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
-                   'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4', 'tbb')
+                   'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4', 'tbb', 'pip')
     env_name <- 'dgp_si_R_2_6_0_9000'
 
     ##For release version
@@ -67,7 +67,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = 'dev', conda = NULL, reinstall = 
     if (dgpsi_ver=='dev'){
       dgpsi_ver <- c('dill>=0.3.2', 'matplotlib-base>=3.2.1', 'numba >=0.51.2',
                      'numpy >=1.18.2', 'pathos >=0.2.9', 'multiprocess >=0.70.13', 'psutil >=5.8.0',
-                     'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4', 'tbb')
+                     'scikit-learn >=0.22.0', 'scipy >=1.4.1', 'tqdm >=4.50.2', 'tabulate >=0.8.7', 'faiss-cpu >=1.7.4', 'tbb', 'pip')
       env_name <- 'dgp_si_R_2_6_0_dev'
     } else {
       dgpsi_ver <- paste('dgpsi==', dgpsi_ver, sep = "")
