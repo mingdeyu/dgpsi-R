@@ -6,7 +6,7 @@
 \usage{
 init_py(
   py_ver = NULL,
-  dgpsi_ver = NULL,
+  dgpsi_ver = "dev",
   conda = NULL,
   reinstall = FALSE,
   uninstall = FALSE,
