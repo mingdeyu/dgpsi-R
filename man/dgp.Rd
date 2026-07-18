@@ -27,7 +27,6 @@ dgp(
   M = 25,
   ord = NULL,
   N = ifelse(vecchia, 200, 500),
-  blocked_gibbs = TRUE,
   ess_burn = 5,
   burnin = NULL,
   B = 10,
@@ -198,10 +197,6 @@ function must satisfy the following basic rules:
 If \code{ord = NULL}, the default random ordering is used. Defaults to \code{NULL}.}
 
 \item{N}{number of iterations for the training. Defaults to \code{500} if \code{vecchia = FALSE} and \code{200} if \code{vecchia = TRUE}. This argument is only used when \code{training = TRUE}.}
-
-\item{blocked_gibbs}{a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
-more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during Gibbs steps,
-especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to \code{TRUE}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
 at each I-step of the training. Defaults to \code{5}. This argument is only used when \code{training = TRUE}.}

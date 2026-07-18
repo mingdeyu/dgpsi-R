@@ -122,9 +122,6 @@
 #'
 #' If `ord = NULL`, the default random ordering is used. Defaults to `NULL`.
 #' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
-#' @param blocked_gibbs a bool indicating if the latent variables are imputed layer-wise using ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
-#'     more efficient than ESS-within-Gibbs that imputes latent variables node-wise because it reduces the number of components to be sampled during Gibbs steps,
-#'     especially when there is a large number of GP nodes in layers due to higher input dimensions. Default to `TRUE`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
 #'     at each I-step of the training. Defaults to `5`. This argument is only used when `training = TRUE`.
 #' @param burnin the number of training iterations to be discarded for
@@ -235,7 +232,7 @@
 #' @export
 dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = NULL,
-                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500), blocked_gibbs = TRUE,
+                likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500),
                 ess_burn = 5, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
@@ -287,6 +284,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
   B <- as.integer(B)
   ess_burn <- as.integer(ess_burn)
+  blocked_gibbs <- TRUE
 
   M <- as.integer(M)
   if ( !is.null(ord) ) {

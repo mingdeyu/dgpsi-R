@@ -1,5 +1,6 @@
 pkg.env <- new.env(parent = emptyenv())
 pkg.env$dgpsi <- NULL
+pkg.env$default_conda_path <- NULL
 pkg.env$py_buildin <- NULL
 pkg.env$np <- NULL
 pkg.env$copy <- NULL
@@ -107,6 +108,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = 'dev', conda = NULL, reinstall = 
       message("Installing the Conda binary...")
       reticulate::install_miniconda()
       conda_path <- reticulate::conda_binary()
+      pkg.env$default_conda_path <- conda_path
       install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
       pkg.env$restart <- TRUE
     } else{
@@ -115,10 +117,15 @@ init_py <- function(py_ver = NULL, dgpsi_ver = 'dev', conda = NULL, reinstall = 
     }
   } else {
     conda_path <- if (is.null(conda)) {
-      reticulate::conda_binary()
+      if ( is.null(pkg.env$dgpsi) ) {
+        reticulate::conda_binary()
+      } else {
+        pkg.env$default_conda_path
+      }
     } else {
       conda
     }
+    if ( is.null(pkg.env$dgpsi) ) pkg.env$default_conda_path <- conda_path
     no_dgpsi <- inherits(tryCatch(reticulate::conda_python(envname = env_name, conda = conda_path), error = identity), "error")
     if (no_dgpsi){
       install_dgpsi(env_name, py_ver, conda_path, dgpsi_ver, auto_yes)
