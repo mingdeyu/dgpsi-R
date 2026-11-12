@@ -30,10 +30,10 @@ The R package `dgpsi` provides R interface to Python package [`dgpsi`](https://g
     - multiple GP nodes;
     - separable or non-separable squared exponential and Mat&eacute;rn-2.5 kernels;
     - global input connections;
-    - non-Gaussian likelihoods (Poisson, Negative-Binomial, heteroskedastic Gaussian, and Categorical).
+    - non-Gaussian likelihoods (Poisson, Zero-Inflated Poisson, Negative-Binomial, Zero-Inflated Negative-Binomial, heteroskedastic Gaussian, and Categorical).
 * Linked emulations of feed-forward systems of computer models by linking (D)GP emulators of deterministic individual computer models.
 * Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP, DGP, and linked (D)GP emulators.
-* Multi-core predictions and validations for GP, DGP, and Linked (D)GP emulators.
+* Parallel predictions and validations for GP, DGP, and Linked (D)GP emulators.
 * Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 * Automatic pruning of DGP emulators, both statically and dynamically.
 * [Large-scale GP, DGP, and Linked (D)GP emulations](https://mingdeyu.github.io/dgpsi-R/articles/large_scale_emulation.html).
@@ -54,7 +54,7 @@ install.packages('dgpsi')
 or its development version from GitHub:
 
 ```r
-devtools::install_github('mingdeyu/dgpsi-R')
+pak::pak('mingdeyu/dgpsi-R')
 ```
 
 After the installation, run 
@@ -92,7 +92,7 @@ to load the package. To install or activate the required Python environment auto
 This package is part of an ongoing research initiative. For detailed information about the research aspects and guidelines for use, please refer to our [Research Notice](https://github.com/mingdeyu/dgpsi-R/blob/master/RESEARCH-NOTICE.md).
 
 ## References
-> [Ming, D. and Williamson, D. (2026) Generalized and scalable deep Gaussian process emulation. arXiv:2603.24538](https://arxiv.org/abs/2603.24538)
+> [Ming, D. and Williamson, D. (2026) Generalized and scalable deep Gaussian process emulation. <i>Computational Statistics & Data Analysis</i>. 227, 108485.](https://doi.org/10.1016/j.csda.2026.108485)
 
 > [Ming, D. and Williamson, D. (2023) Linked deep Gaussian process emulation for model networks. arXiv:2306.01212](https://arxiv.org/abs/2306.01212)
 

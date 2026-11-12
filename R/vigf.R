@@ -11,15 +11,20 @@
 #'     from which the next design point(s) are determined. If `object` is an instance of the `bundle` class and `aggregate` is not supplied, `x_cand` can also be a list.
 #'     The list must have a length equal to the number of emulators in `object`, with each element being a matrix representing the candidate set for a corresponding
 #'     emulator in the bundle. Defaults to `NULL`.
-#' @param n_start an integer that gives the number of initial design points to be used to determine next design point(s). This argument
-#'     is only used when `x_cand` is `NULL`. Defaults to `10`.
+#' @param n_start the maximum number of local refinement starts to determine next design point(s)
+#'     when `x_cand = NULL`. Defaults to `5`.
+#' @param n_screen the number of points generated for screening when `x_cand = NULL`.
+#'     Defaults to `100` times the number of input dimensions. Must be an integer
+#'     at least `n_start`.
+#' @param opt_control a named list controlling local refinement when `x_cand = NULL`.
+#'     Supported entries are `maxit` (default `100`), `ftol` (nonnegative
+#'     function tolerance, default `1e7 * .Machine$double.eps`), `gtol` (nonnegative
+#'     projected-gradient tolerance, default `0`), and `step` (positive scalar numerical
+#'     derivative step in normalized coordinates, default `NULL` for the solver's native step).
 #' @param batch_size an integer that gives the number of design points to be chosen.
 #'     Defaults to `1`.
 #' @param M the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
-#' @param workers the number of processes to be used for design point selection when `x_cand` is `NULL`. If set to `NULL`,
-#'     the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`. The argument does not currently support Windows machines when the `aggregate`
-#'     function is provided, due to the significant overhead caused by initializing the Python environment for each worker under spawning.
 #' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
 #'     If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
 #'     first and second columns correspond to the minimum and maximum values of the input dimensions. This
@@ -118,7 +123,7 @@ vigf <- function(object, ...){
 #' @rdname vigf
 #' @method vigf gp
 #' @export
-vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, ...) {
+vigf.gp <- function(object, x_cand = NULL, n_start = 5, batch_size = 1, M = 50, limits = NULL, int = FALSE, n_screen = 100 * ncol(object$data$X), opt_control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -134,8 +139,6 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50,
   if ( is.null(x_cand) ){
     is_cand <- FALSE
     limits <- check_limits(limits, n_dim_X)
-    lower <- limits[, 1]
-    upper <- limits[, 2]
     int <- check_int(int, n_dim_X)
   } else {
     is_cand <- TRUE
@@ -149,12 +152,6 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50,
     }
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   }
-
-  #check core number
-  if( !is.null(workers) ) {
-    workers <- as.integer(workers)
-    if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
-  }
   M <- as.integer(M)
   #check batch size
   batch_size <- as.integer(batch_size)
@@ -162,21 +159,9 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50,
   #locate
   if ( batch_size==1 ){
     if (!is_cand){
-      #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input, limits), n_start), n_start), limits)
-      x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-      res <- pkg.env$dgpsi$utils$multistart(
-        func = object$emulator_obj$metric,
-        initials = x_cand,
-        lb = reticulate::np_array(lower),
-        up = reticulate::np_array(upper),
-        args = reticulate::tuple('VIGF', 1., M, TRUE),
-        method = "L-BFGS-B",
-        core_num = workers,
-        int_mask = int
-      )
-      idx <- matrix(res, nrow = 1)
+      idx <- vigf_search(object$emulator_obj, n_screen, n_start, limits,
+                        int, M, NULL, list(), opt_control, is_gp = TRUE)
     } else {
-
       res = object$emulator_obj$metric(x_cand = x_cand, method = 'VIGF', m = M)
 
       idx <- res[[1]]+1
@@ -186,23 +171,15 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50,
       idx <- c()
       constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
       for (i in 1:batch_size){
-        #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input, limits), n_start), n_start), limits)
-        x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-        res <- pkg.env$dgpsi$utils$multistart(
-          func = constructor_obj_cp$metric,
-          initials = x_cand,
-          lb = reticulate::np_array(lower),
-          up = reticulate::np_array(upper),
-          args = reticulate::tuple('VIGF', 1., M, TRUE),
-          method = "L-BFGS-B",
-          core_num = workers,
-          int_mask = int
-        )
-        X_new <- res
-        Y_new <- constructor_obj_cp$predict(matrix(X_new, nrow = 1), m = M)[[1]]
-        training_input <- rbind(training_input, X_new)
-        training_output <- rbind(training_output, Y_new)
-        constructor_obj_cp$update_xy(training_input, training_output)
+        X_new <- vigf_search(constructor_obj_cp, n_screen, n_start, limits,
+                            int, M, NULL, list(), opt_control, is_gp = TRUE)
+        X_fantasy <- vigf_new_fantasy_points(X_new, training_input)
+        if (nrow(X_fantasy)) {
+          Y_new <- constructor_obj_cp$predict(X_fantasy, m = M)[[1]]
+          training_input <- rbind(training_input, X_fantasy)
+          training_output <- rbind(training_output, Y_new)
+          constructor_obj_cp$update_xy(training_input, training_output)
+        }
         idx <- rbind(idx, X_new)
       }
     } else {
@@ -216,10 +193,13 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50,
 
         idx_i <- res[[1]]+1
         X_new <- x_cand[idx_x_cand,,drop=F][idx_i,,drop=F]
-        Y_new <- constructor_obj_cp$predict(X_new, m = M)[[1]]
-        training_input <- rbind(training_input, X_new)
-        training_output <- rbind(training_output, Y_new)
-        constructor_obj_cp$update_xy(training_input, training_output)
+        X_fantasy <- vigf_new_fantasy_points(X_new, training_input)
+        if (nrow(X_fantasy)) {
+          Y_new <- constructor_obj_cp$predict(X_fantasy, m = M)[[1]]
+          training_input <- rbind(training_input, X_fantasy)
+          training_output <- rbind(training_output, Y_new)
+          constructor_obj_cp$update_xy(training_input, training_output)
+        }
         idx <- c(idx,  idx_x_cand[idx_i])
         idx_x_cand <- idx_x_cand0[-idx]
       }
@@ -236,7 +216,7 @@ vigf.gp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50,
 #' @rdname vigf
 #' @method vigf dgp
 #' @export
-vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
+vigf.dgp <- function(object, x_cand = NULL, n_start = 5, batch_size = 1, M = 50, limits = NULL, int = FALSE, aggregate = NULL, n_screen = 100 * ncol(object$data$X), opt_control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -250,13 +230,10 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
   training_input <- object$data$X
   training_output <- object$data$Y
   n_dim_X <- ncol(training_input)
-  n_dim_Y <- ncol(training_output)
   #check x_cand
   if ( is.null(x_cand) ){
     is_cand <- FALSE
     limits <- check_limits(limits, n_dim_X)
-    lower <- limits[, 1]
-    upper <- limits[, 2]
     int <- check_int(int, n_dim_X)
   } else {
     is_cand <- TRUE
@@ -270,16 +247,14 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
     }
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   }
-  #check core number
-  if( !is.null(workers) ) {
-    workers <- as.integer(workers)
-    if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
-  }
   M <- as.integer(M)
+  extra_param <- list()
   #check aggregate
   if ( !is.null(aggregate) ){
     add_arg <- list(...)
     gnames <- methods::formalArgs(aggregate)
+    extra_param <- if ("..." %in% gnames) add_arg else
+      add_arg[intersect(names(add_arg), gnames)]
   }
   #check batch size
   batch_size <- as.integer(batch_size)
@@ -287,109 +262,9 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
   #locate
   if ( batch_size==1 ){
     if (!is_cand){
-      #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input, limits), n_start), n_start), limits)
-      x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-      if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
-        lik_name <- object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$name
-        if (lik_name=='Poisson'){
-          n_output_dim <- 1
-        } else if (lik_name=='Hetero' | lik_name=='NegBin' | lik_name=='ZIP'){
-          n_output_dim <- 2
-        } else if (lik_name=='ZINB'){
-          n_output_dim <- 3
-        }else if (lik_name=='Categorical') {
-          num_class <- object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$num_classes
-          if (num_class == 2){
-            n_output_dim <- 1
-          } else {
-            n_output_dim <- num_class
-          }
-        }
-      } else {
-        n_output_dim <- n_dim_Y
-      }
-      if ( is.null(aggregate) ){
-        idx <- c()
-        for (i in 1:n_output_dim){
-          res <- pkg.env$dgpsi$utils$multistart(
-            func = object$emulator_obj$metric,
-            initials = x_cand,
-            lb = reticulate::np_array(lower),
-            up = reticulate::np_array(upper),
-            args = reticulate::tuple('VIGF', object$constructor_obj, 1., M, TRUE),
-            method = "L-BFGS-B",
-            core_num = workers,
-            out_dim = as.integer(i-1),
-            int_mask = int
-          )
-          res <- pmin(pmax(res, lower), upper)
-          idx <- rbind(idx, res)
-        }
-        #idx <- pkg.env$np$unique(idx, axis=0L)
-      } else {
-        if (Sys.info()["sysname"] == "Windows") workers <- 1
-        total_cores <- parallel::detectCores(logical = FALSE)
-        if (is.null(workers)) {
-          workers <- max(1, floor(total_cores / 2))  # Default to half of the physical cores
-        }
-        num_thread <- floor(total_cores / workers)
-        set_thread_num(num_thread)
-        if ("..." %in% gnames){
-          extra_param <- add_arg
-        } else {
-          gidx <- gnames %in% names(add_arg)
-          extra_param <- add_arg[gnames[gidx]]
-        }
-        if (workers == 1) {
-          fn_R <- function(x, m, extra_param, int){
-            x[int] <- round(x[int])
-            scores <- object$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = object$constructor_obj, m = m, score_only = TRUE)
-            agg_res <- do.call(aggregate, c(list(scores), extra_param))
-            return(-agg_res)
-          }
-          results <- lapply(1:n_start, function(x0) {
-            stats::optim(
-              par = x_cand[x0,],
-              fn = fn_R,
-              method = 'L-BFGS-B',
-              lower = lower,
-              upper = upper,
-              control = list(maxit = 100),
-              extra_param = extra_param,
-              m = M,
-              int = int
-            )
-          })
-        } else {
-          fn_R <- function(x, m, extra_param, int){
-            x[int] <- round(x[int])
-            scores <- object$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = object$constructor_obj, m = m, score_only = TRUE)
-            agg_res <- do.call(aggregate, c(list(scores), extra_param))
-            return(-agg_res)
-          }
-          results <- parallel::mclapply(1:n_start, function(x0) {
-            stats::optim(
-              par = x_cand[x0,],
-              fn = fn_R,
-              method = 'L-BFGS-B',
-              lower = lower,
-              upper = upper,
-              control = list(maxit = 100),
-              extra_param = extra_param,
-              m = M,
-              int = int
-            )
-          }, mc.cores = workers)
-        }
-        values <- sapply(results, function(res) res$value)
-        parameters <- lapply(results, function(res) res$par)
-        # Find the best result
-        best_idx <- which.min(values)
-        idx <- parameters[[best_idx]]
-        idx[int] <- round(idx[int])
-        idx <- pmin(pmax(idx, lower), upper)
-        idx <- matrix(idx, nrow = 1)
-      }
+      idx <- vigf_search(object$emulator_obj, n_screen, n_start, limits,
+                        int, M, aggregate, extra_param, opt_control,
+                        constructor_obj = object$constructor_obj)
     } else {
 
       res = object$emulator_obj$metric(x_cand = x_cand, method = 'VIGF', obj = object$constructor_obj, m = M, score_only = TRUE)
@@ -410,6 +285,7 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
           idx <- which.max(agg_res)
         }
       }
+      #idx <- matrix(idx, nrow = 1, byrow = T)
       idx <- as.vector(idx)
     }
   } else {
@@ -420,113 +296,19 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
       B <- as.integer(length(emulator_obj_cp$all_layer_set))
       burnin <- constructor_obj_cp$burnin
       isblock <- constructor_obj_cp$block
-      if ( !is.null(aggregate) ){
-        if (Sys.info()["sysname"] == "Windows") workers <- 1
-        total_cores <- parallel::detectCores(logical = FALSE)
-        if (is.null(workers)) {
-          workers <- max(1, floor(total_cores / 2))  # Default to half of the physical cores
-        }
-        num_thread <- floor(total_cores / workers)
-        set_thread_num(num_thread)
-        if ("..." %in% gnames){
-          extra_param <- add_arg
-        } else {
-          gidx <- gnames %in% names(add_arg)
-          extra_param <- add_arg[gnames[gidx]]
-        }
-      } else {
-        if ( object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$type == 'likelihood' ){
-          lik_name <- object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$name
-          if (lik_name=='Poisson'){
-            n_output_dim <- 1
-          } else if (lik_name=='Hetero' | lik_name=='NegBin' | lik_name=='ZIP'){
-            n_output_dim <- 2
-          } else if (lik_name=='ZINB'){
-            n_output_dim <- 3
-          } else if (lik_name=='Categorical') {
-            num_class <- object$constructor_obj$all_layer[[object$constructor_obj$n_layer]][[1]]$num_classes
-            if (num_class == 2){
-              n_output_dim <- 1
-            } else {
-              n_output_dim <- num_class
-            }
-          }
-        } else {
-          n_output_dim <- n_dim_Y
-        }
-      }
       for (i in 1:batch_size){
-        #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input, limits), n_start), n_start), limits)
-        x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-        X_new <- c()
-        if ( is.null(aggregate) ){
-          for (j in 1:n_output_dim){
-            res <- pkg.env$dgpsi$utils$multistart(
-              func = object$emulator_obj$metric,
-              initials = x_cand,
-              lb = reticulate::np_array(lower),
-              up = reticulate::np_array(upper),
-              args = reticulate::tuple('VIGF', object$constructor_obj, 1., M, TRUE),
-              method = "L-BFGS-B",
-              core_num = workers,
-              out_dim = as.integer(j-1),
-              int_mask = int
-            )
-            res <- pmin(pmax(res, lower), upper)
-            X_new <- rbind(X_new, res)
-          }
-          #X_new <- pkg.env$np$unique(X_new, axis=0L)
-        } else {
-          fn_R <- function(x, m, extra_param,int){
-            x[int] <- round(x[int])
-            scores <- object$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = object$constructor_obj, m = m, score_only = TRUE)
-            agg_res <- do.call(aggregate, c(list(scores), extra_param))
-            return(-agg_res)
-          }
-          if (workers == 1) {
-            results <- lapply(1:n_start, function(x0) {
-              stats::optim(
-                par = x_cand[x0,],
-                fn = fn_R,
-                method = 'L-BFGS-B',
-                lower = lower,
-                upper = upper,
-                control = list(maxit = 100),
-                extra_param = extra_param,
-                m = M,
-                int = int
-              )
-            })
-          } else {
-            results <- parallel::mclapply(1:n_start, function(x0) {
-              stats::optim(
-                par = x_cand[x0,],
-                fn = fn_R,
-                method = 'L-BFGS-B',
-                lower = lower,
-                upper = upper,
-                control = list(maxit = 100),
-                extra_param = extra_param,
-                m = M,
-                int = int
-              )
-            }, mc.cores = workers)
-          }
-          values <- sapply(results, function(res) res$value)
-          parameters <- lapply(results, function(res) res$par)
-          # Find the best result
-          best_idx <- which.min(values)
-          res <- parameters[[best_idx]]
-          res[int] <- round(res[int])
-          res <- pmin(pmax(res, lower), upper)
-          X_new <- rbind(X_new, matrix(res,nrow=1))
+        X_new <- vigf_search(emulator_obj_cp, n_screen, n_start, limits,
+                            int, M, aggregate, extra_param, opt_control,
+                            constructor_obj = constructor_obj_cp)
+        X_fantasy <- vigf_new_fantasy_points(X_new, training_input, constructor_obj_cp)
+        if (nrow(X_fantasy)) {
+          Y_new <- vigf_fantasy_response(emulator_obj_cp, constructor_obj_cp, X_fantasy, M)
+          training_input <- rbind(training_input, X_fantasy)
+          training_output <- rbind(training_output, Y_new)
+          constructor_obj_cp$update_xy(training_input, training_output)
+          est_obj <- constructor_obj_cp$estimate(burnin)
+          emulator_obj_cp <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
         }
-        Y_new <- emulator_obj_cp$predict(X_new, m = M)[[1]]
-        training_input <- rbind(training_input, X_new)
-        training_output <- rbind(training_output, Y_new)
-        constructor_obj_cp$update_xy(training_input, training_output)
-        est_obj <- constructor_obj_cp$estimate(burnin)
-        emulator_obj_cp <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
         idx <- rbind(idx, X_new)
       }
     } else {
@@ -540,7 +322,7 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
       isblock <- constructor_obj_cp$block
       for (i in 1:batch_size){
 
-        res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'VIGF', obj = object$constructor_obj, score_only = TRUE, m = M)
+        res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'VIGF', obj = constructor_obj_cp, m = M, score_only = TRUE)
 
         if ( is.null(aggregate) ){
           idx_i <- pkg.env$np$argmax(res, axis=0L) + 1
@@ -559,14 +341,17 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
           }
         }
         X_new <- x_cand[idx_x_cand,,drop=F][unique(idx_i),,drop=F]
-        Y_new <- emulator_obj_cp$predict(X_new, m = M)[[1]]
+        X_fantasy <- vigf_new_fantasy_points(X_new, training_input, constructor_obj_cp)
+        if (nrow(X_fantasy)) {
+          Y_new <- vigf_fantasy_response(emulator_obj_cp, constructor_obj_cp, X_fantasy, M)
 
-        training_input <- rbind(training_input, X_new)
-        training_output <- rbind(training_output, Y_new)
-        constructor_obj_cp$update_xy(training_input, training_output)
+          training_input <- rbind(training_input, X_fantasy)
+          training_output <- rbind(training_output, Y_new)
+          constructor_obj_cp$update_xy(training_input, training_output)
 
-        est_obj <- constructor_obj_cp$estimate(burnin)
-        emulator_obj_cp <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+          est_obj <- constructor_obj_cp$estimate(burnin)
+          emulator_obj_cp <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+        }
 
         idx <- c(idx,  idx_x_cand[idx_i])
         idx_x_cand <- idx_x_cand0[-unique(idx)]
@@ -585,7 +370,7 @@ vigf.dgp <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50
 #' @rdname vigf
 #' @method vigf bundle
 #' @export
-vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M = 50, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
+vigf.bundle <- function(object, x_cand = NULL, n_start = 5, batch_size = 1, M = 50, limits = NULL, int = FALSE, aggregate = NULL, n_screen = 100 * ncol(object$data$X[[1L]]), opt_control = list(), ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -616,8 +401,6 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
   if ( is.null(x_cand) ){
     is_cand <- FALSE
     limits <- check_limits(limits, n_dim_X)
-    lower <- limits[, 1]
-    upper <- limits[, 2]
     int <- check_int(int, n_dim_X)
   } else {
     is_cand <- TRUE
@@ -628,7 +411,6 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
         }
       }
     }
-
     if ( is.list(x_cand) ){
       if (length(x_cand) != n_emulators) stop("When 'x_cand' is a list, the number of elements in it should match the number of emulators in the bundle.", call. = FALSE)
       for ( i in 1:n_emulators ){
@@ -654,17 +436,14 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
       islist <- FALSE
     }
   }
-
-  #check core number
-  if( !is.null(workers) ) {
-    workers <- as.integer(workers)
-    if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
-  }
   M <- as.integer(M)
+  extra_param <- list()
   #check aggregate
   if ( !is.null(aggregate) ){
     add_arg <- list(...)
     gnames <- methods::formalArgs(aggregate)
+    extra_param <- if ("..." %in% gnames) add_arg else
+      add_arg[intersect(names(add_arg), gnames)]
     if (is_cand){
       if (islist){
         x_cand_dfs <- lapply(x_cand, as.data.frame)
@@ -677,123 +456,22 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
   batch_size <- as.integer(batch_size)
   if ( batch_size < 1 ) stop("'batch_size' must be >= 1.", call. = FALSE)
 
+  is_gp <- logical(n_emulators)
+  for (i in seq_len(n_emulators)) {
+    is_gp[i] <- inherits(object[[paste0('emulator', i)]], "gp")
+  }
   #locate
   if ( batch_size==1 ){
     if (!is_cand){
-      if ( is.null(aggregate) ){
-        x_cand <- vector('list', n_emulators)
-        idx <- vector('list', n_emulators)
-        for (i in 1:n_emulators){
-          #x_cand[[i]] <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input[[i]], limits), n_start), n_start), limits)
-          x_cand[[i]] <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-          obj_i <- object[[paste('emulator',i,sep='')]]
-          res <- pkg.env$dgpsi$utils$multistart(
-            func = obj_i$emulator_obj$metric,
-            initials = x_cand[[i]],
-            lb = reticulate::np_array(lower),
-            up = reticulate::np_array(upper),
-            args = if ( inherits(obj_i,"gp") ) {reticulate::tuple('VIGF', 1., M, TRUE)} else {reticulate::tuple('VIGF', obj_i$constructor_obj, 1., M, TRUE)},
-            method = "L-BFGS-B",
-            core_num = workers,
-            out_dim = -1L,
-            int_mask = int
-          )
-          res <- pmin(pmax(res, lower), upper)
-          idx[[i]] <- matrix(res,nrow=1)
-        }
-        #idx <- pkg.env$np$unique(idx, axis=0L)
-      } else {
-        idx <- vector('list', n_emulators)
-        if (Sys.info()["sysname"] == "Windows") workers <- 1
-        total_cores <- parallel::detectCores(logical = FALSE)
-        if (is.null(workers)) {
-          workers <- max(1, floor(total_cores / 2))  # Default to half of the physical cores
-        }
-        num_thread <- floor(total_cores / workers)
-        set_thread_num(num_thread)
-        if ("..." %in% gnames){
-          extra_param <- add_arg
-        } else {
-          gidx <- gnames %in% names(add_arg)
-          extra_param <- add_arg[gnames[gidx]]
-        }
-        #total_input <- do.call(rbind, training_input)
-        #total_input <- pkg.env$np$unique(total_input, axis=0L)
-        #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(total_input, limits), n_start), n_start), limits)
-        x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-
-        if (workers == 1) {
-          fn_R <- function(x, m, extra_param, int){
-            scores <- vector('list', n_emulators)
-            x[int] <- round(x[int])
-            for (i in 1:n_emulators){
-              obj_i <- object[[paste('emulator',i,sep='')]]
-              if ( inherits(obj_i,"gp") ){
-                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', m = m, score_only = TRUE)
-              } else {
-                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = obj_i$constructor_obj, m = m, score_only = TRUE)
-              }
-              scores[[i]] <- if(ncol(scores_i) == 1) as.vector(scores_i) else rowMeans(scores_i)
-            }
-            scores <- do.call(cbind, scores)
-            agg_res <- do.call(aggregate, c(list(matrix(scores, nrow = 1)), extra_param))
-            return(-agg_res)
-          }
-          results <- lapply(1:n_start, function(x0) {
-            stats::optim(
-              par = x_cand[x0,],
-              fn = fn_R,
-              method = 'L-BFGS-B',
-              lower = lower,
-              upper = upper,
-              control = list(maxit = 100),
-              extra_param = extra_param,
-              m = M,
-              int = int
-            )
-          })
-        } else {
-          fn_R <- function(x, m, extra_param, int){
-            scores <- vector('list', n_emulators)
-            x[int] <- round(x[int])
-            for (i in 1:n_emulators){
-              obj_i <- object[[paste('emulator',i,sep='')]]
-              if ( inherits(obj_i,"gp") ){
-                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', m = m, score_only = TRUE)
-              } else {
-                scores_i <- obj_i$emulator_obj$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = obj_i$constructor_obj, m = m, score_only = TRUE)
-              }
-              scores[[i]] <- if(ncol(scores_i) == 1) as.vector(scores_i) else rowMeans(scores_i)
-            }
-            scores <- do.call(cbind, scores)
-            agg_res <- do.call(aggregate, c(list(matrix(scores, nrow = 1)), extra_param))
-            return(-agg_res)
-          }
-          results <- parallel::mclapply(1:n_start, function(x0) {
-            stats::optim(
-              par = x_cand[x0,],
-              fn = fn_R,
-              method = 'L-BFGS-B',
-              lower = lower,
-              upper = upper,
-              control = list(maxit = 100),
-              extra_param = extra_param,
-              m = M,
-              int = int
-            )
-          }, mc.cores = workers)
-        }
-        values <- sapply(results, function(res) res$value)
-        parameters <- lapply(results, function(res) res$par)
-        # Find the best result
-        best_idx <- which.min(values)
-        res <- parameters[[best_idx]]
-        res[int] <- round(res[int])
-        res <- pmin(pmax(res, lower), upper)
-        for (j in 1:n_emulators){
-          idx[[j]] <- matrix(res,nrow=1)
-        }
+      emulator_obj_list <- vector('list', n_emulators)
+      constructor_obj_list <- vector('list', n_emulators)
+      for (i in seq_len(n_emulators)) {
+        obj_i <- object[[paste0('emulator', i)]]
+        emulator_obj_list[[i]] <- obj_i$emulator_obj
+        constructor_obj_list[[i]] <- obj_i$constructor_obj
       }
+      idx <- vigf_bundle_search(emulator_obj_list, constructor_obj_list, is_gp, n_screen, n_start,
+                               limits, int, M, aggregate, extra_param, opt_control)
     } else {
       scores <- vector('list', n_emulators)
       for ( i in 1:n_emulators ){
@@ -830,6 +508,7 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
           idx <- rep(idx, n_emulators)
         }
       }
+
       idx <- matrix(idx, nrow = 1, byrow = T)
     }
   } else {
@@ -842,118 +521,28 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
         constructor_obj_list[[i]] <- pkg.env$copy$deepcopy(obj_i$constructor_obj)
         emulator_obj_list[[i]] <- pkg.env$copy$deepcopy(obj_i$emulator_obj)
       }
-      if ( !is.null(aggregate) ){
-        if (Sys.info()["sysname"] == "Windows") workers <- 1
-        total_cores <- parallel::detectCores(logical = FALSE)
-        if (is.null(workers)) {
-          workers <- max(1, floor(total_cores / 2))  # Default to half of the physical cores
-        }
-        num_thread <- floor(total_cores / workers)
-        set_thread_num(num_thread)
-        if ("..." %in% gnames){
-          extra_param <- add_arg
-        } else {
-          gidx <- gnames %in% names(add_arg)
-          extra_param <- add_arg[gnames[gidx]]
-        }
-      }
-
       for (i in 1:batch_size){
-        X_new <- vector('list', n_emulators)
-        if ( is.null(aggregate) ){
-          x_cand <- vector('list', n_emulators)
-          for (j in 1:n_emulators){
-            #x_cand[[j]] <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(training_input[[j]], limits), n_start), n_start), limits)
-            x_cand[[j]] <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-            res <- pkg.env$dgpsi$utils$multistart(
-              func = emulator_obj_list[[j]]$metric,
-              initials = x_cand[[j]],
-              lb = reticulate::np_array(lower),
-              up = reticulate::np_array(upper),
-              args = if ( inherits(object[[paste('emulator',j,sep='')]],"gp") ) {reticulate::tuple('VIGF', 1., M, TRUE)} else {reticulate::tuple('VIGF', constructor_obj_list[[j]], 1., M, TRUE)},
-              method = "L-BFGS-B",
-              core_num = workers,
-              out_dim = -1L,
-              int_mask = int
-            )
-            res <- pmin(pmax(res, lower), upper)
-            X_new[[j]] <- matrix(res,nrow=1)
-          }
-          #X_new <- pkg.env$np$unique(X_new, axis=0L)
-        } else {
-          #total_input <- do.call(rbind, training_input)
-          #total_input <- pkg.env$np$unique(total_input, axis=0L)
-          #x_cand <- reverse_minmax(utils::tail(lhs::augmentLHS(minmax(total_input, limits), n_start), n_start), limits)
-          x_cand <- reverse_minmax(lhs::maximinLHS(n_start,n_dim_X), limits)
-          fn_R <- function(x, m, extra_param, int){
-            scores <- vector('list', n_emulators)
-            x[int] <- round(x[int])
-            for (k in 1:n_emulators){
-              if ( inherits(object[[paste('emulator',k,sep='')]],"gp") ){
-                scores_k <- emulator_obj_list[[k]]$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', m = m, score_only = TRUE)
-              } else{
-                scores_k <- emulator_obj_list[[k]]$metric(x_cand = matrix(x, nrow = 1), method = 'VIGF', obj = constructor_obj_list[[k]], m = m, score_only = TRUE)
-              }
-              scores[[k]] <- if(ncol(scores_k) == 1) as.vector(scores_k) else rowMeans(scores_k)
-            }
-            scores <- do.call(cbind, scores)
-            agg_res <- do.call(aggregate, c(list(matrix(scores, nrow = 1)), extra_param))
-            return(-agg_res)
-          }
-          if (workers == 1) {
-            results <- lapply(1:n_start, function(x0) {
-              stats::optim(
-                par = x_cand[x0,],
-                fn = fn_R,
-                method = 'L-BFGS-B',
-                lower = lower,
-                upper = upper,
-                control = list(maxit = 100),
-                extra_param = extra_param,
-                m = M,
-                int = int
-              )
-            })
-          } else {
-            results <- parallel::mclapply(1:n_start, function(x0) {
-              stats::optim(
-                par = x_cand[x0,],
-                fn = fn_R,
-                method = 'L-BFGS-B',
-                lower = lower,
-                upper = upper,
-                control = list(maxit = 100),
-                extra_param = extra_param,
-                m = M,
-                int = int
-              )
-            }, mc.cores = workers)
-          }
-          values <- sapply(results, function(res) res$value)
-          parameters <- lapply(results, function(res) res$par)
-          # Find the best result
-          best_idx <- which.min(values)
-          res <- parameters[[best_idx]]
-          res[int] <- round(res[int])
-          res <- pmin(pmax(res, lower), upper)
-          for (j in 1:n_emulators){
-            X_new[[j]] <- matrix(res,nrow=1)
-          }
-        }
+        X_new <- vigf_bundle_search(emulator_obj_list, constructor_obj_list, is_gp, n_screen, n_start,
+                                   limits, int, M, aggregate, extra_param, opt_control)
+
         for ( j in 1:n_emulators ){
           obj_j <- object[[paste('emulator',j,sep='')]]
-          Y_new_j <- emulator_obj_list[[j]]$predict(X_new[[j]], m = M)[[1]]
-          training_input[[j]] <- rbind(training_input[[j]], X_new[[j]])
-          training_output[[j]] <- rbind(training_output[[j]], Y_new_j)
-          if ( inherits(obj_j,"gp") ){
-            emulator_obj_list[[j]]$update_xy(training_input[[j]], training_output[[j]])
-          } else {
-            B <- as.integer(length(obj_j$emulator_obj$all_layer_set))
-            burnin <- obj_j$constructor_obj$burnin
-            isblock <- obj_j$constructor_obj$block
-            constructor_obj_list[[j]]$update_xy(training_input[[j]], training_output[[j]])
-            est_obj <- constructor_obj_list[[j]]$estimate(burnin)
-            emulator_obj_list[[j]] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+          X_fantasy <- vigf_new_fantasy_points(X_new[[j]], training_input[[j]], constructor_obj_list[[j]], is_gp[j])
+          if (nrow(X_fantasy)) {
+            Y_new_j <- vigf_fantasy_response(emulator_obj_list[[j]], constructor_obj_list[[j]],
+                                            X_fantasy, M, is_gp = is_gp[j])
+            training_input[[j]] <- rbind(training_input[[j]], X_fantasy)
+            training_output[[j]] <- rbind(training_output[[j]], Y_new_j)
+            if ( inherits(obj_j,"gp") ){
+              emulator_obj_list[[j]]$update_xy(training_input[[j]], training_output[[j]])
+            } else {
+              B <- as.integer(length(obj_j$emulator_obj$all_layer_set))
+              burnin <- obj_j$constructor_obj$burnin
+              isblock <- obj_j$constructor_obj$block
+              constructor_obj_list[[j]]$update_xy(training_input[[j]], training_output[[j]])
+              est_obj <- constructor_obj_list[[j]]$estimate(burnin)
+              emulator_obj_list[[j]] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+            }
           }
           idx[[j]] <- rbind(idx[[j]], X_new[[j]])
         }
@@ -971,6 +560,7 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
     }
 
     for (i in 1:batch_size){
+
       scores <- vector('list', n_emulators)
       for ( j in 1:n_emulators ){
         obj_j <- object[[paste('emulator',j,sep='')]]
@@ -979,7 +569,7 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
           scores[[j]] <- res
         } else {
 
-          res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, obj = constructor_obj_list[[j]], method = 'VIGF', m = M, score_only = TRUE)
+          res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'VIGF', obj = constructor_obj_list[[j]], m = M, score_only = TRUE)
 
           scores[[j]] <- if(ncol(res) == 1) res else rowMeans(res)
         }
@@ -996,7 +586,6 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
           gparam <- add_arg[gnames[gidx]]
           agg_scores <- do.call(aggregate, c(list(scores), gparam))
         }
-
         idx_i <- which.max(agg_scores)
         idx_i <- rep(idx_i, n_emulators)
       }
@@ -1009,23 +598,28 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
 
       for ( j in 1:n_emulators ){
         obj_j <- object[[paste('emulator',j,sep='')]]
-        Y_new_j <- emulator_obj_list[[j]]$predict(X_new[[j]], m = M)[[1]]
-        if ( inherits(obj_j,"gp") ){
-          emulator_obj_list[[j]]$update_xy(rbind(training_input[[j]], X_new[[j]]), rbind(training_output[[j]], Y_new_j))
-        } else {
-          B <- as.integer(length(obj_j$emulator_obj$all_layer_set))
-          burnin <- obj_j$constructor_obj$burnin
-          isblock <- obj_j$constructor_obj$block
-          constructor_obj_list[[j]]$update_xy(rbind(training_input[[j]], X_new[[j]]), rbind(training_output[[j]], Y_new_j))
-          est_obj <- constructor_obj_list[[j]]$estimate(burnin)
-          emulator_obj_list[[j]] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+        X_fantasy <- vigf_new_fantasy_points(X_new[[j]], training_input[[j]], constructor_obj_list[[j]], is_gp[j])
+        if (nrow(X_fantasy)) {
+          Y_new_j <- vigf_fantasy_response(emulator_obj_list[[j]], constructor_obj_list[[j]],
+                                            X_fantasy, M, is_gp = is_gp[j])
+          training_input[[j]] <- rbind(training_input[[j]], X_fantasy)
+          training_output[[j]] <- rbind(training_output[[j]], Y_new_j)
+          if ( inherits(obj_j,"gp") ){
+            emulator_obj_list[[j]]$update_xy(training_input[[j]], training_output[[j]])
+          } else {
+            B <- as.integer(length(obj_j$emulator_obj$all_layer_set))
+            burnin <- obj_j$constructor_obj$burnin
+            isblock <- obj_j$constructor_obj$block
+            constructor_obj_list[[j]]$update_xy(training_input[[j]], training_output[[j]])
+            est_obj <- constructor_obj_list[[j]]$estimate(burnin)
+            emulator_obj_list[[j]] <- pkg.env$dgpsi$emulator(all_layer = est_obj, N = B, block = isblock)
+          }
         }
       }
-
       if ( !is.null(aggregate) & islist ){
         chosen_row <- x_cand[idx_x_cand[[1]],,drop=F][idx_i[1], ]
         idx <- rbind( idx, unlist(lapply(x_cand_dfs, function(df) {
-          which(apply(df, 1, function(row) identical(row, chosen_row)))
+          which(colSums(t(as.matrix(df)) == chosen_row, na.rm = TRUE) == n_dim_X)
         })))
         idx_x_cand <- replicate(n_emulators, idx_x_cand[[1]][-idx_i[1]], simplify = FALSE)
       } else {
@@ -1034,11 +628,284 @@ vigf.bundle <- function(object, x_cand = NULL, n_start = 10, batch_size = 1, M =
       }
     }
     #idx <- matrix(idx, nrow = batch_size, byrow = T)
-    }
+  }
   }
   if ( batch_size!=1 ){
     pkg.env$py_gc$collect()
     gc(full=T)
   }
   return(idx)
+}
+
+vigf_bundle_search <- function(emulator_objs, constructor_objs, is_gp, n_screen, n_start, limits, int, M, aggregate, extra_param, opt_control) {
+  if (!is.null(aggregate)) {
+    point <- vigf_search(emulator_objs, n_screen, n_start, limits, int, M,
+                         aggregate, extra_param, opt_control, is_gp = is_gp,
+                         bundle = TRUE, constructor_obj = constructor_objs)
+    return(rep(list(point), length(emulator_objs)))
+  }
+  points <- vector('list', length(emulator_objs))
+  for (i in seq_along(emulator_objs)) {
+    points[[i]] <- vigf_search(emulator_objs[[i]], n_screen, n_start, limits,
+                              int, M, NULL, list(), opt_control,
+                              is_gp = is_gp[i], mean_output = TRUE,
+                              constructor_obj = constructor_objs[[i]])
+  }
+  points
+}
+
+vigf_scores <- function(emulator_obj, constructor_obj, points, M, is_gp = FALSE, bundle = FALSE) {
+  if (bundle) {
+    scores <- matrix(NA_real_, nrow = nrow(points), ncol = length(emulator_obj))
+    for (i in seq_along(emulator_obj)) {
+      scores[, i] <- rowMeans(vigf_scores(emulator_obj[[i]], constructor_obj[[i]],
+                                         points, M, is_gp = is_gp[i]))
+    }
+    return(scores)
+  }
+  if (is_gp) {
+    emulator_obj$metric(x_cand = points, method = 'VIGF', m = M, score_only = TRUE)
+  } else {
+    emulator_obj$metric(x_cand = points, method = 'VIGF', obj = constructor_obj,
+                        m = M, score_only = TRUE)
+  }
+}
+
+vigf_opt_control <- function(opt_control, n_free) {
+  allowed <- c("maxit", "ftol", "gtol", "step")
+  if (!is.list(opt_control) || (length(opt_control) &&
+      (is.null(names(opt_control)) || anyNA(names(opt_control)) ||
+       any(!nzchar(names(opt_control))) || anyDuplicated(names(opt_control)) ||
+       any(!names(opt_control) %in% allowed)))) {
+    stop("'opt_control' must be a named list containing only maxit, ftol, gtol, and step.", call. = FALSE)
+  }
+  values <- list(maxit = 100L, ftol = 1e7 * .Machine$double.eps, gtol = 0, step = NULL)
+  values[names(opt_control)] <- opt_control
+  if (length(values$maxit) != 1L || !is.numeric(values$maxit) ||
+      !is.finite(values$maxit) || values$maxit < 1 ||
+      values$maxit != floor(values$maxit) || values$maxit > .Machine$integer.max) {
+    stop("'opt_control$maxit' must be a positive integer within R's integer range.", call. = FALSE)
+  }
+  for (name in c("ftol", "gtol")) {
+    value <- values[[name]]
+    if (length(value) != 1L || !is.numeric(value) || !is.finite(value) || value < 0) {
+      stop(sprintf("'opt_control$%s' must be one finite nonnegative number.", name), call. = FALSE)
+    }
+  }
+  if (!is.null(values$step) && (length(values$step) != 1L ||
+      !is.numeric(values$step) || !is.finite(values$step) || values$step <= 0)) {
+    stop("'opt_control$step' must be NULL or one finite positive number.", call. = FALSE)
+  }
+  r <- list(maxit = as.integer(values$maxit), factr = values$ftol / .Machine$double.eps,
+            pgtol = values$gtol)
+  python <- list(maxiter = as.integer(values$maxit), ftol = values$ftol, gtol = values$gtol)
+  if (!is.null(values$step)) {
+    r$ndeps <- rep(values$step, n_free)
+    python$eps <- values$step
+  }
+  list(r = r, python = python)
+}
+
+vigf_search <- function(emulator_obj, n_screen, n_start, limits, int, M, aggregate, extra_param, opt_control = list(), is_gp = FALSE, mean_output = FALSE, bundle = FALSE, constructor_obj = NULL) {
+  if (length(n_start) != 1L || !is.numeric(n_start) ||
+      !is.finite(n_start) || n_start < 1 || n_start != floor(n_start)) {
+    stop("'n_start' must be a positive integer.", call. = FALSE)
+  }
+  if (length(n_screen) != 1L || !is.numeric(n_screen) ||
+      !is.finite(n_screen) || n_screen < n_start ||
+      n_screen != floor(n_screen)) {
+    stop("'n_screen' must be an integer >= 'n_start'.", call. = FALSE)
+  }
+  if (is.numeric(limits) && !is.complex(limits)) storage.mode(limits) <- "double"
+  if (!is.matrix(limits) || ncol(limits) != 2L || !is.numeric(limits) ||
+      is.complex(limits) || any(!is.finite(limits)) ||
+      any(limits[, 1] > limits[, 2]) || any(!is.finite(limits[, 2] - limits[, 1]))) {
+    stop("'limits' must have finite numeric, ordered bounds and finite widths.", call. = FALSE)
+  }
+  if (!is.logical(int) || length(int) != nrow(limits) || anyNA(int)) {
+    stop("'int' must be a logical mask without missing values.", call. = FALSE)
+  }
+  lower <- limits[, 1]
+  upper <- limits[, 2]
+  lower[int] <- ceiling(lower[int])
+  upper[int] <- floor(upper[int])
+  if (any(lower[int] > upper[int])) {
+    stop("No feasible integer VIGF screening points.", call. = FALSE)
+  }
+  span <- upper - lower
+  free <- span > 0 & !int
+  solver_control <- vigf_opt_control(opt_control, sum(free))
+  sampling_limits <- limits
+  sampling_limits[int, 1] <- 0
+  sampling_limits[int, 2] <- upper[int] - lower[int] + 1
+  x_screen <- reverse_minmax(lhs::maximinLHS(n_screen, length(lower)), sampling_limits)
+  if (any(int)) {
+    x_screen[, int] <- sweep(floor(x_screen[, int, drop = FALSE]), 2L, lower[int], "+")
+  }
+  x_screen <- unique(x_screen[
+    rowSums(sweep(x_screen, 2L, lower, "<") |
+            sweep(x_screen, 2L, upper, ">")) == 0, , drop = FALSE
+  ])
+  if (!nrow(x_screen)) stop("No feasible VIGF screening points.", call. = FALSE)
+  scores <- vigf_scores(emulator_obj, constructor_obj, x_screen, M, is_gp, bundle)
+  if (!is.null(aggregate)) {
+    scores <- matrix(vigf_aggregate_scores(scores, aggregate, extra_param), ncol = 1)
+  } else if (mean_output) {
+    scores <- matrix(rowMeans(scores), ncol = 1)
+  }
+
+  span[span == 0] <- 1
+  x_scaled <- sweep(sweep(x_screen, 2L, lower, "-"), 2L, span, "/")
+  norm2 <- rowSums(x_scaled * x_scaled)
+
+  points <- matrix(NA_real_, nrow = ncol(scores), ncol = ncol(x_screen))
+  for (j in seq_len(ncol(scores))) {
+    starts <- vigf_select_starts(x_scaled, scores[, j], n_start, norm2)
+    points[j, ] <- x_screen[starts[1], ]
+    if (!any(free)) next
+
+    if (is.null(aggregate)) {
+      res <- tryCatch(pkg.env$dgpsi$utils$multistart(
+        func = emulator_obj$metric,
+        initials = x_screen[starts, , drop = FALSE],
+        lb = reticulate::np_array(lower),
+        up = reticulate::np_array(upper),
+        args = if (is_gp) reticulate::tuple('VIGF', 1., M, TRUE) else
+          reticulate::tuple('VIGF', constructor_obj, 1., M, TRUE),
+        method = "L-BFGS-B",
+        out_dim = if (mean_output) -1L else as.integer(j - 1L),
+        int_mask = int,
+        options = reticulate::r_to_py(solver_control$python)
+      ), error = identity)
+      if (inherits(res, "error")) {
+        next
+      }
+      refined <- matrix(res, nrow = 1)
+    } else {
+      refined <- matrix(NA_real_, nrow = length(starts), ncol = ncol(x_screen))
+      for (k in seq_along(starts)) {
+        res <- tryCatch(stats::optim(
+          par = x_scaled[starts[k], free], fn = vigf_objective,
+          method = 'L-BFGS-B', lower = rep(0, sum(free)), upper = rep(1, sum(free)),
+          control = solver_control$r,
+          emulator_obj = emulator_obj, M = M, aggregate = aggregate,
+          extra_param = extra_param, point = x_screen[starts[k], ], free = free,
+          lower_free = lower[free], upper_free = upper[free], span_free = span[free],
+          bundle = bundle, constructor_obj = constructor_obj, is_gp = is_gp
+        ), error = identity)
+        if (inherits(res, "error") || any(!is.finite(res$par))) {
+          next
+        }
+        refined[k, ] <- x_screen[starts[k], ]
+        refined[k, free] <- pmin(pmax(lower[free] + res$par * span[free], lower[free]), upper[free])
+      }
+    }
+
+    if (any(int)) refined[, int] <- round(refined[, int, drop = FALSE])
+    for (k in seq_along(lower)) {
+      refined[, k] <- pmin(pmax(refined[, k], lower[k]), upper[k])
+    }
+    valid <- rowSums(!is.finite(refined)) == 0 &
+      rowSums(refined[, int, drop = FALSE] !=
+              round(refined[, int, drop = FALSE])) == 0
+    refined <- refined[valid, , drop = FALSE]
+    if (!nrow(refined)) next
+    refined_scores <- tryCatch(vigf_scores(emulator_obj, constructor_obj, refined, M,
+                                           is_gp, bundle), error = identity)
+    if (inherits(refined_scores, "error")) {
+      next
+    }
+    values <- tryCatch(if (!is.null(aggregate))
+      vigf_aggregate_scores(refined_scores, aggregate, extra_param) else if (mean_output)
+      rowMeans(refined_scores) else refined_scores[, j], error = identity)
+    if (inherits(values, "error")) {
+      next
+    }
+    values[!is.finite(values)] <- -Inf
+    candidates <- rbind(x_screen[starts[1], , drop = FALSE], refined)
+    points[j, ] <- candidates[which.max(c(scores[starts[1], j], values)), ]
+  }
+  points
+}
+
+vigf_new_fantasy_points <- function(points, training_input, constructor_obj = NULL, is_gp = FALSE) {
+  # One full-output fantasy per proposed location; public suggestions are unchanged.
+  if (!is_gp && !is.null(constructor_obj) &&
+      constructor_obj$all_layer[[constructor_obj$n_layer]][[1]]$type == 'likelihood') {
+    return(unique(points))
+  }
+  # VIGF cannot use replicated training inputs for GP or likelihood-free DGP models.
+  repeated <- utils::tail(duplicated(rbind(training_input, points)), nrow(points))
+  points[!repeated, , drop = FALSE]
+}
+
+vigf_fantasy_response <- function(emulator_obj, constructor_obj, points, M, is_gp = FALSE) {
+  response <- emulator_obj$predict(points, m = M)[[1]]
+  if (is_gp) return(response)
+  last_node <- constructor_obj$all_layer[[constructor_obj$n_layer]][[1]]
+  if (last_node$name == "Categorical") {
+    probabilities <- as.matrix(response)
+    index <- if (last_node$num_classes == 2L) as.integer(probabilities[, 1] > 0.5) + 1L else
+      max.col(probabilities, ties.method = "first")
+    response <- matrix(last_node$class_encoder$classes_[index], ncol = 1L)
+  }
+  response
+}
+
+vigf_aggregate_scores <- function(scores, aggregate, extra_param) {
+  values <- numeric(nrow(scores))
+  for (i in seq_len(nrow(scores))) {
+    value <- do.call(aggregate, c(list(scores[i, , drop = FALSE]), extra_param))
+    if (!is.numeric(value) || length(value) != 1L) {
+      stop("'aggregate' must return one numeric score for a candidate.", call. = FALSE)
+    }
+    values[i] <- value
+  }
+  values
+}
+
+vigf_objective <- function(x, emulator_obj, M, aggregate, extra_param, point, free, lower_free, upper_free, span_free, bundle = FALSE, constructor_obj = NULL, is_gp = FALSE) {
+  point[free] <- pmin(pmax(lower_free + x * span_free, lower_free), upper_free)
+  scores <- vigf_scores(emulator_obj, constructor_obj, matrix(point, nrow = 1),
+                        M, is_gp, bundle)
+  -vigf_aggregate_scores(scores, aggregate, extra_param)
+}
+
+vigf_select_starts <- function(x, scores, n_start, norm2) {
+  eligible <- which(is.finite(scores))
+  if (!length(eligible)) stop("No finite VIGF screening scores.", call. = FALSE)
+  n_start <- min(n_start, length(eligible))
+  y <- scores[eligible]
+  first <- which.max(y)
+  if (n_start == 1L) return(eligible[first])
+  if (n_start == length(eligible)) {
+    return(eligible[c(first, seq_along(eligible)[-first])])
+  }
+
+  # x is bound-normalized; squared row norms are shared across outputs.
+  if (length(eligible) != nrow(x)) {
+    norm2 <- norm2[eligible]
+    x <- x[eligible, , drop = FALSE]
+  }
+  # Rescale scores and compare weight * squared distance in log space.
+  magnitude <- max(abs(y))
+  if (magnitude > 0) y <- y / magnitude
+  score_sd <- stats::sd(y)
+  log_weight <- if (score_sd > 0) (y - max(y)) / score_sd else numeric(length(y))
+
+  starts <- integer(n_start)
+  starts[1L] <- first
+  chosen <- logical(length(y))
+  chosen[first] <- TRUE
+  nearest2 <- rep(Inf, length(y))
+  for (k in seq_len(n_start - 1L)) {
+    last <- starts[k]
+    distance2 <- pmax(norm2 + norm2[last] - 2 * drop(x %*% x[last, ]), 0)
+    nearest2 <- pmin(nearest2, distance2)
+    remaining <- which(!chosen)
+    next_id <- remaining[which.max(log_weight[remaining] + log(nearest2[remaining]))]
+    starts[k + 1L] <- next_id
+    chosen[next_id] <- TRUE
+  }
+  eligible[starts]
 }

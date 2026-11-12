@@ -12,38 +12,41 @@ vigf(object, ...)
 \method{vigf}{gp}(
   object,
   x_cand = NULL,
-  n_start = 10,
+  n_start = 5,
   batch_size = 1,
   M = 50,
-  workers = 1,
   limits = NULL,
   int = FALSE,
+  n_screen = 100 * ncol(object$data$X),
+  opt_control = list(),
   ...
 )
 
 \method{vigf}{dgp}(
   object,
   x_cand = NULL,
-  n_start = 10,
+  n_start = 5,
   batch_size = 1,
   M = 50,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
+  n_screen = 100 * ncol(object$data$X),
+  opt_control = list(),
   ...
 )
 
 \method{vigf}{bundle}(
   object,
   x_cand = NULL,
-  n_start = 10,
+  n_start = 5,
   batch_size = 1,
   M = 50,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
+  n_screen = 100 * ncol(object$data$X[[1L]]),
+  opt_control = list(),
   ...
 )
 }
@@ -63,18 +66,14 @@ from which the next design point(s) are determined. If \code{object} is an insta
 The list must have a length equal to the number of emulators in \code{object}, with each element being a matrix representing the candidate set for a corresponding
 emulator in the bundle. Defaults to \code{NULL}.}
 
-\item{n_start}{an integer that gives the number of initial design points to be used to determine next design point(s). This argument
-is only used when \code{x_cand} is \code{NULL}. Defaults to \code{10}.}
+\item{n_start}{the maximum number of local refinement starts to determine next design point(s)
+when \code{x_cand = NULL}. Defaults to \code{5}.}
 
 \item{batch_size}{an integer that gives the number of design points to be chosen.
 Defaults to \code{1}.}
 
 \item{M}{the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
-
-\item{workers}{the number of processes to be used for design point selection when \code{x_cand} is \code{NULL}. If set to \code{NULL},
-the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}. The argument does not currently support Windows machines when the \code{aggregate}
-function is provided, due to the significant overhead caused by initializing the Python environment for each worker under spawning.}
 
 \item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
 If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
@@ -84,6 +83,16 @@ argument is only used when \code{x_cand = NULL}. Defaults to \code{NULL}.}
 \item{int}{a bool or a vector of bools that indicates if an input dimension is an integer type. If a single bool is given, it will be applied to
 all input dimensions. If a vector is provided, it should have a length equal to the input dimensions and will be applied to individual
 input dimensions. This argument is only used when \code{x_cand = NULL}. Defaults to \code{FALSE}.}
+
+\item{n_screen}{the number of points generated for screening when \code{x_cand = NULL}.
+Defaults to \code{100} times the number of input dimensions. Must be an integer
+at least \code{n_start}.}
+
+\item{opt_control}{a named list controlling local refinement when \code{x_cand = NULL}.
+Supported entries are \code{maxit} (default \code{100}), \code{ftol} (nonnegative
+function tolerance, default \code{1e7 * .Machine$double.eps}), \code{gtol} (nonnegative
+projected-gradient tolerance, default \code{0}), and \code{step} (positive scalar numerical
+derivative step in normalized coordinates, default \code{NULL} for the solver's native step).}
 
 \item{aggregate}{an R function that aggregates scores of the VIGF across different output dimensions (if \code{object} is an instance
 of the \code{dgp} class) or across different emulators (if \code{object} is an instance of the \code{bundle} class). The function should be specified in the

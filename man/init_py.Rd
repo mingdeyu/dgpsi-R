@@ -25,7 +25,7 @@ If \code{py_ver = NULL}, the default 'python' version '3.10' will be installed.}
 }}
 
 \item{conda}{optional path to a conda binary. If \code{NULL}, \code{\link[=init_py]{init_py()}}
-attempts to locate conda automatically; see \code{\link[reticulate:conda-tools]{reticulate::conda_binary()}} for the search order.
+attempts to locate conda automatically; see \code{\link[reticulate:conda_binary]{reticulate::conda_binary()}} for the search order.
 If provided, the path is used directly and must point to an existing conda executable.}
 
 \item{reinstall}{a bool that indicates whether to reinstall the 'python' version of 'dgpsi' specified

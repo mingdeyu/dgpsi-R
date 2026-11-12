@@ -27,7 +27,7 @@ dgp(
   M = 25,
   ord = NULL,
   N = ifelse(vecchia, 200, 500),
-  ess_burn = 5,
+  ess_burn = 10,
   burnin = NULL,
   B = 10,
   id = NULL,
@@ -199,7 +199,7 @@ If \code{ord = NULL}, the default random ordering is used. Defaults to \code{NUL
 \item{N}{number of iterations for the training. Defaults to \code{500} if \code{vecchia = FALSE} and \code{200} if \code{vecchia = TRUE}. This argument is only used when \code{training = TRUE}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs
-at each I-step of the training. Defaults to \code{5}. This argument is only used when \code{training = TRUE}.}
+at each I-step of the training. Defaults to \code{10}. This argument is only used when \code{training = TRUE}.}
 
 \item{burnin}{the number of training iterations to be discarded for
 point estimates of model parameters. Must be smaller than the training iterations \code{N}. If this is not specified, only the last 25\% of iterations

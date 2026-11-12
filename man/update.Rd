@@ -16,7 +16,7 @@ update(object, X, Y, refit, reset, verb, ...)
   reset = FALSE,
   verb = TRUE,
   N = NULL,
-  ess_burn = 5,
+  ess_burn = 10,
   B = NULL,
   ...
 )
@@ -54,7 +54,7 @@ the number of iterations is set to \code{100} if the DGP emulator was constructe
 if Vecchia approximation was used. Defaults to \code{NULL}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs sampler at each I-step of the training of the emulator \code{object} if it is an
-instance of the \code{dgp} class. Defaults to \code{5}.}
+instance of the \code{dgp} class. Defaults to \code{10}.}
 
 \item{B}{the number of imputations for predictions from the updated emulator \code{object} if it is an instance of the \code{dgp} class.
 This overrides the number of imputations set in \code{object}. Set to \code{NULL} to use the same number of imputations set

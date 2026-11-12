@@ -27,7 +27,7 @@ design(
   verb,
   autosave,
   new_wave,
-  M_val,
+  validation_M,
   ...
 )
 
@@ -51,7 +51,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
-  M_val = 50,
+  validation_M = 50,
   ...
 )
 
@@ -75,7 +75,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
-  M_val = 50,
+  validation_M = 50,
   train_N = NULL,
   pruning = TRUE,
   control = list(),
@@ -102,7 +102,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
-  M_val = 50,
+  validation_M = 50,
   train_N = NULL,
   ...
 )
@@ -258,7 +258,7 @@ This argument is relevant only if waves already exist in the emulator. Creating 
 to \code{\link[=design]{design()}} via \code{\link[=draw]{draw()}}, and allows for specifying a different evaluation frequency in \code{freq}. However, disabling this option can help limit the number of waves visualized
 in \code{\link[=draw]{draw()}} to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to \code{TRUE}.}
 
-\item{M_val}{an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
+\item{validation_M}{an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{...}{Any arguments with names that differ from those used in \code{\link[=design]{design()}} but are required by \code{f}, \code{method}, or \code{eval} can be passed here.

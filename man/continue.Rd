@@ -4,7 +4,7 @@
 \alias{continue}
 \title{Continue training a DGP emulator}
 \usage{
-continue(object, N = NULL, ess_burn = 5, verb = TRUE, burnin = NULL, B = NULL)
+continue(object, N = NULL, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL)
 }
 \arguments{
 \item{object}{an instance of the \code{dgp} class.}
@@ -13,7 +13,7 @@ continue(object, N = NULL, ess_burn = 5, verb = TRUE, burnin = NULL, B = NULL)
 was constructed without the Vecchia approximation, and is set to \code{200} if Vecchia approximation was used. Defaults to \code{NULL}.}
 
 \item{ess_burn}{number of burnin steps for ESS-within-Gibbs
-at each I-step of the training. Defaults to \code{5}.}
+at each I-step of the training. Defaults to \code{10}.}
 
 \item{verb}{a bool indicating if a progress bar will be printed during training. Defaults to \code{TRUE}.}
 

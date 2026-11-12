@@ -1,4 +1,8 @@
 # dgpsi 2.6.0-9000 (development version)
+- Renamed the `M_val` argument of `design()` to `validation_M`. Existing calls must use the new name.
+- Updated `alm()` and `vigf()` to default to screening `100` points per input dimension, followed by serial local refinement from up to `5` selected starts. Integer coordinates remain fixed during refinement.
+- Added an `opt_control` argument to `alm()` and `vigf()` to configure the optimiser for the local refinement.
+- Removed the `workers` argument from `alm()` and `vigf()` to avoid multiprocessing overhead and potential instability when combining R and Python.
 - Resolved Python environment import failure relating to `libcblas.so.3` on Intel CPUs when using MKL BLAS.
 - Fixed Python import errors on Linux caused by `libstdc++.so.6` by prompting users during `init_py()` to update `R_LD_LIBRARY_PATH` (automatically or manually) to prioritize the Python environment's `lib`.
 - Fixed CRAN check error caused by missing vignette images.
@@ -9,7 +13,6 @@
 - Introduced automatic error handling in `dgp()`, allowing up to three training retries instead of terminating the training process.
 - Zero-inflated Poisson and zero-inflated Negative Binomial likelihoods have been added to the package and can be used in `dgp()` by setting `likelihood = "ZIP"` and `likelihood = "ZINB"`, respectively.
 - Removed the multi-process parallel option in favour of automatic Numba-based parallelisation in the Python backend.
-- Reduced the default value of `ess_burn` from `10` to `5`.
 - Fixed a bug in `lgp()` when linked DGPs use `connect = TRUE`.
 - Added `conda` and `show_config` arguments to `init_py()`, allowing users to specify the path to a conda binary and optionally display the Python backend configuration.
 - Updated `plot()` to use column names from the training inputs and outputs supplied to `gp()` and `dgp()`, and from the testing inputs and outputs supplied to `lgp()`, as x- and y-axis labels in relevant validation plots.

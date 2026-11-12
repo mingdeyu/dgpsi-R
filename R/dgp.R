@@ -123,7 +123,7 @@
 #' If `ord = NULL`, the default random ordering is used. Defaults to `NULL`.
 #' @param N number of iterations for the training. Defaults to `500` if `vecchia = FALSE` and `200` if `vecchia = TRUE`. This argument is only used when `training = TRUE`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs
-#'     at each I-step of the training. Defaults to `5`. This argument is only used when `training = TRUE`.
+#'     at each I-step of the training. Defaults to `10`. This argument is only used when `training = TRUE`.
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates of model parameters. Must be smaller than the training iterations `N`. If this is not specified, only the last 25% of iterations
 #'     are used. Defaults to `NULL`. This argument is only used when `training = TRUE`.
@@ -233,7 +233,7 @@
 dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.0, bounds = NULL, prior = 'ga', share = TRUE,
                 nugget_est = FALSE, nugget = NULL, scale_est = TRUE, scale = 1., connect = NULL,
                 likelihood = NULL, training =TRUE, verb = TRUE, check_rep = TRUE, vecchia = FALSE, M = 25, ord = NULL, N = ifelse(vecchia, 200, 500),
-                ess_burn = 5, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = NULL) {
+                ess_burn = 10, burnin = NULL, B = 10, id = NULL, decouple = FALSE, link = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -746,7 +746,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 #' @param N additional number of iterations to train the DGP emulator. If set to `NULL`, the number of iterations is set to `500` if the DGP emulator
 #'     was constructed without the Vecchia approximation, and is set to `200` if Vecchia approximation was used. Defaults to `NULL`.
 #' @param ess_burn number of burnin steps for ESS-within-Gibbs
-#'     at each I-step of the training. Defaults to `5`.
+#'     at each I-step of the training. Defaults to `10`.
 #' @param verb a bool indicating if a progress bar will be printed during training. Defaults to `TRUE`.
 #' @param burnin the number of training iterations to be discarded for
 #'     point estimates calculation. Must be smaller than the overall training iterations
@@ -773,7 +773,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 #' @md
 #' @export
 
-continue <- function(object, N = NULL, ess_burn = 5, verb = TRUE, burnin = NULL, B = NULL) {
+continue <- function(object, N = NULL, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))

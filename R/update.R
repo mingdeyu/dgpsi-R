@@ -19,7 +19,7 @@
 #'     the number of iterations is set to `100` if the DGP emulator was constructed without the Vecchia approximation, and is set to `50`
 #'     if Vecchia approximation was used. Defaults to `NULL`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs sampler at each I-step of the training of the emulator `object` if it is an
-#'     instance of the `dgp` class. Defaults to `5`.
+#'     instance of the `dgp` class. Defaults to `10`.
 #' @param B the number of imputations for predictions from the updated emulator `object` if it is an instance of the `dgp` class.
 #'     This overrides the number of imputations set in `object`. Set to `NULL` to use the same number of imputations set
 #'     in `object`. Defaults to `NULL`.
@@ -50,7 +50,7 @@ update <- function(object, X, Y, refit, reset, verb, ...){
 #' @rdname update
 #' @method update dgp
 #' @export
-update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N = NULL, ess_burn = 5, B = NULL, ...) {
+update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N = NULL, ess_burn = 10, B = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
