@@ -1,0 +1,8 @@
+tutorial-output/
+docs/
+site/
+*.tar.gz
+*.Rcheck/
+.Rhistory
+.RData
+.Rproj.user/

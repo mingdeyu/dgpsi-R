@@ -1,4 +1,6 @@
 # dgpsi 2.6.0-9000 (development version)
+- Added `prunlgp()` for validation-based selection of internal inputs in scalar linked emulators, with system objectives, optional output protection, grouped copies and PSOCK candidate evaluation.
+- Fixed prediction for single-layer linked networks and metadata restoration after full linked-emulator serialisation.
 - Resolved Python environment import failure relating to `libcblas.so.3` on Intel CPUs when using MKL BLAS.
 - Fixed Python import errors on Linux caused by `libstdc++.so.6` by prompting users during `init_py()` to update `R_LD_LIBRARY_PATH` (automatically or manually) to prioritize the Python environment's `lib`.
 - Fixed CRAN check error caused by missing vignette images.

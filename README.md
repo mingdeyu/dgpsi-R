@@ -1,5 +1,14 @@
 # dgpsi <img src="man/figures/logo.png" align="right" width="120" />
 
+## Internal connection pruning
+
+This branch adds `prunlgp()` for selecting the internal inputs of linked emulators.
+Start with the [installation and testing guide](PRUNLGP.md), then follow the
+[executed tutorial](https://zhuangchaoqun.github.io/dgpsi-R/articles/prunlgp.html)
+and [function reference](https://zhuangchaoqun.github.io/dgpsi-R/reference/prunlgp.html).
+The contribution is based on the upstream `dev` branch; the original package
+introduction and references are retained below.
+
 <!-- badges: start -->
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dgpsi)](https://CRAN.R-project.org/package=dgpsi)

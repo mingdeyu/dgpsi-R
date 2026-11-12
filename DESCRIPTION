@@ -45,8 +45,10 @@ Imports:
 Suggests:
     knitr,
     rmarkdown,
+    htmlwidgets,
     MASS,
     R.utils,
+    testthat (>= 3.0.0),
     spelling
 LazyData: false
 VignetteBuilder:
@@ -54,3 +56,4 @@ VignetteBuilder:
 RoxygenNote: 7.3.3
 Language: en-US
 Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3

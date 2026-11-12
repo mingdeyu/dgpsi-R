@@ -232,10 +232,10 @@ predict.lgp <- function(object, x, method = "mean_var", full_layer = FALSE, samp
         x <- as.matrix(x)
       }
     }
-    num_layers <- length(object$constructor)
+    num_layers <- length(object$constructor_obj)
     x_list <- vector("list", num_layers)
     x_list[[1]] <- x
-    for (l in 2:num_layers) {
+    for (l in if (num_layers > 1L) seq.int(2L, num_layers) else integer()) {
       layer_metadata <- subset(object$specs$metadata, object$specs$metadata[["Layer"]] == l)
       layer_metadata <- layer_metadata[order(layer_metadata$Pos_in_Layer), ]
       layer_matrices <- vector("list", nrow(layer_metadata))
@@ -257,7 +257,12 @@ predict.lgp <- function(object, x, method = "mean_var", full_layer = FALSE, samp
   sample_size <- as.integer(sample_size)
   M <- as.integer(M)
 
-  res <- object$emulator_obj$predict(x, method, full_layer, sample_size, M)
+  if (num_layers == 1L) {
+    res <- .predict_single_layer_lgp(object$emulator_obj, x[[1]], method,
+                                     full_layer, sample_size, M)
+  } else {
+    res <- object$emulator_obj$predict(x, method, full_layer, sample_size, M)
+  }
 
   if (method == 'mean_var'){
     if (full_layer) {

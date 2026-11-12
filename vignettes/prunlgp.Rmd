@@ -1,0 +1,365 @@
+---
+title: "Pruning internal connections"
+output: rmarkdown::html_vignette
+description: >
+  Select internal inputs in a linked emulator using a system-level validation loss.
+vignette: >
+  %\VignetteIndexEntry{Pruning internal connections}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE, purl=FALSE}
+run_examples <- identical(Sys.getenv("DGPSI_RUN_PRUNLGP_VIGNETTE"), "true")
+knitr::opts_chunk$set(eval=run_examples, collapse=TRUE, comment="#>", fig.width=7, fig.height=3.5, out.width="100%",
+                     dpi=150, message=FALSE, warning=FALSE)
+if (run_examples) {
+  library(dgpsi)
+  backend <- Sys.getenv("DGPSI_TUTORIAL_BACKEND")
+  if (nzchar(backend)) init_py(dgpsi_ver=backend, verb=FALSE) else init_py(verb=FALSE)
+  set_thread_num(1)
+}
+```
+
+A linked emulator passes intermediate predictions and their uncertainty to
+downstream models. Some of these inputs may add little predictive value.
+`prunlgp()` evaluates reduced input sets, refits the receiving models and selects
+a network using validation predictions from the whole system.
+
+The example uses the development R interface and Python backend recorded in
+[the validation notes](https://github.com/zhuangchaoqun/dgpsi-R/blob/prunlgp/VALIDATION.md). The data and fitting settings are fixed
+before selection.
+
+This example starts with six internal connections. Two intermediate emulators,
+`u` and `v`, supply three downstream emulators, `a`, `b` and `c`. Each output has its own
+DGP and selects its own subset of the two internal inputs.
+
+## Load the data
+
+The accompanying file contains a small, de-identified sample of operational
+measurements: 96 training rows, 48 validation rows and 96 test rows from consecutive,
+non-overlapping periods. Variable names are neutral and timestamps and equipment
+identifiers have been removed. A one-sided filter was applied before sampling;
+the example therefore evaluates filtered responses. All columns were centred and
+scaled using the **training rows only**, then rounded to six decimal places.
+
+`x1`--`x16` are global inputs available under the example's prediction information
+set. These include origin measurements and prescribed boundary inputs. They do
+not include future observations of `u`, `v`, `a`, `b` or `c`. The observed intermediate
+responses are used to train components; validation and test predictions receive
+only the global inputs.
+
+```{r data, purl=FALSE}
+library(dgpsi)
+library(ggplot2)
+dat <- read.csv(system.file("extdata", "prunlgp_example.csv", package="dgpsi"))
+train <- subset(dat, split == "train")
+validation <- subset(dat, split == "validation")
+test <- subset(dat, split == "test")
+global <- paste0("x", 1:16)
+table(dat$split)
+```
+
+For a new dataset, estimate transformation parameters on the training partition
+and apply those same parameters to validation and test data. Standardisation is
+a numerical transformation, not a guarantee of anonymity.
+
+## Train the component emulators
+
+Each downstream component initially receives both internal inputs. We use the
+same DGP architecture and fitting budget before and after pruning: two layers,
+two latent nodes, 40 iterations, ten ESS burn-in steps per iteration and five
+imputations. The burn-in count is explicit because development versions may
+use different defaults.
+
+```{r fit, purl=FALSE}
+features <- list(
+  u = c("x1", "x2", "x5", "x6", "x7", "x8", "x9", "x10"),
+  v = c("x5", "x6", "x7", "x8", "x11", "x12"),
+  a = c("x5", "x6", "x7", "x8", "x13", "x14", "x15", "x16", "u", "v"),
+  b = c("x5", "x6", "x7", "x8", "x13", "x14", "x15", "x16", "u", "v"),
+  c = c("x5", "x6", "x7", "x8", "x13", "x14", "x15", "x16", "u", "v")
+)
+components <- lapply(names(features), function(id) {
+  set_seed(57)
+  dgp(as.matrix(train[, features[[id]]]), as.matrix(train[, id, drop=FALSE]),
+      id=id, name="sexp", depth=2, node=2, N=40, B=5, ess_burn=10,
+      share=FALSE, bounds=c(0.1, 10), prior="ga", nugget_est=TRUE, verb=FALSE)
+})
+```
+
+## Construct the initial network
+
+`To_Input` identifies the receiving component's training column. An internal
+connection takes output 1 of `u` or `v`; a global connection takes the corresponding
+column of the supplied global input matrix.
+
+```{r link, purl=FALSE}
+connections <- do.call(rbind, lapply(names(features), function(id) {
+  f <- features[[id]]
+  internal <- f %in% c("u", "v")
+  data.frame(
+    From_Emulator=ifelse(internal, f, "Global"),
+    To_Emulator=id,
+    From_Output=ifelse(internal, 1L, match(f, global)),
+    To_Input=seq_along(f)
+  )
+}))
+network <- lgp(connections, components, B=5, verb=FALSE)
+```
+
+## Select internal connections
+
+The `refit` function states exactly how a reduced component is trained. Its
+`keep` argument refers to columns of the **original** training matrix; it never
+refers to an already reduced matrix. The component's response and ID are retained.
+
+```{r refit, purl=FALSE}
+refit <- function(model, keep, seed) {
+  dgpsi::set_seed(seed)
+  dgpsi::dgp(model$data$X[, keep, drop=FALSE], model$data$Y,
+      id=model$id, name="sexp", depth=2, node=2, N=40, B=5, ess_burn=10,
+      share=FALSE, bounds=c(0.1, 10), prior="ga", nugget_est=TRUE, verb=FALSE)
+}
+```
+
+Here the system objective is the equally weighted mean normalised RMSE of `a`,
+`b` and `c`. The normalising scales are computed from their component training
+responses. `u` and `v` still participate in linked prediction, but are not scored
+in this particular objective.
+
+```{r prune, purl=FALSE}
+selected <- prunlgp(
+  network, components,
+  x=as.matrix(validation[, global]),
+  y=lapply(validation[, c("a", "b", "c")], as.numeric),
+  refit=refit, seed=57, B=5, search="subsets",
+  max_rounds=2, max_evals=32, verb=FALSE
+)
+selected
+```
+
+At each visit, the function evaluates all internal-input subsets for the receiving
+output while holding other fitted components fixed. It then compares the
+**system** validation losses. The initial network and the network without
+internal inputs are also candidates. The best admissible evaluated network is
+returned. This extends output-specific subset selection with a system-level
+objective; it does not claim to solve the global combinatorial optimisation problem.
+
+```{r history, purl=FALSE}
+knitr::kable(selected$history[, c("evaluation", "stage", "loss", "internal_links",
+                                "admissible", "selected")], digits=4)
+```
+
+## Inspect the networks
+
+Both objects below are ordinary linked emulators. The initial model is activated
+with the same settings used during selection, providing a consistent reference
+for the subsequent comparison. Blue arrows show retained internal connections;
+orange dashed arrows show deleted connections in the initial graph. Grey arrows
+represent global inputs. Node positions are identical in both views.
+
+```{r network-before, purl=FALSE}
+network_view <- function(model, title) {
+  view <- summary(model)
+  view$height <- "440px"
+  view$x$height <- "360px"
+  view$x$main$text <- title
+  view$x$submain$text <- ""
+  view$x$footer$text <- ""
+  view$x$nodes$label <- ifelse(view$x$nodes$id == "Global", "Global",
+                              paste0(view$x$nodes$id, "\nDGP"))
+  view$x$nodes$shape <- ifelse(view$x$nodes$id == "Global", "database", "box")
+  view$x$nodes$color <- ifelse(view$x$nodes$id=="Global", "#67B7F7",
+    ifelse(view$x$nodes$id %in% c("u", "v"), "#F2767A", "#6DB66E"))
+  position <- data.frame(id=c("Global", "u", "v", "a", "b", "c"),
+                         x=c(0, 220, 220, 440, 440, 440),
+                         y=c(0, -100, 100, -140, 0, 140))
+  index <- match(view$x$nodes$id, position$id)
+  view$x$nodes$x <- position$x[index]
+  view$x$nodes$y <- position$y[index]
+  edge_key <- paste(view$x$edges$from, view$x$edges$to)
+  kept_key <- paste(selected$structure$From_Emulator, selected$structure$To_Emulator)
+  internal <- view$x$edges$from != "Global"
+  removed <- internal & !edge_key %in% kept_key
+  view$x$edges$color <- ifelse(!internal, "#BBBBBB",
+                              ifelse(removed, "#D55E00", "#0072B2"))
+  view$x$edges$dashes <- removed
+  view$x$edges$width <- ifelse(internal, 2, 1)
+  view <- visNetwork::visHierarchicalLayout(view, enabled=FALSE)
+  view <- visNetwork::visPhysics(view, enabled=FALSE)
+  view <- visNetwork::visNodes(view, font=list(color="black", size=16))
+  htmlwidgets::onRender(view, "function(el, x) {
+    document.getElementById('maindiv' + el.id).style.height = 'calc(100% - 80px)';
+  }")
+}
+network_view(selected$initial_model, "Before pruning: six internal connections")
+```
+
+```{r network-after, purl=FALSE}
+n_links <- sum(selected$structure$From_Emulator != "Global")
+network_view(selected, sprintf("After pruning: %d internal %s", n_links,
+  if(n_links == 1) "connection" else "connections"))
+```
+
+```{r retained, purl=FALSE}
+original_edges <- subset(selected$initial_structure, From_Emulator != "Global")
+retained_edges <- subset(selected$structure, From_Emulator != "Global")
+connection_summary <- do.call(rbind, lapply(c("a", "b", "c"), function(id) {
+  original <- original_edges$From_Emulator[original_edges$To_Emulator == id]
+  retained <- retained_edges$From_Emulator[retained_edges$To_Emulator == id]
+  removed <- setdiff(original, retained)
+  data.frame(output=id, initial=length(original), retained=length(retained),
+    removed=length(removed),
+    retained_inputs=if(length(retained)) paste(retained, collapse=", ") else "None",
+    removed_inputs=if(length(removed)) paste(removed, collapse=", ") else "None")
+}))
+knitr::kable(connection_summary, row.names=FALSE)
+```
+
+Pruning removes an input column and its connection. It does not remove the output
+model or automatically disconnect other receivers. A model with no internal
+inputs continues to use its global inputs and may still supply downstream models.
+
+## Evaluate held-out predictions
+
+Test responses are evaluated after structure selection. Neither the structure
+search nor the component fitting uses them. The sample is an illustrative
+benchmark, rather than a new prospective evaluation.
+
+```{r test, purl=FALSE}
+set_seed(57)
+before <- predict(selected$initial_model, as.matrix(test[, global]),
+                  full_layer=TRUE)$results
+set_seed(57)
+after <- predict(selected, as.matrix(test[, global]), full_layer=TRUE)$results
+means <- function(p) do.call(c, unname(p$mean))
+scores <- do.call(rbind, lapply(c("a", "b", "c"), function(id) {
+  data.frame(output=id,
+    validation_unpruned=selected$initial_rmse[id],
+    validation_pruned=selected$rmse[id],
+    test_unpruned=sqrt(mean((as.numeric(means(before)[[id]])-test[[id]])^2)),
+    test_pruned=sqrt(mean((as.numeric(means(after)[[id]])-test[[id]])^2)))
+}))
+scores$validation_reduction_pct <- 100*(1-scores$validation_pruned/scores$validation_unpruned)
+scores$test_reduction_pct <- 100*(1-scores$test_pruned/scores$test_unpruned)
+score_table <- do.call(rbind, lapply(c("validation", "test"), function(part) {
+  data.frame(Partition=part, Output=scores$output,
+    Unpruned=scores[[paste0(part, "_unpruned")]],
+    Pruned=scores[[paste0(part, "_pruned")]],
+    Reduction=scores[[paste0(part, "_reduction_pct")]])
+}))
+knitr::kable(score_table, digits=c(0, 0, 4, 4, 2), row.names=FALSE,
+             col.names=c("Partition", "Output", "Unpruned", "Pruned", "Reduction (%)"))
+system_test <- c(Unpruned=mean(scores$test_unpruned / selected$settings$scale),
+                 Pruned=mean(scores$test_pruned / selected$settings$scale))
+knitr::kable(data.frame(model=names(system_test), mean_NRMSE=system_test),
+             digits=4, row.names=FALSE)
+```
+
+```{r error-plot, fig.cap="Validation and test errors of the three scored outputs. Lower values are better.", purl=FALSE}
+plot_data <- do.call(rbind, lapply(c("validation", "test"), function(part) {
+  rbind(data.frame(output=scores$output, partition=part, model="Unpruned",
+                   RMSE=scores[[paste0(part, "_unpruned")]]),
+        data.frame(output=scores$output, partition=part, model="Pruned",
+                   RMSE=scores[[paste0(part, "_pruned")]]))
+}))
+plot_data$partition <- factor(plot_data$partition, levels=c("validation", "test"))
+plot_data$model <- factor(plot_data$model, levels=c("Unpruned", "Pruned"))
+ggplot(plot_data, aes(output, RMSE, fill=model)) +
+  geom_col(position=position_dodge(0.7), width=0.6) +
+  geom_text(aes(label=sprintf("%.3f", RMSE)), position=position_dodge(0.7),
+            vjust=-0.35, size=3) +
+  scale_y_continuous(expand=expansion(mult=c(0, .14))) +
+  facet_wrap(~partition) +
+  scale_fill_manual(values=c(Unpruned="#999999", Pruned="#0072B2")) +
+  labs(x="Output", y="RMSE (standardised response)", fill=NULL) +
+  theme_bw(base_size=11) + theme(legend.position="top", panel.grid.minor=element_blank())
+```
+
+```{r comparison-text, echo=FALSE, results='asis', purl=FALSE}
+cat(sprintf("The selected network reduces the validation objective by %.1f%% while retaining %d of the six internal links. Its mean test NRMSE is %.4f, compared with %.4f before pruning.\n\n",
+  100*(1-selected$score/selected$initial_score),
+  sum(selected$structure$From_Emulator!="Global"),
+  system_test["Pruned"],system_test["Unpruned"]))
+```
+
+The validation objective determines the selected graph. A smaller validation
+loss does not imply that every output, or the held-out test period, will improve.
+The tables report both partitions so that this distinction remains visible.
+Setting `protect=0` imposes a different search by rejecting candidates
+whose scored validation outputs exceed their initial RMSEs.
+
+The connection table and error plot answer different questions: which inputs
+were removed, and how the resulting predictions changed. Different receivers
+can retain different subsets of the same upstream outputs. An unchanged subset
+can also yield unchanged predictions when its ancestors and fitted model remain
+unchanged. Use explicit output protection when the application requires it.
+
+## Check predictive intervals
+
+Pruning leaves native uncertainty propagation in place. The following table
+reports 95% moment-matched interval coverage, width and interval score on the
+same test rows. Coverage should be assessed against 95%; width and interval
+score are better when smaller at adequate coverage. These diagnostics are
+reported after selection and do not enter the RMSE objective.
+
+```{r intervals, purl=FALSE}
+interval_summary <- function(p, label) {
+  mu <- means(p); variance <- do.call(c, unname(p$var))
+  do.call(rbind, lapply(c("a", "b", "c"), function(id) {
+    lo <- as.numeric(mu[[id]]) - qnorm(.975)*sqrt(as.numeric(variance[[id]]))
+    hi <- as.numeric(mu[[id]]) + qnorm(.975)*sqrt(as.numeric(variance[[id]]))
+    truth <- test[[id]]; s <- selected$settings$scale[id]
+    data.frame(model=label, output=id, coverage=mean(truth>=lo & truth<=hi),
+      normalised_width=mean(hi-lo)/s,
+      normalised_IS95=mean(hi-lo+40*pmax(lo-truth,0)+40*pmax(truth-hi,0))/s)
+  }))
+}
+knitr::kable(rbind(interval_summary(before,"Unpruned"),
+                  interval_summary(after,"Pruned")), digits=3, row.names=FALSE)
+```
+
+## Change the selection rule
+
+Give a more important output a larger weight, or require every scored output to
+stay within 1% of its initial validation RMSE. These are modelling choices to
+make before examining test results.
+
+```{r alternatives, eval=FALSE, purl=FALSE}
+protected <- prunlgp(network, components,
+  as.matrix(validation[, global]), lapply(validation[, c("a", "b", "c")], as.numeric),
+  refit, weights=c(a=1, b=1, c=2), protect=0.01, seed=57)
+
+# For more candidate inputs, backward deletion reduces the search cost.
+backward <- prunlgp(network, components,
+  as.matrix(validation[, global]), lapply(validation[, c("a", "b", "c")], as.numeric),
+  refit, search="backward", max_evals=100, seed=57)
+```
+
+Independent candidates can run on separate PSOCK workers. Keep the worker count
+times the thread count within the available CPU budget. If a non-default Python
+environment is used, supply the corresponding initialiser through `worker_init`.
+
+```{r parallel, eval=FALSE, purl=FALSE}
+parallel_result <- prunlgp(network, components,
+  as.matrix(validation[, global]), lapply(validation[, c("a", "b", "c")], as.numeric),
+  refit, seed=57, workers=2, threads=1,
+  worker_init=function() dgpsi::init_py(verb=FALSE))
+```
+
+For a time-expanded network, use `groups` to tie copies of the same fitted scalar
+component. A removed dimension then disappears from every copy, including an
+origin copy supplied by a measurement. Copies must have identical training data
+and consistent original input positions. The caller is responsible for supplying
+only global inputs available at the forecast origin or prescribed as known
+boundaries; the function cannot infer measurement availability from numeric matrices.
+
+The returned `$model` supports the usual linked prediction and plotting methods.
+Use `dgpsi::serialize(selected$model, light=FALSE)` to save its Python-backed
+state, and save `$history` and `$settings` alongside it for an audit of selection.
+
+To execute all computations when rebuilding this article, set
+`DGPSI_RUN_PRUNLGP_VIGNETTE=true` before calling `rmarkdown::render()`.
+An optional `DGPSI_TUTORIAL_BACKEND` value is forwarded to `init_py(dgpsi_ver=...)`.
+The default package build shows the code without starting or installing Python.

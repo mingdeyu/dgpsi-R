@@ -282,6 +282,10 @@ deserialize <- function(object) {
         class(res) <- "dgp"
       }
     } else if (label == "lgp"){
+      # Reticulate converts data frames to dictionaries when pandas is absent.
+      # Restore the R metadata for both full and light serialisations.
+      res$specs$metadata <- as.data.frame(res$specs$metadata)
+      res$specs$struc <- as.data.frame(res$specs$struc)
       if ('emulator_obj' %in% names(res)){
         if (!'id' %in% names(res)) res[['id']] <- uuid::UUIDgenerate()
         class(res) <- "lgp"

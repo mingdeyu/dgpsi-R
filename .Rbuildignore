@@ -22,3 +22,9 @@
 ^LICENSE\.md$
 ^test$
 ^class_data$
+
+^PRUNLGP\.md$
+^VALIDATION\.md$
+^tools$
+^tutorial-output$
+^site$
