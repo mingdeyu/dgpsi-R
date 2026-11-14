@@ -252,6 +252,24 @@
 #' @name design
 #' @export
 design <- function(object, N, x_cand, y_cand, n_sample, limits, f, reps, freq, x_test, y_test, reset, target, method, batch_size, eval, verb, autosave, new_wave, validation_M, ...){
+  matched_call <- as.list(match.call(expand.dots = TRUE))
+
+  if ("M_val" %in% names(matched_call)) {
+    lifecycle::deprecate_warn(
+      when = "2.6.0.9000",
+      what = "design(M_val)",
+      with = "design(validation_M)"
+    )
+
+    if (missing(validation_M)) {
+      matched_call["validation_M"] <- matched_call["M_val"]
+    }
+
+    matched_call["M_val"] <- NULL
+
+    return(base::eval(as.call(matched_call), parent.frame()))
+  }
+
   UseMethod("design")
 }
 
