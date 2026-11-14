@@ -685,7 +685,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
     }
     if ( isTRUE(verb) ) {
       message(" done")
-      Sys.sleep(0.5)
+      Sys.sleep(0.1)
     }
 
 
@@ -695,7 +695,7 @@ dgp <- function(X, Y, depth = 2, node = ncol(X), name = 'sexp', lengthscale = 1.
 
   if ( isTRUE(verb) ) {
     message(" done")
-    Sys.sleep(0.5)
+    Sys.sleep(0.1)
   }
 
   if ( training ) {

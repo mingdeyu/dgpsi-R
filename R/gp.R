@@ -184,7 +184,7 @@ gp <- function(X, Y, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NU
 
   if ( verb ) {
     message(" done")
-    Sys.sleep(0.5)
+    Sys.sleep(0.1)
   }
 
 
@@ -193,13 +193,13 @@ gp <- function(X, Y, name = 'sexp', lengthscale = rep(0.1, ncol(X)), bounds = NU
   obj <- pkg.env$dgpsi$gp(X, Y, struc, check_rep, vecchia, M, ord_wrapper)
 
   if ( verb ) {
-    Sys.sleep(0.5)
+    Sys.sleep(0.1)
     message(" done")
   }
 
   if ( training ) {
     if ( verb ){
-      Sys.sleep(0.5)
+      Sys.sleep(0.1)
       message("Training the GP emulator ...", appendLF = FALSE)
     }
     obj$train()

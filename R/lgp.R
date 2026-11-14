@@ -142,7 +142,7 @@ lgp <- function(struc, emulators, B = 10, activate = TRUE, verb = TRUE, id = NUL
     lgp_struc <- process_emulators(emulators, metadata)
     metadata <- update_metadata(metadata, emulators)
     if ( verb ) {
-      Sys.sleep(0.5)
+      Sys.sleep(0.1)
       message(" done")
     }
 

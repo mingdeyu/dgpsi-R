@@ -47,6 +47,8 @@ configuration when \code{verb = TRUE}. Defaults to \code{FALSE}.}
 No return value, called to install required 'python' environment.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function initializes the 'python' environment for the package.
 }
 \details{

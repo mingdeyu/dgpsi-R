@@ -4,11 +4,11 @@
 \name{dgpsi-package}
 \alias{dgpsi}
 \alias{dgpsi-package}
-\title{dgpsi: Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations}
+\title{dgpsi: Computer Model Emulation Using Gaussian Process Networks}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Interface to the 'python' package 'dgpsi' for Gaussian process, deep Gaussian process, and linked deep Gaussian process emulations of computer models and networks using stochastic imputation (SI). The implementations follow Ming & Guillas (2021) \doi{10.1137/20M1323771} and Ming, Williamson, & Guillas (2023) \doi{10.1080/00401706.2022.2124311} and Ming & Williamson (2023) \doi{10.48550/arXiv.2306.01212} and Ming & Williamson (2026) \doi{10.48550/arXiv.2603.24538}. To get started with the package, see \url{https://mingdeyu.github.io/dgpsi-R/}.
+Provides tools for scalable computer model emulation using Gaussian process networks. The implementations follow Ming & Guillas (2021) \doi{10.1137/20M1323771} for linked Gaussian processes, Ming, Williamson, & Guillas (2023) \doi{10.1080/00401706.2022.2124311} for deep Gaussian processes, Ming & Williamson (2023) \doi{10.48550/arXiv.2306.01212} for linked deep Gaussian processes, and Ming & Williamson (2026) \doi{10.1016/j.csda.2026.108485} for generalized deep Gaussian processes. To get started with the package, see \url{https://mingdeyu.github.io/dgpsi-R/}.
 }
 \seealso{
 Useful links:
@@ -24,6 +24,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Deyu Ming \email{deyu.ming.16@ucl.ac.uk} [copyright holder]
   \item Daniel Williamson \email{d.williamson@exeter.ac.uk}
 }
 

@@ -258,7 +258,7 @@ This argument is relevant only if waves already exist in the emulator. Creating 
 to \code{\link[=design]{design()}} via \code{\link[=draw]{draw()}}, and allows for specifying a different evaluation frequency in \code{freq}. However, disabling this option can help limit the number of waves visualized
 in \code{\link[=draw]{draw()}} to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to \code{TRUE}.}
 
-\item{validation_M}{an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
+\item{validation_M}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#new}{\figure{lifecycle-new.svg}{options: alt='[New]'}}}{\strong{[New]}} an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator \code{object}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{...}{Any arguments with names that differ from those used in \code{\link[=design]{design()}} but are required by \code{f}, \code{method}, or \code{eval} can be passed here.
@@ -340,6 +340,8 @@ avoid re-visiting the same locations in later runs of \code{design()}.
 See \emph{Note} section below for further information.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function implements sequential design and active learning for a (D)GP emulator or
 a bundle of (D)GP emulators, supporting an array of popular methods as well as user-specified approaches.
 It can also be used as a wrapper for Bayesian optimization methods.

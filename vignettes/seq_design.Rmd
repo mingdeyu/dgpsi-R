@@ -70,13 +70,13 @@ We can see from the figure above that the synthetic simulator exhibits more fluc
 We now specify a seed with `set_seed()` for reproducibility
 
 ```{r}
-set_seed(999)
+set_seed(9999)
 ```
 
-and generate an initial design with 5 design points using the maximin Latin hypercube sampler:
+and generate an initial design with 10 design points using the maximin Latin hypercube sampler:
 
 ```{r}
-X <- maximinLHS(5,2)
+X <- maximinLHS(10,2)
 Y <- f(X)
 ```
 
@@ -99,7 +99,7 @@ m <- dgp(X, Y)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 353.90it/s]
+## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 415.05it/s]
 ## Imputing ... done
 ```
 
@@ -116,39 +116,39 @@ The limits of the input parameters are defined as a matrix with each row giving 
 For illustrative purpose, we implement two waves of sequential design on `m`:
 
 ```{r}
-# 1st wave with 25 steps
-m <- design(m, N = 25, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+# 1st wave with 20 steps
+m <- design(m, N = 20, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 
 ```
 ## Initializing ... done
-##  * RMSE: 0.487293
+##  * RMSE: 0.388518
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.620583 1.000000
+##  * Next design point: 1.000000 1.000000
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.388907
+##  * RMSE: 0.380539
 ## 
 ## ...
 ## 
-## Iteration 18:
+## Iteration 13:
 ##  - Locating ... done
-##  * Next design point: 0.198164 0.195029
+##  * Next design point: 0.012846 0.060399
 ##  - Updating and re-fitting ... done
 ##  - Pruning 1 node(s) in layer 1 ... done
 ##  - Re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.052264
+##  * RMSE: 0.076901
 ## 
 ## ...
 ## 
-## Iteration 25:
+## Iteration 20:
 ##  - Locating ... done
-##  * Next design point: 0.248474 0.034358
+##  * Next design point: 0.325434 0.010143
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.016924
+##  * RMSE: 0.034671
 ```
 
 After the first wave we see that 1 GP node is removed from the first layer by automatic pruning of the DGP which leaves only one node in both the first and second layer of the DGP hierarchy respectively. This helps accelerate the inference of the DGP emulator in subsequent waves of the sequential design while maintaining accuracy. We now start the second wave of the sequential design:
@@ -159,22 +159,22 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ```
 ## Initializing ... done
-##  * RMSE: 0.016924
+##  * RMSE: 0.034671
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point: 0.092643 0.352432
+##  * Next design point: 0.150835 0.850534
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.013484
+##  * RMSE: 0.018740
 ##   
 ##  ...
 ##  
 ## Iteration 10:
 ##  - Locating ... done
-##  * Next design point: 0.901510 0.989878
+##  * Next design point: 0.056978 0.110908
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.007114
+##  * RMSE: 0.006311
 ```
 Finally, we resume the second wave with 10 additional iterations:
 
@@ -186,19 +186,19 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 ## Iteration 11:
 ##  - Locating ... done
-##  * Next design point: 0.016562 0.966263
+##  * Next design point: 0.090776 0.210772
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.005308
+##  * RMSE: 0.014517
 ##  
 ##  ...
 ##  
 ## Iteration 20:
 ##  - Locating ... done
-##  * Next design point: 0.982806 0.438261
+##  * Next design point: 0.051133 0.060526
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  * RMSE: 0.002383
+##  * RMSE: 0.002727
 ```
 
 Resuming rather than adding an additional wave can be a useful feature, particularly for plotting using `draw()`. After the sequential design is done, we can inspect the enriched design by applying `draw()` to `m`:

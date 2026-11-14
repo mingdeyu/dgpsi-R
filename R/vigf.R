@@ -1,6 +1,10 @@
 #' @title Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using VIGF
 #'
-#' @description This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 #'     or a bundle of (D)GP emulators using the Variance of Improvement for Global Fit (VIGF). For VIGF on GP emulators, see the reference below.
 #'
 #' @param object can be one of the following:

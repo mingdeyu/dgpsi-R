@@ -1,6 +1,10 @@
 #' @title Locate the next design point(s) for a (D)GP emulator or a bundle of (D)GP emulators using Active Learning MacKay (ALM)
 #'
-#' @description This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 #'     or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 #'
 #' @param object can be one of the following:

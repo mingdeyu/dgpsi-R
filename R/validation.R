@@ -24,7 +24,7 @@
 #'     in the final layer.
 #'
 #' `y_test` must be provided if `object` is an instance of the `lgp`. `y_test` must also be provided if `x_test` is provided. Defaults to `NULL`, in which case LOO validation is performed.
-#' @param method `r new_badge("updated")` the prediction approach to use for validation: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). For details see [predict()].
+#' @param method the prediction approach to use for validation: either the mean-variance approach (`"mean_var"`) or the sampling approach (`"sampling"`). For details see [predict()].
 #'      Defaults to `"mean_var"`.
 #' @param sample_size the number of samples to draw for each given imputation if `method = "sampling"`. Defaults to `50`.
 #' @param verb a bool indicating if trace information for validation should be printed during function execution.
@@ -142,21 +142,21 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
     if ( isFALSE(force) ){
       if ( "loo" %in% names(object) ){
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( isTRUE(verb) ) message(" LOO results found in the gp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( (method == 'mean_var')&("mean" %in% names(object$loo)) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
-          if ( isTRUE(verb) ) Sys.sleep(0.5)
+          if ( isTRUE(verb) ) Sys.sleep(0.1)
           if ( isTRUE(verb) ) message(" done")
           return(object)
         } else if ( (method == 'sampling')&("median" %in% names(object$loo)) & (M == object$loo$M) ){
           if (sample_size == object$loo$sample_size){
             if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
-            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) Sys.sleep(0.1)
             if ( isTRUE(verb) ) message(" done")
             return(object)
           } else {
@@ -174,7 +174,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
     x_train <- object$data$X
     y_train <- object$data$Y
     dat <- list('x_train' = x_train, 'y_train' = y_train)
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
@@ -204,7 +204,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
       dat[["sample_size"]] <- sample_size
     }
     object$loo <- dat
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     return(object)
@@ -230,21 +230,21 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
     if ( isFALSE(force) ){
       if ( "oos" %in% names(object) ){
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( isTRUE(verb) ) message(" OOS results found in the gp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
-          if ( isTRUE(verb) ) Sys.sleep(0.5)
+          if ( isTRUE(verb) ) Sys.sleep(0.1)
           if ( isTRUE(verb) ) message(" done")
           return(object)
         } else if ( ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&("median" %in% names(object$oos)) & (M == object$oos$M) ) ){
           if ( sample_size == object$oos$sample_size ){
             if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting gp object without re-evaluation ...", appendLF = FALSE)
-            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) Sys.sleep(0.1)
             if ( isTRUE(verb) ) message(" done")
             return(object)
           } else {
@@ -260,7 +260,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
 
     if ( isTRUE(verb) ) message("Initializing the OOS ...", appendLF = FALSE)
     dat <- list('x_test' = x_test,'y_test' = y_test)
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the OOS ...", appendLF = FALSE)
@@ -295,7 +295,7 @@ validate.gp <- function(object, x_test = NULL, y_test = NULL, method = "mean_var
       dat[["sample_size"]] <- sample_size
     }
     object$oos <- dat
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     return(object)
@@ -337,15 +337,15 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     if ( isFALSE(force) ){
       if ( "loo" %in% names(object) ){
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( isTRUE(verb) ) message(" LOO results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( (method == 'mean_var')&(("mean" %in% names(object$loo)) ||
                                      ("method" %in% names(object$loo) && object$loo$method == "mean_var")) & (M == object$loo$M) ){
           if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
-          if ( isTRUE(verb) ) Sys.sleep(0.5)
+          if ( isTRUE(verb) ) Sys.sleep(0.1)
           if ( isTRUE(verb) ) message(" done")
           return(object)
         } else if ( (method == 'sampling') & (("median" %in% names(object$loo)) ||
@@ -353,7 +353,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
           if ( sample_size == object$loo$sample_size ) {
             if ( isTRUE(verb) ) message(" LOO re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
-            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) Sys.sleep(0.1)
             if ( isTRUE(verb) ) message(" done")
             return(object)
           } else {
@@ -376,7 +376,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
       x_train <- x_train[rep,,drop=FALSE]
     }
     dat <- list('x_train' = x_train,'y_train' = y_train)
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the LOO ...", appendLF = FALSE)
@@ -446,7 +446,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
       dat[["sample_size"]] <- sample_size
     }
     object$loo <- dat
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     return(object)
@@ -478,15 +478,15 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     if ( isFALSE(force) ){
       if ( "oos" %in% names(object) ){
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( isTRUE(verb) ) message(" OOS results found in the dgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&(("mean" %in% names(object$oos)) ||
                                                                                                                    ("method" %in% names(object$oos) && object$oos$method == "mean_var")) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
-          if ( isTRUE(verb) ) Sys.sleep(0.5)
+          if ( isTRUE(verb) ) Sys.sleep(0.1)
           if ( isTRUE(verb) ) message(" done")
           return(object)
         } else if ( identical(object$oos$x_test, x_test) & identical(object$oos$y_test, y_test) & (method == 'sampling')&(("median" %in% names(object$oos))||
@@ -494,7 +494,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
           if ( sample_size == object$oos$sample_size ){
             if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting dgp object without re-evaluation ...", appendLF = FALSE)
-            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) Sys.sleep(0.1)
             if ( isTRUE(verb) ) message(" done")
             return(object)
           } else {
@@ -510,7 +510,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
 
     if ( isTRUE(verb) ) message("Initializing the OOS ...", appendLF = FALSE)
     dat <- list('x_test' = x_test,'y_test' = y_test)
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the OOS ...", appendLF = FALSE)
@@ -588,7 +588,7 @@ validate.dgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
       dat[["sample_size"]] <- sample_size
     }
     object$oos <- dat
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     return(object)
@@ -713,21 +713,21 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     if ( isFALSE(force) ){
       if ( "oos" %in% names(object) ){
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( isTRUE(verb) ) message(" OOS results found in the lgp object.")
         if ( isTRUE(verb) ) message("Checking ...", appendLF = FALSE)
-        if ( isTRUE(verb) ) Sys.sleep(0.5)
+        if ( isTRUE(verb) ) Sys.sleep(0.1)
         if ( identical(object$oos$x_test, x_test[[1]]) & identical(object$oos$y_test, y_test) & (method == 'mean_var')&("mean" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
           if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
-          if ( isTRUE(verb) ) Sys.sleep(0.5)
+          if ( isTRUE(verb) ) Sys.sleep(0.1)
           if ( isTRUE(verb) ) message(" done")
           return(object)
         } else if ( identical(object$oos$x_test, x_test[[1]]) & identical(object$oos$y_test, y_test) & (method == 'sampling')&("median" %in% names(object$oos)) & (M == object$oos$M) ){
           if ( sample_size == object$oos$sample_size ) {
             if ( isTRUE(verb) ) message(" OOS re-evaluation not needed.")
             if ( isTRUE(verb) ) message("Exporting lgp object without re-evaluation ...", appendLF = FALSE)
-            if ( isTRUE(verb) ) Sys.sleep(0.5)
+            if ( isTRUE(verb) ) Sys.sleep(0.1)
             if ( isTRUE(verb) ) message(" done")
             return(object)
           } else {
@@ -744,7 +744,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
     if ( isTRUE(verb) ) message("Initializing the OOS ...", appendLF = FALSE)
       dat <- list('x_test' = x_test[[1]],'y_test' = y_test)
     if ( !is.list(y_test) ) y_test <- list(y_test)
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Calculating the OOS ...", appendLF = FALSE)
@@ -804,7 +804,7 @@ validate.lgp <- function(object, x_test = NULL, y_test = NULL, method = "mean_va
       dat[["sample_size"]] <- sample_size
     }
     object$oos <- dat
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     return(object)

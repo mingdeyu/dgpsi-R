@@ -79,7 +79,7 @@ in the final layer.
 
 \code{y_test} must be provided if \code{object} is an instance of the \code{lgp}. \code{y_test} must also be provided if \code{x_test} is provided. Defaults to \code{NULL}, in which case LOO validation is performed.}
 
-\item{method}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}} the prediction approach to use for validation: either the mean-variance approach (\code{"mean_var"}) or the sampling approach (\code{"sampling"}). For details see \code{\link[=predict]{predict()}}.
+\item{method}{the prediction approach to use for validation: either the mean-variance approach (\code{"mean_var"}) or the sampling approach (\code{"sampling"}). For details see \code{\link[=predict]{predict()}}.
 Defaults to \code{"mean_var"}.}
 
 \item{sample_size}{the number of samples to draw for each given imputation if \code{method = "sampling"}. Defaults to \code{50}.}

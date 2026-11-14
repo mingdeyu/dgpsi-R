@@ -60,6 +60,7 @@ reference:
   - predict
   - validate
   - plot
+  - summary
   - prune
 
 - title: "Sequential Design"
@@ -77,7 +78,6 @@ reference:
 
 - title: "Helpers"
   contents:
-  - summary
   - write
   - read
   - set_seed

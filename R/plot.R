@@ -176,7 +176,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
         }
       }
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
@@ -242,7 +242,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
           patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
       }
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
     p_patch
     # For OOS
@@ -408,7 +408,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
         }
       }
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
@@ -475,7 +475,7 @@ plot.dgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
       }
     }
 
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
     p_patch
   }
@@ -686,7 +686,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
       }
     }
   }
-  if ( isTRUE(verb) ) Sys.sleep(0.5)
+  if ( isTRUE(verb) ) Sys.sleep(0.1)
   if ( isTRUE(verb) ) message(" done")
 
   if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
@@ -743,7 +743,7 @@ plot.lgp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean
       patchwork::plot_layout(guides = 'collect') +
       patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
   }
-  if ( isTRUE(verb) ) Sys.sleep(0.5)
+  if ( isTRUE(verb) ) Sys.sleep(0.1)
   if ( isTRUE(verb) ) message(" done")
   p_patch
 }
@@ -829,7 +829,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
@@ -878,7 +878,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
         patchwork::plot_layout(guides = 'collect') +
         patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
     p_patch
     # For OOS
@@ -983,7 +983,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
           ggplot2::theme(plot.title = ggplot2::element_text(size=10))
       }
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
 
     if ( isTRUE(verb) ) message("Plotting ...", appendLF = FALSE)
@@ -1032,7 +1032,7 @@ plot.gp <- function(x, x_test = NULL, y_test = NULL, dim = NULL, method = "mean_
         patchwork::plot_layout(guides = 'collect') +
         patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "bottom"))
     }
-    if ( isTRUE(verb) ) Sys.sleep(0.5)
+    if ( isTRUE(verb) ) Sys.sleep(0.1)
     if ( isTRUE(verb) ) message(" done")
     p_patch
   }

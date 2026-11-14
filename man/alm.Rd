@@ -141,6 +141,8 @@ element of the list is a matrix with \code{batch_size} rows, where each row repr
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function searches from a candidate set to locate the next design point(s) to be added to a (D)GP emulator
 or a bundle of (D)GP emulators using the Active Learning MacKay (ALM) criterion (see the reference below).
 }

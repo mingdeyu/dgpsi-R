@@ -109,7 +109,7 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
 
   constructor_obj_cp$update_xy(X, Y, reset)
   if ( verb ) {
-    Sys.sleep(0.2)
+    Sys.sleep(0.1)
     message(" done")
   }
 
@@ -197,7 +197,7 @@ update.gp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ..
   }
   constructor_obj_cp$update_xy(X, Y, reset)
   if ( verb ) {
-    Sys.sleep(0.5)
+    Sys.sleep(0.1)
     message(" done")
   }
 

@@ -1,6 +1,10 @@
 #' @title Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
 #'
-#' @description This function implements sequential design and active learning for a (D)GP emulator or
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function implements sequential design and active learning for a (D)GP emulator or
 #'     a bundle of (D)GP emulators, supporting an array of popular methods as well as user-specified approaches.
 #'     It can also be used as a wrapper for Bayesian optimization methods.
 #'
@@ -105,7 +109,7 @@
 #'     This argument is relevant only if waves already exist in the emulator. Creating new waves can improve the visualization of sequential design performance across different calls
 #'     to [design()] via [draw()], and allows for specifying a different evaluation frequency in `freq`. However, disabling this option can help limit the number of waves visualized
 #'     in [draw()] to avoid issues such as running out of distinct colors for large numbers of waves. Defaults to `TRUE`.
-#' @param validation_M an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
+#' @param validation_M `r new_badge("new")` an integer that gives the size of the conditioning set for the Vecchia approximation in emulator validations. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param train_N the number of training iterations to be used for re-fitting the DGP emulator at each step of the sequential design:
 #' - If `train_N` is an integer, the DGP emulator will be re-fitted at each step (based on the re-fit frequency specified in `freq[1]`) using `train_N` iterations.
@@ -602,7 +606,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = FALSE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-          if ( verb ) Sys.sleep(0.5)
+          if ( verb ) Sys.sleep(0.1)
           if ( verb ) message(" done")
         }
 
@@ -806,7 +810,7 @@ design.gp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, l
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = FALSE, reset = reset[i-start_point], verb = FALSE, update_in_design = NULL)
-          if ( verb ) Sys.sleep(0.5)
+          if ( verb ) Sys.sleep(0.1)
           if ( verb ) message(" done")
         }
 
@@ -1298,7 +1302,7 @@ design.dgp <- function(object, N, x_cand = NULL, y_cand = NULL, n_sample = 200, 
         } else {
           if ( verb ) message(" - Updating ...", appendLF = FALSE)
           object <- update(object, X, Y, refit = FALSE, reset = reset[i-start_point], verb = FALSE, B = ifelse(length(object$emulator_obj$all_layer_set)<10, length(object$emulator_obj$all_layer_set), 10), update_in_design = NULL)
-          if ( verb ) Sys.sleep(0.5)
+          if ( verb ) Sys.sleep(0.1)
           if ( verb ) message(" done")
         }
 

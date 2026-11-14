@@ -12,7 +12,11 @@ pkg.env$dill <- NULL
 
 #' @title 'python' environment initialization
 #'
-#' @description This function initializes the 'python' environment for the package.
+#' @description
+#'
+#' `r new_badge("updated")`
+#'
+#' This function initializes the 'python' environment for the package.
 #'
 #' @param py_ver a string that gives the 'python' version to be installed. Supported versions are 3.10, 3.11, and 3.12.
 #'    If `py_ver = NULL`, the default 'python' version '3.10' will be installed.
@@ -198,7 +202,7 @@ init_py <- function(py_ver = NULL, dgpsi_ver = 'dev', conda = NULL, reinstall = 
     assign('base64', reticulate::import("base64"), pkg.env)
     pkg.env$thread_num <- pkg.env$dgpsi$get_thread()
     if ( verb ) message(" done")
-    Sys.sleep(0.5)
+    Sys.sleep(0.1)
     if ( verb ) {
       message("The Python environment for 'dgpsi' is successfully loaded.")
       if (show_config) {
