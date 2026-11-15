@@ -1,5 +1,7 @@
 # Locate the next design point for a (D)GP emulator or a bundle of (D)GP emulators using VIGF
 
+**\[updated\]**
+
 This function searches from a candidate set to locate the next design
 point(s) to be added to a (D)GP emulator or a bundle of (D)GP emulators
 using the Variance of Improvement for Global Fit (VIGF). For VIGF on GP
@@ -14,12 +16,13 @@ vigf(object, ...)
 vigf(
   object,
   x_cand = NULL,
-  n_start = 10,
+  n_start = 5,
   batch_size = 1,
   M = 50,
-  workers = 1,
   limits = NULL,
   int = FALSE,
+  n_screen = 100 * ncol(object$data$X),
+  opt_control = list(),
   ...
 )
 
@@ -27,13 +30,14 @@ vigf(
 vigf(
   object,
   x_cand = NULL,
-  n_start = 10,
+  n_start = 5,
   batch_size = 1,
   M = 50,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
+  n_screen = 100 * ncol(object$data$X),
+  opt_control = list(),
   ...
 )
 
@@ -41,13 +45,14 @@ vigf(
 vigf(
   object,
   x_cand = NULL,
-  n_start = 10,
+  n_start = 5,
   batch_size = 1,
   M = 50,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
+  n_screen = 100 * ncol(object$data$X[[1L]]),
+  opt_control = list(),
   ...
 )
 ```
@@ -81,9 +86,8 @@ vigf(
 
 - n_start:
 
-  an integer that gives the number of initial design points to be used
-  to determine next design point(s). This argument is only used when
-  `x_cand` is `NULL`. Defaults to `10`.
+  the maximum number of local refinement starts to determine next design
+  point(s) when `x_cand = NULL`. Defaults to `5`.
 
 - batch_size:
 
@@ -96,15 +100,6 @@ vigf(
   criterion calculation. This argument is only used if the emulator
   `object` was constructed under the Vecchia approximation. Defaults to
   `50`.
-
-- workers:
-
-  the number of processes to be used for design point selection. If set
-  to `NULL`, the number of processes is set to
-  `max physical cores available %/% 2`. Defaults to `1`. The argument
-  does not currently support Windows machines when the `aggregate`
-  function is provided, due to the significant overhead caused by
-  initializing the Python environment for each worker under spawning.
 
 - limits:
 
@@ -124,6 +119,21 @@ vigf(
   equal to the input dimensions and will be applied to individual input
   dimensions. This argument is only used when `x_cand = NULL`. Defaults
   to `FALSE`.
+
+- n_screen:
+
+  the number of points generated for screening when `x_cand = NULL`.
+  Defaults to `100` times the number of input dimensions. Must be an
+  integer at least `n_start`.
+
+- opt_control:
+
+  a named list controlling local refinement when `x_cand = NULL`.
+  Supported entries are `maxit` (default `100`), `ftol` (nonnegative
+  function tolerance, default `1e7 * .Machine$double.eps`), `gtol`
+  (nonnegative projected-gradient tolerance, default `0`), and `step`
+  (positive scalar numerical derivative step in normalized coordinates,
+  default `NULL` for the solver's native step).
 
 - aggregate:
 

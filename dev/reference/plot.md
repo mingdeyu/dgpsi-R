@@ -22,7 +22,6 @@ plot(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -41,7 +40,6 @@ plot(
   M = 50,
   verb = TRUE,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -60,7 +58,6 @@ plot(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 ```
@@ -172,11 +169,6 @@ plot(
   [`validate()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/validate.md).
 
 - force:
-
-  same as that of
-  [`validate()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/validate.md).
-
-- cores:
 
   same as that of
   [`validate()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/validate.md).

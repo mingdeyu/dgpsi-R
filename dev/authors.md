@@ -51,12 +51,22 @@ emulation for model networks, arXiv:2306.01212.
       year = {2023},
     }
 
-Ming, D. and Williamson, D. (2025) dgpsi: An R package powered by Python
-for modelling linked deep Gaussian processes, R package version 2.6.0.
+Ming, D. and Williamson, D. (2026) Generalized and scalable deep
+Gaussian process emulation, arXiv:2603.24538.
+
+    @Unpublished{,
+      title = {Generalized and scalable deep Gaussian process emulation},
+      author = {Deyu Ming and Daniel Williamson},
+      note = {arXiv:2603.24538},
+      year = {2026},
+    }
+
+Ming, D. and Williamson, D. (2025) dgpsi: A scalable toolbox for
+computer model emulation, R package version 2.6.0.
 https://CRAN.R-project.org/package=dgpsi.
 
     @Manual{,
-      title = {dgpsi: An R package powered by Python for modelling linked deep Gaussian processes},
+      title = {dgpsi: A scalable toolbox for computer model emulation},
       author = {Deyu Ming and Daniel Williamson},
       note = {R package version 2.6.0},
       url = {https://CRAN.R-project.org/package=dgpsi},

@@ -7,18 +7,7 @@ linked (D)GP emulator.
 ## Usage
 
 ``` r
-validate(
-  object,
-  x_test,
-  y_test,
-  method,
-  sample_size,
-  verb,
-  M,
-  force,
-  cores,
-  ...
-)
+validate(object, x_test, y_test, method, sample_size, verb, M, force, ...)
 
 # S3 method for class 'gp'
 validate(
@@ -30,7 +19,6 @@ validate(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -44,7 +32,6 @@ validate(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -58,7 +45,6 @@ validate(
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 ```
@@ -129,8 +115,8 @@ validate(
 
 - method:
 
-  **\[updated\]** the prediction approach to use for validation: either
-  the mean-variance approach (`"mean_var"`) or the sampling approach
+  the prediction approach to use for validation: either the
+  mean-variance approach (`"mean_var"`) or the sampling approach
   (`"sampling"`). For details see
   [`predict()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/predict.md).
   Defaults to `"mean_var"`.
@@ -162,12 +148,6 @@ validate(
   approximation or a different `method` to the one prescribed in this
   call, the emulator will be re-evaluated. Set `force` to `TRUE` when
   LOO or OOS re-evaluation is required. Defaults to `FALSE`.
-
-- cores:
-
-  the number of processes to be used for validation. If set to `NULL`,
-  the number of processes is set to
-  `max physical cores available %/% 2`. Defaults to `1`.
 
 - ...:
 

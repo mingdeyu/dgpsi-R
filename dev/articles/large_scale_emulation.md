@@ -6,6 +6,7 @@ large-scale datasets.
 ## Load the packages
 
 ``` r
+
 library(dgpsi)
 library(lhs)
 ```
@@ -16,6 +17,7 @@ We consider a 2-dimensional synthetic simulator with the following
 functional form defined over `[0, 1]` and `[0, 1]`:
 
 ``` r
+
 f <- function(x) {
   x1 <- x[,1,drop=F] * 4 -2
   x2 <- x[,2,drop=F] * 4 -2
@@ -29,12 +31,14 @@ We now specify a seed with
 from the package for reproducibility
 
 ``` r
+
 set_seed(9999)
 ```
 
 and generate `3000` training data points:
 
 ``` r
+
 X <- randomLHS(3000, 2)
 Y <- f(X)
 ```
@@ -45,13 +49,14 @@ We now build and train a large-scale DGP emulator using a Vecchia
 implementation under our Stochastic Imputation (SI) framework:
 
 ``` r
+
 m <- dgp(X, Y, vecchia = TRUE)
 ```
 
     ## Auto-generating a 2-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator: 
-    ## Iteration 200: Layer 2: 100%|██████████| 200/200 [02:59<00:00,  1.12it/s]
+    ## Iteration 200: Layer 2: 100%|██████████| 200/200 [01:14<00:00,  2.69it/s]
     ## Imputing ... done
 
 ## Validation
@@ -60,6 +65,7 @@ After we have the emulator, we can validate it by the Leave-One-Out
 (LOO) cross validation plot:
 
 ``` r
+
 plot(m)
 ```
 
@@ -73,6 +79,7 @@ or the Out-Of-Sample (OOS) validation plot over `1000` randomly
 generated testing locations:
 
 ``` r
+
 oos_x <- randomLHS(1000, 2)
 oos_y <- f(oos_x)
 plot(m, oos_x, oos_y)

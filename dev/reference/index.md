@@ -5,7 +5,7 @@
 The function to initiate the underlying Python environment.
 
 - [`init_py()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/init_py.md)
-  : 'python' environment initialization
+  **\[updated\]** : 'python' environment initialization
 
 ## GP, DGP, and Linked (D)GP Emulations
 
@@ -30,6 +30,10 @@ Linked (D)GP emulators.
   [`plot(`*`<lgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)
   [`plot(`*`<gp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)
   : Validation plots of a constructed GP, DGP, or linked (D)GP emulator
+- [`summary(`*`<gp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
+  [`summary(`*`<dgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
+  [`summary(`*`<lgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
+  : Summary of a constructed GP, DGP, or linked (D)GP emulator
 - [`prune()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/prune.md)
   : Static pruning of a DGP emulator
 
@@ -39,16 +43,17 @@ Functions to implement sequential designs for (D)GP and bundles of (D)GP
 emulators.
 
 - [`design()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/design.md)
-  : Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
-- [`alm()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.md) :
-  Locate the next design point(s) for a (D)GP emulator or a bundle of
-  (D)GP emulators using Active Learning MacKay (ALM)
+  **\[updated\]** : Sequential design of a (D)GP emulator or a bundle of
+  (D)GP emulators
+- [`alm()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.md)
+  **\[updated\]** : Locate the next design point(s) for a (D)GP emulator
+  or a bundle of (D)GP emulators using Active Learning MacKay (ALM)
 - [`mice()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/mice.md) :
   Locate the next design point for a (D)GP emulator or a bundle of (D)GP
   emulators using MICE
-- [`vigf()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/vigf.md) :
-  Locate the next design point for a (D)GP emulator or a bundle of (D)GP
-  emulators using VIGF
+- [`vigf()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/vigf.md)
+  **\[updated\]** : Locate the next design point for a (D)GP emulator or
+  a bundle of (D)GP emulators using VIGF
 - [`update()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/update.md)
   : Update a GP or DGP emulator
 - [`draw()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/draw.md) :
@@ -60,10 +65,6 @@ emulators.
 
 ## Helpers
 
-- [`summary(`*`<gp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
-  [`summary(`*`<dgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
-  [`summary(`*`<lgp>`*`)`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md)
-  : Summary of a constructed GP, DGP, or linked (D)GP emulator
 - [`write()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/write.md)
   : Save the constructed emulator
 - [`read()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/read.md) :

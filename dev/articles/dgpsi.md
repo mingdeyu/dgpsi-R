@@ -25,6 +25,7 @@ section of the package website.
 ## Load the packages
 
 ``` r
+
 library(dgpsi)
 library(ggplot2)
 ```
@@ -44,12 +45,14 @@ environment will be automatically loaded after we run
 from the package to specify a seed for reproducibility:
 
 ``` r
+
 set_seed(9999)
 ```
 
 Define the step function:
 
 ``` r
+
 f <- function(x) {
   if (x < 0.5) return(-1)
   if (x >= 0.5) return(1)
@@ -59,6 +62,7 @@ f <- function(x) {
 and generate ten training data points:
 
 ``` r
+
 X <- seq(0, 1, length = 10)
 Y <- sapply(X, f)
 ```
@@ -68,13 +72,14 @@ Y <- sapply(X, f)
 We now build and train a DGP emulator with three layers:
 
 ``` r
+
 m <- dgp(X, Y, depth = 3)
 ```
 
     ## Auto-generating a 3-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator: 
-    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:03<00:00, 148.10it/s]
+    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:02<00:00, 225.01it/s]
     ## Imputing ... done
 
 The progress bar displayed shows how long it takes to finish training.
@@ -88,6 +93,7 @@ The trained DGP emulator can be visualized using the
 function:
 
 ``` r
+
 summary(m)
 ```
 
@@ -116,6 +122,7 @@ plots. There are two types of validation plots provided by the package.
 The first one is the Leave-One-Out (LOO) cross validation plot:
 
 ``` r
+
 plot(m)
 ```
 
@@ -130,6 +137,7 @@ that requires an out-of-sample testing data set. Here we generate an OOS
 data set that contains 10 testing data points:
 
 ``` r
+
 oos_x <- sample(seq(0, 1, length = 200), 10)
 oos_y <- sapply(oos_x, f)
 ```
@@ -137,6 +145,7 @@ oos_y <- sapply(oos_x, f)
 We can now perform OOS validation:
 
 ``` r
+
 plot(m,oos_x,oos_y)
 ```
 
@@ -155,9 +164,10 @@ function can be used to draw different types of plot (see
 
 Once the validation is done, we can make predictions from the DGP
 emulator. We generate 200 data points from the step function over
-$\lbrack 0,1\rbrack$:
+$`[0,1]`$:
 
 ``` r
+
 test_x <- seq(0, 1, length = 200)
 test_y <- sapply(test_x, f)
 ```
@@ -165,6 +175,7 @@ test_y <- sapply(test_x, f)
 and predict at these locations:
 
 ``` r
+
 m <- predict(m, x = test_x)
 ```
 
@@ -177,6 +188,7 @@ emulation results to check the predictive performance of our constructed
 DGP emulator:
 
 ``` r
+
 mu <- m$results$mean # extract the predictive means 
 sd <- sqrt(m$results$var) # extract the predictive variance and compute the predictive standard deviations
 # compute predictive bounds which are two predictive standard deviations above and below the predictive means

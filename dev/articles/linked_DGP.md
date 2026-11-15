@@ -6,6 +6,7 @@ system of three synthetic computer models.
 ## Load the package
 
 ``` r
+
 library(ggplot2)
 library(patchwork)
 library(dgpsi)
@@ -20,6 +21,7 @@ We consider the following synthetic system
 that involves three models defined by:
 
 ``` r
+
 # Model 1
 f1 <- function(x) {
   (sin(7.5*x)+1)/2
@@ -43,6 +45,7 @@ We then specify a seed with
 from the package for reproducibility
 
 ``` r
+
 set_seed(999)
 ```
 
@@ -50,6 +53,7 @@ and generate 10 training data points for Model 1 and 15 training data
 points for Model 2 and 3:
 
 ``` r
+
 # Training data for Model 1
 X1 <- seq(0, 1, length = 10)
 Y1 <- sapply(X1, f1)
@@ -67,6 +71,7 @@ We construct and train a GP emulator with Matérn-2.5 kernel with ID
 `gp1`:
 
 ``` r
+
 m1 <- gp(X1, Y1, name = "matern2.5", id = "gp1")
 ```
 
@@ -82,6 +87,7 @@ to store the LOO results before plotting with
 [`plot()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md)):
 
 ``` r
+
 plot(m1)
 ```
 
@@ -97,13 +103,14 @@ We construct a two-layered DGP emulator with Matérn-2.5 kernels to
 emulate Model 2:
 
 ``` r
+
 m2 <- dgp(X2, Y2, depth = 2, name = "matern2.5")
 ```
 
     ## Auto-generating a 2-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator:
-    ## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 264.72it/s]
+    ## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 410.84it/s]
     ## Imputing ... done
 
 and set its ID to `gp2` using the
@@ -111,12 +118,14 @@ and set its ID to `gp2` using the
 function:
 
 ``` r
+
 m2 <- set_id(m2, "gp2")
 ```
 
 The following plot visualizes the LOO of the trained DGP emulator `m2`:
 
 ``` r
+
 plot(m2)
 ```
 
@@ -132,18 +141,20 @@ We now construct a three-layered DGP emulator with Matérn-2.5 kernels to
 emulate Model 3:
 
 ``` r
+
 m3 <- dgp(X3, Y3, depth = 3, name = "matern2.5", id = "gp3" )
 ```
 
     ## Auto-generating a 3-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator:
-    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:04<00:00, 104.80it/s]
+    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:02<00:00, 189.95it/s]
     ## Imputing ... done
 
 The following plot visualizes the LOO of the trained DGP emulator `m3`:
 
 ``` r
+
 plot(m3)
 ```
 
@@ -161,6 +172,7 @@ ready to build the linked emulator by first defining a data frame
 `struc`:
 
 ``` r
+
 struc <- data.frame(From_Emulator = c("Global", "gp1", "gp1", "gp2"),
                     To_Emulator = c("gp1", "gp2", "gp3", "gp3"),
                     From_Output = c(1, 1, 1, 1),
@@ -192,6 +204,7 @@ create the linked emulator. The order of the emulators in the list does
 not matter:
 
 ``` r
+
 emulators <- list(m1, m2, m3)
 ```
 
@@ -199,6 +212,7 @@ Before activating the linked emulator for prediction, it’s good practice
 to first inspect the structure of the emulator:
 
 ``` r
+
 m_link <- lgp(struc, emulators, activate = FALSE)
 ```
 
@@ -210,6 +224,7 @@ and visually check the relationships between emulators by applying
 to `m_link`:
 
 ``` r
+
 summary(m_link)
 ```
 
@@ -217,6 +232,7 @@ If everything looks correct, we can then activate the linked emulator
 for prediction:
 
 ``` r
+
 m_link <- lgp(struc, emulators, activate = TRUE)
 ```
 
@@ -228,6 +244,7 @@ For comparison, we construct a GP emulator for the whole system by
 generating 15 training data points from Model 1 and Model 2:
 
 ``` r
+
 X_gp <- seq(0, 1, length = 15)
 Y_gp <- sapply(X_gp, f123)
 m_gp <- gp(X_gp, Y_gp, name = 'matern2.5')
@@ -238,9 +255,10 @@ m_gp <- gp(X_gp, Y_gp, name = 'matern2.5')
     ## Training the GP emulator ... done
 
 Finally, we validate both the GP emulator and the linked emulator at 300
-testing data points over $\lbrack 0,1\rbrack$:
+testing data points over $`[0,1]`$:
 
 ``` r
+
 # Testing input
 test_x <- seq(0, 1, length = 300)
 # Testing output
@@ -254,6 +272,7 @@ m_link <- validate(m_link, x_test = test_x, y_test = test_y, verb = F)
 and plot them to compare their performance:
 
 ``` r
+
 # GP emulator
 plot(m_gp, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
   plot_annotation(title = 'GP Emulator', theme = theme(plot.title = element_text(hjust = 0.5)))
@@ -262,6 +281,7 @@ plot(m_gp, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
 ![](images/linked_result.png)
 
 ``` r
+
 # Linked emulator
 plot(m_link, x_test = test_x, y_test = test_y, type = 'line', verb = F) +
   plot_annotation(title = 'Linked Emulator', theme = theme(plot.title = element_text(hjust = 0.5)))
@@ -280,6 +300,7 @@ validation. Say we were able to afford 20 runs of the above linked
 computer system:
 
 ``` r
+
 # OOS testing input
 test_x_oos <- sample(seq(0, 1, length = 300), 20)
 # OOS testing output
@@ -289,6 +310,7 @@ test_y_oos <- sapply(test_x_oos, f123)
 Then, we can conduct OOS validation for the GP emulator:
 
 ``` r
+
 plot(m_gp, test_x_oos, test_y_oos, style = 2)
 ```
 
@@ -301,6 +323,7 @@ plot(m_gp, test_x_oos, test_y_oos, style = 2)
 and the linked emulator:
 
 ``` r
+
 plot(m_link, test_x_oos, test_y_oos, style = 2)
 ```
 

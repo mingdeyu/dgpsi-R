@@ -8,6 +8,7 @@ emulator.
 ## Load the packages
 
 ``` r
+
 library(tidyverse)
 library(lhs)
 library(ggplot2)
@@ -21,6 +22,7 @@ We consider a non-stationary synthetic simulator which has a
 defined by:
 
 ``` r
+
 f <- function(x) {
  sin(1/((0.7*x[,1,drop=F]+0.3)*(0.7*x[,2,drop=F]+0.3)))
  }
@@ -31,6 +33,7 @@ have defined the above function such that its input `x` and output are
 both matrices. The commands below generate the contour of the function:
 
 ``` r
+
 x1 <- seq(0, 1, length.out = 100)
 x2 <- seq(0, 1, length.out = 100)
 dat <- expand_grid(x1 = x1, x2 = x2)
@@ -50,14 +53,16 @@ We now specify a seed with
 for reproducibility
 
 ``` r
-set_seed(999)
+
+set_seed(9999)
 ```
 
-and generate an initial design with 5 design points using the maximin
+and generate an initial design with 10 design points using the maximin
 Latin hypercube sampler:
 
 ``` r
-X <- maximinLHS(5,2)
+
+X <- maximinLHS(10,2)
 Y <- f(X)
 ```
 
@@ -65,6 +70,7 @@ To track the qualities of constructed emulators during sequential
 design, we generate a validation dataset:
 
 ``` r
+
 validate_x <- maximinLHS(200,2)
 validate_y <- f(validate_x)
 ```
@@ -76,19 +82,21 @@ emulator (with 2 GP nodes in the first layer and 1 GP node in the second
 layer) using the generated initial design:
 
 ``` r
+
 m <- dgp(X, Y)
 ```
 
     ## Auto-generating a 2-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator: 
-    ## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 353.90it/s]
+    ## Iteration 500: Layer 2: 100%|██████████| 500/500 [00:01<00:00, 415.05it/s]
     ## Imputing ... done
 
 We then specify the boundaries of the input parameter space for `f` so
 that the sequential design can restrict its search for new points.
 
 ``` r
+
 lim_1 <- c(0, 1)
 lim_2 <- c(0, 1)
 lim <- rbind(lim_1, lim_2)
@@ -113,38 +121,39 @@ For illustrative purpose, we implement two waves of sequential design on
 `m`:
 
 ``` r
-# 1st wave with 25 steps
-m <- design(m, N = 25, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
+
+# 1st wave with 20 steps
+m <- design(m, N = 20, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 
     ## Initializing ... done
-    ##  * RMSE: 0.487293
+    ##  * RMSE: 0.388518
     ## Iteration 1:
     ##  - Locating ... done
-    ##  * Next design point: 0.620583 1.000000
+    ##  * Next design point: 1.000000 1.000000
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.388907
+    ##  * RMSE: 0.380539
     ## 
     ## ...
     ## 
-    ## Iteration 18:
+    ## Iteration 13:
     ##  - Locating ... done
-    ##  * Next design point: 0.198164 0.195029
+    ##  * Next design point: 0.012846 0.060399
     ##  - Updating and re-fitting ... done
     ##  - Pruning 1 node(s) in layer 1 ... done
     ##  - Re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.052264
+    ##  * RMSE: 0.076901
     ## 
     ## ...
     ## 
-    ## Iteration 25:
+    ## Iteration 20:
     ##  - Locating ... done
-    ##  * Next design point: 0.248474 0.034358
+    ##  * Next design point: 0.325434 0.010143
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.016924
+    ##  * RMSE: 0.034671
 
 After the first wave we see that 1 GP node is removed from the first
 layer by automatic pruning of the DGP which leaves only one node in both
@@ -154,50 +163,52 @@ sequential design while maintaining accuracy. We now start the second
 wave of the sequential design:
 
 ``` r
+
 # 2nd wave with 10 steps
 m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y)
 ```
 
     ## Initializing ... done
-    ##  * RMSE: 0.016924
+    ##  * RMSE: 0.034671
     ## Iteration 1:
     ##  - Locating ... done
-    ##  * Next design point: 0.092643 0.352432
+    ##  * Next design point: 0.150835 0.850534
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.013484
+    ##  * RMSE: 0.018740
     ##   
     ##  ...
     ##  
     ## Iteration 10:
     ##  - Locating ... done
-    ##  * Next design point: 0.901510 0.989878
+    ##  * Next design point: 0.056978 0.110908
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.007114
+    ##  * RMSE: 0.006311
 
 Finally, we resume the second wave with 10 additional iterations:
 
 ``` r
+
 # 2nd wave with 10 additional steps
 m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = validate_y, new_wave = FALSE)
 ```
 
     ## Iteration 11:
     ##  - Locating ... done
-    ##  * Next design point: 0.016562 0.966263
+    ##  * Next design point: 0.090776 0.210772
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.005308
+    ##  * RMSE: 0.014517
     ##  
     ##  ...
     ##  
     ## Iteration 20:
     ##  - Locating ... done
-    ##  * Next design point: 0.982806 0.438261
+    ##  * Next design point: 0.051133 0.060526
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.002383
+    ##  * RMSE: 0.002727
 
 Resuming rather than adding an additional wave can be a useful feature,
 particularly for plotting using
@@ -208,6 +219,7 @@ by applying
 `m`:
 
 ``` r
+
 draw(m, 'design')
 ```
 
@@ -218,6 +230,7 @@ needs more data to be well-emulated. We can also visualize the
 improvement to RMSE during the sequential design:
 
 ``` r
+
 draw(m, 'rmse')
 ```
 
@@ -229,6 +242,7 @@ We build four DGP emulators with static space-filling Latin hypercube
 designs (LHD) of size 10, 20, 30, 40, and 50 respectively:
 
 ``` r
+
 # DGP emulator with a LHD of size 10
 X1 <- maximinLHS(10,2)
 Y1 <- f(X1)
@@ -236,6 +250,7 @@ m1 <- dgp(X1, Y1, verb = F)
 ```
 
 ``` r
+
 # DGP emulator with a LHD of size 20
 X2 <- maximinLHS(20,2)
 Y2 <- f(X2)
@@ -243,6 +258,7 @@ m2 <- dgp(X2, Y2, verb = F)
 ```
 
 ``` r
+
 # DGP emulator with a LHD of size 30
 X3 <- maximinLHS(30,2)
 Y3 <- f(X3)
@@ -250,6 +266,7 @@ m3 <- dgp(X3, Y3, verb = F)
 ```
 
 ``` r
+
 # DGP emulator with a LHD of size 40
 X4 <- maximinLHS(40,2)
 Y4 <- f(X4)
@@ -257,6 +274,7 @@ m4 <- dgp(X4, Y4, verb = F)
 ```
 
 ``` r
+
 # DGP emulator with a LHD of size 50
 X5 <- maximinLHS(50,2)
 Y5 <- f(X5)
@@ -266,6 +284,7 @@ m5 <- dgp(X5, Y5, verb = F)
 We then extract their RMSEs
 
 ``` r
+
 # validation of the DGP emulator with the LHD of size 10
 m1 <- validate(m1, x_test = validate_x, y_test = validate_y, verb = F)
 rmse1 <- m1$oos$rmse
@@ -289,6 +308,7 @@ and add them to the sequential design validation plot (in log-scale) for
 comparison:
 
 ``` r
+
 draw(m, 'rmse', log = T) + 
   geom_point(data = rmse_static, mapping = aes(x = N, y = rmse, group = LHD, shape = LHD), color = '#E69F00', size = 1.5) +
   scale_shape_manual(values = c(2, 3, 4, 8, 15))

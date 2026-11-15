@@ -2,6 +2,24 @@
 
 ## dgpsi 2.6.0-9000 (development version)
 
+- Renamed the `M_val` argument of
+  [`design()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/design.md)
+  to `validation_M`. Existing calls must use the new name.
+- Updated
+  [`alm()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.md) and
+  [`vigf()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/vigf.md) to
+  default to screening `100` points per input dimension, followed by
+  serial local refinement from up to `5` selected starts. Integer
+  coordinates remain fixed during refinement.
+- Added an `opt_control` argument to
+  [`alm()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.md) and
+  [`vigf()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/vigf.md) to
+  configure the optimizer for the local refinement.
+- Removed the `workers` argument from
+  [`alm()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/alm.md) and
+  [`vigf()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/vigf.md) to
+  avoid multiprocessing overhead and potential instability when
+  combining R and Python.
 - Resolved Python environment import failure relating to `libcblas.so.3`
   on Intel CPUs when using MKL BLAS.
 - Fixed Python import errors on Linux caused by `libstdc++.so.6` by
@@ -31,6 +49,24 @@
   have been added to the package and can be used in
   [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md) by
   setting `likelihood = "ZIP"` and `likelihood = "ZINB"`, respectively.
+- Removed the multi-process parallel option in favour of automatic
+  Numba-based parallelization in the Python backend.
+- Fixed a bug in
+  [`lgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/lgp.md) when
+  linked DGPs use `connect = TRUE`.
+- Added `conda` and `show_config` arguments to
+  [`init_py()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/init_py.md),
+  allowing users to specify the path to a conda binary and optionally
+  display the Python backend configuration.
+- Updated
+  [`plot()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/plot.md) to
+  use column names from the training inputs and outputs supplied to
+  [`gp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.md) and
+  [`dgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/dgp.md), and
+  from the testing inputs and outputs supplied to
+  [`lgp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/lgp.md), as
+  x- and y-axis labels in relevant validation plots.
+- Various bug fixes.
 
 ## dgpsi 2.6.0
 

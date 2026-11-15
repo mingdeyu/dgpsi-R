@@ -1,5 +1,7 @@
 # 'python' environment initialization
 
+**\[updated\]**
+
 This function initializes the 'python' environment for the package.
 
 ## Usage
@@ -8,9 +10,11 @@ This function initializes the 'python' environment for the package.
 init_py(
   py_ver = NULL,
   dgpsi_ver = NULL,
+  conda = NULL,
   reinstall = FALSE,
   uninstall = FALSE,
-  verb = TRUE
+  verb = TRUE,
+  show_config = FALSE
 )
 ```
 
@@ -33,6 +37,14 @@ init_py(
   - the development 'python' version of 'dgpsi' will be used, if the
     package is installed from GitHub.
 
+- conda:
+
+  optional path to a conda binary. If `NULL`, `init_py()` attempts to
+  locate conda automatically; see
+  [`reticulate::conda_binary()`](https://rstudio.github.io/reticulate/reference/conda-tools.html)
+  for the search order. If provided, the path is used directly and must
+  point to an existing conda executable.
+
 - reinstall:
 
   a bool that indicates whether to reinstall the 'python' version of
@@ -54,6 +66,11 @@ init_py(
   a bool indicating if trace information will be printed during function
   execution. Defaults to `TRUE`.
 
+- show_config:
+
+  a bool indicating whether to print the Python backend configuration
+  when `verb = TRUE`. Defaults to `FALSE`.
+
 ## Value
 
 No return value, called to install required 'python' environment.
@@ -62,6 +79,15 @@ No return value, called to install required 'python' environment.
 
 See further examples and tutorials at
 <https://mingdeyu.github.io/dgpsi-R/dev/>.
+
+## Note
+
+On Linux, `init_py()` may ask for permission during installation. To
+auto-accept these prompts in non-interactive settings, set the
+environment variable `DGPSI_AUTO_YES` to `"TRUE"` before calling
+`init_py()` for the first time. Accepted values include `"TRUE"`,
+`"true"`, `"yes"`, `"y"`, and `"1"`. If unset, `init_py()` will continue
+to prompt interactively.
 
 ## Examples
 

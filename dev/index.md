@@ -31,13 +31,14 @@ process emulations using stochastic imputation (SI).
   - separable or non-separable squared exponential and Matérn-2.5
     kernels;
   - global input connections;
-  - non-Gaussian likelihoods (Poisson, Negative-Binomial,
-    heteroskedastic Gaussian, and Categorical).
+  - non-Gaussian likelihoods (Poisson, Zero-Inflated Poisson,
+    Negative-Binomial, Zero-Inflated Negative-Binomial, heteroskedastic
+    Gaussian, and Categorical).
 - Linked emulations of feed-forward systems of computer models by
   linking (D)GP emulators of deterministic individual computer models.
 - Fast Leave-One-Out (LOO) and Out-Of-Sample (OOS) validations for GP,
   DGP, and linked (D)GP emulators.
-- Multi-core predictions and validations for GP, DGP, and Linked (D)GP
+- Parallel predictions and validations for GP, DGP, and Linked (D)GP
   emulators.
 - Sequential designs for (D)GP emulators and bundles of (D)GP emulators.
 - Automatic pruning of DGP emulators, both statically and dynamically.
@@ -61,18 +62,21 @@ process emulations using stochastic imputation (SI).
 You can install the package from CRAN:
 
 ``` r
+
 install.packages('dgpsi')
 ```
 
 or its development version from GitHub:
 
 ``` r
-devtools::install_github('mingdeyu/dgpsi-R')
+
+pak::pak('mingdeyu/dgpsi-R')
 ```
 
 After the installation, run
 
 ``` r
+
 library(dgpsi)
 ```
 
@@ -93,18 +97,21 @@ package is ready to use!
 > please try to reinstall the Python environment:
 >
 > ``` r
+>
 > dgpsi::init_py(reinstall = T)
 > ```
 >
 > Or uninstall completely the Python environment:
 >
 > ``` r
+>
 > dgpsi::init_py(uninstall = T)
 > ```
 >
 > and then reinstall:
 >
 > ``` r
+>
 > dgpsi::init_py()
 > ```
 
@@ -116,6 +123,10 @@ refer to our [Research
 Notice](https://github.com/mingdeyu/dgpsi-R/blob/master/RESEARCH-NOTICE.md).
 
 ## References
+
+> [Ming, D. and Williamson, D. (2026) Generalized and scalable deep
+> Gaussian process emulation. *Computational Statistics & Data
+> Analysis*. 227, 108485.](https://doi.org/10.1016/j.csda.2026.108485)
 
 > [Ming, D. and Williamson, D. (2023) Linked deep Gaussian process
 > emulation for model networks.

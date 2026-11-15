@@ -30,8 +30,6 @@ dgp(
   M = 25,
   ord = NULL,
   N = ifelse(vecchia, 200, 500),
-  cores = 1,
-  blocked_gibbs = TRUE,
   ess_burn = 10,
   burnin = NULL,
   B = 10,
@@ -341,25 +339,6 @@ dgp(
   number of iterations for the training. Defaults to `500` if
   `vecchia = FALSE` and `200` if `vecchia = TRUE`. This argument is only
   used when `training = TRUE`.
-
-- cores:
-
-  the number of processes to be used to optimize GP components (in the
-  same layer) at each M-step of the training. If set to `NULL`, the
-  number of processes is set to `(max physical cores available - 1)` if
-  `vecchia = FALSE` and `max physical cores available %/% 2` if
-  `vecchia = TRUE`. Only use multiple processes when there is a large
-  number of GP components in different layers and optimization of GP
-  components is computationally expensive. Defaults to `1`.
-
-- blocked_gibbs:
-
-  a bool indicating if the latent variables are imputed layer-wise using
-  ESS-within-Blocked-Gibbs. ESS-within-Blocked-Gibbs would be faster and
-  more efficient than ESS-within-Gibbs that imputes latent variables
-  node-wise because it reduces the number of components to be sampled
-  during Gibbs steps, especially when there is a large number of GP
-  nodes in layers due to higher input dimensions. Default to `TRUE`.
 
 - ess_burn:
 

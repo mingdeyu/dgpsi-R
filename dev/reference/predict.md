@@ -14,8 +14,6 @@ predict(
   full_layer = FALSE,
   sample_size = 50,
   M = 50,
-  cores = 1,
-  chunks = NULL,
   ...
 )
 
@@ -27,22 +25,11 @@ predict(
   full_layer = FALSE,
   sample_size = 50,
   M = 50,
-  cores = 1,
-  chunks = NULL,
   ...
 )
 
 # S3 method for class 'gp'
-predict(
-  object,
-  x,
-  method = "mean_var",
-  sample_size = 50,
-  M = 50,
-  cores = 1,
-  chunks = NULL,
-  ...
-)
+predict(object, x, method = "mean_var", sample_size = 50, M = 50, ...)
 ```
 
 ## Arguments
@@ -93,19 +80,6 @@ predict(
   the size of the conditioning set for the Vecchia approximation in the
   emulator prediction. Defaults to `50`. This argument is only used if
   the emulator `object` was constructed under the Vecchia approximation.
-
-- cores:
-
-  the number of processes to be used for prediction. If set to `NULL`,
-  the number of processes is set to
-  `max physical cores available %/% 2`. Defaults to `1`.
-
-- chunks:
-
-  the number of chunks that the testing input matrix `x` will be divided
-  into for multi-cores to work on. Only used when `cores` is not `1`. If
-  not specified (i.e., `chunks = NULL`), the number of chunks is set to
-  the value of `cores`. Defaults to `NULL`.
 
 - ...:
 

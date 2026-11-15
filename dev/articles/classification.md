@@ -8,6 +8,7 @@ popular iris data set (Anderson 1935).
 We start by loading required packages,
 
 ``` r
+
 library(dgpsi)
 library(dplyr)
 ```
@@ -15,12 +16,14 @@ library(dplyr)
 We now load the iris data set,
 
 ``` r
+
 data(iris)
 ```
 
-and re-scale its four input variables to $\lbrack 0,1\rbrack$.
+and re-scale its four input variables to $`[0,1]`$.
 
 ``` r
+
 iris <- iris %>%
   mutate(across(1:4, ~ (. - min(.)) / (max(.) - min(.))))
 ```
@@ -30,12 +33,14 @@ Before building a classifier, we set a seed with
 from the package for reproducibility
 
 ``` r
+
 set_seed(9999)
 ```
 
 and split the data into training and testing:
 
 ``` r
+
 test_idx <- sample(seq_len(nrow(iris)), size = 30)
 
 train_data <- iris[-test_idx, ]
@@ -53,19 +58,21 @@ Y_test <- as.matrix(test_data[, 5])
 We consider a three-layer DGP classifier using Matérn-2.5 kernels:
 
 ``` r
+
 m_dgp <- dgp(X_train, Y_train, depth = 3, name = 'matern2.5', likelihood = "Categorical")
 ```
 
     ## Auto-generating a 3-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator: 
-    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:52<00:00,  9.44it/s]
+    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:27<00:00, 17.98it/s]
     ## Imputing ... done
 
 Visualizing the DGP object helps to clarify the layered structure for
 non-Gaussian (in this case categorical) likelihoods.
 
 ``` r
+
 summary(m_dgp)
 ```
 
@@ -83,6 +90,7 @@ We are now ready to validate the classifier via
 at 30 out-of-sample testing positions:
 
 ``` r
+
 m_dgp <- validate(m_dgp, X_test, Y_test)
 ```
 
@@ -93,6 +101,7 @@ m_dgp <- validate(m_dgp, X_test, Y_test)
 Finally, we visualize the OOS validation for the classifier:
 
 ``` r
+
 plot(m_dgp, X_test, Y_test)
 ```
 
@@ -110,6 +119,7 @@ position. Alternatively, setting `style = 2` in
 generates a confusion matrix:
 
 ``` r
+
 plot(m_dgp, X_test, Y_test, style = 2)
 ```
 

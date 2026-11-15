@@ -18,7 +18,6 @@ mice(
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   ...
@@ -32,7 +31,6 @@ mice(
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
@@ -47,7 +45,6 @@ mice(
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
@@ -104,12 +101,6 @@ mice(
 
   the value of the smoothing nugget term used by MICE. Defaults to
   `1e-6`.
-
-- workers:
-
-  the number of processes to be used for the criterion calculation. If
-  set to `NULL`, the number of processes is set to
-  `max physical cores available %/% 2`. Defaults to `1`.
 
 - limits:
 

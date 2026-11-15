@@ -8,6 +8,7 @@ popular motorcycle dataset (Silverman 1985).
 We start by loading packages:
 
 ``` r
+
 library(dgpsi)
 library(MASS)
 library(ggplot2)
@@ -17,6 +18,7 @@ library(patchwork)
 We now load the training data points,
 
 ``` r
+
 X <- mcycle$times
 Y <- mcycle$accel
 ```
@@ -24,6 +26,7 @@ Y <- mcycle$accel
 scale them,
 
 ``` r
+
 X <- (X - min(X))/(max(X)-min(X))
 Y <- scale(Y, center = TRUE, scale = TRUE)
 ```
@@ -31,6 +34,7 @@ Y <- scale(Y, center = TRUE, scale = TRUE)
 and plot them:
 
 ``` r
+
 ggplot(data = data.frame(X = X, Y = Y), aes(x = X, y = Y)) +
   geom_point(shape = 16, size = 3) +
   labs(x = "Time", y = "Acceleration") +
@@ -45,12 +49,14 @@ Before constructing an emulator, we first specify a seed with
 from the package for reproducibility
 
 ``` r
+
 set_seed(9999)
 ```
 
 and split a training data set and a testing data set:
 
 ``` r
+
 test_idx <- sample(seq_len(length(X)), size = 20)
 train_X <- X[-test_idx]
 train_Y <- Y[-test_idx,]
@@ -64,13 +70,14 @@ We consider a three-layered DGP emulator with squared exponential
 kernels and heteroskedastic likelihood:
 
 ``` r
+
 m_dgp <- dgp(train_X, train_Y, depth = 3, likelihood = "Hetero")
 ```
 
     ## Auto-generating a 3-layered DGP structure ... done
     ## Initializing the DGP emulator ... done
     ## Training the DGP emulator: 
-    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:09<00:00, 53.85it/s]
+    ## Iteration 500: Layer 3: 100%|██████████| 500/500 [00:06<00:00, 74.81it/s]
     ## Imputing ... done
 
 We choose a heteroskedastic Gaussian likelihood by setting
@@ -81,15 +88,17 @@ to visualize the structure and specifications for the trained DGP
 emulator:
 
 ``` r
+
 summary(m_dgp)
 ```
 
 For comparison, we also build a GP emulator (by
 [`gp()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/gp.md)) that
 incorporates homogeneous noise by setting `nugget_est = T` and the
-initial nugget value to $0.01$:
+initial nugget value to $`0.01`$:
 
 ``` r
+
 m_gp <- gp(train_X, train_Y, nugget_est = T, nugget = 1e-2) 
 ```
 
@@ -101,6 +110,7 @@ We can also summarize the trained GP emulator by
 [`summary()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/summary.md):
 
 ``` r
+
 summary(m_gp)
 ```
 
@@ -111,6 +121,7 @@ We are now ready to validate both emulators via
 at the 20 out-of-sample testing positions generated earlier:
 
 ``` r
+
 m_dgp <- validate(m_dgp, test_x, test_y)
 ```
 
@@ -119,6 +130,7 @@ m_dgp <- validate(m_dgp, test_x, test_y)
     ## Saving results to the slot 'oos' in the dgp object ... done
 
 ``` r
+
 m_gp <- validate(m_gp, test_x, test_y)
 ```
 
@@ -138,6 +150,7 @@ use these, if it can, to avoid calculating them on the fly. Finally, we
 plot the OOS validation for the GP emulator:
 
 ``` r
+
 plot(m_gp, test_x, test_y)
 ```
 
@@ -150,6 +163,7 @@ plot(m_gp, test_x, test_y)
 and for the DGP emulator:
 
 ``` r
+
 plot(m_dgp, test_x, test_y)
 ```
 

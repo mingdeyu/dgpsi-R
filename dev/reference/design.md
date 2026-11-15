@@ -1,5 +1,7 @@
 # Sequential design of a (D)GP emulator or a bundle of (D)GP emulators
 
+**\[updated\]**
+
 This function implements sequential design and active learning for a
 (D)GP emulator or a bundle of (D)GP emulators, supporting an array of
 popular methods as well as user-specified approaches. It can also be
@@ -28,8 +30,7 @@ design(
   verb,
   autosave,
   new_wave,
-  M_val,
-  cores,
+  validation_M,
   ...
 )
 
@@ -54,8 +55,7 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
-  M_val = 50,
-  cores = 1,
+  validation_M = 50,
   ...
 )
 
@@ -80,10 +80,8 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
-  M_val = 50,
-  cores = 1,
+  validation_M = 50,
   train_N = NULL,
-  refit_cores = 1,
   pruning = TRUE,
   control = list(),
   ...
@@ -110,10 +108,8 @@ design(
   verb = TRUE,
   autosave = list(),
   new_wave = TRUE,
-  M_val = 50,
-  cores = 1,
+  validation_M = 50,
   train_N = NULL,
-  refit_cores = 1,
   ...
 )
 ```
@@ -416,19 +412,12 @@ design(
   avoid issues such as running out of distinct colors for large numbers
   of waves. Defaults to `TRUE`.
 
-- M_val:
+- validation_M:
 
-  an integer that gives the size of the conditioning set for the Vecchia
-  approximation in emulator validations. This argument is only used if
-  the emulator `object` was constructed under the Vecchia approximation.
-  Defaults to `50`.
-
-- cores:
-
-  an integer that gives the number of processes to be used for emulator
-  validation. If set to `NULL`, the number of processes is set to
-  `max physical cores available %/% 2`. Defaults to `1`. This argument
-  is only used if `eval = NULL`.
+  **\[new\]** an integer that gives the size of the conditioning set for
+  the Vecchia approximation in emulator validations. This argument is
+  only used if the emulator `object` was constructed under the Vecchia
+  approximation. Defaults to `50`.
 
 - ...:
 
@@ -458,18 +447,6 @@ design(
     - `50` iterations if the Vecchia approximation was used.
 
   Defaults to `NULL`.
-
-- refit_cores:
-
-  the number of processes to be used to re-fit GP components (in the
-  same layer of a DGP emulator) at each M-step during the re-fitting. If
-  set to `NULL`, the number of processes is set to
-  `(max physical cores available - 1)` if the DGP emulator was
-  constructed without the Vecchia approximation. Otherwise, the number
-  of processes is set to `max physical cores available %/% 2`. Only use
-  multiple processes when there is a large number of GP components in
-  different layers and optimization of GP components is computationally
-  expensive. Defaults to `1`.
 
 - pruning:
 

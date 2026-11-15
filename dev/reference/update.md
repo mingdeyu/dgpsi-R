@@ -17,7 +17,6 @@ update(
   reset = FALSE,
   verb = TRUE,
   N = NULL,
-  cores = 1,
   ess_burn = 10,
   B = NULL,
   ...
@@ -83,16 +82,6 @@ update(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ...)
   iterations is set to `100` if the DGP emulator was constructed without
   the Vecchia approximation, and is set to `50` if Vecchia approximation
   was used. Defaults to `NULL`.
-
-- cores:
-
-  the number of processes to be used to re-fit GP components (in the
-  same layer) at each M-step during the re-fitting. If set to `NULL`,
-  the number of processes is set to `(max physical cores available - 1)`
-  if `vecchia = FALSE` and `max physical cores available %/% 2` if
-  `vecchia = TRUE`. Only use multiple processes when there is a large
-  number of GP components in different layers and optimization of GP
-  components is computationally expensive. Defaults to `1`.
 
 - ess_burn:
 

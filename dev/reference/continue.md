@@ -6,15 +6,7 @@ emulator.
 ## Usage
 
 ``` r
-continue(
-  object,
-  N = NULL,
-  cores = 1,
-  ess_burn = 10,
-  verb = TRUE,
-  burnin = NULL,
-  B = NULL
-)
+continue(object, N = NULL, ess_burn = 10, verb = TRUE, burnin = NULL, B = NULL)
 ```
 
 ## Arguments
@@ -29,18 +21,6 @@ continue(
   `NULL`, the number of iterations is set to `500` if the DGP emulator
   was constructed without the Vecchia approximation, and is set to `200`
   if Vecchia approximation was used. Defaults to `NULL`.
-
-- cores:
-
-  the number of processes to be used to optimize GP components (in the
-  same layer) at each M-step of the training. If set to `NULL`, the
-  number of processes is set to `(max physical cores available - 1)` if
-  the DGP emulator was constructed without the Vecchia approximation.
-  Otherwise, the number of processes is set to
-  `max physical cores available %/% 2`. Only use multiple processes when
-  there is a large number of GP components in different layers and
-  optimization of GP components is computationally expensive. Defaults
-  to `1`.
 
 - ess_burn:
 
