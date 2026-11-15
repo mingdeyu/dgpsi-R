@@ -22,7 +22,6 @@
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -40,7 +39,6 @@
   M = 50,
   verb = TRUE,
   force = FALSE,
-  cores = 1,
   ...
 )
 
@@ -58,7 +56,6 @@
   verb = TRUE,
   M = 50,
   force = FALSE,
-  cores = 1,
   ...
 )
 }
@@ -121,8 +118,6 @@ Defaults to \code{TRUE}.}
 
 \item{force}{same as that of \code{\link[=validate]{validate()}}.}
 
-\item{cores}{same as that of \code{\link[=validate]{validate()}}.}
-
 \item{...}{N/A.}
 }
 \value{
@@ -142,7 +137,7 @@ training or testing data points), direct execution of \code{\link[=plot]{plot()}
 it is recommended to first run \code{\link[=validate]{validate()}} to obtain and store validation results in the emulator object, and then supply the
 object to \code{\link[=plot]{plot()}}. \code{\link[=plot]{plot()}} checks the object's \code{loo} and \code{oos} slots prior to calling \code{\link[=validate]{validate()}} and will not perform further calculation if the required information is already stored.
 \item \code{\link[=plot]{plot()}} will only use stored OOS validation if \code{x_test} and \code{y_test} are identical to those used by \code{\link[=validate]{validate()}} to produce the data contained in the object's \code{oos} slot, otherwise \code{\link[=plot]{plot()}} will re-evaluate OOS validation before plotting.
-\item The returned \link[patchwork:patchwork-package]{patchwork::patchwork} object contains the \link[ggplot2:ggplot2-package]{ggplot2::ggplot2} objects. One can modify the included individual ggplots
+\item The returned \link[patchwork:patchwork]{patchwork::patchwork} object contains the \link[ggplot2:ggplot2]{ggplot2::ggplot2} objects. One can modify the included individual ggplots
 by accessing them with double-bracket indexing. See \url{https://patchwork.data-imaginist.com/} for further information.
 }
 }

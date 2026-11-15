@@ -688,8 +688,8 @@ summary.gp <- function(object, type = "plot", ...) {
     )
     defaults <- list(
       col.names = c(
-        "Kernel", "Input Dim(s)", "Output Dim",
-        "Length-scale(s)", "Scale (Prior Var)", "Nugget", "Vecchia"
+        "Kernel", "In Dim", "Out Dim",
+        "Length-scale", "Scale", "Nugget", "Vecchia"
       ),
       format = "simple",
       row.names = FALSE,
@@ -927,8 +927,8 @@ summary.dgp <- function(object, type = "plot", ...) {
     # Rename columns to add spaces and make them more readable
     defaults <- list(
       col.names = c(
-        "Node Type", "Layer", "Node No", "Input Dim(s)", "Output Dim",
-        "Length-scale(s)", "Scale (Prior Var)", "Nugget"
+        "Type", "Layer", "Pos.", "In Dim", "Out Dim",
+        "Length-scale", "Scale", "Nugget"
       ),
       format = "simple",
       row.names = FALSE,
@@ -1247,8 +1247,8 @@ summary.lgp <- function(object, type = "plot", group_size = 1, ...) {
 
       defaults <- list(
         col.names = c(
-          "Emulator ID", "Type", "Layer", "Position", "Input Dim(s)",
-          "Output Dim(s)", "Global Output Idx", "Vecchia"
+          "ID", "Type", "Layer", "Pos.", "In Dim",
+          "Out Dim", "Global Out Idx", "Vecchia"
         ),
         format = "simple",
         row.names = FALSE,
@@ -1997,7 +1997,7 @@ prune <- function(object, control = list(), verb = TRUE) {
     }
     if (N_cropped!=0) {
       object <- copy_in_design(object)
-      object <- crop(object, crop_id_list, refit_cores = as.integer(1), verb = verb)
+      object <- crop(object, crop_id_list, verb = verb)
       if ( !inherits(object,"dgp") ) {
         is.finish <- TRUE
       } else {
@@ -2048,7 +2048,7 @@ extract_specs <- function(obj, type) {
   return(res)
 }
 
-crop <- function(object, crop_id_list, refit_cores, verb) {
+crop <- function(object, crop_id_list, verb) {
   total_layer <- object$constructor_obj$n_layer
   all_layer <- object$constructor_obj$all_layer
   blocked_gibbs <- object$constructor_obj$block
@@ -2140,11 +2140,9 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
         if ( verb ) message(" done")
         object$constructor_obj$update_all_layer(all_layer)
         if ( verb ) message(" - Re-fitting ...", appendLF = FALSE)
-        if ( identical(refit_cores, as.integer(1)) ){
-          with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$train(as.integer(100), as.integer(10), TRUE))
-        } else {
-          with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores))
-        }
+
+        with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$train(as.integer(100), as.integer(10), TRUE))
+
         est_obj <- object$constructor_obj$estimate()
         object[['specs']] <- extract_specs(est_obj, "dgp")
         object[['specs']][['vecchia']] <- vecchia
@@ -2176,11 +2174,9 @@ crop <- function(object, crop_id_list, refit_cores, verb) {
 
   object$constructor_obj$update_all_layer(all_layer)
   if ( verb ) message(" - Re-fitting ...", appendLF = FALSE)
-  if ( identical(refit_cores, as.integer(1)) ){
-    with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$train(as.integer(100), as.integer(10), TRUE))
-  } else {
-    with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$ptrain(as.integer(100), as.integer(10), TRUE, refit_cores))
-  }
+
+  with(pkg.env$np$errstate(divide = 'ignore'), object$constructor_obj$train(as.integer(100), as.integer(10), TRUE))
+
   est_obj <- object$constructor_obj$estimate()
   object[['specs']] <- extract_specs(est_obj, "dgp")
   object[['specs']][['vecchia']] <- vecchia

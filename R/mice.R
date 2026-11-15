@@ -18,8 +18,6 @@
 #' @param M the size of the conditioning set for the Vecchia approximation in the criterion calculation. This argument is only used if the emulator `object`
 #'     was constructed under the Vecchia approximation. Defaults to `50`.
 #' @param nugget_s the value of the smoothing nugget term used by MICE. Defaults to `1e-6`.
-#' @param workers  the number of processes to be used for the criterion calculation. If set to `NULL`,
-#'     the number of processes is set to `max physical cores available %/% 2`. Defaults to `1`.
 #' @param limits a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
 #'     If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its
 #'     first and second columns correspond to the minimum and maximum values of the input dimensions. This
@@ -120,7 +118,7 @@ mice <- function(object, ...){
 #' @rdname mice
 #' @method mice gp
 #' @export
-mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, limits = NULL, int = FALSE, ...) {
+mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, limits = NULL, int = FALSE, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -158,22 +156,14 @@ mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50,
     }
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   }
-    #check core number
-  if( !is.null(workers) ) {
-    workers <- as.integer(workers)
-    if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
-  }
+
   M <- as.integer(M)
   #check batch size
   batch_size <- as.integer(batch_size)
   if ( batch_size < 1 ) stop("'batch_size' must be >= 1.", call. = FALSE)
   #locate
   if ( batch_size==1 ){
-    if ( identical(workers,as.integer(1)) ){
-      res = object$emulator_obj$metric(x_cand = x_cand, method = 'MICE', m = M, nugget_s = nugget_s)
-    } else {
-      res = object$emulator_obj$pmetric(x_cand = x_cand, method = 'MICE', m = M, nugget_s = nugget_s, core_num = workers)
-    }
+    res = object$emulator_obj$metric(x_cand = x_cand, method = 'MICE', m = M, nugget_s = nugget_s)
     idx <- res[[1]]+1
   } else {
     idx <- c()
@@ -181,11 +171,7 @@ mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50,
     idx_x_cand <- idx_x_cand0
     constructor_obj_cp <- pkg.env$copy$deepcopy(object$constructor_obj)
     for (i in 1:batch_size){
-      if ( identical(workers,as.integer(1)) ){
-        res = constructor_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', m = M, nugget_s = nugget_s)
-      } else {
-        res = constructor_obj_cp$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', m = M, nugget_s = nugget_s, core_num = workers)
-      }
+      res = constructor_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', m = M, nugget_s = nugget_s)
       idx_i <- res[[1]]+1
       X_new <- x_cand[idx_x_cand,,drop=F][idx_i,,drop=F]
       Y_new <- constructor_obj_cp$predict(X_new, m = M)[[1]]
@@ -212,7 +198,7 @@ mice.gp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50,
 #' @rdname mice
 #' @method mice dgp
 #' @export
-mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
+mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, limits = NULL, int = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -254,11 +240,7 @@ mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50
     }
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
   }
-  #check core number
-  if( !is.null(workers) ) {
-    workers <- as.integer(workers)
-    if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
-  }
+
   M <- as.integer(M)
   #check aggregate
   if ( !is.null(aggregate) ){
@@ -270,11 +252,7 @@ mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50
   if ( batch_size < 1 ) stop("'batch_size' must be >= 1.", call. = FALSE)
   #locate
   if ( batch_size==1 ){
-    if ( identical(workers,as.integer(1)) ){
-      res = object$emulator_obj$metric(x_cand = x_cand, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
-    } else {
-      res = object$emulator_obj$pmetric(x_cand = x_cand, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE, core_num = workers)
-    }
+    res = object$emulator_obj$metric(x_cand = x_cand, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
     if ( is.null(aggregate) ){
       idx <- pkg.env$np$argmax(res, axis=0L) + 1
     } else {
@@ -303,11 +281,7 @@ mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50
     burnin <- constructor_obj_cp$burnin
     isblock <- constructor_obj_cp$block
     for (i in 1:batch_size){
-      if ( identical(workers,as.integer(1)) ){
-        res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
-      } else {
-        res = emulator_obj_cp$pmetric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE, core_num = workers)
-      }
+      res = emulator_obj_cp$metric(x_cand = x_cand[idx_x_cand,,drop=F], method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
       if ( is.null(aggregate) ){
         idx_i <- pkg.env$np$argmax(res, axis=0L) + 1
       } else {
@@ -356,7 +330,7 @@ mice.dgp <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50
 #' @rdname mice
 #' @method mice bundle
 #' @export
-mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, workers = 1, limits = NULL, int = FALSE, aggregate = NULL, ...) {
+mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M = 50, nugget_s = 1e-6, limits = NULL, int = FALSE, aggregate = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -442,11 +416,7 @@ mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M =
     if ( ncol(x_cand)!=n_dim_X ) stop("'x_cand' and the training input have different number of dimensions.", call. = FALSE)
     islist <- FALSE
   }
-  #check core number
-  if( !is.null(workers) ) {
-    workers <- as.integer(workers)
-    if ( workers < 1 ) stop("The worker number must be >= 1.", call. = FALSE)
-  }
+
   M <- as.integer(M)
   #check aggregate
   if ( !is.null(aggregate) ){
@@ -471,11 +441,7 @@ mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M =
         res = obj_i$emulator_obj$metric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
         scores[[i]] <- res
       } else {
-        if ( identical(workers,as.integer(1)) ){
-          res = obj_i$emulator_obj$metric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
-        } else {
-          res = obj_i$emulator_obj$pmetric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE, core_num = workers)
-        }
+        res = obj_i$emulator_obj$metric(x_cand = if (is.list(x_cand)) {x_cand[[i]]} else {x_cand}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
         scores[[i]] <- if(ncol(res) == 1) res else rowMeans(res)
       }
     }
@@ -524,11 +490,7 @@ mice.bundle <- function(object, x_cand = NULL, n_cand = 200, batch_size = 1, M =
           res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
           scores[[j]] <- res
         } else {
-          if ( identical(workers,as.integer(1)) ){
-            res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
-          } else {
-            res = emulator_obj_list[[j]]$pmetric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE, core_num = workers)
-          }
+          res = emulator_obj_list[[j]]$metric(x_cand = if (is.list(x_cand)) {x_cand[[j]][idx_x_cand[[j]],,drop=F]} else {x_cand[idx_x_cand[[j]],,drop=F]}, method = 'MICE', m = M, nugget_s = nugget_s, score_only = TRUE)
           scores[[j]] <- if(ncol(res) == 1) res else rowMeans(res)
         }
       }

@@ -1,6 +1,6 @@
 Package: dgpsi
 Type: Package
-Title: Interface to 'dgpsi' for Deep and Linked Gaussian Process Emulations 
+Title: Computer Model Emulation Using Gaussian Process Networks
 Version: 2.6.0-9000
 Authors@R: c(
   person('Deyu', 'Ming', role = c('aut', 'cre', 'cph'),
@@ -9,12 +9,12 @@ Authors@R: c(
          email = 'd.williamson@exeter.ac.uk')
   )
 Maintainer: Deyu Ming <deyu.ming.16@ucl.ac.uk>
-Description: Interface to the 'python' package 'dgpsi' for Gaussian process, deep Gaussian process, 
-             and linked deep Gaussian process emulations of computer models and networks using stochastic imputation (SI). 
-             The implementations follow Ming & Guillas (2021) <doi:10.1137/20M1323771> and 
-             Ming, Williamson, & Guillas (2023) <doi:10.1080/00401706.2022.2124311> and 
-             Ming & Williamson (2023) <doi:10.48550/arXiv.2306.01212>. To get started with the package, 
-             see <https://mingdeyu.github.io/dgpsi-R/>.
+Description: Provides tools for scalable computer model emulation using Gaussian process networks.
+             The implementations follow Ming & Guillas (2021) <doi:10.1137/20M1323771> for linked Gaussian processes,
+             Ming, Williamson, & Guillas (2023) <doi:10.1080/00401706.2022.2124311> for deep Gaussian processes, 
+             Ming & Williamson (2023) <doi:10.48550/arXiv.2306.01212> for linked deep Gaussian processes, and 
+             Ming & Williamson (2026) <doi:10.1016/j.csda.2026.108485> for generalized deep Gaussian processes.
+             To get started with the package, see <https://mingdeyu.github.io/dgpsi-R/>.
 License: MIT + file LICENSE
 URL: https://github.com/mingdeyu/dgpsi-R, https://mingdeyu.github.io/dgpsi-R/
 BugReports: https://github.com/mingdeyu/dgpsi-R/issues
@@ -40,17 +40,17 @@ Imports:
     lifecycle,
     magrittr,
     visNetwork,
-    parallel,
     kableExtra
 Suggests:
     knitr,
     rmarkdown,
     MASS,
     R.utils,
+    parallel,
     spelling
 LazyData: false
 VignetteBuilder:
     knitr
-RoxygenNote: 7.3.3
 Language: en-US
 Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0

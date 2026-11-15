@@ -7,9 +7,11 @@
 init_py(
   py_ver = NULL,
   dgpsi_ver = NULL,
+  conda = NULL,
   reinstall = FALSE,
   uninstall = FALSE,
-  verb = TRUE
+  verb = TRUE,
+  show_config = FALSE
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ If \code{py_ver = NULL}, the default 'python' version '3.10' will be installed.}
 \item the development 'python' version of 'dgpsi' will be used, if the package is installed from GitHub.
 }}
 
+\item{conda}{optional path to a conda binary. If \code{NULL}, \code{\link[=init_py]{init_py()}}
+attempts to locate conda automatically; see \code{\link[reticulate:conda_binary]{reticulate::conda_binary()}} for the search order.
+If provided, the path is used directly and must point to an existing conda executable.}
+
 \item{reinstall}{a bool that indicates whether to reinstall the 'python' version of 'dgpsi' specified
 in \code{dgpsi_ver} if it has already been installed. This argument is useful when the development version
 of the R package is installed and one may want to regularly update the development 'python' version
@@ -33,15 +39,28 @@ is corrupted and one wants to completely uninstall and reinstall it. Defaults to
 
 \item{verb}{a bool indicating if trace information will be printed during function execution.
 Defaults to \code{TRUE}.}
+
+\item{show_config}{a bool indicating whether to print the Python backend
+configuration when \code{verb = TRUE}. Defaults to \code{FALSE}.}
 }
 \value{
 No return value, called to install required 'python' environment.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#updated}{\figure{lifecycle-updated.svg}{options: alt='[Updated]'}}}{\strong{[Updated]}}
+
 This function initializes the 'python' environment for the package.
 }
 \details{
 See further examples and tutorials at \url{https://mingdeyu.github.io/dgpsi-R/dev/}.
+}
+\note{
+On Linux, \code{init_py()} may ask for permission during installation. To
+auto-accept these prompts in non-interactive settings,
+set the environment variable \code{DGPSI_AUTO_YES} to
+\code{"TRUE"} before calling \code{\link[=init_py]{init_py()}} for the first time. Accepted values
+include \code{"TRUE"}, \code{"true"}, \code{"yes"}, \code{"y"}, and
+\code{"1"}. If unset, \code{\link[=init_py]{init_py()}} will continue to prompt interactively.
 }
 \examples{
 \dontrun{

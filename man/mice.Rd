@@ -16,7 +16,6 @@ mice(object, ...)
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   ...
@@ -29,7 +28,6 @@ mice(object, ...)
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
@@ -43,7 +41,6 @@ mice(object, ...)
   batch_size = 1,
   M = 50,
   nugget_s = 1e-06,
-  workers = 1,
   limits = NULL,
   int = FALSE,
   aggregate = NULL,
@@ -76,9 +73,6 @@ Defaults to \code{1}.}
 was constructed under the Vecchia approximation. Defaults to \code{50}.}
 
 \item{nugget_s}{the value of the smoothing nugget term used by MICE. Defaults to \code{1e-6}.}
-
-\item{workers}{the number of processes to be used for the criterion calculation. If set to \code{NULL},
-the number of processes is set to \verb{max physical cores available \%/\% 2}. Defaults to \code{1}.}
 
 \item{limits}{a two-column matrix that gives the ranges of each input dimension, or a vector of length two if there is only one input dimension.
 If a vector is provided, it will be converted to a two-column row matrix. The rows of the matrix correspond to input dimensions, and its

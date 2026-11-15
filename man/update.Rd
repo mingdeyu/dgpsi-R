@@ -16,7 +16,6 @@ update(object, X, Y, refit, reset, verb, ...)
   reset = FALSE,
   verb = TRUE,
   N = NULL,
-  cores = 1,
   ess_burn = 10,
   B = NULL,
   ...
@@ -53,11 +52,6 @@ Defaults to \code{TRUE}.}
 \item{N}{number of training iterations used to re-fit the emulator \code{object} if it is an instance of the \code{dgp} class. If set to \code{NULL},
 the number of iterations is set to \code{100} if the DGP emulator was constructed without the Vecchia approximation, and is set to \code{50}
 if Vecchia approximation was used. Defaults to \code{NULL}.}
-
-\item{cores}{the number of processes to be used to re-fit GP components (in the same layer)
-at each M-step during the re-fitting. If set to \code{NULL}, the number of processes is set to \verb{(max physical cores available - 1)} if \code{vecchia = FALSE}
-and \verb{max physical cores available \%/\% 2} if \code{vecchia = TRUE}. Only use multiple processes when there is a large number of GP components in different
-layers and optimization of GP components is computationally expensive. Defaults to \code{1}.}
 
 \item{ess_burn}{number of burnin steps for the ESS-within-Gibbs sampler at each I-step of the training of the emulator \code{object} if it is an
 instance of the \code{dgp} class. Defaults to \code{10}.}

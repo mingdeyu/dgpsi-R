@@ -5,7 +5,6 @@ Challenor
 DGP
 DGPs
 EI
-ESS
 GPs
 Gu
 Guillas
@@ -18,6 +17,7 @@ Miniconda
 Mohammadi
 NRMSE
 NRMSEs
+Numba
 OOS
 RStudio
 Scalable
@@ -27,15 +27,13 @@ Technometrics
 UUID
 VIGF
 Vecchia
-adaptively
 al
-arXiv
-bool
-bools
 burnin
 conda
+csda
 doi
 et
+favour
 ggplots
 heteroskedastic
 lengthscale
@@ -43,7 +41,7 @@ lengthscales
 lifecycle
 maximin
 oos
-reproducibility
+parallelization
 repurpose
 scalable
 softmax

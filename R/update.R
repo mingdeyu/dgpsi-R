@@ -18,10 +18,6 @@
 #' @param N number of training iterations used to re-fit the emulator `object` if it is an instance of the `dgp` class. If set to `NULL`,
 #'     the number of iterations is set to `100` if the DGP emulator was constructed without the Vecchia approximation, and is set to `50`
 #'     if Vecchia approximation was used. Defaults to `NULL`.
-#' @param cores the number of processes to be used to re-fit GP components (in the same layer)
-#'     at each M-step during the re-fitting. If set to `NULL`, the number of processes is set to `(max physical cores available - 1)` if `vecchia = FALSE`
-#'     and `max physical cores available %/% 2` if `vecchia = TRUE`. Only use multiple processes when there is a large number of GP components in different
-#'     layers and optimization of GP components is computationally expensive. Defaults to `1`.
 #' @param ess_burn number of burnin steps for the ESS-within-Gibbs sampler at each I-step of the training of the emulator `object` if it is an
 #'     instance of the `dgp` class. Defaults to `10`.
 #' @param B the number of imputations for predictions from the updated emulator `object` if it is an instance of the `dgp` class.
@@ -54,7 +50,7 @@ update <- function(object, X, Y, refit, reset, verb, ...){
 #' @rdname update
 #' @method update dgp
 #' @export
-update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N = NULL, cores = 1, ess_burn = 10, B = NULL, ...) {
+update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N = NULL, ess_burn = 10, B = NULL, ...) {
   if ( is.null(pkg.env$dgpsi) ) {
     init_py(verb = F)
     if (pkg.env$restart) return(invisible(NULL))
@@ -72,10 +68,7 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
     }
   }
   N <- as.integer(N)
-  if( !is.null(cores) ) {
-    cores <- as.integer(cores)
-    if ( cores < 1 ) stop("'cores' must be >= 1.", call. = FALSE)
-  }
+
   ess_burn <- as.integer(ess_burn)
   if ( is.null(B) ){
     B <- as.integer(length(object$emulator_obj$all_layer_set))
@@ -116,7 +109,7 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
 
   constructor_obj_cp$update_xy(X, Y, reset)
   if ( verb ) {
-    Sys.sleep(0.2)
+    Sys.sleep(0.1)
     message(" done")
   }
 
@@ -128,11 +121,9 @@ update.dgp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, N
       disable <- TRUE
     }
     N0 <- constructor_obj_cp$N
-    if ( identical(cores,as.integer(1)) ){
-      with(pkg.env$np$errstate(divide = 'ignore'), constructor_obj_cp$train(N, ess_burn, disable))
-    } else {
-      with(pkg.env$np$errstate(divide = 'ignore'), constructor_obj_cp$ptrain(N, ess_burn, disable, cores))
-    }
+
+    with(pkg.env$np$errstate(divide = 'ignore'), constructor_obj_cp$train(N, ess_burn, disable))
+
     burnin <- as.integer(N0 + 0.75*N)
   } else {
     burnin <- constructor_obj_cp$burnin
@@ -206,7 +197,7 @@ update.gp <- function(object, X, Y, refit = TRUE, reset = FALSE, verb = TRUE, ..
   }
   constructor_obj_cp$update_xy(X, Y, reset)
   if ( verb ) {
-    Sys.sleep(0.5)
+    Sys.sleep(0.1)
     message(" done")
   }
 

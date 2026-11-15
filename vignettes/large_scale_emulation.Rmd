@@ -64,7 +64,7 @@ m <- dgp(X, Y, vecchia = TRUE)
 ## Auto-generating a 2-layered DGP structure ... done
 ## Initializing the DGP emulator ... done
 ## Training the DGP emulator: 
-## Iteration 200: Layer 2: 100%|██████████| 200/200 [02:59<00:00,  1.12it/s]
+## Iteration 200: Layer 2: 100%|██████████| 200/200 [01:14<00:00,  2.69it/s]
 ## Imputing ... done
 ```
 
