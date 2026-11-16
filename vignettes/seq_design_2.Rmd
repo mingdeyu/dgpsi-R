@@ -199,7 +199,7 @@ m <- design(m, N = 5, limits = lim, f = f, x_test = validate_x, y_test = validat
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.244029, RMSE: 0.221132, RMSE: 0.008662
+##  *  RMSE: 0.246759, RMSE: 0.262972, RMSE: 0.008662
 ## Targets not reached for all emulators at the end of the sequential design.
 ```
 
@@ -214,49 +214,49 @@ m <- design(m, N = 20, limits = lim, f = f, x_test = validate_x, y_test = valida
 
 ```
 ## Initializing ... done
-##  *  RMSE: 0.244029, RMSE: 0.221132, RMSE: 0.008662
+##  *  RMSE: 0.246759, RMSE: 0.262972, RMSE: 0.008662
 ## Iteration 1:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.462197
-##  * Next design point (Emulator2): 0.812305
+##  * Next design point (Emulator1): 0.462069
+##  * Next design point (Emulator2): 0.810189
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.239421, RMSE: 0.080618, RMSE: 0.008662
+##  *  RMSE: 0.244006, RMSE: 0.102343, RMSE: 0.008662
 ##
 ##  ...
 ##
 ## Iteration 6:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.185122
-##  * Next design point (Emulator2): 0.548047
+##  * Next design point (Emulator1): 0.251046
+##  * Next design point (Emulator2): 0.919186
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.110065, RMSE: 0.002043, RMSE: 0.008662
+##  *  RMSE: 0.116134, RMSE: 0.006969, RMSE: 0.008662
 ## Iteration 7:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.064206
+##  * Next design point (Emulator1): 0.064208
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.105509, RMSE: 0.002043, RMSE: 0.008662
+##  *  RMSE: 0.116917, RMSE: 0.006969, RMSE: 0.008662
 ##  
 ##  ...
 ## 
-## Iteration 16:
+## Iteration 17:
 ##  - Locating ... done
-##  * Next design point (Emulator1): 0.010565
+##  * Next design point (Emulator1): 0.010838
 ##  * Next design point (Emulator2): None (target reached)
 ##  * Next design point (Emulator3): None (target reached)
 ##  - Updating and re-fitting ... done
 ##  - Validating ... done
-##  *  RMSE: 0.008208, RMSE: 0.002043, RMSE: 0.008662
-## Target reached! Sequential design stopped at step 16.
+##  *  RMSE: 0.006999, RMSE: 0.006969, RMSE: 0.008662
+## Target reached! Sequential design stopped at step 17.
 ```
 
-The first and the second emulators reached the target after iteration 15 and 6 of the second wave, respectively. 
+The first and the second emulators reached the target after iteration 17 and 6 of the second wave, respectively. 
 
 The sequential design points of the three emulators can be plotted with `draw()`:
 
