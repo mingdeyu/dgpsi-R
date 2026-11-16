@@ -190,21 +190,21 @@ on <code>m</code>:</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 13:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.012846 0.060399</span></span>
+<span><span class="co">##  * Next design point: 0.000899 0.079712</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Pruning 1 node(s) in layer 1 ... done</span></span>
 <span><span class="co">##  - Re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.076901</span></span>
+<span><span class="co">##  * RMSE: 0.059921</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 20:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.325434 0.010143</span></span>
+<span><span class="co">##  * Next design point: 0.188835 0.000000</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.034671</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.038084</span></span></code></pre>
 <p>After the first wave we see that 1 GP node is removed from the first
 layer by automatic pruning of the DGP which leaves only one node in both
 the first and second layer of the DGP hierarchy respectively. This helps
@@ -215,41 +215,41 @@ wave of the sequential design:</p>
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * RMSE: 0.034671</span></span>
+<span><span class="co">##  * RMSE: 0.038084</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.150835 0.850534</span></span>
+<span><span class="co">##  * Next design point: 0.282856 1.000000</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.018740</span></span>
+<span><span class="co">##  * RMSE: 0.020514</span></span>
 <span><span class="co">##   </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 10:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.056978 0.110908</span></span>
+<span><span class="co">##  * Next design point: 0.077334 0.159270</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.006311</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.010800</span></span></code></pre>
 <p>Finally, we resume the second wave with 10 additional iterations:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2nd wave with 10 additional steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">10</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, new_wave <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Iteration 11:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.090776 0.210772</span></span>
+<span><span class="co">##  * Next design point: 0.527942 0.216465</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.014517</span></span>
+<span><span class="co">##  * RMSE: 0.016575</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">## Iteration 20:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.051133 0.060526</span></span>
+<span><span class="co">##  * Next design point: 0.646864 0.015680</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * RMSE: 0.002727</span></span></code></pre>
+<span><span class="co">##  * RMSE: 0.004725</span></span></code></pre>
 <p>Resuming rather than adding an additional wave can be a useful
 feature, particularly for plotting using <code><a href="../reference/draw.html">draw()</a></code>. After the
 sequential design is done, we can inspect the enriched design by

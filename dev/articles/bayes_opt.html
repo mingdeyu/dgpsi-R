@@ -148,7 +148,7 @@ acquisition function to identify the global minima.</p>
 <p>To ensure the reproducibility of this vignette, we set a seed using
 the <code><a href="../reference/set_seed.html">set_seed()</a></code> function from the package:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">99</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_seed.html">set_seed</a></span><span class="op">(</span><span class="fl">9999</span><span class="op">)</span></span></code></pre></div>
 <p>Next, we generate an initial design of 20 points using the maximin
 Latin hypercube sampler:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -172,7 +172,7 @@ need to define the Expected Improvement (EI) acquisition function,
 adhering to the rules specified for the <code>method</code> argument in
 <code><a href="../reference/design.html">design()</a></code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ei</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">limits</span>, <span class="va">n_starts</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">ei</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">limits</span>, <span class="va">n_starts</span> <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Best observed minimum value</span></span>
 <span>  <span class="va">best_value</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
 <span></span>
@@ -258,37 +258,37 @@ optimization using <code><a href="../reference/design.html">design()</a></code> 
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">100</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">shubert</span>, method <span class="op">=</span> <span class="va">ei</span>, eval <span class="op">=</span> <span class="va">opt_monitor</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  * Metric: -125.203479</span></span>
+<span><span class="co">##  * Metric: -94.537224</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.352378 0.142569</span></span>
+<span><span class="co">##  * Next design point: 0.416102 0.251405</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * Metric: -125.203479</span></span>
+<span><span class="co">##  * Metric: -94.537224</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Iteration 6:</span></span>
+<span><span class="co">## Iteration 8:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.300400 0.113491</span></span>
+<span><span class="co">##  * Next design point: 0.294140 0.137627</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Transiting to a GP emulator ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * Metric: -186.383927</span></span>
+<span><span class="co">##  * Metric: -184.184830</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## ...</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Iteration 100:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point: 0.562228 0.662527</span></span>
+<span><span class="co">##  * Next design point: 0.000000 0.766103</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  * Metric: -186.730021</span></span></code></pre>
+<span><span class="co">##  * Metric: -186.730481</span></span></code></pre>
 <p>During the Bayesian optimization, our dynamic pruning mechanism
-transitioned the DGP emulator to a GP emulator at iteration 6, leading
+transitioned the DGP emulator to a GP emulator at iteration 8, leading
 to faster optimizations in the remaining iterations while maintaining
 the emulator’s quality. After 100 iterations, we identified a minimum of
-the Shubert function with a value of -186.7300, which is very close to
+the Shubert function with a value of -186.7305, which is very close to
 the global minimum of -186.7309. We can inspect the progress of the
 minima search conducted by <code><a href="../reference/design.html">design()</a></code> by applying
 <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code>:</p>
@@ -309,9 +309,9 @@ minima search conducted by <code><a href="../reference/design.html">design()</a>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p><img src="images/bo_tracker.png" style="width:100.0%"></p>
 <p>The figure above shows that Bayesian optimization using our (D)GP
-emulator quickly identifies a low value of the Shubert function within 4
-iterations. Notably, the lowest value, -186.7300, was achieved by
-<code><a href="../reference/design.html">design()</a></code> after 43 iterations.</p>
+emulator quickly identifies a low value of the Shubert function within 7
+iterations. Notably, the lowest value, -186.7305, was achieved by
+<code><a href="../reference/design.html">design()</a></code> after 76 iterations.</p>
 <p>We can also inspect the locations identified during the process by
 applying <code><a href="../reference/draw.html">draw()</a></code> to <code>m</code> with
 <code>type = 'design'</code>:</p>

@@ -139,21 +139,21 @@ m <- design(m, N = 20, limits = lim, f = f, x_test = validate_x, y_test = valida
     ## 
     ## Iteration 13:
     ##  - Locating ... done
-    ##  * Next design point: 0.012846 0.060399
+    ##  * Next design point: 0.000899 0.079712
     ##  - Updating and re-fitting ... done
     ##  - Pruning 1 node(s) in layer 1 ... done
     ##  - Re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.076901
+    ##  * RMSE: 0.059921
     ## 
     ## ...
     ## 
     ## Iteration 20:
     ##  - Locating ... done
-    ##  * Next design point: 0.325434 0.010143
+    ##  * Next design point: 0.188835 0.000000
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.034671
+    ##  * RMSE: 0.038084
 
 After the first wave we see that 1 GP node is removed from the first
 layer by automatic pruning of the DGP which leaves only one node in both
@@ -169,22 +169,22 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 ```
 
     ## Initializing ... done
-    ##  * RMSE: 0.034671
+    ##  * RMSE: 0.038084
     ## Iteration 1:
     ##  - Locating ... done
-    ##  * Next design point: 0.150835 0.850534
+    ##  * Next design point: 0.282856 1.000000
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.018740
+    ##  * RMSE: 0.020514
     ##   
     ##  ...
     ##  
     ## Iteration 10:
     ##  - Locating ... done
-    ##  * Next design point: 0.056978 0.110908
+    ##  * Next design point: 0.077334 0.159270
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.006311
+    ##  * RMSE: 0.010800
 
 Finally, we resume the second wave with 10 additional iterations:
 
@@ -196,19 +196,19 @@ m <- design(m, N = 10, limits = lim, f = f, x_test = validate_x, y_test = valida
 
     ## Iteration 11:
     ##  - Locating ... done
-    ##  * Next design point: 0.090776 0.210772
+    ##  * Next design point: 0.527942 0.216465
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.014517
+    ##  * RMSE: 0.016575
     ##  
     ##  ...
     ##  
     ## Iteration 20:
     ##  - Locating ... done
-    ##  * Next design point: 0.051133 0.060526
+    ##  * Next design point: 0.646864 0.015680
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * RMSE: 0.002727
+    ##  * RMSE: 0.004725
 
 Resuming rather than adding an additional wave can be a useful feature,
 particularly for plotting using

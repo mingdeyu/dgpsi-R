@@ -70,7 +70,7 @@ function from the package:
 
 ``` r
 
-set_seed(99)
+set_seed(9999)
 ```
 
 Next, we generate an initial design of 20 points using the maximin Latin
@@ -105,7 +105,7 @@ function, adhering to the rules specified for the `method` argument in
 
 ``` r
 
-ei <- function(object, limits, n_starts = 10) {
+ei <- function(object, limits, n_starts = 20) {
   # Best observed minimum value
   best_value <- min(object$data$Y)
 
@@ -210,38 +210,38 @@ m <- design(m, N = 100, limits = lim, f = shubert, method = ei, eval = opt_monit
 ```
 
     ## Initializing ... done
-    ##  * Metric: -125.203479
+    ##  * Metric: -94.537224
     ## Iteration 1:
     ##  - Locating ... done
-    ##  * Next design point: 0.352378 0.142569
+    ##  * Next design point: 0.416102 0.251405
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * Metric: -125.203479
+    ##  * Metric: -94.537224
     ## 
     ## ...
     ## 
-    ## Iteration 6:
+    ## Iteration 8:
     ##  - Locating ... done
-    ##  * Next design point: 0.300400 0.113491
+    ##  * Next design point: 0.294140 0.137627
     ##  - Updating and re-fitting ... done
     ##  - Transiting to a GP emulator ... done
     ##  - Validating ... done
-    ##  * Metric: -186.383927
+    ##  * Metric: -184.184830
     ## 
     ## ...
     ## 
     ## Iteration 100:
     ##  - Locating ... done
-    ##  * Next design point: 0.562228 0.662527
+    ##  * Next design point: 0.000000 0.766103
     ##  - Updating and re-fitting ... done
     ##  - Validating ... done
-    ##  * Metric: -186.730021
+    ##  * Metric: -186.730481
 
 During the Bayesian optimization, our dynamic pruning mechanism
-transitioned the DGP emulator to a GP emulator at iteration 6, leading
+transitioned the DGP emulator to a GP emulator at iteration 8, leading
 to faster optimizations in the remaining iterations while maintaining
 the emulator’s quality. After 100 iterations, we identified a minimum of
-the Shubert function with a value of -186.7300, which is very close to
+the Shubert function with a value of -186.7305, which is very close to
 the global minimum of -186.7309. We can inspect the progress of the
 minima search conducted by
 [`design()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/design.md)
@@ -270,10 +270,10 @@ draw(m) +
 ![](images/bo_tracker.png)
 
 The figure above shows that Bayesian optimization using our (D)GP
-emulator quickly identifies a low value of the Shubert function within 4
-iterations. Notably, the lowest value, -186.7300, was achieved by
+emulator quickly identifies a low value of the Shubert function within 7
+iterations. Notably, the lowest value, -186.7305, was achieved by
 [`design()`](http://mingdeyu.github.io/dgpsi-R/dev/reference/design.md)
-after 43 iterations.
+after 76 iterations.
 
 We can also inspect the locations identified during the process by
 applying

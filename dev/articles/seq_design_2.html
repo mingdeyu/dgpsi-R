@@ -237,7 +237,7 @@ of the sequential design with 5 steps:</p>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  *  RMSE: 0.244029, RMSE: 0.221132, RMSE: 0.008662</span></span>
+<span><span class="co">##  *  RMSE: 0.246759, RMSE: 0.262972, RMSE: 0.008662</span></span>
 <span><span class="co">## Targets not reached for all emulators at the end of the sequential design.</span></span></code></pre>
 <p>It can be seen that, at the first step, the DGP emulator for the
 third output has already reached the target, so no further refinements
@@ -254,48 +254,48 @@ emulator by omitting the aggregation function:</p>
 <code class="sourceCode R"><span><span class="co"># 2nd wave with separate designs and up to 20 steps</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/design.html">design</a></span><span class="op">(</span><span class="va">m</span>, N <span class="op">=</span> <span class="fl">20</span>, limits <span class="op">=</span> <span class="va">lim</span>, f <span class="op">=</span> <span class="va">f</span>, x_test <span class="op">=</span> <span class="va">validate_x</span>, y_test <span class="op">=</span> <span class="va">validate_y</span>, target <span class="op">=</span> <span class="va">target</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Initializing ... done</span></span>
-<span><span class="co">##  *  RMSE: 0.244029, RMSE: 0.221132, RMSE: 0.008662</span></span>
+<span><span class="co">##  *  RMSE: 0.246759, RMSE: 0.262972, RMSE: 0.008662</span></span>
 <span><span class="co">## Iteration 1:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.462197</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.812305</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.462069</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.810189</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  *  RMSE: 0.239421, RMSE: 0.080618, RMSE: 0.008662</span></span>
+<span><span class="co">##  *  RMSE: 0.244006, RMSE: 0.102343, RMSE: 0.008662</span></span>
 <span><span class="co">##</span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">##</span></span>
 <span><span class="co">## Iteration 6:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.185122</span></span>
-<span><span class="co">##  * Next design point (Emulator2): 0.548047</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.251046</span></span>
+<span><span class="co">##  * Next design point (Emulator2): 0.919186</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  *  RMSE: 0.110065, RMSE: 0.002043, RMSE: 0.008662</span></span>
+<span><span class="co">##  *  RMSE: 0.116134, RMSE: 0.006969, RMSE: 0.008662</span></span>
 <span><span class="co">## Iteration 7:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.064206</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.064208</span></span>
 <span><span class="co">##  * Next design point (Emulator2): None (target reached)</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  *  RMSE: 0.105509, RMSE: 0.002043, RMSE: 0.008662</span></span>
+<span><span class="co">##  *  RMSE: 0.116917, RMSE: 0.006969, RMSE: 0.008662</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  ...</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Iteration 16:</span></span>
+<span><span class="co">## Iteration 17:</span></span>
 <span><span class="co">##  - Locating ... done</span></span>
-<span><span class="co">##  * Next design point (Emulator1): 0.010565</span></span>
+<span><span class="co">##  * Next design point (Emulator1): 0.010838</span></span>
 <span><span class="co">##  * Next design point (Emulator2): None (target reached)</span></span>
 <span><span class="co">##  * Next design point (Emulator3): None (target reached)</span></span>
 <span><span class="co">##  - Updating and re-fitting ... done</span></span>
 <span><span class="co">##  - Validating ... done</span></span>
-<span><span class="co">##  *  RMSE: 0.008208, RMSE: 0.002043, RMSE: 0.008662</span></span>
-<span><span class="co">## Target reached! Sequential design stopped at step 16.</span></span></code></pre>
+<span><span class="co">##  *  RMSE: 0.006999, RMSE: 0.006969, RMSE: 0.008662</span></span>
+<span><span class="co">## Target reached! Sequential design stopped at step 17.</span></span></code></pre>
 <p>The first and the second emulators reached the target after iteration
-15 and 6 of the second wave, respectively.</p>
+17 and 6 of the second wave, respectively.</p>
 <p>The sequential design points of the three emulators can be plotted
 with <code><a href="../reference/draw.html">draw()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
